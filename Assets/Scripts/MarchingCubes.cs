@@ -11,8 +11,10 @@ public class MarchingCubes : MonoBehaviour
     
     [SerializeField] private int width = 32;
     [SerializeField] private int height = 12;
-    [SerializeField] private float noiseResolution = 0.1f;
-    [SerializeField] private float isolevel = 0.5f;
+    [SerializeField] private float noiseScale = 0.1f;
+    [SerializeField] private float isolevel = 1.28f;
+    [SerializeField] private bool lerp = true;
+    [SerializeField] private bool smoothShade = true;
     private float[,,] heights;
     private List<Vector3> vertices = new List<Vector3>();
     private List<int> triangles = new List<int>();
@@ -44,6 +46,7 @@ public class MarchingCubes : MonoBehaviour
     /// </summary>
     private void SetupMesh() {
         Mesh mesh = new Mesh();
+        mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
         mesh.vertices = vertices.ToArray();
         mesh.triangles = triangles.ToArray();
         mesh.RecalculateNormals();
@@ -61,17 +64,9 @@ public class MarchingCubes : MonoBehaviour
         for(int x = 0; x < width+1; x++) {
             for(int y = 0; y < height+1; y++) {
                 for(int z = 0; z < width+1; z++) {
-                    float currentHeight = height * Mathf.PerlinNoise(x * noiseResolution, z * noiseResolution);
-                    float newHeight;
+                    float currentHeight = height * Mathf.PerlinNoise(x * noiseScale, z * noiseScale);
 
-                    if(y > currentHeight) {
-                        newHeight = y - currentHeight;
-                    }
-                    else {
-                        newHeight = currentHeight - y;
-                    }
-
-                    heights[x,y,z] = newHeight;
+                    heights[x,y,z] = y - currentHeight;
                 }
             }
         }
@@ -93,18 +88,20 @@ public class MarchingCubes : MonoBehaviour
                         cubeVertices[i] = heights[vertex.x,vertex.y,vertex.z];
                     }
 
-                    MarchCube(new Vector3(x,y,z), GetCubeConfiguration(cubeVertices));
+                    MarchCube(new Vector3(x,y,z), cubeVertices);
                 }
             }
         }
     }
 
-/// <summary>
-/// Polygonizes for a single given cube.
-/// </summary>
-/// <param name="cubePosition"> The world space position of the cube within the chunk </param>
-/// <param name="configurationIndex"> The configuration index for the marching cubes triangulation table </param>
-    public void MarchCube(Vector3 cubePosition, int configurationIndex) {
+    /// <summary>
+    /// Polygonizes for a single given cube.
+    /// </summary>
+    /// <param name="cubePosition"> The world space position of the cube within the chunk </param>
+    /// <param name="cubeVertices"> The vertices for the given cube to be marched which will be used to get the configuration </param>
+    public void MarchCube(Vector3 cubePosition, float[] cubeVertices) {
+        int configurationIndex = GetCubeConfiguration(cubeVertices);
+
         if(configurationIndex == 0 || configurationIndex == 255) {
             return ;
         }
@@ -119,10 +116,17 @@ public class MarchingCubes : MonoBehaviour
                     return ;
                 }
 
-                Vector3 edgeV1 = cubePosition + MarchingCubesTables.edgeTable[edgeValue, 0];
-                Vector3 edgeV2 = cubePosition + MarchingCubesTables.edgeTable[edgeValue, 1];
+                Vector3 edgeV1 = cubePosition + MarchingCubesTables.vertexOffsetTable[MarchingCubesTables.edgeIndexTable[edgeValue, 0]];
+                Vector3 edgeV2 = cubePosition + MarchingCubesTables.vertexOffsetTable[MarchingCubesTables.edgeIndexTable[edgeValue, 1]];
 
-                Vector3 vertex = (edgeV1 + edgeV2) / 2;
+                Vector3 vertex;
+                if(lerp) {
+                    vertex = Vector3.Lerp(edgeV1, edgeV2, 
+                    (isolevel - cubeVertices[MarchingCubesTables.edgeIndexTable[edgeValue, 0]]) / (cubeVertices[MarchingCubesTables.edgeIndexTable[edgeValue, 1]] - cubeVertices[MarchingCubesTables.edgeIndexTable[edgeValue, 0]]));
+                }
+                else {
+                    vertex = (edgeV1 + edgeV2) / 2;
+                }
 
                 vertices.Add(vertex);
                 triangles.Add(vertices.Count - 1);
@@ -142,14 +146,6 @@ public class MarchingCubes : MonoBehaviour
         for(int i = 0; i < 8; i++) {
             if(cubeValues[i] > isolevel) cubeIndex |= 1 << i;
         }
-        // if (cubeValues[0] < isolevel) cubeIndex |= 1;
-        // if (cubeValues[1] < isolevel) cubeIndex |= 2;
-        // if (cubeValues[2] < isolevel) cubeIndex |= 4;
-        // if (cubeValues[3] < isolevel) cubeIndex |= 8;
-        // if (cubeValues[4] < isolevel) cubeIndex |= 16;
-        // if (cubeValues[5] < isolevel) cubeIndex |= 32;
-        // if (cubeValues[6] < isolevel) cubeIndex |= 64;
-        // if (cubeValues[7] < isolevel) cubeIndex |= 128;
 
         return cubeIndex;
     }

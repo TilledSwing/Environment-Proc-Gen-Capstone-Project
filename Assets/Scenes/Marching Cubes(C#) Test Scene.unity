@@ -611,8 +611,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   width: 32
   height: 12
-  noiseResolution: 0.1
+  noiseScale: 0.1
   isolevel: 1.28
+  lerp: 1
+  smoothShade: 1
 --- !u!23 &1627581234
 MeshRenderer:
   m_ObjectHideFlags: 0
