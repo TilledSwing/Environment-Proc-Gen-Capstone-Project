@@ -98,7 +98,7 @@ public class MarchingCubes : MonoBehaviour
     /// Polygonizes for a single given cube.
     /// </summary>
     /// <param name="cubePosition"> The world space position of the cube within the chunk </param>
-    /// <param name="cubeVertices"> The vertices for the given cube to be marched which will be used to get the configuration </param>
+    /// <param name="cubeVertices"> The values of the vertices for the given cube to be marched which will be used to get the configuration </param>
     public void MarchCube(Vector3 cubePosition, float[] cubeVertices) {
         int configurationIndex = GetCubeConfiguration(cubeVertices);
 
@@ -143,6 +143,7 @@ public class MarchingCubes : MonoBehaviour
     /// <returns></returns>
     private int GetCubeConfiguration(float[] cubeValues) {
         int cubeIndex = 0;
+        // Compare the value of each vertice with the iso level and do bitshifting
         for(int i = 0; i < 8; i++) {
             if(cubeValues[i] > isolevel) cubeIndex |= 1 << i;
         }
