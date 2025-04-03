@@ -18,6 +18,7 @@ public class SteamValidation : MonoBehaviour
     {
         //Checks if the steam manager is open. If it is not it will simply return
         if(!SteamManager.Initialized){
+            Debug.Log("Your steam engine is not open, please open it and re-run the program to utilize steam functionality.");
             return; //Ensure steam is open
         }
 
