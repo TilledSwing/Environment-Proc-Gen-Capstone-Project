@@ -28,7 +28,7 @@ public class DBManager : MonoBehaviour
     /// Starts the DB process to save a created terrain
     /// </summary>
     public void saveTerrain(){
-        StartCoroutine(SaveTerrain());
+        StartCoroutine(LoadTerrainData());
     }
 
 
