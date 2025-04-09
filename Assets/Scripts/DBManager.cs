@@ -7,12 +7,25 @@ using UnityEngine.Networking;
 /// </summary>
 public class DBManager : MonoBehaviour
 {
+    /// <summary>
+    /// Starts the DB process to determine if a user is registered or not
+    /// </summary>
+    /// <param name="steamId"></param>
+    /// <param name="steamName"></param>
     public void checkRegisteredUser(ulong steamId, string steamName){
         Debug.Log("In the checkRegistration with values being: " + steamId + " , " + steamName);
         StartCoroutine(VerifyRegisteredUser(steamId, steamName));
     }
+
     /// <summary>
-    /// Called once the user selects to save a terrain
+    /// Starts the DB retrieval of the users created terrains
+    /// </summary>
+    public void retreiveTerrainNames(){
+        StartCoroutine(RetrieveTerrainNames(SteamValidation.steamID));
+    }
+
+    /// <summary>
+    /// Starts the DB process to save a created terrain
     /// </summary>
     public void saveTerrain(){
         StartCoroutine(SaveTerrain());
@@ -34,22 +47,84 @@ public class DBManager : MonoBehaviour
     /// <returns></returns>
      IEnumerator VerifyRegisteredUser(ulong steamId, string steamName) //int seed, int width, int height, float noiseScale, float isolevel, bool lerp
     {
-       
+         //Set up connection
         string url = "http://localhost/sqlconnect/validateUser.php";
         WWWForm form = new();
+
+        //Need to pass the SteamId and steamId to the php to determine if the user exists, or if we need to add them to the db
         form.AddField("SteamId", steamId.ToString());
         form.AddField("SteamName", steamName);
+
+        //Send web request
         using (UnityWebRequest request = UnityWebRequest.Post(url, form))
         {
-            // Set timeout (in seconds)
+            // Set timeout at 10 seconds
             request.timeout = 10;
             
             yield return request.SendWebRequest();
 
+            //Log the results. This can be deleted later
             if (request.result == UnityWebRequest.Result.Success)
                 Debug.Log("Raw Response: " + request.downloadHandler.text);
             else
                 Debug.Log("request failed: " + request.error + " response code: " + request.responseCode);
+        }
+    }
+
+
+    /// <summary>
+    /// The method will use the loadCreatedTerrainNames.php script to retreive the names of all the terrains that a user has created and saved to the DB
+    /// This data will then need to be displayed in order to allow the user to select what terrain they want to fully load
+    /// </summary>
+    /// <param name="steamId"></param>
+    /// <param name="steamName"></param>
+    /// <returns></returns>
+     IEnumerator RetrieveTerrainNames(ulong steamId) //int seed, int width, int height, float noiseScale, float isolevel, bool lerp
+    {
+        //Set up connection
+        string url = "http://localhost/sqlconnect/loadCreatedTerrainNames.php";
+        WWWForm form = new();
+
+        //Need to pass the SteamId to the php to be used in the query
+        form.AddField("SteamId", steamId.ToString());
+        using (UnityWebRequest request = UnityWebRequest.Post(url, form))
+        {
+            // Set timeout at 10 seconds
+            request.timeout = 10;
+            
+            yield return request.SendWebRequest();
+
+            //If the return result shows it was a sucess (The php script didnt break)
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                try 
+                {
+                    // Parse the JSON response
+                    PHPTerrainNameResponse response = JsonUtility.FromJson<PHPTerrainNameResponse>(request.downloadHandler.text);
+                    if (response.success)
+                    {                        
+                        // Process data
+                        foreach (var item in response.data)
+                        {
+                            Debug.Log($"Terrain Name: {item.TerrainName} TerrainId: {item.TerrainId}");
+                        }
+                    }
+                    else
+                    {
+                        Debug.LogError("PHP Error: " + response.message);
+                    }
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogError("JSON Parse Error: " + e.Message);
+                    Debug.Log("Raw Response: " + request.downloadHandler.text);
+                }
+            }
+            else
+            {
+                Debug.LogError("Request Failed: " + request.error);
+                Debug.LogError("Response Code: " + request.responseCode);
+            }
         }
     }
 
@@ -113,6 +188,23 @@ public class DBManager : MonoBehaviour
     {
         public string ID;
         public string Name;
+    }
+
+    [System.Serializable]
+    public class PHPTerrainNameResponse
+    {
+        public bool success;
+        public string message;
+        public TerrainNames[] data;
+    }
+
+     [System.Serializable]
+    public class TerrainNames
+    {
+        public string TerrainName;
+
+        //Terrain Id is retreived also so that the query to retreive the terrain info will be faster
+        public int TerrainId;
     }
 }
 
