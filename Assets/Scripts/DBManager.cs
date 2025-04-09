@@ -31,12 +31,6 @@ public class DBManager : MonoBehaviour
         StartCoroutine(SaveTerrain());
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
 
     /// <summary>
     /// On Startup this method will call a php script that checks if the user exists in out system. If they do not we will add them into the 
@@ -128,7 +122,7 @@ public class DBManager : MonoBehaviour
         }
     }
 
-    IEnumerator SaveTerrain() //int seed, int width, int height, float noiseScale, float isolevel, bool lerp
+    IEnumerator LoadTerrainData() //int seed, int width, int height, float noiseScale, float isolevel, bool lerp
     {
         string url = "http://localhost/sqlconnect/saveTerrain.php";
         
