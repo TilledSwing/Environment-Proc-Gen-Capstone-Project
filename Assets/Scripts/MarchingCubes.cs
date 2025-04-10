@@ -8,37 +8,40 @@ using UnityEngine;
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public class MarchingCubes : MonoBehaviour
 {
-    
-    [SerializeField] private int width = 32;
-    [SerializeField] private int height = 12;
-    [SerializeField] private float noiseScale = 0.1f;
-    [SerializeField] private float isolevel = 1.28f;
-    [SerializeField] private bool lerp = true;
-    [SerializeField] private bool smoothShade = true;
     private float[,,] heights;
     private List<Vector3> vertices = new List<Vector3>();
     private List<int> triangles = new List<int>();
     private MeshFilter meshFilter;
     private MeshCollider meshCollider;
 
+    // Noise Settings
+    FastNoiseLite noiseGenerator = new FastNoiseLite();
+
+
+
+    public int width = 100;
+    public int height = 50;
+    public float noiseScale = 0.6f;
+    public float isolevel = 5f;
+    public bool lerp = true;
+    public int seed;
+
     void Start()
     {
         meshFilter = GetComponent<MeshFilter>();
         meshCollider = GetComponent<MeshCollider>();
-        StartCoroutine(UpdateMesh());
+        seed = UnityEngine.Random.Range(0, 10000);
+        UpdateMesh();
     }
 
     /// <summary>
-    /// For The purposes of updating mesh in real time when adjusting parameters during runtime
+    /// Updates the terrain mesh
     /// </summary>
-    /// <returns> Waits for a set period of time before looping again </returns>
-    private IEnumerator UpdateMesh() {
-        while(true) {
-            SetHeights();
-            MarchCubes();
-            SetupMesh();
-            yield return new WaitForSeconds(1f);
-        }
+    public void UpdateMesh() {
+        SetNoiseSetting();
+        SetHeights();
+        MarchCubes();
+        SetupMesh();
     }
 
     /// <summary>
@@ -55,6 +58,16 @@ public class MarchingCubes : MonoBehaviour
         meshCollider.sharedMesh = mesh;
     }
 
+    private void SetNoiseSetting() {
+        noiseGenerator.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
+        noiseGenerator.SetFrequency(0.01f);
+        noiseGenerator.SetSeed(seed);
+        noiseGenerator.SetFractalType(FastNoiseLite.FractalType.FBm);
+        noiseGenerator.SetFractalOctaves(5);
+        noiseGenerator.SetFractalLacunarity(2);
+        noiseGenerator.SetFractalGain(0.5f);
+    }
+
     /// <summary>
     /// Essentially the density function that will dictate the heights of the terrain
     /// </summary>
@@ -64,7 +77,9 @@ public class MarchingCubes : MonoBehaviour
         for(int x = 0; x < width+1; x++) {
             for(int y = 0; y < height+1; y++) {
                 for(int z = 0; z < width+1; z++) {
-                    float currentHeight = height * Mathf.PerlinNoise(x * noiseScale, z * noiseScale);
+                    float currentHeight = height * noiseGenerator.GetNoise(x * noiseScale, y * noiseScale, z * noiseScale);
+
+                    if(currentHeight < 0) currentHeight = 0;
 
                     heights[x,y,z] = y - currentHeight;
                 }
