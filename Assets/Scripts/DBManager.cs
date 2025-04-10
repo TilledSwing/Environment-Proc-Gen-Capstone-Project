@@ -7,6 +7,7 @@ using UnityEngine.Networking;
 /// </summary>
 public class DBManager : MonoBehaviour
 {
+    private int loadedTerrainId = 1;
     /// <summary>
     /// Starts the DB process to determine if a user is registered or not
     /// </summary>
@@ -27,10 +28,9 @@ public class DBManager : MonoBehaviour
     /// <summary>
     /// Starts the DB process to save a created terrain
     /// </summary>
-    public void saveTerrain(){
+    public void retreiveTerrainData(){
         StartCoroutine(LoadTerrainData());
     }
-
 
     /// <summary>
     /// On Startup this method will call a php script that checks if the user exists in out system. If they do not we will add them into the 
@@ -122,11 +122,14 @@ public class DBManager : MonoBehaviour
         }
     }
 
-    IEnumerator LoadTerrainData() //int seed, int width, int height, float noiseScale, float isolevel, bool lerp
+    IEnumerator LoadTerrainData() 
     {
-        string url = "http://localhost/sqlconnect/saveTerrain.php";
-        
-        using (UnityWebRequest request = UnityWebRequest.Get(url))
+        string url = "http://localhost/sqlconnect/loadTerrainData.php";
+         WWWForm form = new();
+
+        //Need to pass the SteamId and steamId to the php to determine if the user exists, or if we need to add them to the db
+        form.AddField("terrainId", loadedTerrainId);
+        using (UnityWebRequest request = UnityWebRequest.Post(url, form))
         {
             // Set timeout (in seconds)
             request.timeout = 10;
@@ -138,15 +141,13 @@ public class DBManager : MonoBehaviour
                 try 
                 {
                     // Parse the JSON response
-                    PHPResponse response = JsonUtility.FromJson<PHPResponse>(request.downloadHandler.text);
+                    PHPTerrainDataResponse response = JsonUtility.FromJson<PHPTerrainDataResponse>(request.downloadHandler.text);
                     if (response.success)
-                    {
-                        Debug.Log("PHP Success: " + response.message);
-                        
+                    {                        
                         // Process your data here
                         foreach (var item in response.data)
                         {
-                            Debug.Log($"ID: {item.ID}, Name: {item.Name}");
+                            Debug.Log($"Seed: {item.Seed}, Width: {item.Width}, Height: {item.Height}, NoiseScale: {item.NoiseScale}, IsoLevel: {item.IsoLevel}, Lerp: {item.Lerp}");
                         }
                     }
                     else
@@ -199,6 +200,24 @@ public class DBManager : MonoBehaviour
 
         //Terrain Id is retreived also so that the query to retreive the terrain info will be faster
         public int TerrainId;
+    }
+      [System.Serializable]
+    public class PHPTerrainDataResponse
+    {
+        public bool success;
+        public string message;
+        public TerrainData[] data;
+    }
+
+    [System.Serializable]
+    public class TerrainData
+    {
+        public int Seed;
+        public int Width;
+        public int Height;
+        public float NoiseScale;
+        public float IsoLevel;
+        public bool Lerp;
     }
 }
 
