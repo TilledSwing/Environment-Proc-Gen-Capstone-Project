@@ -17,14 +17,18 @@ public class MarchingCubes : MonoBehaviour
     // Noise Settings
     FastNoiseLite noiseGenerator = new FastNoiseLite();
 
-
-
+    public FastNoiseLite.NoiseType noiseType = FastNoiseLite.NoiseType.OpenSimplex2;
+    public FastNoiseLite.FractalType fractalType = FastNoiseLite.FractalType.FBm;
+    public int seed;
+    public int fractalOctaves = 5;
+    public float fractalLacunarity = 2;
+    public float fractalGain = 0.5f;
+    public float frequency = 0.01f;
     public int width = 100;
     public int height = 50;
     public float noiseScale = 0.6f;
     public float isolevel = 5f;
     public bool lerp = true;
-    public int seed;
 
     void Start()
     {
@@ -59,13 +63,13 @@ public class MarchingCubes : MonoBehaviour
     }
 
     private void SetNoiseSetting() {
-        noiseGenerator.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
-        noiseGenerator.SetFrequency(0.01f);
+        noiseGenerator.SetNoiseType(noiseType);
+        noiseGenerator.SetFractalType(fractalType);
         noiseGenerator.SetSeed(seed);
-        noiseGenerator.SetFractalType(FastNoiseLite.FractalType.FBm);
-        noiseGenerator.SetFractalOctaves(5);
-        noiseGenerator.SetFractalLacunarity(2);
-        noiseGenerator.SetFractalGain(0.5f);
+        noiseGenerator.SetFractalOctaves(fractalOctaves);
+        noiseGenerator.SetFractalLacunarity(fractalLacunarity);
+        noiseGenerator.SetFractalGain(fractalGain);
+        noiseGenerator.SetFrequency(frequency);
     }
 
     /// <summary>
