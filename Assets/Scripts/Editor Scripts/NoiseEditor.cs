@@ -8,7 +8,8 @@ using UnityEngine.UIElements;
 public class NoiseEditor : Editor
 {
 
-    MarchingCubes marchingCubes;
+    private MarchingCubes marchingCubes;
+    private TerrainDensityData terrainDensityData;
 
     // Noise Values
     private int selectedNoiseType = 0;
@@ -59,21 +60,21 @@ public class NoiseEditor : Editor
     private string[] cellularReturnTypeOptionLabels = new string[] {"Cell Value", "Distance", "Distance2", "Distance2Add", "Distance2Div", "Distance2Mul", "Distance2Sub"};
     // 2D or 3D Noise
     private int selectedNoiseDimension = 1;
-    private NoiseDimension[] noiseDimensionOptions = new NoiseDimension[] {NoiseDimension._2D,
-                                                                           NoiseDimension._3D};
+    private TerrainDensityData.NoiseDimension[] noiseDimensionOptions = new TerrainDensityData.NoiseDimension[] {TerrainDensityData.NoiseDimension._2D,
+                                                                           TerrainDensityData.NoiseDimension._3D};
     private string[] noiseDimensionOptionLabels = new string[] {"2D", "3D"};
 
     private void OnEnable()
     {
         marchingCubes = (MarchingCubes)target; // Cast the target to your script type
-
+        terrainDensityData = marchingCubes.terrainDensityData;
     }
 
     public override void OnInspectorGUI()
     {
         serializedObject.Update();
 
-        // base.OnInspectorGUI();
+        base.OnInspectorGUI();
 
         // Section header styling
         GUIStyle sectionHeaderStyle = new GUIStyle(EditorStyles.label);
@@ -93,40 +94,40 @@ public class NoiseEditor : Editor
         EditorGUILayout.LabelField("Noise Types", GUILayout.Width(230));
         selectedNoiseDimension = EditorGUILayout.Popup(selectedNoiseDimension, noiseDimensionOptionLabels);
         EditorGUILayout.EndHorizontal();
-        marchingCubes.noiseDimension = noiseDimensionOptions[selectedNoiseDimension];
+        terrainDensityData.noiseDimension = noiseDimensionOptions[selectedNoiseDimension];
         EditorGUILayout.BeginHorizontal();
         EditorGUILayout.LabelField("Noise Types", GUILayout.Width(230));
         selectedNoiseType = EditorGUILayout.Popup(selectedNoiseType, noiseTypeOptionLabels);
         EditorGUILayout.EndHorizontal();
-        marchingCubes.noiseType = noiseTypeOptions[selectedNoiseType];
-        marchingCubes.noiseSeed = EditorGUILayout.IntField("Terrain Seed", marchingCubes.noiseSeed);
-        marchingCubes.noiseFrequency = EditorGUILayout.FloatField("Noise Frequency", marchingCubes.noiseFrequency);
-        marchingCubes.width = EditorGUILayout.IntField("Terrain width", marchingCubes.width);
-        marchingCubes.height = EditorGUILayout.IntField("Terrain height", marchingCubes.height);
-        marchingCubes.noiseScale = EditorGUILayout.FloatField("Noise Scale", marchingCubes.noiseScale);
-        marchingCubes.isolevel = EditorGUILayout.FloatField("Isolevel", marchingCubes.isolevel);
-        marchingCubes.lerp = GUILayout.Toggle(marchingCubes.lerp, "Lerp");
+        terrainDensityData.noiseType = noiseTypeOptions[selectedNoiseType];
+        terrainDensityData.noiseSeed = EditorGUILayout.IntField("Terrain Seed", terrainDensityData.noiseSeed);
+        terrainDensityData.noiseFrequency = EditorGUILayout.FloatField("Noise Frequency", terrainDensityData.noiseFrequency);
+        terrainDensityData.width = EditorGUILayout.IntField("Terrain width", terrainDensityData.width);
+        terrainDensityData.height = EditorGUILayout.IntField("Terrain height", terrainDensityData.height);
+        terrainDensityData.noiseScale = EditorGUILayout.FloatField("Noise Scale", terrainDensityData.noiseScale);
+        terrainDensityData.isolevel = EditorGUILayout.FloatField("Isolevel", terrainDensityData.isolevel);
+        terrainDensityData.lerp = GUILayout.Toggle(terrainDensityData.lerp, "Lerp");
         // Domain Warp Settings
         EditorGUILayout.Space();
         EditorGUILayout.LabelField("Domain Warp Settings", sectionHeaderStyle);
         EditorGUILayout.Space();
-        marchingCubes.domainWarpToggle = GUILayout.Toggle(marchingCubes.domainWarpToggle, "Domain Warp");
+        terrainDensityData.domainWarpToggle = GUILayout.Toggle(terrainDensityData.domainWarpToggle, "Domain Warp");
         EditorGUILayout.BeginHorizontal();
         EditorGUILayout.LabelField("Domain Warp Types", GUILayout.Width(230));
         selectedDomainWarpType = EditorGUILayout.Popup(selectedDomainWarpType, domainWarpTypeOptionLabels);
         EditorGUILayout.EndHorizontal();
-        marchingCubes.domainWarpType = domainWarpTypeOptions[selectedDomainWarpType];
+        terrainDensityData.domainWarpType = domainWarpTypeOptions[selectedDomainWarpType];
         EditorGUILayout.BeginHorizontal();
         EditorGUILayout.LabelField("Domain Warp Fractal Types", GUILayout.Width(230));
         selectedDomainWarpFractalType = EditorGUILayout.Popup(selectedDomainWarpFractalType, domainWarpFractalTypeOptionLabels);
         EditorGUILayout.EndHorizontal();
-        marchingCubes.domainWarpFractalType = domainWarpFractalTypeOptions[selectedDomainWarpFractalType];
-        marchingCubes.domainWarpAmplitude = EditorGUILayout.FloatField("Domain Warp Amplitude", marchingCubes.domainWarpAmplitude);
-        marchingCubes.domainWarpSeed = EditorGUILayout.IntField("Domain Warp Seed", marchingCubes.domainWarpSeed);
-        marchingCubes.domainWarpFrequency = EditorGUILayout.FloatField("Domain Warp Frequency", marchingCubes.domainWarpFrequency);
-        marchingCubes.domainWarpFractalOctaves = EditorGUILayout.IntField("Domain Warp Fractal Octaves", marchingCubes.domainWarpFractalOctaves);
-        marchingCubes.domainWarpFractalLacunarity = EditorGUILayout.FloatField("Domain Warp Fractal Lacunarity", marchingCubes.domainWarpFractalLacunarity);
-        marchingCubes.domainWarpFractalGain = EditorGUILayout.FloatField("Domain Warp Fractal Gain", marchingCubes.domainWarpFractalGain);
+        terrainDensityData.domainWarpFractalType = domainWarpFractalTypeOptions[selectedDomainWarpFractalType];
+        terrainDensityData.domainWarpAmplitude = EditorGUILayout.FloatField("Domain Warp Amplitude", terrainDensityData.domainWarpAmplitude);
+        terrainDensityData.domainWarpSeed = EditorGUILayout.IntField("Domain Warp Seed", terrainDensityData.domainWarpSeed);
+        terrainDensityData.domainWarpFrequency = EditorGUILayout.FloatField("Domain Warp Frequency", terrainDensityData.domainWarpFrequency);
+        terrainDensityData.domainWarpFractalOctaves = EditorGUILayout.IntField("Domain Warp Fractal Octaves", terrainDensityData.domainWarpFractalOctaves);
+        terrainDensityData.domainWarpFractalLacunarity = EditorGUILayout.FloatField("Domain Warp Fractal Lacunarity", terrainDensityData.domainWarpFractalLacunarity);
+        terrainDensityData.domainWarpFractalGain = EditorGUILayout.FloatField("Domain Warp Fractal Gain", terrainDensityData.domainWarpFractalGain);
         // Fractal Settings
         EditorGUILayout.Space();
         EditorGUILayout.LabelField("Fractal Settings", sectionHeaderStyle);
@@ -135,11 +136,11 @@ public class NoiseEditor : Editor
         EditorGUILayout.LabelField("Fractal Types", GUILayout.Width(230));
         selectedNoiseFractalType = EditorGUILayout.Popup(selectedNoiseFractalType, noiseFractalTypeOptionLabels);
         EditorGUILayout.EndHorizontal();
-        marchingCubes.noiseFractalType = noiseFractalTypeOptions[selectedNoiseFractalType];
-        marchingCubes.noiseFractalOctaves = EditorGUILayout.IntField("Fractal Octaves", marchingCubes.noiseFractalOctaves);
-        marchingCubes.noiseFractalLacunarity = EditorGUILayout.FloatField("Fractal Lacunarity", marchingCubes.noiseFractalLacunarity);
-        marchingCubes.noiseFractalGain = EditorGUILayout.FloatField("Fractal Gain", marchingCubes.noiseFractalGain);
-        marchingCubes.fractalWeightedStrength = EditorGUILayout.FloatField("Fractal Weighted Strength", marchingCubes.fractalWeightedStrength);
+        terrainDensityData.noiseFractalType = noiseFractalTypeOptions[selectedNoiseFractalType];
+        terrainDensityData.noiseFractalOctaves = EditorGUILayout.IntField("Fractal Octaves", terrainDensityData.noiseFractalOctaves);
+        terrainDensityData.noiseFractalLacunarity = EditorGUILayout.FloatField("Fractal Lacunarity", terrainDensityData.noiseFractalLacunarity);
+        terrainDensityData.noiseFractalGain = EditorGUILayout.FloatField("Fractal Gain", terrainDensityData.noiseFractalGain);
+        terrainDensityData.fractalWeightedStrength = EditorGUILayout.FloatField("Fractal Weighted Strength", terrainDensityData.fractalWeightedStrength);
         // Cellular(Voronoi) Noise Settings
         EditorGUILayout.Space();
         EditorGUILayout.LabelField("Cellular(Voronoi) Settings", sectionHeaderStyle);
@@ -148,14 +149,20 @@ public class NoiseEditor : Editor
         EditorGUILayout.LabelField("Cellular(Voronoi) Distance Functions", GUILayout.Width(230));
         selectedCellularDistanceFunction = EditorGUILayout.Popup(selectedCellularDistanceFunction, cellularDistanceFunctionOptionLabels);
         EditorGUILayout.EndHorizontal();
-        marchingCubes.cellularDistanceFunction = cellularDistanceFunctionOptions[selectedCellularDistanceFunction];
+        terrainDensityData.cellularDistanceFunction = cellularDistanceFunctionOptions[selectedCellularDistanceFunction];
         EditorGUILayout.BeginHorizontal();
         EditorGUILayout.LabelField("Cellular(Voronoi) Return Type", GUILayout.Width(230));
         selectedCellularReturnType = EditorGUILayout.Popup(selectedCellularReturnType, cellularReturnTypeOptionLabels);
         EditorGUILayout.EndHorizontal();
-        marchingCubes.cellularReturnType = cellularReturnTypeOptions[selectedCellularReturnType];
-        marchingCubes.cellularJitter = EditorGUILayout.FloatField("Jitter", marchingCubes.cellularJitter);
+        terrainDensityData.cellularReturnType = cellularReturnTypeOptions[selectedCellularReturnType];
+        terrainDensityData.cellularJitter = EditorGUILayout.FloatField("Jitter", terrainDensityData.cellularJitter);
 
+        if (GUILayout.Button("Reset To Default", GUILayout.Width(230)))
+        {
+            terrainDensityData.ResetToDefault();
+        }
+
+    
         if (GUILayout.Button("Update", GUILayout.Width(230)))
         {
             marchingCubes.UpdateMesh();
