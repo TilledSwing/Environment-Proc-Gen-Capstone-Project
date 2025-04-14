@@ -5,6 +5,11 @@ using UnityEditor.VersionControl;
 using Unity.Mathematics;
 using UnityEngine;
 
+public enum NoiseDimension {
+    _2D,
+    _3D
+}
+
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public class MarchingCubes : MonoBehaviour
 {
@@ -15,26 +20,41 @@ public class MarchingCubes : MonoBehaviour
     private MeshCollider meshCollider;
 
     // Noise Settings
-    FastNoiseLite noiseGenerator = new FastNoiseLite();
-
+    private FastNoiseLite noiseGenerator = new FastNoiseLite();
+    private FastNoiseLite domainWarp = new FastNoiseLite();
     public FastNoiseLite.NoiseType noiseType = FastNoiseLite.NoiseType.OpenSimplex2;
-    public FastNoiseLite.FractalType fractalType = FastNoiseLite.FractalType.FBm;
-    public int seed;
-    public int fractalOctaves = 5;
-    public float fractalLacunarity = 2;
-    public float fractalGain = 0.5f;
-    public float frequency = 0.01f;
-    public int width = 100;
+    public FastNoiseLite.FractalType noiseFractalType = FastNoiseLite.FractalType.FBm;
+    public int noiseSeed;
+    public int noiseFractalOctaves = 5;
+    public float noiseFractalLacunarity = 2;
+    public float noiseFractalGain = 0.5f;
+    public float fractalWeightedStrength = 0;
+    public float noiseFrequency = 0.01f;
+    public bool domainWarpToggle = false;
+    public FastNoiseLite.DomainWarpType domainWarpType = FastNoiseLite.DomainWarpType.OpenSimplex2;
+    public FastNoiseLite.FractalType domainWarpFractalType = FastNoiseLite.FractalType.None;
+    public float domainWarpAmplitude = 1;
+    public int domainWarpSeed;
+    public int domainWarpFractalOctaves = 5;
+    public float domainWarpFractalLacunarity = 2;
+    public float domainWarpFractalGain = 0.5f;
+    public float domainWarpFrequency = 0.01f;
+    public FastNoiseLite.CellularDistanceFunction cellularDistanceFunction = FastNoiseLite.CellularDistanceFunction.EuclideanSq;
+    public FastNoiseLite.CellularReturnType cellularReturnType = FastNoiseLite.CellularReturnType.Distance;
+    public float cellularJitter = 1;
+    public int width = 200;
     public int height = 50;
     public float noiseScale = 0.6f;
     public float isolevel = 5f;
     public bool lerp = true;
+    public NoiseDimension noiseDimension = NoiseDimension._3D;
 
     void Start()
     {
         meshFilter = GetComponent<MeshFilter>();
         meshCollider = GetComponent<MeshCollider>();
-        seed = UnityEngine.Random.Range(0, 10000);
+        noiseSeed = UnityEngine.Random.Range(0, 10000);
+        domainWarpSeed = UnityEngine.Random.Range(0, 10000);
         UpdateMesh();
     }
 
@@ -63,13 +83,33 @@ public class MarchingCubes : MonoBehaviour
     }
 
     private void SetNoiseSetting() {
+        // Noise Values
         noiseGenerator.SetNoiseType(noiseType);
-        noiseGenerator.SetFractalType(fractalType);
-        noiseGenerator.SetSeed(seed);
-        noiseGenerator.SetFractalOctaves(fractalOctaves);
-        noiseGenerator.SetFractalLacunarity(fractalLacunarity);
-        noiseGenerator.SetFractalGain(fractalGain);
-        noiseGenerator.SetFrequency(frequency);
+        noiseGenerator.SetFractalType(noiseFractalType);
+        noiseGenerator.SetSeed(noiseSeed);
+        noiseGenerator.SetFractalOctaves(noiseFractalOctaves);
+        noiseGenerator.SetFractalLacunarity(noiseFractalLacunarity);
+        noiseGenerator.SetFractalGain(noiseFractalGain);
+        noiseGenerator.SetFractalWeightedStrength(fractalWeightedStrength);
+        noiseGenerator.SetFrequency(noiseFrequency);
+        // Cellular Values
+        if(noiseType == FastNoiseLite.NoiseType.Cellular) {
+            noiseGenerator.SetCellularDistanceFunction(cellularDistanceFunction);
+            noiseGenerator.SetCellularReturnType(cellularReturnType);
+            noiseGenerator.SetCellularJitter(cellularJitter);
+        }
+        // Domain Warp Values
+        if(domainWarpToggle) {
+            domainWarp.SetNoiseType(noiseType);
+            domainWarp.SetFractalType(noiseFractalType);
+            domainWarp.SetDomainWarpType(domainWarpType);
+            domainWarp.SetDomainWarpAmp(domainWarpAmplitude);
+            domainWarp.SetSeed(domainWarpSeed);
+            domainWarp.SetFractalOctaves(domainWarpFractalOctaves);
+            domainWarp.SetFractalLacunarity(domainWarpFractalLacunarity);
+            domainWarp.SetFractalGain(domainWarpFractalGain);
+            domainWarp.SetFrequency(domainWarpFrequency);
+        }
     }
 
     /// <summary>
@@ -78,10 +118,31 @@ public class MarchingCubes : MonoBehaviour
     private void SetHeights() {
         heights = new float[width+1, height+1, width+1];
 
+        float xWarp = 0;
+        float yWarp = 0;
+        float zWarp = 0;
+
         for(int x = 0; x < width+1; x++) {
             for(int y = 0; y < height+1; y++) {
                 for(int z = 0; z < width+1; z++) {
-                    float currentHeight = height * noiseGenerator.GetNoise(x * noiseScale, y * noiseScale, z * noiseScale);
+                    float currentHeight = 0;
+                    xWarp = x * noiseScale;
+                    yWarp = y * noiseScale;
+                    zWarp = z * noiseScale;
+                    if(domainWarpToggle) {
+                        if(noiseDimension == NoiseDimension._2D) {
+                            domainWarp.DomainWarp(ref xWarp, ref zWarp);
+                        }
+                        else {
+                            domainWarp.DomainWarp(ref xWarp, ref yWarp, ref zWarp);
+                        }
+                    }
+                    if(noiseDimension == NoiseDimension._2D) {
+                        currentHeight = height * noiseGenerator.GetNoise(xWarp, zWarp);
+                    }
+                    else {
+                        currentHeight = height * noiseGenerator.GetNoise(xWarp, yWarp, zWarp);
+                    }
 
                     if(currentHeight < 0) currentHeight = 0;
 
