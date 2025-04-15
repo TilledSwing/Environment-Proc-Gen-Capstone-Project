@@ -42,35 +42,35 @@ public class TerrainDensityData : ScriptableObject
 
     // Default Values
         // Noise and Fractal Settings
-    public NoiseDimension defaultNoiseDimension = NoiseDimension._3D;
-    public FastNoiseLite.NoiseType defaultNoiseType = FastNoiseLite.NoiseType.OpenSimplex2;
-    public FastNoiseLite.FractalType defaultNoiseFractalType = FastNoiseLite.FractalType.FBm;
-    public int defaultNoiseSeed;
-    public int defaultNoiseFractalOctaves = 5;
-    public float defaultNoiseFractalLacunarity = 2;
-    public float defaultNoiseFractalGain = 0.5f;
-    public float defaultFractalWeightedStrength = 0;
-    public float defaultNoiseFrequency = 0.01f;
+    private NoiseDimension defaultNoiseDimension = NoiseDimension._3D;
+    private FastNoiseLite.NoiseType defaultNoiseType = FastNoiseLite.NoiseType.OpenSimplex2;
+    private FastNoiseLite.FractalType defaultNoiseFractalType = FastNoiseLite.FractalType.FBm;
+    private int defaultNoiseSeed;
+    private int defaultNoiseFractalOctaves = 5;
+    private float defaultNoiseFractalLacunarity = 2;
+    private float defaultNoiseFractalGain = 0.5f;
+    private float defaultFractalWeightedStrength = 0;
+    private float defaultNoiseFrequency = 0.01f;
     // Domain Warp Values
-    public bool defaultDomainWarpToggle = false;
-    public FastNoiseLite.DomainWarpType defaultDomainWarpType = FastNoiseLite.DomainWarpType.OpenSimplex2;
-    public FastNoiseLite.FractalType defaultDomainWarpFractalType = FastNoiseLite.FractalType.None;
-    public float defaultDomainWarpAmplitude = 1;
-    public int defaultDomainWarpSeed;
-    public int defaultDomainWarpFractalOctaves = 5;
-    public float defaultDomainWarpFractalLacunarity = 2;
-    public float defaultDomainWarpFractalGain = 0.5f;
-    public float defaultDomainWarpFrequency = 0.01f;
+    private bool defaultDomainWarpToggle = false;
+    private FastNoiseLite.DomainWarpType defaultDomainWarpType = FastNoiseLite.DomainWarpType.OpenSimplex2;
+    private FastNoiseLite.FractalType defaultDomainWarpFractalType = FastNoiseLite.FractalType.None;
+    private float defaultDomainWarpAmplitude = 1;
+    private int defaultDomainWarpSeed;
+    private int defaultDomainWarpFractalOctaves = 5;
+    private float defaultDomainWarpFractalLacunarity = 2;
+    private float defaultDomainWarpFractalGain = 0.5f;
+    private float defaultDomainWarpFrequency = 0.01f;
     // Cellular(Voronoi) Values
-    public FastNoiseLite.CellularDistanceFunction defaultCellularDistanceFunction = FastNoiseLite.CellularDistanceFunction.EuclideanSq;
-    public FastNoiseLite.CellularReturnType defaultCellularReturnType = FastNoiseLite.CellularReturnType.Distance;
-    public float defaultCellularJitter = 1;
+    private FastNoiseLite.CellularDistanceFunction defaultCellularDistanceFunction = FastNoiseLite.CellularDistanceFunction.EuclideanSq;
+    private FastNoiseLite.CellularReturnType defaultCellularReturnType = FastNoiseLite.CellularReturnType.Distance;
+    private float defaultCellularJitter = 1;
     // Terrain Values
-    public int defaultWidth = 200;
-    public int defaultHeight = 50;
-    public float defaultNoiseScale = 0.6f;
-    public float defaultIsolevel = 5f;
-    public bool defaultLerp = true;
+    private int defaultWidth = 200;
+    private int defaultHeight = 50;
+    private float defaultNoiseScale = 0.6f;
+    private float defaultIsolevel = 5f;
+    private bool defaultLerp = true;
 
     public void ResetToDefault() {
         // Noise and Fractal Settings

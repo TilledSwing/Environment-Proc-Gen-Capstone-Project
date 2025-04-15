@@ -160,6 +160,7 @@ public class NoiseEditor : Editor
         if (GUILayout.Button("Reset To Default", GUILayout.Width(230)))
         {
             terrainDensityData.ResetToDefault();
+            marchingCubes.UpdateMesh();
         }
 
     
