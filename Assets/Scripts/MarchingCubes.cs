@@ -15,14 +15,24 @@ public class MarchingCubes : MonoBehaviour
     [SerializeField] private float isolevel = 1.28f;
     [SerializeField] private bool lerp = true;
     [SerializeField] private bool smoothShade = true;
+    [SerializeField] private int seed = 0;
+
     private float[,,] heights;
     private List<Vector3> vertices = new List<Vector3>();
     private List<int> triangles = new List<int>();
     private MeshFilter meshFilter;
     private MeshCollider meshCollider;
 
+    private Vector2 noiseOffset;
+    
     void Start()
     {
+        UnityEngine.Random.InitState(seed);
+        Debug.Log($"Seed: {seed} | Offset: {noiseOffset}");
+        noiseOffset = new Vector2(
+            UnityEngine.Random.Range(-10000f, 10000f),
+            UnityEngine.Random.Range(-10000f, 10000f)
+        );
         meshFilter = GetComponent<MeshFilter>();
         meshCollider = GetComponent<MeshCollider>();
         StartCoroutine(UpdateMesh());
@@ -34,6 +44,11 @@ public class MarchingCubes : MonoBehaviour
     /// <returns> Waits for a set period of time before looping again </returns>
     private IEnumerator UpdateMesh() {
         while(true) {
+            UnityEngine.Random.InitState(seed);
+            noiseOffset = new Vector2(
+                UnityEngine.Random.Range(-10000f, 10000f),
+                UnityEngine.Random.Range(-10000f, 10000f)
+            );
             SetHeights();
             MarchCubes();
             SetupMesh();
@@ -64,7 +79,10 @@ public class MarchingCubes : MonoBehaviour
         for(int x = 0; x < width+1; x++) {
             for(int y = 0; y < height+1; y++) {
                 for(int z = 0; z < width+1; z++) {
-                    float currentHeight = height * Mathf.PerlinNoise(x * noiseScale, z * noiseScale);
+                    float currentHeight = height * Mathf.PerlinNoise(
+                        x * noiseScale + noiseOffset.x, 
+                        z * noiseScale + noiseOffset.y
+                    );
 
                     heights[x,y,z] = y - currentHeight;
                 }
