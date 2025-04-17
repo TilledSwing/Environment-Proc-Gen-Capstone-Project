@@ -14,7 +14,6 @@ public class DBManager : MonoBehaviour
     /// <param name="steamId"></param>
     /// <param name="steamName"></param>
     public void checkRegisteredUser(ulong steamId, string steamName){
-        Debug.Log("In the checkRegistration with values being: " + steamId + " , " + steamName);
         StartCoroutine(VerifyRegisteredUser(steamId, steamName));
     }
 
