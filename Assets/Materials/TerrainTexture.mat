@@ -48,6 +48,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _GrassTex:
+        m_Texture: {fileID: 2800000, guid: aed09ca1eca3daf4bbf71465933fada1, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _MainTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -66,6 +70,18 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _SpecGlossMap:
         m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Texture1:
+        m_Texture: {fileID: 2800000, guid: aed09ca1eca3daf4bbf71465933fada1, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Texture2:
+        m_Texture: {fileID: 2800000, guid: c4ed3f814a2097a4d8b7b45375297930, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Texture3:
+        m_Texture: {fileID: 2800000, guid: 24a3a457b2d0e364c8eb25f783b0f20f, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
@@ -105,12 +121,26 @@ Material:
     - _Parallax: 0.005
     - _QueueOffset: 0
     - _ReceiveShadows: 1
+    - _Scale: 0.2
+    - _SlopeBlendSharpness: 1
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _SrcBlendAlpha: 1
     - _Surface: 0
+    - _Tex1HeightEnd: 40
+    - _Tex1HeightStart: 0
+    - _Tex1SlopeEnd: 0.3
+    - _Tex1SlopeStart: 0
+    - _Tex2HeightEnd: 50
+    - _Tex2HeightStart: 35
+    - _Tex2SlopeEnd: 0.8
+    - _Tex2SlopeStart: 0.3
+    - _Tex3HeightEnd: 80
+    - _Tex3HeightStart: 45
+    - _Tex3SlopeEnd: 1
+    - _Tex3SlopeStart: 0.8
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:

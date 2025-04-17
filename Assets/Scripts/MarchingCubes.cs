@@ -118,13 +118,13 @@ public class MarchingCubes : MonoBehaviour
                         }
                     }
                     if(terrainDensityData.noiseDimension == TerrainDensityData.NoiseDimension._2D) {
-                        currentHeight = height * noiseGenerator.GetNoise(xWarp, zWarp);
+                        currentHeight = height * ((noiseGenerator.GetNoise(xWarp, zWarp)+1)/2);
                     }
                     else {
-                        currentHeight = height * noiseGenerator.GetNoise(xWarp, yWarp, zWarp);
+                        currentHeight = height * ((noiseGenerator.GetNoise(xWarp, yWarp, zWarp)+1)/2);
                     }
 
-                    if(currentHeight < 0) currentHeight = 0;
+                    // if(currentHeight < 0) currentHeight = 0;
 
                     heights[x,y,z] = y - currentHeight;
                 }

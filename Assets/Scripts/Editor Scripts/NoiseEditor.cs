@@ -91,7 +91,7 @@ public class NoiseEditor : Editor
         EditorGUILayout.LabelField("Noise Settings", sectionHeaderStyle);
         EditorGUILayout.Space();
         EditorGUILayout.BeginHorizontal();
-        EditorGUILayout.LabelField("Noise Types", GUILayout.Width(230));
+        EditorGUILayout.LabelField("Noise Dimensions", GUILayout.Width(230));
         selectedNoiseDimension = EditorGUILayout.Popup(selectedNoiseDimension, noiseDimensionOptionLabels);
         EditorGUILayout.EndHorizontal();
         terrainDensityData.noiseDimension = noiseDimensionOptions[selectedNoiseDimension];

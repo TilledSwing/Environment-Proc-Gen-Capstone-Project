@@ -33,9 +33,9 @@ public class TerrainDensityData : ScriptableObject
     public float cellularJitter = 1;
     // Terrain Values
     public int width = 200;
-    public int height = 50;
+    public int height = 80;
     public float noiseScale = 0.6f;
-    public float isolevel = 5f;
+    public float isolevel = 0.5f;
     public bool lerp = true;
 
 
@@ -67,9 +67,9 @@ public class TerrainDensityData : ScriptableObject
     private float defaultCellularJitter = 1;
     // Terrain Values
     private int defaultWidth = 200;
-    private int defaultHeight = 50;
+    private int defaultHeight = 80;
     private float defaultNoiseScale = 0.6f;
-    private float defaultIsolevel = 5f;
+    private float defaultIsolevel = 0.5f;
     private bool defaultLerp = true;
 
     public void ResetToDefault() {
