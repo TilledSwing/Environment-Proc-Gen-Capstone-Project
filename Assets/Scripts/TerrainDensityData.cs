@@ -8,8 +8,11 @@ public class TerrainDensityData : ScriptableObject
         _3D
     }
     // Noise and Fractal Settings
+    public int selectedNoiseDimension = 1;
     public NoiseDimension noiseDimension = NoiseDimension._3D;
+    public int selectedNoiseType = 0;
     public FastNoiseLite.NoiseType noiseType = FastNoiseLite.NoiseType.OpenSimplex2;
+    public int selectedNoiseFractalType = 0;
     public FastNoiseLite.FractalType noiseFractalType = FastNoiseLite.FractalType.FBm;
     public int noiseSeed;
     public int noiseFractalOctaves = 5;
@@ -19,7 +22,9 @@ public class TerrainDensityData : ScriptableObject
     public float noiseFrequency = 0.01f;
     // Domain Warp Values
     public bool domainWarpToggle = false;
+    public int selectedDomainWarpType = 0;
     public FastNoiseLite.DomainWarpType domainWarpType = FastNoiseLite.DomainWarpType.OpenSimplex2;
+    public int selectedDomainWarpFractalType = 2;
     public FastNoiseLite.FractalType domainWarpFractalType = FastNoiseLite.FractalType.None;
     public float domainWarpAmplitude = 1;
     public int domainWarpSeed;
@@ -28,7 +33,9 @@ public class TerrainDensityData : ScriptableObject
     public float domainWarpFractalGain = 0.5f;
     public float domainWarpFrequency = 0.01f;
     // Cellular(Voronoi) Values
+    public int selectedCellularDistanceFunction = 1;
     public FastNoiseLite.CellularDistanceFunction cellularDistanceFunction = FastNoiseLite.CellularDistanceFunction.EuclideanSq;
+    public int selectedCellularReturnType = 1;
     public FastNoiseLite.CellularReturnType cellularReturnType = FastNoiseLite.CellularReturnType.Distance;
     public float cellularJitter = 1;
     // Terrain Values
