@@ -27,12 +27,6 @@ public class MarchingCubes : MonoBehaviour
     
     void Start()
     {
-        UnityEngine.Random.InitState(seed);
-        Debug.Log($"Seed: {seed} | Offset: {noiseOffset}");
-        noiseOffset = new Vector2(
-            UnityEngine.Random.Range(-10000f, 10000f),
-            UnityEngine.Random.Range(-10000f, 10000f)
-        );
         meshFilter = GetComponent<MeshFilter>();
         meshCollider = GetComponent<MeshCollider>();
         terrainDensityData = Resources.Load<TerrainDensityData>("TerrainDensityData");
