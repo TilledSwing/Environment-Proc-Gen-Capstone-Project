@@ -7,8 +7,7 @@ using FishNet.Object;
 // Template by Bobsi Unity - Youtube
 // Modified by Jacob Ormsby
 
-public class PlayerController : NetworkBehaviour
-{
+public class PlayerController : NetworkBehaviour {
     [Header("Base setup")]
     public float walkingSpeed = 7.5f;
     public float runningSpeed = 11.5f;
@@ -29,23 +28,19 @@ public class PlayerController : NetworkBehaviour
     private Camera playerCamera;
 
 
-    public override void OnStartClient()
-    {
+    public override void OnStartClient() {
         base.OnStartClient();
-        if (base.IsOwner)
-        {
+        if (base.IsOwner) {
             playerCamera = Camera.main;
             playerCamera.transform.position = new Vector3(transform.position.x, transform.position.y + cameraYOffset, transform.position.z);
             playerCamera.transform.SetParent(transform);
         }
-        else
-        {
+        else {
             gameObject.GetComponent<PlayerController>().enabled = false;
         }
     }
 
-    void Start()
-    {
+    void Start() {
         characterController = GetComponent<CharacterController>();
 
         // Lock cursor
@@ -53,8 +48,7 @@ public class PlayerController : NetworkBehaviour
         Cursor.visible = false;
     }
 
-    void Update()
-    {
+    void Update() {
         bool isRunning = false;
 
         // Press Left Shift to run
@@ -62,8 +56,7 @@ public class PlayerController : NetworkBehaviour
 
 
         // Goes from first person to a pseudo pause screen and vice versa on escape.
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
+        if (Input.GetKeyDown(KeyCode.Escape)) {
             bool isCursorVisible = Cursor.visible;
             Cursor.visible = !isCursorVisible;
             Cursor.lockState = isCursorVisible ? CursorLockMode.Locked : CursorLockMode.None;
@@ -80,17 +73,14 @@ public class PlayerController : NetworkBehaviour
         float movementDirectionY = moveDirection.y;
         moveDirection = (forward * curSpeedX) + (right * curSpeedY);
 
-        if (Input.GetButton("Jump") && canMove && characterController.isGrounded)
-        {
+        if (Input.GetButton("Jump") && canMove && characterController.isGrounded) {
             moveDirection.y = jumpSpeed;
         }
-        else
-        {
+        else {
             moveDirection.y = movementDirectionY;
         }
 
-        if (!characterController.isGrounded)
-        {
+        if (!characterController.isGrounded) {
             moveDirection.y -= gravity * Time.deltaTime;
         }
 
@@ -98,8 +88,7 @@ public class PlayerController : NetworkBehaviour
         characterController.Move(moveDirection * Time.deltaTime);
 
         // Player and Camera rotation
-        if (canMove && playerCamera != null)
-        {
+        if (canMove && playerCamera != null) {
             rotationX += -Input.GetAxis("Mouse Y") * lookSpeed;
             rotationX = Mathf.Clamp(rotationX, -lookXLimit, lookXLimit);
             playerCamera.transform.localRotation = Quaternion.Euler(rotationX, 0, 0);

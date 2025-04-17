@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 8715546124528772257}
   - component: {fileID: 8342886298990182291}
   - component: {fileID: 2818081255560217895}
+  - component: {fileID: -5856504933627607615}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -212,6 +213,23 @@ MonoBehaviour:
   _networkObjectCache: {fileID: 0}
   body: {fileID: 5562710252478409533}
   endColor: {r: 0.18191515, g: 0.39711696, b: 0.91823894, a: 0}
+--- !u!114 &-5856504933627607615
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5154939420342024550}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf7f4c0580052e64a85dc1ea4f1c4601, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _componentIndexCache: 255
+  _addedNetworkObject: {fileID: 4395815574390368028}
+  _networkObjectCache: {fileID: 0}
+  objToSpawn: {fileID: 8164198744844633110, guid: 77658c6470fcf2f4bbcdf5a7bcc17372, type: 3}
+  spawnedObject: {fileID: 0}
 --- !u!1 &5562710252478409533
 GameObject:
   m_ObjectHideFlags: 0
