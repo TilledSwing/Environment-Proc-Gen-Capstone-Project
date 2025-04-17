@@ -210,7 +210,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: d644a1ee14ca32a44b080e9c6de5ed62, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -249,7 +249,7 @@ Transform:
   m_GameObject: {fileID: 47143885}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 18.02, y: 15.15, z: 17.92}
+  m_LocalPosition: {x: 18.02, y: 32.9, z: 17.92}
   m_LocalScale: {x: 2.39, y: 2.39, z: 2.39}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -697,12 +697,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85d7070574d34d743b11ebe05b4cbe4c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  width: 32
-  height: 12
-  noiseScale: 0.1
-  isolevel: 1.28
-  lerp: 1
-  smoothShade: 1
+  terrainDensityData: {fileID: 11400000, guid: 864756879a48256409eb8ae5f9a04619, type: 2}
 --- !u!23 &1627581234
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -726,7 +721,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: d5840143b3c8e154d9d7a64895dd4cf6, type: 2}
+  - {fileID: 2100000, guid: d644a1ee14ca32a44b080e9c6de5ed62, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

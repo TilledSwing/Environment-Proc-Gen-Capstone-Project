@@ -4,24 +4,24 @@ using System.Collections.Generic;
 using UnityEditor.VersionControl;
 using Unity.Mathematics;
 using UnityEngine;
+using Unity.VisualScripting;
 
-[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
+[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider))]
 public class MarchingCubes : MonoBehaviour
 {
-    
-    [SerializeField] private int width = 32;
-    [SerializeField] private int height = 12;
-    [SerializeField] private float noiseScale = 0.1f;
-    [SerializeField] private float isolevel = 1.28f;
-    [SerializeField] private bool lerp = true;
-    [SerializeField] private bool smoothShade = true;
-    [SerializeField] private int seed = 0;
-
     private float[,,] heights;
     private List<Vector3> vertices = new List<Vector3>();
     private List<int> triangles = new List<int>();
     private MeshFilter meshFilter;
     private MeshCollider meshCollider;
+    public TerrainDensityData terrainDensityData;
+    private FastNoiseLite noiseGenerator = new FastNoiseLite();
+    private FastNoiseLite domainWarp = new FastNoiseLite();
+    private int width;
+    private int height;
+    private float noiseScale;
+    private float isolevel;
+    private bool lerp;
 
     private Vector2 noiseOffset;
     
@@ -35,25 +35,20 @@ public class MarchingCubes : MonoBehaviour
         );
         meshFilter = GetComponent<MeshFilter>();
         meshCollider = GetComponent<MeshCollider>();
-        StartCoroutine(UpdateMesh());
+        terrainDensityData = Resources.Load<TerrainDensityData>("TerrainDensityData");
+        terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 10000);
+        terrainDensityData.domainWarpSeed = UnityEngine.Random.Range(0, 10000);
+        UpdateMesh();
     }
 
     /// <summary>
-    /// For The purposes of updating mesh in real time when adjusting parameters during runtime
+    /// Updates the terrain mesh
     /// </summary>
-    /// <returns> Waits for a set period of time before looping again </returns>
-    private IEnumerator UpdateMesh() {
-        while(true) {
-            UnityEngine.Random.InitState(seed);
-            noiseOffset = new Vector2(
-                UnityEngine.Random.Range(-10000f, 10000f),
-                UnityEngine.Random.Range(-10000f, 10000f)
-            );
-            SetHeights();
-            MarchCubes();
-            SetupMesh();
-            yield return new WaitForSeconds(1f);
-        }
+    public void UpdateMesh() {
+        SetNoiseSetting();
+        SetHeights();
+        MarchCubes();
+        SetupMesh();
     }
 
     /// <summary>
@@ -70,19 +65,74 @@ public class MarchingCubes : MonoBehaviour
         meshCollider.sharedMesh = mesh;
     }
 
+    private void SetNoiseSetting() {
+        width = terrainDensityData.width;
+        height = terrainDensityData.height;
+        noiseScale = terrainDensityData.noiseScale;
+        isolevel = terrainDensityData.isolevel;
+        lerp = terrainDensityData.lerp;
+        // Noise Values
+        noiseGenerator.SetNoiseType(terrainDensityData.noiseType);
+        noiseGenerator.SetFractalType(terrainDensityData.noiseFractalType);
+        noiseGenerator.SetSeed(terrainDensityData.noiseSeed);
+        noiseGenerator.SetFractalOctaves(terrainDensityData.noiseFractalOctaves);
+        noiseGenerator.SetFractalLacunarity(terrainDensityData.noiseFractalLacunarity);
+        noiseGenerator.SetFractalGain(terrainDensityData.noiseFractalGain);
+        noiseGenerator.SetFractalWeightedStrength(terrainDensityData.fractalWeightedStrength);
+        noiseGenerator.SetFrequency(terrainDensityData.noiseFrequency);
+        // Cellular Values
+        if(terrainDensityData.noiseType == FastNoiseLite.NoiseType.Cellular) {
+            noiseGenerator.SetCellularDistanceFunction(terrainDensityData.cellularDistanceFunction);
+            noiseGenerator.SetCellularReturnType(terrainDensityData.cellularReturnType);
+            noiseGenerator.SetCellularJitter(terrainDensityData.cellularJitter);
+        }
+        // Domain Warp Values
+        if(terrainDensityData.domainWarpToggle) {
+            domainWarp.SetNoiseType(terrainDensityData.noiseType);
+            domainWarp.SetFractalType(terrainDensityData.noiseFractalType);
+            domainWarp.SetDomainWarpType(terrainDensityData.domainWarpType);
+            domainWarp.SetDomainWarpAmp(terrainDensityData.domainWarpAmplitude);
+            domainWarp.SetSeed(terrainDensityData.domainWarpSeed);
+            domainWarp.SetFractalOctaves(terrainDensityData.domainWarpFractalOctaves);
+            domainWarp.SetFractalLacunarity(terrainDensityData.domainWarpFractalLacunarity);
+            domainWarp.SetFractalGain(terrainDensityData.domainWarpFractalGain);
+            domainWarp.SetFrequency(terrainDensityData.domainWarpFrequency);
+        }
+    }
+
     /// <summary>
     /// Essentially the density function that will dictate the heights of the terrain
     /// </summary>
     private void SetHeights() {
         heights = new float[width+1, height+1, width+1];
 
+        float xWarp = 0;
+        float yWarp = 0;
+        float zWarp = 0;
+
         for(int x = 0; x < width+1; x++) {
             for(int y = 0; y < height+1; y++) {
                 for(int z = 0; z < width+1; z++) {
-                    float currentHeight = height * Mathf.PerlinNoise(
-                        x * noiseScale + noiseOffset.x, 
-                        z * noiseScale + noiseOffset.y
-                    );
+                    float currentHeight = 0;
+                    xWarp = x * noiseScale;
+                    yWarp = y * noiseScale;
+                    zWarp = z * noiseScale;
+                    if(terrainDensityData.domainWarpToggle) {
+                        if(terrainDensityData.noiseDimension == TerrainDensityData.NoiseDimension._2D) {
+                            domainWarp.DomainWarp(ref xWarp, ref zWarp);
+                        }
+                        else {
+                            domainWarp.DomainWarp(ref xWarp, ref yWarp, ref zWarp);
+                        }
+                    }
+                    if(terrainDensityData.noiseDimension == TerrainDensityData.NoiseDimension._2D) {
+                        currentHeight = height * ((noiseGenerator.GetNoise(xWarp, zWarp)+1)/2);
+                    }
+                    else {
+                        currentHeight = height * ((noiseGenerator.GetNoise(xWarp, yWarp, zWarp)+1)/2);
+                    }
+
+                    // if(currentHeight < 0) currentHeight = 0;
 
                     heights[x,y,z] = y - currentHeight;
                 }
