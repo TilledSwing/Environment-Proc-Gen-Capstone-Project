@@ -13,21 +13,24 @@ public class DBManager : MonoBehaviour
     /// </summary>
     /// <param name="steamId"></param>
     /// <param name="steamName"></param>
-    public void checkRegisteredUser(ulong steamId, string steamName){
+    public void checkRegisteredUser(ulong steamId, string steamName)
+    {
         StartCoroutine(VerifyRegisteredUser(steamId, steamName));
     }
 
     /// <summary>
     /// Starts the DB retrieval of the users created terrains
     /// </summary>
-    public void retreiveTerrainNames(){
+    public void retreiveTerrainNames()
+    {
         StartCoroutine(RetrieveTerrainNames(SteamValidation.steamID));
     }
 
     /// <summary>
     /// Starts the DB process to save a created terrain
     /// </summary>
-    public void retreiveTerrainData(){
+    public void retreiveTerrainData()
+    {
         StartCoroutine(LoadTerrainData());
     }
 
@@ -38,9 +41,9 @@ public class DBManager : MonoBehaviour
     /// <param name="steamId"></param>
     /// <param name="steamName"></param>
     /// <returns></returns>
-     IEnumerator VerifyRegisteredUser(ulong steamId, string steamName) //int seed, int width, int height, float noiseScale, float isolevel, bool lerp
+    IEnumerator VerifyRegisteredUser(ulong steamId, string steamName) //int seed, int width, int height, float noiseScale, float isolevel, bool lerp
     {
-         //Set up connection
+        //Set up connection
         string url = "http://localhost/sqlconnect/validateUser.php";
         WWWForm form = new();
 
@@ -53,7 +56,7 @@ public class DBManager : MonoBehaviour
         {
             // Set timeout at 10 seconds
             request.timeout = 10;
-            
+
             yield return request.SendWebRequest();
 
             //Log the results. This can be deleted later
@@ -72,7 +75,7 @@ public class DBManager : MonoBehaviour
     /// <param name="steamId"></param>
     /// <param name="steamName"></param>
     /// <returns></returns>
-     IEnumerator RetrieveTerrainNames(ulong steamId) //int seed, int width, int height, float noiseScale, float isolevel, bool lerp
+    IEnumerator RetrieveTerrainNames(ulong steamId) //int seed, int width, int height, float noiseScale, float isolevel, bool lerp
     {
         //Set up connection
         string url = "http://localhost/sqlconnect/loadCreatedTerrainNames.php";
@@ -84,18 +87,18 @@ public class DBManager : MonoBehaviour
         {
             // Set timeout at 10 seconds
             request.timeout = 10;
-            
+
             yield return request.SendWebRequest();
 
             //If the return result shows it was a sucess (The php script didnt break)
             if (request.result == UnityWebRequest.Result.Success)
             {
-                try 
+                try
                 {
                     // Parse the JSON response
                     PHPTerrainNameResponse response = JsonUtility.FromJson<PHPTerrainNameResponse>(request.downloadHandler.text);
                     if (response.success)
-                    {                        
+                    {
                         // Process data
                         foreach (var item in response.data)
                         {
@@ -121,10 +124,10 @@ public class DBManager : MonoBehaviour
         }
     }
 
-    IEnumerator LoadTerrainData() 
+    IEnumerator LoadTerrainData()
     {
         string url = "http://localhost/sqlconnect/loadTerrainData.php";
-         WWWForm form = new();
+        WWWForm form = new();
 
         //Need to pass the SteamId and steamId to the php to determine if the user exists, or if we need to add them to the db
         form.AddField("terrainId", loadedTerrainId);
@@ -132,17 +135,17 @@ public class DBManager : MonoBehaviour
         {
             // Set timeout (in seconds)
             request.timeout = 10;
-            
+
             yield return request.SendWebRequest();
 
             if (request.result == UnityWebRequest.Result.Success)
             {
-                try 
+                try
                 {
                     // Parse the JSON response
                     PHPTerrainDataResponse response = JsonUtility.FromJson<PHPTerrainDataResponse>(request.downloadHandler.text);
                     if (response.success)
-                    {                        
+                    {
                         // Process your data here
                         foreach (var item in response.data)
                         {
@@ -192,7 +195,7 @@ public class DBManager : MonoBehaviour
         public TerrainNames[] data;
     }
 
-     [System.Serializable]
+    [System.Serializable]
     public class TerrainNames
     {
         public string TerrainName;
@@ -200,7 +203,7 @@ public class DBManager : MonoBehaviour
         //Terrain Id is retreived also so that the query to retreive the terrain info will be faster
         public int TerrainId;
     }
-      [System.Serializable]
+    [System.Serializable]
     public class PHPTerrainDataResponse
     {
         public bool success;

@@ -9,20 +9,21 @@ using UnityEngine;
 public class SteamValidation
 {
     //Variables that will hold the users Steam Name and Steam ID
-    public static ulong steamID{ get; private set;}
-    public static string steamProfileName { get; private set;}
+    public static ulong steamID { get; private set; }
+    public static string steamProfileName { get; private set; }
     public static bool IsInitialized { get; private set; }
 
     /// <summary>
     /// On the initilization of the app this method will look for the steam manager and then retreive user information
     /// </summary>
-    
+
     [RuntimeInitializeOnLoadMethod]
     [System.Obsolete]
     public static void OnRuntimeMethodLoad()
     {
         //Checks if the steam manager is open. If it is not it will simply return
-        if(!SteamManager.Initialized){
+        if (!SteamManager.Initialized)
+        {
             Debug.Log("Your steam engine is not open, please open it and re-run the program to utilize steam functionality.");
             return; //Ensure steam is open
         }
