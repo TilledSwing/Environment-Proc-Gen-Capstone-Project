@@ -36,6 +36,16 @@ public class MarchingCubes : MonoBehaviour
     }
 
     /// <summary>
+    /// Creates new terrian data to randomly generate a new terrian
+    /// </summary>
+    public void GenerateTerrianData() {
+        terrainDensityData = Resources.Load<TerrainDensityData>("TerrainDensityData");
+        terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 10000);
+        terrainDensityData.domainWarpSeed = UnityEngine.Random.Range(0, 10000);
+        UpdateMesh();
+    }
+
+    /// <summary>
     /// Updates the terrain mesh
     /// </summary>
     public void UpdateMesh() {
