@@ -211,12 +211,33 @@ public class DBManager : MonoBehaviour
     [System.Serializable]
     public class TerrainData
     {
+        //Noise settings
+        public string NoiseDimensions;
+        public string NoiseTypes;
         public int Seed;
         public int Width;
         public int Height;
         public float NoiseScale;
         public float IsoLevel;
         public bool Lerp;
+        
+        // DomainWarpSettings 
+        public string WarpType; 
+        public string WarpFractalTypes;
+        public float WarpAmplitude;
+        public int WarpSeed;
+        public float WarpFrequency;
+        public int WarpFractalOctaves;
+        public float WarpFractalLacunarity;
+        public float WarpFractalGain;
+        public bool DomainWarp;
+        
+        // FractalSettings 
+        public string FractalTypes;
+        public int FractalOctaves;
+        public float FractalLacunarity;
+        public float FractalGain
+        public float FractalWeightedStrength;
     }
 }
 
