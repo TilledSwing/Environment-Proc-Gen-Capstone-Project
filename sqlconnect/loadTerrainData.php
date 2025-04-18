@@ -23,7 +23,13 @@
     
         $conn->begin_transaction();
         try{
-            $retreiveTerrainNames = $conn->prepare("SELECT * FROM TerrainData WHERE TerrainId = ?");
+            $retreiveTerrainNames = $conn->prepare("
+            SELECT * 
+            FROM NoiseSettings 
+            JOIN DomainWarpSettings ON NoiseSettings.TerrainId = DomainWarpSettings.TerrainId 
+            JOIN FractalSettings ON NoiseSettings.TerrainId = FractalSettings.TerrainId 
+            WHERE NoiseSettings.TerrainId = ?
+        ");
             $retreiveTerrainNames->bind_param("s", $terrainId);
             $retreiveTerrainNames->execute();
             $terrainNames = $retreiveTerrainNames->get_result();
@@ -34,6 +40,9 @@
             
             while ($row = $terrainNames->fetch_assoc()) {
                 $response["data"][] = [
+                    //Noise Settings
+                    "NoiseDimensions" = $row["NoiseDimensions"],
+                    "NoiseTypes" = $row['NoiseTypes']
                     "Seed" => (int)$row["Seed"],
                     "Width" => (int)$row["Width"],
                     "Height" => (int)$row["Height"],
@@ -41,6 +50,23 @@
                     "IsoLevel" => (float)$row["IsoLevel"],
                     "Lerp" => (bool)$row["Lerp"]
 
+                    // DomainWarpSettings fields
+                    "WarpType" => $row["WarpType"], 
+                    "WarpFractalTypes" => $row["WarpFractalTypes"],
+                    "WarpAmplitude" => (float)$row["WarpAmplitude"],
+                    "WarpSeed" => (int)$row["WarpSeed"],
+                    "WarpFrequency" => (float)$row["WarpFrequency"],
+                    "WarpFractalOctaves" => (int)$row["WarpFractalOctaves"],
+                    "WarpFractalLacunarity" => (float)$row["WarpFractalLacunarity"],
+                    "WarpFractalGain" => (float)$row["WarpFractalGain"],
+                    "DomainWarp" => (bool)$row["DomainWarp"],
+
+                    // FractalSettings fields
+                    "FractalTypes" => $row["FractalTypes"],
+                    "FractalOctaves" => (int)$row["FractalOctaves"],
+                    "FractalLacunarity" => (float)$row["FractalLacunarity"],
+                    "FractalGain" => (float)$row["FractalGain"],
+                    "FractalWeightedStrength" => (float)$row["FractalWeightedStrength"]
                 ];
             }
 
