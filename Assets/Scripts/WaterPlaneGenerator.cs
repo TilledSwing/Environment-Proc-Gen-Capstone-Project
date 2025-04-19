@@ -21,13 +21,7 @@ public class WaterPlaneGenerator : MonoBehaviour
         UpdateMesh();
     }
 
-    // void Update()
-    // {
-    //     UpdateMesh();
-    // }
-
     public void UpdateMesh() {
-        UnityEngine.Debug.Log("Hi");
         width = terrainDensityData.width;
         waterLevel = terrainDensityData.waterLevel;
         GenerateWaterPlane();

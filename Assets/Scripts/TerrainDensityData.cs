@@ -45,6 +45,7 @@ public class TerrainDensityData : ScriptableObject
     public float isolevel = 0.5f;
     public int waterLevel = 10;
     public bool lerp = true;
+    public bool polygonizationVisualization = false;
 
 
 
@@ -80,6 +81,7 @@ public class TerrainDensityData : ScriptableObject
     private float defaultIsolevel = 0.5f;
     private int defaultWaterLevel = 10;
     private bool defaultLerp = true;
+    public bool defaultPolygonizationVisualization = false;
 
     public void ResetToDefault() {
         // Noise and Fractal Settings
@@ -113,5 +115,6 @@ public class TerrainDensityData : ScriptableObject
         isolevel = defaultIsolevel;
         waterLevel = defaultWaterLevel;
         lerp = defaultLerp;
+        polygonizationVisualization = defaultPolygonizationVisualization;
     }
 }

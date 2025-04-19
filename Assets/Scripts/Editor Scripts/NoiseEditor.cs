@@ -86,6 +86,7 @@ public class NoiseEditor : Editor
         // Noise Settings
         EditorGUILayout.LabelField("Noise Settings", sectionHeaderStyle);
         EditorGUILayout.Space();
+        terrainDensityData.polygonizationVisualization = GUILayout.Toggle(terrainDensityData.polygonizationVisualization, "Visualize Terrain Generation");
         EditorGUILayout.BeginHorizontal();
         EditorGUILayout.LabelField("Noise Dimensions", GUILayout.Width(230));
         terrainDensityData.selectedNoiseDimension = EditorGUILayout.Popup(terrainDensityData.selectedNoiseDimension, noiseDimensionOptionLabels);
@@ -153,6 +154,9 @@ public class NoiseEditor : Editor
         terrainDensityData.cellularReturnType = cellularReturnTypeOptions[terrainDensityData.selectedCellularReturnType];
         terrainDensityData.cellularJitter = EditorGUILayout.FloatField("Jitter", terrainDensityData.cellularJitter);
         // Water
+        EditorGUILayout.Space();
+        EditorGUILayout.LabelField("Water Settings", sectionHeaderStyle);
+        EditorGUILayout.Space();
         terrainDensityData.waterLevel = EditorGUILayout.IntField("Water Level", terrainDensityData.waterLevel);
 
         if (GUILayout.Button("Reset To Default", GUILayout.Width(230)))

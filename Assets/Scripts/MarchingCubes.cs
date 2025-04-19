@@ -17,6 +17,8 @@ public class MarchingCubes : MonoBehaviour
     public TerrainDensityData terrainDensityData;
     private FastNoiseLite noiseGenerator = new FastNoiseLite();
     private FastNoiseLite domainWarp = new FastNoiseLite();
+    private int cubesProcessed = 0;
+    private int meshUpdateInterval = 10000;
     private int width;
     private int height;
     private float noiseScale;
@@ -43,8 +45,9 @@ public class MarchingCubes : MonoBehaviour
         waterGen.UpdateMesh();
         SetNoiseSetting();
         SetHeights();
-        MarchCubes();
-        SetupMesh();
+        StartCoroutine(MarchCubes());
+        // MarchCubes();
+        // SetupMesh();
     }
 
     /// <summary>
@@ -128,8 +131,6 @@ public class MarchingCubes : MonoBehaviour
                         currentHeight = height * ((noiseGenerator.GetNoise(xWarp, yWarp, zWarp)+1)/2);
                     }
 
-                    // if(currentHeight < 0) currentHeight = 0;
-
                     heights[x,y,z] = y - currentHeight;
                 }
             }
@@ -139,7 +140,7 @@ public class MarchingCubes : MonoBehaviour
     /// <summary>
     /// Marches through every cube in a given chunk
     /// </summary>
-    public void MarchCubes() {
+    public IEnumerator MarchCubes() {
         vertices.Clear();
         triangles.Clear();
 
@@ -153,9 +154,19 @@ public class MarchingCubes : MonoBehaviour
                     }
 
                     MarchCube(new Vector3(x,y,z), cubeVertices);
+                    cubesProcessed++;
+
+                    if(cubesProcessed % meshUpdateInterval == 0 && terrainDensityData.polygonizationVisualization) {
+                        // Update the mesh after each cube
+                        SetupMesh();
+                        
+                        // Wait for a frame or time delay to visualize it
+                        yield return null; // Adjust delay as needed
+                    }
                 }
             }
         }
+        SetupMesh();
     }
 
     /// <summary>
