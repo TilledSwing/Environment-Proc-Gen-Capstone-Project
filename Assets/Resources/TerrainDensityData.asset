@@ -12,29 +12,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e9e94faf7c753248938f3512f96088a, type: 3}
   m_Name: TerrainDensityData
   m_EditorClassIdentifier: 
+  selectedNoiseDimension: 1
   noiseDimension: 1
+  selectedNoiseType: 0
   noiseType: 0
+  selectedNoiseFractalType: 0
   noiseFractalType: 1
-  noiseSeed: 0
+  noiseSeed: 6505
   noiseFractalOctaves: 5
   noiseFractalLacunarity: 2
   noiseFractalGain: 0.5
   fractalWeightedStrength: 0
   noiseFrequency: 0.01
   domainWarpToggle: 0
+  selectedDomainWarpType: 0
   domainWarpType: 0
+  selectedDomainWarpFractalType: 2
   domainWarpFractalType: 0
   domainWarpAmplitude: 1
-  domainWarpSeed: 0
+  domainWarpSeed: 7020
   domainWarpFractalOctaves: 5
   domainWarpFractalLacunarity: 2
   domainWarpFractalGain: 0.5
   domainWarpFrequency: 0.01
+  selectedCellularDistanceFunction: 1
   cellularDistanceFunction: 1
+  selectedCellularReturnType: 1
   cellularReturnType: 1
   cellularJitter: 1
-  width: 200
-  height: 50
+  width: 150
+  height: 80
   noiseScale: 0.6
-  isolevel: 5
+  isolevel: 0.5
+  waterLevel: 35
   lerp: 1

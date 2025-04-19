@@ -43,6 +43,8 @@ Shader "Custom/TerrainTextureShader"
             #pragma vertex vert
             // This line defines the name of the fragment shader.
             #pragma fragment frag
+            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
+            #pragma multi_compile _ _ADDITIONAL_LIGHT_SHADOWS
 
             // The Core.hlsl file contains definitions of frequently used HLSL
             // macros and functions, and also contains #include references to other
@@ -69,7 +71,7 @@ Shader "Custom/TerrainTextureShader"
                 float4 positionHCS : SV_POSITION;
                 float3 worldPos : TEXCOORD0;
                 float3 worldNormal : TEXCOORD1;
-                float4 shadowCoord : TEXCOORD2;
+                float4 shadowCoord : TEXCOORD3;
             };
 
             // The vertex shader definition with properties defined in the Varyings
@@ -193,6 +195,5 @@ Shader "Custom/TerrainTextureShader"
             }
             ENDHLSL
         }
-        UsePass "Universal Render Pipeline/Lit/ShadowCaster"
     }
 }

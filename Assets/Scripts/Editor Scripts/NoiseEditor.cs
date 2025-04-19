@@ -1,4 +1,4 @@
-// #if (UNITY_EDITOR)
+#if (UNITY_EDITOR)
 
 using UnityEditor;
 using UnityEditor.TerrainTools;
@@ -170,4 +170,4 @@ public class NoiseEditor : Editor
     }
 }
 
-// #endif
+#endif
