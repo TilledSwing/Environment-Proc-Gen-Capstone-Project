@@ -87,6 +87,7 @@ public class NoiseEditor : Editor
         EditorGUILayout.LabelField("Noise Settings", sectionHeaderStyle);
         EditorGUILayout.Space();
         terrainDensityData.polygonizationVisualization = GUILayout.Toggle(terrainDensityData.polygonizationVisualization, "Visualize Terrain Generation");
+        terrainDensityData.polygonizationVisualizationRate = EditorGUILayout.IntField("Visualization Speed", terrainDensityData.polygonizationVisualizationRate);
         EditorGUILayout.BeginHorizontal();
         EditorGUILayout.LabelField("Noise Dimensions", GUILayout.Width(230));
         terrainDensityData.selectedNoiseDimension = EditorGUILayout.Popup(terrainDensityData.selectedNoiseDimension, noiseDimensionOptionLabels);

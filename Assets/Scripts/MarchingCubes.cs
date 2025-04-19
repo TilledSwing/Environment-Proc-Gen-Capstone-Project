@@ -18,7 +18,6 @@ public class MarchingCubes : MonoBehaviour
     private FastNoiseLite noiseGenerator = new FastNoiseLite();
     private FastNoiseLite domainWarp = new FastNoiseLite();
     private int cubesProcessed = 0;
-    private int meshUpdateInterval = 10000;
     private int width;
     private int height;
     private float noiseScale;
@@ -156,7 +155,7 @@ public class MarchingCubes : MonoBehaviour
                     MarchCube(new Vector3(x,y,z), cubeVertices);
                     cubesProcessed++;
 
-                    if(cubesProcessed % meshUpdateInterval == 0 && terrainDensityData.polygonizationVisualization) {
+                    if(cubesProcessed % terrainDensityData.polygonizationVisualizationRate == 0 && terrainDensityData.polygonizationVisualization) {
                         // Update the mesh after each cube
                         SetupMesh();
                         
