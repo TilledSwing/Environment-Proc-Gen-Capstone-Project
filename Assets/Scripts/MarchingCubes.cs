@@ -22,7 +22,7 @@ public class MarchingCubes : MonoBehaviour
     private float noiseScale;
     private float isolevel;
     private bool lerp;
-
+    WaterPlaneGenerator waterGen;
     private Vector2 noiseOffset;
     
     void Start()
@@ -30,6 +30,7 @@ public class MarchingCubes : MonoBehaviour
         meshFilter = GetComponent<MeshFilter>();
         meshCollider = GetComponent<MeshCollider>();
         terrainDensityData = Resources.Load<TerrainDensityData>("TerrainDensityData");
+        waterGen = gameObject.GetComponentInChildren<WaterPlaneGenerator>();
         terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 10000);
         terrainDensityData.domainWarpSeed = UnityEngine.Random.Range(0, 10000);
         UpdateMesh();
@@ -39,6 +40,7 @@ public class MarchingCubes : MonoBehaviour
     /// Updates the terrain mesh
     /// </summary>
     public void UpdateMesh() {
+        waterGen.UpdateMesh();
         SetNoiseSetting();
         SetHeights();
         MarchCubes();

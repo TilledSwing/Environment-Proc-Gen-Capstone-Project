@@ -1,4 +1,4 @@
-#if (UNITY_EDITOR)
+// #if (UNITY_EDITOR)
 
 using UnityEditor;
 using UnityEditor.TerrainTools;
@@ -152,6 +152,8 @@ public class NoiseEditor : Editor
         EditorGUILayout.EndHorizontal();
         terrainDensityData.cellularReturnType = cellularReturnTypeOptions[terrainDensityData.selectedCellularReturnType];
         terrainDensityData.cellularJitter = EditorGUILayout.FloatField("Jitter", terrainDensityData.cellularJitter);
+        // Water
+        terrainDensityData.waterLevel = EditorGUILayout.IntField("Water Level", terrainDensityData.waterLevel);
 
         if (GUILayout.Button("Reset To Default", GUILayout.Width(230)))
         {
@@ -168,4 +170,4 @@ public class NoiseEditor : Editor
     }
 }
 
-#endif
+// #endif

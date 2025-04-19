@@ -43,6 +43,7 @@ public class TerrainDensityData : ScriptableObject
     public int height = 80;
     public float noiseScale = 0.6f;
     public float isolevel = 0.5f;
+    public int waterLevel = 10;
     public bool lerp = true;
 
 
@@ -77,6 +78,7 @@ public class TerrainDensityData : ScriptableObject
     private int defaultHeight = 80;
     private float defaultNoiseScale = 0.6f;
     private float defaultIsolevel = 0.5f;
+    private int defaultWaterLevel = 10;
     private bool defaultLerp = true;
 
     public void ResetToDefault() {
@@ -109,6 +111,7 @@ public class TerrainDensityData : ScriptableObject
         height = defaultHeight;
         noiseScale = defaultNoiseScale;
         isolevel = defaultIsolevel;
+        waterLevel = defaultWaterLevel;
         lerp = defaultLerp;
     }
 }
