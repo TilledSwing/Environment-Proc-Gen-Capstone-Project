@@ -30,7 +30,7 @@
             JOIN FractalSettings ON NoiseSettings.TerrainId = FractalSettings.TerrainId 
             WHERE NoiseSettings.TerrainId = ?
         ");
-            $retreiveTerrainNames->bind_param("s", $terrainId);
+            $retreiveTerrainNames->bind_param("i", $terrainId);
             $retreiveTerrainNames->execute();
             $terrainNames = $retreiveTerrainNames->get_result();
 
@@ -41,8 +41,8 @@
             while ($row = $terrainNames->fetch_assoc()) {
                 $response["data"][] = [
                     //Noise Settings
-                    "NoiseDimensions" = $row["NoiseDimensions"],
-                    "NoiseTypes" = $row['NoiseTypes']
+                    "NoiseDimensions" => $row["NoiseDimensions"],
+                    "NoiseTypes" => $row['NoiseTypes'],
                     "Seed" => (int)$row["Seed"],
                     "Width" => (int)$row["Width"],
                     "Height" => (int)$row["Height"],
@@ -74,7 +74,7 @@
            
             $conn->commit();
             $response['success'] = true;
-            $response['message'] = "Successfully added user";
+            $response['message'] = "Successfully Retreived Terrain Data";
             
         } catch(Exception $e){
             $conn->rollback();

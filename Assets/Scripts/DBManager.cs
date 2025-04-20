@@ -8,7 +8,7 @@ using Unity.VisualScripting;
 /// </summary>
 public class DBManager : MonoBehaviour
 {
-    private int loadedTerrainId = 0;
+    private int loadedTerrainId = 4;
     public bool IsTerrainLoaded = false;
     /// <summary>
     /// Starts the DB process to determine if a user is registered or not
@@ -39,7 +39,7 @@ public class DBManager : MonoBehaviour
     /// </summary>
     public void saveTerrainData(){
         MarchingCubes mc = GameObject.FindFirstObjectByType<MarchingCubes>();
-        StartCoroutine(SaveTerrainData(mc.terrainDensityData));
+        StartCoroutine(SaveTerrainData(mc.terrainDensityData, "Testing"));
     }
 
      /// <summary>
@@ -50,7 +50,7 @@ public class DBManager : MonoBehaviour
     /// <param name="steamName"></param>
     /// <returns></returns>
      
-     IEnumerator SaveTerrainData(TerrainDensityData terrainDensityData, string terrainName = "CreateNewTerrainInsertTest") //int seed, int width, int height, float noiseScale, float isolevel, bool lerp
+     IEnumerator SaveTerrainData(TerrainDensityData terrainDensityData, string terrainName) //int seed, int width, int height, float noiseScale, float isolevel, bool lerp
     {
          //Set up connection
         string url = "http://localhost/sqlconnect/saveTerrain.php";
@@ -220,7 +220,9 @@ public class DBManager : MonoBehaviour
                         // Process your data here
                         foreach (var item in response.data)
                         {
-                            Debug.Log($"Seed: {item.Seed}, Width: {item.Width}, Height: {item.Height}, NoiseScale: {item.NoiseScale}, IsoLevel: {item.IsoLevel}, Lerp: {item.Lerp}");
+                            Debug.Log($"Noise Settings: NoiseDimensions = {item.NoiseDimensions}, NoiseTypes = {item.NoiseTypes}, $Seed = {item.Seed}," + 
+                                                                            $" $Width = {item.Width}, $Height = {item.Height}, $NoiseScale = {item.NoiseScale}," +
+                                                                            $" $IsoLevel = {item.IsoLevel}, $Lerp = {item.Lerp}, $NoiseFrequency = {item.NoiseFrequency}");
                         }
                     }
                     else
