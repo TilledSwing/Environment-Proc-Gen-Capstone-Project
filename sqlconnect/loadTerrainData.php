@@ -48,7 +48,8 @@
                     "Height" => (int)$row["Height"],
                     "NoiseScale" => (float)$row["NoiseScale"],
                     "IsoLevel" => (float)$row["IsoLevel"],
-                    "Lerp" => (bool)$row["Lerp"]
+                    "Lerp" => (bool)$row["Lerp"],
+                    "NoiseFrequency" => (float)$row["NoiseFrequency"],
 
                     // DomainWarpSettings fields
                     "WarpType" => $row["WarpType"], 
@@ -83,9 +84,6 @@
     } catch (Exception $e){
         $response['message'] = "Error: " . $e->getMessage();
     } finally {
-        if (isset($stmt)) {
-            $stmt->close();
-        }
         if (isset($conn)){
             $conn->close();
         }

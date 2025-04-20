@@ -2,12 +2,14 @@ using UnityEngine;
 using System;
 using System.Collections;
 using UnityEngine.Networking;
+using Unity.VisualScripting;
 /// <summary>
 /// This class will act as a manager script that will facilitate all DB operations
 /// </summary>
 public class DBManager : MonoBehaviour
 {
-    private int loadedTerrainId = 1;
+    private int loadedTerrainId = 0;
+    public bool IsTerrainLoaded = false;
     /// <summary>
     /// Starts the DB process to determine if a user is registered or not
     /// </summary>
@@ -31,6 +33,77 @@ public class DBManager : MonoBehaviour
         StartCoroutine(LoadTerrainData());
     }
 
+
+    /// <summary>
+    /// This starts the DB save of current terrain data
+    /// </summary>
+    public void saveTerrainData(){
+        MarchingCubes mc = GameObject.FindFirstObjectByType<MarchingCubes>();
+        StartCoroutine(SaveTerrainData(mc.terrainDensityData));
+    }
+
+     /// <summary>
+    /// On Startup this method will call a php script that checks if the user exists in out system. If they do not we will add them into the 
+    /// db to facilitate the loading and storing of terrains.
+    /// </summary>
+    /// <param name="steamId"></param>
+    /// <param name="steamName"></param>
+    /// <returns></returns>
+     
+     IEnumerator SaveTerrainData(TerrainDensityData terrainDensityData, string terrainName = "CreateNewTerrainInsertTest") //int seed, int width, int height, float noiseScale, float isolevel, bool lerp
+    {
+         //Set up connection
+        string url = "http://localhost/sqlconnect/saveTerrain.php";
+        WWWForm form = new();
+
+        //Noise Settings
+        form.AddField("NoiseDimensions", terrainDensityData.noiseDimension.ToString());
+        form.AddField("NoiseTypes", terrainDensityData.noiseType.ToString());
+        form.AddField("Seed", terrainDensityData.noiseSeed.ToString());
+        form.AddField("Width", terrainDensityData.width.ToString());
+        form.AddField("Height", terrainDensityData.height.ToString());
+        form.AddField("NoiseScale", terrainDensityData.noiseScale.ToString());
+        form.AddField("IsoLevel", terrainDensityData.isolevel.ToString());
+        form.AddField("Lerp", terrainDensityData.lerp.ToString());
+        form.AddField("NoiseFrequency", terrainDensityData.noiseFrequency.ToString());
+
+        //Warp Settings 
+        form.AddField("WarpType", terrainDensityData.domainWarpType.ToString());
+        form.AddField("WarpFractalTypes", terrainDensityData.domainWarpFractalType.ToString());
+        form.AddField("WarpAmplitude", terrainDensityData.domainWarpAmplitude.ToString());
+        form.AddField("WarpSeed", terrainDensityData.domainWarpSeed.ToString());
+        form.AddField("WarpFrequency", terrainDensityData.domainWarpFrequency.ToString());
+        form.AddField("WarpFractalOctaves", terrainDensityData.domainWarpFractalOctaves.ToString());
+        form.AddField("WarpFractalLacunarity", terrainDensityData.domainWarpFractalLacunarity.ToString());
+        form.AddField("WarpFractalGain", terrainDensityData.domainWarpFractalGain.ToString());
+        form.AddField("DomainWarp", terrainDensityData.domainWarpToggle.ToString());
+
+        //Fractal settings 
+        form.AddField("FractalTypes", terrainDensityData.noiseFractalType.ToString());
+        form.AddField("FractalOctaves", terrainDensityData.noiseFractalOctaves.ToString());
+        form.AddField("FractalLacunarity", terrainDensityData.noiseFractalLacunarity.ToString());
+        form.AddField("FractalGain", terrainDensityData.noiseFractalGain.ToString());
+        form.AddField("FractalWeightedStrength", terrainDensityData.fractalWeightedStrength.ToString());
+        form.AddField("SteamId", SteamValidation.steamID.ToString());
+
+        form.AddField("TerrainName", terrainName);
+
+        //Send web request
+        using (UnityWebRequest request = UnityWebRequest.Post(url, form))
+        {
+            // Set timeout at 10 seconds
+            request.timeout = 10;
+            
+            yield return request.SendWebRequest();
+
+            //Log the results. This can be deleted later
+            if (request.result == UnityWebRequest.Result.Success)
+                Debug.Log("Raw Response: " + request.downloadHandler.text);
+            else
+                Debug.Log("request failed: " + request.error + " response code: " + request.responseCode);
+        }
+    }
+
     /// <summary>
     /// On Startup this method will call a php script that checks if the user exists in out system. If they do not we will add them into the 
     /// db to facilitate the loading and storing of terrains.
@@ -38,6 +111,7 @@ public class DBManager : MonoBehaviour
     /// <param name="steamId"></param>
     /// <param name="steamName"></param>
     /// <returns></returns>
+     
      IEnumerator VerifyRegisteredUser(ulong steamId, string steamName) //int seed, int width, int height, float noiseScale, float isolevel, bool lerp
     {
          //Set up connection
@@ -220,6 +294,7 @@ public class DBManager : MonoBehaviour
         public float NoiseScale;
         public float IsoLevel;
         public bool Lerp;
+        public float NoiseFrequency;
         
         // DomainWarpSettings 
         public string WarpType; 
@@ -236,7 +311,7 @@ public class DBManager : MonoBehaviour
         public string FractalTypes;
         public int FractalOctaves;
         public float FractalLacunarity;
-        public float FractalGain
+        public float FractalGain;
         public float FractalWeightedStrength;
     }
 }

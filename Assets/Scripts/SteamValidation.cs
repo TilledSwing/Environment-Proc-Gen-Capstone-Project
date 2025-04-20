@@ -6,7 +6,7 @@ using System.Collections;
 using Steamworks;
 using UnityEngine;
 
-public class SteamValidation
+public class SteamValidation : MonoBehaviour
 {
     //Variables that will hold the users Steam Name and Steam ID
     public static ulong steamID{ get; private set;}
