@@ -157,6 +157,8 @@ namespace FishNet.Example
                 OnClick_Server();
             if (!Application.isBatchMode && (_autoStartType == AutoStartType.Host || _autoStartType == AutoStartType.Client))
                 OnClick_Client();
+
+            gameObject.SetActive(false);
         }
 
 
