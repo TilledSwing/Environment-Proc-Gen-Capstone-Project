@@ -105,6 +105,8 @@ public class NoiseEditor : Editor
         terrainDensityData.noiseScale = EditorGUILayout.FloatField("Noise Scale", terrainDensityData.noiseScale);
         terrainDensityData.isolevel = EditorGUILayout.FloatField("Isolevel", terrainDensityData.isolevel);
         terrainDensityData.lerp = GUILayout.Toggle(terrainDensityData.lerp, "Lerp");
+        terrainDensityData.terracing = GUILayout.Toggle(terrainDensityData.terracing, "Terracing");
+        terrainDensityData.terraceHeight = EditorGUILayout.IntField("Terrace Height", terrainDensityData.terraceHeight);
         // Domain Warp Settings
         EditorGUILayout.Space();
         EditorGUILayout.LabelField("Domain Warp Settings", sectionHeaderStyle);

@@ -43,8 +43,10 @@ public class TerrainDensityData : ScriptableObject
     public int height = 80;
     public float noiseScale = 0.6f;
     public float isolevel = 0.5f;
-    public int waterLevel = 10;
+    public int waterLevel = 30;
     public bool lerp = true;
+    public bool terracing = false;
+    public int terraceHeight = 2;
     public bool polygonizationVisualization = false;
     public int polygonizationVisualizationRate = 30000;
 
@@ -80,8 +82,10 @@ public class TerrainDensityData : ScriptableObject
     private int defaultHeight = 80;
     private float defaultNoiseScale = 0.6f;
     private float defaultIsolevel = 0.5f;
-    private int defaultWaterLevel = 10;
+    private int defaultWaterLevel = 30;
     private bool defaultLerp = true;
+    public bool defaultTerracing = false;
+    public int defaultTerraceHeight = 2;
     public bool defaultPolygonizationVisualization = false;
     public int defaultPolygonizationVisualizationRate = 30000;
 
@@ -117,6 +121,8 @@ public class TerrainDensityData : ScriptableObject
         isolevel = defaultIsolevel;
         waterLevel = defaultWaterLevel;
         lerp = defaultLerp;
+        terracing = defaultTerracing;
+        terraceHeight = defaultTerraceHeight;
         polygonizationVisualization = defaultPolygonizationVisualization;
     }
 }

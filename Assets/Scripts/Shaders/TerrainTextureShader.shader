@@ -110,7 +110,9 @@ Shader "Custom/TerrainTextureShader"
                 OUT.worldNormal = TransformObjectToWorldNormal(IN.normalOS);
 
                 VertexPositionInputs vertexInput = GetVertexPositionInputs(IN.positionOS.xyz);
+                #if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
                 OUT.shadowCoord = GetShadowCoord(vertexInput);
+                #endif
 
                 return OUT;
             }
@@ -172,6 +174,13 @@ Shader "Custom/TerrainTextureShader"
 
                 // Get main directional light info
                 Light mainLight = GetMainLight();
+                #if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
+                IN.shadowCoord = IN.shadowCoord;
+                #elif defined(MAIN_LIGHT_CALCULATE_SHADOWS)
+                IN.shadowCoord = TransformWorldToShadowCoord(IN.worldPos);
+                #else
+                IN.shadowCoord = float4(0, 0, 0, 0);
+                #endif
                 float shadowAttenuation = MainLightRealtimeShadow(IN.shadowCoord);
 
                 // Calculate diffuse lighting
@@ -195,5 +204,6 @@ Shader "Custom/TerrainTextureShader"
             }
             ENDHLSL
         }
+        UsePass "Universal Render Pipeline/Lit/ShadowCaster"
     }
 }

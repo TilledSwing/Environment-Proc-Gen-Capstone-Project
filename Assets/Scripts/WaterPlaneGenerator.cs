@@ -10,15 +10,17 @@ public class WaterPlaneGenerator : MonoBehaviour
     private List<Vector3> vertices = new List<Vector3>();
     private List<int> triangles = new List<int>();
     private MeshFilter meshFilter;
+    private MarchingCubes marchingCubes;
     public TerrainDensityData terrainDensityData;
     private int width;
     private int waterLevel;
+    // private float[,] density2D;
 
     void Start()
     {
         meshFilter = GetComponent<MeshFilter>();
+        marchingCubes = gameObject.GetComponentInParent<MarchingCubes>();
         terrainDensityData = Resources.Load<TerrainDensityData>("TerrainDensityData");
-        UpdateMesh();
     }
 
     public void UpdateMesh() {
@@ -41,6 +43,17 @@ public class WaterPlaneGenerator : MonoBehaviour
         meshFilter.mesh = mesh;
     }
 
+    // private void CalculateDensity() {
+    //     density2D = new float[width + 1, width + 1];
+    //     for (int x = 0; x <= width; x++) {
+    //         for (int z = 0; z <= width; z++) {
+    //             UnityEngine.Debug.Log(marchingCubes.heights[x, waterLevel, z]);
+    //             density2D[x, z] = marchingCubes.heights[x, waterLevel, z];
+    //         }
+    //     }
+    // }
+
+
     private void GenerateWaterPlane() {
         vertices.Clear();
         triangles.Clear();
@@ -52,6 +65,7 @@ public class WaterPlaneGenerator : MonoBehaviour
                 Vector3 vertex01 = new Vector3(x, waterLevel, z+1);
                 Vector3 vertex11 = new Vector3(x+1, waterLevel, z+1);
                 int vertCount = vertices.Count;
+                
                 vertices.Add(vertex00);
                 vertices.Add(vertex10);
                 vertices.Add(vertex01);
