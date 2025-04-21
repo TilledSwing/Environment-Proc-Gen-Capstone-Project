@@ -9,20 +9,23 @@ using Unity.VisualScripting;
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider))]
 public class MarchingCubes : MonoBehaviour
 {
-    private float[,,] heights;
+    public float[,,] heights;
     private List<Vector3> vertices = new List<Vector3>();
     private List<int> triangles = new List<int>();
+    private List<Vector3> normals = new List<Vector3>();
     private MeshFilter meshFilter;
     private MeshCollider meshCollider;
     public TerrainDensityData terrainDensityData;
     private FastNoiseLite noiseGenerator = new FastNoiseLite();
     private FastNoiseLite domainWarp = new FastNoiseLite();
+    private int cubesProcessed = 0;
     private int width;
     private int height;
     private float noiseScale;
     private float isolevel;
     private bool lerp;
-
+    WaterPlaneGenerator waterGen;
+    private AssetSpawner assetSpawner;
     private Vector2 noiseOffset;
     
     void Start()
@@ -37,6 +40,11 @@ public class MarchingCubes : MonoBehaviour
     /// </summary>
     public void GenerateTerrianData() {
         terrainDensityData = Resources.Load<TerrainDensityData>("TerrainDensityData");
+        waterGen = gameObject.GetComponentInChildren<WaterPlaneGenerator>();
+        assetSpawner = gameObject.GetComponent<AssetSpawner>();
+        Material mat = GetComponent<Renderer>().material;
+        mat.SetFloat("_UnderwaterTexHeightEnd", terrainDensityData.waterLevel-15f);
+        mat.SetFloat("_Tex1HeightStart", terrainDensityData.waterLevel-18f);
         terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 10000);
         terrainDensityData.domainWarpSeed = UnityEngine.Random.Range(0, 10000);
         UpdateMesh();
@@ -48,8 +56,14 @@ public class MarchingCubes : MonoBehaviour
     public void UpdateMesh() {
         SetNoiseSetting();
         SetHeights();
-        MarchCubes();
-        SetupMesh();
+        waterGen.UpdateMesh();
+        StartCoroutine(MarchCubes());
+        assetSpawner.ClearAssets();
+        if(!terrainDensityData.polygonizationVisualization) {
+            assetSpawner.SpawnAssets();
+        }
+        // MarchCubes();
+        // SetupMesh();
     }
 
     /// <summary>
@@ -127,13 +141,11 @@ public class MarchingCubes : MonoBehaviour
                         }
                     }
                     if(terrainDensityData.noiseDimension == TerrainDensityData.NoiseDimension._2D) {
-                        currentHeight = height * ((noiseGenerator.GetNoise(xWarp, zWarp)+1)/2);
+                        currentHeight = height * ((noiseGenerator.GetNoise(xWarp, zWarp)+1)/2) + (terrainDensityData.terracing ? (y%terrainDensityData.terraceHeight) : 0);
                     }
                     else {
-                        currentHeight = height * ((noiseGenerator.GetNoise(xWarp, yWarp, zWarp)+1)/2);
+                        currentHeight = height * ((noiseGenerator.GetNoise(xWarp, yWarp, zWarp)+1)/2) + (terrainDensityData.terracing ? (y%terrainDensityData.terraceHeight) : 0);
                     }
-
-                    // if(currentHeight < 0) currentHeight = 0;
 
                     heights[x,y,z] = y - currentHeight;
                 }
@@ -144,7 +156,7 @@ public class MarchingCubes : MonoBehaviour
     /// <summary>
     /// Marches through every cube in a given chunk
     /// </summary>
-    public void MarchCubes() {
+    public IEnumerator MarchCubes() {
         vertices.Clear();
         triangles.Clear();
 
@@ -158,9 +170,20 @@ public class MarchingCubes : MonoBehaviour
                     }
 
                     MarchCube(new Vector3(x,y,z), cubeVertices);
+                    cubesProcessed++;
+
+                    if(cubesProcessed % terrainDensityData.polygonizationVisualizationRate == 0 && terrainDensityData.polygonizationVisualization) {
+                        // Update the mesh after each cube
+                        SetupMesh();
+                        
+                        // Wait for a frame or time delay to visualize it
+                        yield return null; // Adjust delay as needed
+                    }
                 }
             }
         }
+        SetupMesh();
+        assetSpawner.SpawnAssets();
     }
 
     /// <summary>
@@ -199,6 +222,9 @@ public class MarchingCubes : MonoBehaviour
 
                 vertices.Add(vertex);
                 triangles.Add(vertices.Count - 1);
+
+                Vector3 faceNormal = Vector3.Cross(edgeV2 - vertex, edgeV1 - vertex).normalized;
+                normals.Add(faceNormal);
 
                 edgeIndex++;
             }

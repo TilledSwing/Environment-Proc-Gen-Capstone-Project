@@ -9,7 +9,7 @@ public class MarchingCubesTables : MonoBehaviour
         float3 vertC;
     }
 
-    public static Vector3Int[] vertexOffsetTable = new Vector3Int[8]{
+    public static readonly Vector3Int[] vertexOffsetTable = new Vector3Int[8]{
         new Vector3Int(0, 0, 0),
 		new Vector3Int(1, 0, 0),
 		new Vector3Int(1, 1, 0),
@@ -20,13 +20,13 @@ public class MarchingCubesTables : MonoBehaviour
 		new Vector3Int(0, 1, 1)
     };
 
-    public static int[,] edgeIndexTable = new int[12, 2] {
+    public static readonly int[,] edgeIndexTable = new int[12, 2] {
 
         {0, 1}, {1, 2}, {3, 2}, {0, 3}, {4, 5}, {5, 6}, {7, 6}, {4, 7}, {0, 4}, {1, 5}, {2, 6}, {3, 7}
 
     };
 
-    public static int[,] triangleTable = new int[,]
+    public static readonly int[,] triangleTable = new int[,]
     {
         {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
         {0, 8, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},

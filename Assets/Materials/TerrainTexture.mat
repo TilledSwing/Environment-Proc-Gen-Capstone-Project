@@ -53,7 +53,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: aed09ca1eca3daf4bbf71465933fada1, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -73,15 +73,27 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Texture1:
-        m_Texture: {fileID: 2800000, guid: aed09ca1eca3daf4bbf71465933fada1, type: 3}
+        m_Texture: {fileID: 2800000, guid: 36bd7599ee9a4154d8974465a9fbf527, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Texture2:
-        m_Texture: {fileID: 2800000, guid: c4ed3f814a2097a4d8b7b45375297930, type: 3}
+        m_Texture: {fileID: 2800000, guid: e6387bc135e2c154f98c6db07942f4c4, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Texture3:
-        m_Texture: {fileID: 2800000, guid: 24a3a457b2d0e364c8eb25f783b0f20f, type: 3}
+        m_Texture: {fileID: 2800000, guid: 37bdf190e8f22514cbfb200ad7d7659a, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Texture4:
+        m_Texture: {fileID: 2800000, guid: 6c70b02d0da087e469660d504ddadb91, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Underwater:
+        m_Texture: {fileID: 2800000, guid: ac9569eb787e1af4ca584d15a29060d3, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _UnderwaterTexture:
+        m_Texture: {fileID: 2800000, guid: ac9569eb787e1af4ca584d15a29060d3, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
@@ -129,23 +141,29 @@ Material:
     - _SrcBlend: 1
     - _SrcBlendAlpha: 1
     - _Surface: 0
-    - _Tex1HeightEnd: 40
+    - _Tex1HeightEnd: 50
     - _Tex1HeightStart: 0
     - _Tex1SlopeEnd: 0.3
     - _Tex1SlopeStart: 0
-    - _Tex2HeightEnd: 50
-    - _Tex2HeightStart: 35
+    - _Tex2HeightEnd: 55
+    - _Tex2HeightStart: 45
     - _Tex2SlopeEnd: 0.8
     - _Tex2SlopeStart: 0.3
-    - _Tex3HeightEnd: 80
-    - _Tex3HeightStart: 45
+    - _Tex3HeightEnd: 65
+    - _Tex3HeightStart: 50
     - _Tex3SlopeEnd: 1
     - _Tex3SlopeStart: 0.8
+    - _Tex4HeightEnd: 80
+    - _Tex4HeightStart: 60
+    - _Tex4SlopeEnd: 1
+    - _Tex4SlopeStart: 0.8
+    - _UnderwaterTexHeightEnd: 0
+    - _UnderwaterTexHeightStart: 0
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 0.35686272, g: 0.5531489, b: 0.98039216, a: 1}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0.3568627, g: 0.55314887, b: 0.98039216, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []

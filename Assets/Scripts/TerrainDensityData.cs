@@ -43,12 +43,17 @@ public class TerrainDensityData : ScriptableObject
     public int height = 80;
     public float noiseScale = 0.6f;
     public float isolevel = 0.5f;
+    public int waterLevel = 30;
     public bool lerp = true;
+    public bool terracing = false;
+    public int terraceHeight = 2;
+    public bool polygonizationVisualization = false;
+    public int polygonizationVisualizationRate = 30000;
 
 
 
     // Default Values
-        // Noise and Fractal Settings
+    // Noise and Fractal Settings
     private NoiseDimension defaultNoiseDimension = NoiseDimension._3D;
     private FastNoiseLite.NoiseType defaultNoiseType = FastNoiseLite.NoiseType.OpenSimplex2;
     private FastNoiseLite.FractalType defaultNoiseFractalType = FastNoiseLite.FractalType.FBm;
@@ -77,7 +82,12 @@ public class TerrainDensityData : ScriptableObject
     private int defaultHeight = 80;
     private float defaultNoiseScale = 0.6f;
     private float defaultIsolevel = 0.5f;
+    private int defaultWaterLevel = 30;
     private bool defaultLerp = true;
+    public bool defaultTerracing = false;
+    public int defaultTerraceHeight = 2;
+    public bool defaultPolygonizationVisualization = false;
+    public int defaultPolygonizationVisualizationRate = 30000;
 
     public void ResetToDefault() {
         // Noise and Fractal Settings
@@ -109,6 +119,10 @@ public class TerrainDensityData : ScriptableObject
         height = defaultHeight;
         noiseScale = defaultNoiseScale;
         isolevel = defaultIsolevel;
+        waterLevel = defaultWaterLevel;
         lerp = defaultLerp;
+        terracing = defaultTerracing;
+        terraceHeight = defaultTerraceHeight;
+        polygonizationVisualization = defaultPolygonizationVisualization;
     }
 }

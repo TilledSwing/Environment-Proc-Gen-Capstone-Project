@@ -86,6 +86,8 @@ public class NoiseEditor : Editor
         // Noise Settings
         EditorGUILayout.LabelField("Noise Settings", sectionHeaderStyle);
         EditorGUILayout.Space();
+        terrainDensityData.polygonizationVisualization = GUILayout.Toggle(terrainDensityData.polygonizationVisualization, "Visualize Terrain Generation");
+        terrainDensityData.polygonizationVisualizationRate = EditorGUILayout.IntField("Visualization Speed", terrainDensityData.polygonizationVisualizationRate);
         EditorGUILayout.BeginHorizontal();
         EditorGUILayout.LabelField("Noise Dimensions", GUILayout.Width(230));
         terrainDensityData.selectedNoiseDimension = EditorGUILayout.Popup(terrainDensityData.selectedNoiseDimension, noiseDimensionOptionLabels);
@@ -103,6 +105,8 @@ public class NoiseEditor : Editor
         terrainDensityData.noiseScale = EditorGUILayout.FloatField("Noise Scale", terrainDensityData.noiseScale);
         terrainDensityData.isolevel = EditorGUILayout.FloatField("Isolevel", terrainDensityData.isolevel);
         terrainDensityData.lerp = GUILayout.Toggle(terrainDensityData.lerp, "Lerp");
+        terrainDensityData.terracing = GUILayout.Toggle(terrainDensityData.terracing, "Terracing");
+        terrainDensityData.terraceHeight = EditorGUILayout.IntField("Terrace Height", terrainDensityData.terraceHeight);
         // Domain Warp Settings
         EditorGUILayout.Space();
         EditorGUILayout.LabelField("Domain Warp Settings", sectionHeaderStyle);
@@ -152,6 +156,11 @@ public class NoiseEditor : Editor
         EditorGUILayout.EndHorizontal();
         terrainDensityData.cellularReturnType = cellularReturnTypeOptions[terrainDensityData.selectedCellularReturnType];
         terrainDensityData.cellularJitter = EditorGUILayout.FloatField("Jitter", terrainDensityData.cellularJitter);
+        // Water
+        EditorGUILayout.Space();
+        EditorGUILayout.LabelField("Water Settings", sectionHeaderStyle);
+        EditorGUILayout.Space();
+        terrainDensityData.waterLevel = EditorGUILayout.IntField("Water Level", terrainDensityData.waterLevel);
 
         if (GUILayout.Button("Reset To Default", GUILayout.Width(230)))
         {
