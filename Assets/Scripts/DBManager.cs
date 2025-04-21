@@ -216,14 +216,47 @@ public class DBManager : MonoBehaviour
                     // Parse the JSON response
                     PHPTerrainDataResponse response = JsonUtility.FromJson<PHPTerrainDataResponse>(request.downloadHandler.text);
                     if (response.success)
-                    {                        
-                        // Process your data here
-                        foreach (var item in response.data)
-                        {
-                            Debug.Log($"Noise Settings: NoiseDimensions = {item.NoiseDimensions}, NoiseTypes = {item.NoiseTypes}, $Seed = {item.Seed}," + 
-                                                                            $" $Width = {item.Width}, $Height = {item.Height}, $NoiseScale = {item.NoiseScale}," +
-                                                                            $" $IsoLevel = {item.IsoLevel}, $Lerp = {item.Lerp}, $NoiseFrequency = {item.NoiseFrequency}");
-                        }
+                    {    
+                        TerrainData data = response.data[0];
+                        MarchingCubes mc = GameObject.FindFirstObjectByType<MarchingCubes>(); 
+
+                        //Set noise settings
+                        FastNoiseLite.NoiseType noiseType = (FastNoiseLite.NoiseType)Enum.Parse(typeof(FastNoiseLite.NoiseType), data.NoiseTypes.Replace(" ", "")); 
+                        mc.terrainDensityData.noiseType = noiseType;
+                        TerrainDensityData.NoiseDimension dimension = (TerrainDensityData.NoiseDimension)Enum.Parse(typeof(TerrainDensityData.NoiseDimension), data.NoiseDimensions.Replace(" ", ""));
+                        mc.terrainDensityData.noiseDimension = dimension;
+                        mc.terrainDensityData.noiseSeed = data.Seed;
+                        mc.terrainDensityData.width = data.Width;
+                        mc.terrainDensityData.height = data.Height;
+                        mc.terrainDensityData.noiseScale = data.NoiseScale;
+                        mc.terrainDensityData.isolevel = data.IsoLevel;
+                        mc.terrainDensityData.lerp = data.Lerp;
+                        mc.terrainDensityData.noiseFrequency = data.NoiseFrequency;
+
+                        //Domain warp settings
+                        FastNoiseLite.DomainWarpType domainWarp = (FastNoiseLite.DomainWarpType)Enum.Parse(typeof(FastNoiseLite.DomainWarpType), data.WarpType); 
+                        mc.terrainDensityData.domainWarpType = domainWarp;
+                        FastNoiseLite.FractalType WarpfractalType = (FastNoiseLite.FractalType)Enum.Parse(typeof(FastNoiseLite.FractalType), data.WarpFractalTypes.Replace(" ", "")); 
+                        mc.terrainDensityData.domainWarpFractalType = WarpfractalType;
+                        mc.terrainDensityData.domainWarpAmplitude = data.WarpAmplitude;
+                        mc.terrainDensityData.domainWarpSeed = data.WarpSeed;
+                        mc.terrainDensityData.domainWarpFrequency = data.WarpFrequency;
+                        mc.terrainDensityData.domainWarpFractalOctaves = data.WarpFractalOctaves;
+                        mc.terrainDensityData.domainWarpFractalLacunarity = data.WarpFractalLacunarity;
+                        mc.terrainDensityData.domainWarpFractalGain = data.WarpFractalGain;
+                        mc.terrainDensityData.domainWarpToggle = data.DomainWarp;
+
+                        //Fractal Settings
+                        FastNoiseLite.FractalType fractalType = (FastNoiseLite.FractalType)Enum.Parse(typeof(FastNoiseLite.FractalType), data.WarpFractalTypes.Replace(" ", "")); 
+                        mc.terrainDensityData.noiseFractalType = fractalType;
+                        mc.terrainDensityData.noiseFractalOctaves = data.FractalOctaves;
+                        mc.terrainDensityData.noiseFractalLacunarity = data.FractalLacunarity;
+                        mc.terrainDensityData.noiseFractalGain = data.FractalGain;
+                        mc.terrainDensityData.fractalWeightedStrength = data.FractalWeightedStrength;
+
+                        //Update mesh with new values
+                        mc.UpdateMesh();
+                      
                     }
                     else
                     {
