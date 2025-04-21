@@ -2,12 +2,14 @@ using UnityEngine;
 using System;
 using System.Collections;
 using UnityEngine.Networking;
+using Unity.VisualScripting;
 /// <summary>
 /// This class will act as a manager script that will facilitate all DB operations
 /// </summary>
 public class DBManager : MonoBehaviour
 {
-    private int loadedTerrainId = 1;
+    private int loadedTerrainId = 4;
+    public bool IsTerrainLoaded = false;
     /// <summary>
     /// Starts the DB process to determine if a user is registered or not
     /// </summary>
@@ -34,6 +36,77 @@ public class DBManager : MonoBehaviour
         StartCoroutine(LoadTerrainData());
     }
 
+
+    /// <summary>
+    /// This starts the DB save of current terrain data
+    /// </summary>
+    public void saveTerrainData(){
+        MarchingCubes mc = GameObject.FindFirstObjectByType<MarchingCubes>();
+        StartCoroutine(SaveTerrainData(mc.terrainDensityData, "Testing"));
+    }
+
+     /// <summary>
+    /// On Startup this method will call a php script that checks if the user exists in out system. If they do not we will add them into the 
+    /// db to facilitate the loading and storing of terrains.
+    /// </summary>
+    /// <param name="steamId"></param>
+    /// <param name="steamName"></param>
+    /// <returns></returns>
+     
+     IEnumerator SaveTerrainData(TerrainDensityData terrainDensityData, string terrainName) //int seed, int width, int height, float noiseScale, float isolevel, bool lerp
+    {
+         //Set up connection
+        string url = "http://localhost/sqlconnect/saveTerrain.php";
+        WWWForm form = new();
+
+        //Noise Settings
+        form.AddField("NoiseDimensions", terrainDensityData.noiseDimension.ToString());
+        form.AddField("NoiseTypes", terrainDensityData.noiseType.ToString());
+        form.AddField("Seed", terrainDensityData.noiseSeed.ToString());
+        form.AddField("Width", terrainDensityData.width.ToString());
+        form.AddField("Height", terrainDensityData.height.ToString());
+        form.AddField("NoiseScale", terrainDensityData.noiseScale.ToString());
+        form.AddField("IsoLevel", terrainDensityData.isolevel.ToString());
+        form.AddField("Lerp", terrainDensityData.lerp.ToString());
+        form.AddField("NoiseFrequency", terrainDensityData.noiseFrequency.ToString());
+
+        //Warp Settings 
+        form.AddField("WarpType", terrainDensityData.domainWarpType.ToString());
+        form.AddField("WarpFractalTypes", terrainDensityData.domainWarpFractalType.ToString());
+        form.AddField("WarpAmplitude", terrainDensityData.domainWarpAmplitude.ToString());
+        form.AddField("WarpSeed", terrainDensityData.domainWarpSeed.ToString());
+        form.AddField("WarpFrequency", terrainDensityData.domainWarpFrequency.ToString());
+        form.AddField("WarpFractalOctaves", terrainDensityData.domainWarpFractalOctaves.ToString());
+        form.AddField("WarpFractalLacunarity", terrainDensityData.domainWarpFractalLacunarity.ToString());
+        form.AddField("WarpFractalGain", terrainDensityData.domainWarpFractalGain.ToString());
+        form.AddField("DomainWarp", terrainDensityData.domainWarpToggle.ToString());
+
+        //Fractal settings 
+        form.AddField("FractalTypes", terrainDensityData.noiseFractalType.ToString());
+        form.AddField("FractalOctaves", terrainDensityData.noiseFractalOctaves.ToString());
+        form.AddField("FractalLacunarity", terrainDensityData.noiseFractalLacunarity.ToString());
+        form.AddField("FractalGain", terrainDensityData.noiseFractalGain.ToString());
+        form.AddField("FractalWeightedStrength", terrainDensityData.fractalWeightedStrength.ToString());
+        form.AddField("SteamId", SteamValidation.steamID.ToString());
+
+        form.AddField("TerrainName", terrainName);
+
+        //Send web request
+        using (UnityWebRequest request = UnityWebRequest.Post(url, form))
+        {
+            // Set timeout at 10 seconds
+            request.timeout = 10;
+            
+            yield return request.SendWebRequest();
+
+            //Log the results. This can be deleted later
+            if (request.result == UnityWebRequest.Result.Success)
+                Debug.Log("Raw Response: " + request.downloadHandler.text);
+            else
+                Debug.Log("request failed: " + request.error + " response code: " + request.responseCode);
+        }
+    }
+
     /// <summary>
     /// On Startup this method will call a php script that checks if the user exists in out system. If they do not we will add them into the 
     /// db to facilitate the loading and storing of terrains.
@@ -41,7 +114,8 @@ public class DBManager : MonoBehaviour
     /// <param name="steamId"></param>
     /// <param name="steamName"></param>
     /// <returns></returns>
-    IEnumerator VerifyRegisteredUser(ulong steamId, string steamName) //int seed, int width, int height, float noiseScale, float isolevel, bool lerp
+     
+     IEnumerator VerifyRegisteredUser(ulong steamId, string steamName) //int seed, int width, int height, float noiseScale, float isolevel, bool lerp
     {
         //Set up connection
         string url = "http://localhost/sqlconnect/validateUser.php";
@@ -145,12 +219,47 @@ public class DBManager : MonoBehaviour
                     // Parse the JSON response
                     PHPTerrainDataResponse response = JsonUtility.FromJson<PHPTerrainDataResponse>(request.downloadHandler.text);
                     if (response.success)
-                    {
-                        // Process your data here
-                        foreach (var item in response.data)
-                        {
-                            Debug.Log($"Seed: {item.Seed}, Width: {item.Width}, Height: {item.Height}, NoiseScale: {item.NoiseScale}, IsoLevel: {item.IsoLevel}, Lerp: {item.Lerp}");
-                        }
+                    {    
+                        TerrainData data = response.data[0];
+                        MarchingCubes mc = GameObject.FindFirstObjectByType<MarchingCubes>(); 
+
+                        //Set noise settings
+                        FastNoiseLite.NoiseType noiseType = (FastNoiseLite.NoiseType)Enum.Parse(typeof(FastNoiseLite.NoiseType), data.NoiseTypes.Replace(" ", "")); 
+                        mc.terrainDensityData.noiseType = noiseType;
+                        TerrainDensityData.NoiseDimension dimension = (TerrainDensityData.NoiseDimension)Enum.Parse(typeof(TerrainDensityData.NoiseDimension), data.NoiseDimensions.Replace(" ", ""));
+                        mc.terrainDensityData.noiseDimension = dimension;
+                        mc.terrainDensityData.noiseSeed = data.Seed;
+                        mc.terrainDensityData.width = data.Width;
+                        mc.terrainDensityData.height = data.Height;
+                        mc.terrainDensityData.noiseScale = data.NoiseScale;
+                        mc.terrainDensityData.isolevel = data.IsoLevel;
+                        mc.terrainDensityData.lerp = data.Lerp;
+                        mc.terrainDensityData.noiseFrequency = data.NoiseFrequency;
+
+                        //Domain warp settings
+                        FastNoiseLite.DomainWarpType domainWarp = (FastNoiseLite.DomainWarpType)Enum.Parse(typeof(FastNoiseLite.DomainWarpType), data.WarpType); 
+                        mc.terrainDensityData.domainWarpType = domainWarp;
+                        FastNoiseLite.FractalType WarpfractalType = (FastNoiseLite.FractalType)Enum.Parse(typeof(FastNoiseLite.FractalType), data.WarpFractalTypes.Replace(" ", "")); 
+                        mc.terrainDensityData.domainWarpFractalType = WarpfractalType;
+                        mc.terrainDensityData.domainWarpAmplitude = data.WarpAmplitude;
+                        mc.terrainDensityData.domainWarpSeed = data.WarpSeed;
+                        mc.terrainDensityData.domainWarpFrequency = data.WarpFrequency;
+                        mc.terrainDensityData.domainWarpFractalOctaves = data.WarpFractalOctaves;
+                        mc.terrainDensityData.domainWarpFractalLacunarity = data.WarpFractalLacunarity;
+                        mc.terrainDensityData.domainWarpFractalGain = data.WarpFractalGain;
+                        mc.terrainDensityData.domainWarpToggle = data.DomainWarp;
+
+                        //Fractal Settings
+                        FastNoiseLite.FractalType fractalType = (FastNoiseLite.FractalType)Enum.Parse(typeof(FastNoiseLite.FractalType), data.WarpFractalTypes.Replace(" ", "")); 
+                        mc.terrainDensityData.noiseFractalType = fractalType;
+                        mc.terrainDensityData.noiseFractalOctaves = data.FractalOctaves;
+                        mc.terrainDensityData.noiseFractalLacunarity = data.FractalLacunarity;
+                        mc.terrainDensityData.noiseFractalGain = data.FractalGain;
+                        mc.terrainDensityData.fractalWeightedStrength = data.FractalWeightedStrength;
+
+                        //Update mesh with new values
+                        mc.UpdateMesh();
+                      
                     }
                     else
                     {
@@ -214,12 +323,34 @@ public class DBManager : MonoBehaviour
     [System.Serializable]
     public class TerrainData
     {
+        //Noise settings
+        public string NoiseDimensions;
+        public string NoiseTypes;
         public int Seed;
         public int Width;
         public int Height;
         public float NoiseScale;
         public float IsoLevel;
         public bool Lerp;
+        public float NoiseFrequency;
+        
+        // DomainWarpSettings 
+        public string WarpType; 
+        public string WarpFractalTypes;
+        public float WarpAmplitude;
+        public int WarpSeed;
+        public float WarpFrequency;
+        public int WarpFractalOctaves;
+        public float WarpFractalLacunarity;
+        public float WarpFractalGain;
+        public bool DomainWarp;
+        
+        // FractalSettings 
+        public string FractalTypes;
+        public int FractalOctaves;
+        public float FractalLacunarity;
+        public float FractalGain;
+        public float FractalWeightedStrength;
     }
 }
 

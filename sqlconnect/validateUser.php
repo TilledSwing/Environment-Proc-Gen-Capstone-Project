@@ -51,9 +51,6 @@
     } catch (Exception $e){
         $response['message'] = "Error: " . $e->getMessage();
     } finally {
-        if (isset($stmt)) {
-            $stmt->close();
-        }
         if (isset($conn)){
             $conn->close();
         }
