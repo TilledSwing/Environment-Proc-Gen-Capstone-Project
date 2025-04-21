@@ -15,6 +15,7 @@ public class PlayerController : NetworkBehaviour {
     public float gravity = 20.0f;
     public float lookSpeed = 2.0f;
     public float lookXLimit = 45.0f;
+    public float flightSpeed = 6.0f;
 
     CharacterController characterController;
     Vector3 moveDirection = Vector3.zero;
@@ -26,6 +27,8 @@ public class PlayerController : NetworkBehaviour {
     [SerializeField]
     private float cameraYOffset = 0.4f;
     private Camera playerCamera;
+
+    private bool isFlightMode = false;
 
 
     public override void OnStartClient() {
@@ -49,10 +52,15 @@ public class PlayerController : NetworkBehaviour {
     }
 
     void Update() {
+
+        // Only apply updates to local player / owner of script.
+        if (!IsOwner)
+            return;
+
         bool isRunning = false;
 
-        // Press Left Shift to run
-        isRunning = Input.GetKey(KeyCode.LeftShift);
+        // Press S to run
+        isRunning = Input.GetKey(KeyCode.RightShift);
 
 
         // Goes from first person to a pseudo pause screen and vice versa on escape.
@@ -64,6 +72,10 @@ public class PlayerController : NetworkBehaviour {
             canMove = isCursorVisible;
         }
 
+        // Allows player to switch between walking and flying mode.
+        if (Input.GetKeyDown(KeyCode.M))
+            isFlightMode = !isFlightMode;
+
         // We are grounded, so recalculate move direction based on axis
         Vector3 forward = transform.TransformDirection(Vector3.forward);
         Vector3 right = transform.TransformDirection(Vector3.right);
@@ -73,15 +85,34 @@ public class PlayerController : NetworkBehaviour {
         float movementDirectionY = moveDirection.y;
         moveDirection = (forward * curSpeedX) + (right * curSpeedY);
 
-        if (Input.GetButton("Jump") && canMove && characterController.isGrounded) {
-            moveDirection.y = jumpSpeed;
-        }
-        else {
-            moveDirection.y = movementDirectionY;
-        }
+        if (!isFlightMode)
+        {
+            if (Input.GetButton("Jump") && canMove && characterController.isGrounded)
+            {
+                moveDirection.y = jumpSpeed;
+            }
+            else
+            {
+                moveDirection.y = movementDirectionY;
+            }
 
-        if (!characterController.isGrounded) {
-            moveDirection.y -= gravity * Time.deltaTime;
+            if (!characterController.isGrounded)
+            {
+                moveDirection.y -= gravity * Time.deltaTime;
+            }
+        } else
+        {
+            moveDirection.y = 0f;
+
+            // Free flight settings - not affected by gravity.
+            if (Input.GetButton("Jump") && canMove)
+            {
+                moveDirection.y = flightSpeed;
+            }
+            else if (Input.GetKey(KeyCode.LeftShift) && canMove)
+            {
+                moveDirection.y = -flightSpeed;
+            }
         }
 
         // Move the controller
