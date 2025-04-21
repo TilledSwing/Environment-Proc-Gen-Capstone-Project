@@ -3246,10 +3246,10 @@ GameObject:
   m_Component:
   - component: {fileID: 1627581232}
   - component: {fileID: 1627581233}
+  - component: {fileID: 1627581237}
   - component: {fileID: 1627581235}
   - component: {fileID: 1627581234}
   - component: {fileID: 1627581236}
-  - component: {fileID: 1627581237}
   m_Layer: 0
   m_Name: CubeMarcher
   m_TagString: Untagged
@@ -3374,11 +3374,91 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   assets:
-  - {fileID: 6577857602279842889, guid: 6ecd8b4bc211e454ea918d6d527c28f7, type: 3}
-  - {fileID: 2007192654614371893, guid: db907286f5ae1d5498c4f2ab90c984f2, type: 3}
-  - {fileID: 2007192654614371893, guid: db907286f5ae1d5498c4f2ab90c984f2, type: 3}
-  terrainDensityData: {fileID: 0}
-  assetsToSpawn: 25
+  - asset: {fileID: 2007192654614371893, guid: db907286f5ae1d5498c4f2ab90c984f2, type: 3}
+    rotateToFaceNormal: 0
+    assetsToSpawn: 20
+    useMinSlope: 0
+    minSlope: 0
+    useMaxSlope: 1
+    maxSlope: 30
+    useMinHeight: 0
+    minHeight: 0
+    useMaxHeight: 1
+    maxHeight: 45
+    underwaterAsset: 0
+  - asset: {fileID: 6577857602279842889, guid: 6ecd8b4bc211e454ea918d6d527c28f7, type: 3}
+    rotateToFaceNormal: 0
+    assetsToSpawn: 20
+    useMinSlope: 0
+    minSlope: 0
+    useMaxSlope: 1
+    maxSlope: 30
+    useMinHeight: 0
+    minHeight: 0
+    useMaxHeight: 1
+    maxHeight: 45
+    underwaterAsset: 0
+  - asset: {fileID: 5314847637665799501, guid: f2612ce08bab1de44b3c77b0ccafd3a6, type: 3}
+    rotateToFaceNormal: 1
+    assetsToSpawn: 30
+    useMinSlope: 0
+    minSlope: 0
+    useMaxSlope: 1
+    maxSlope: 45
+    useMinHeight: 0
+    minHeight: 0
+    useMaxHeight: 1
+    maxHeight: 55
+    underwaterAsset: 0
+  - asset: {fileID: 7762856170357784386, guid: 1f761016c03a561418ff210aec563e01, type: 3}
+    rotateToFaceNormal: 1
+    assetsToSpawn: 15
+    useMinSlope: 0
+    minSlope: 0
+    useMaxSlope: 1
+    maxSlope: 40
+    useMinHeight: 1
+    minHeight: 45
+    useMaxHeight: 0
+    maxHeight: 0
+    underwaterAsset: 0
+  - asset: {fileID: 8085658037914830548, guid: 18981bbe1e4a71543b15e4922dd3247f, type: 3}
+    rotateToFaceNormal: 1
+    assetsToSpawn: 10
+    useMinSlope: 0
+    minSlope: 0
+    useMaxSlope: 0
+    maxSlope: 0
+    useMinHeight: 0
+    minHeight: 0
+    useMaxHeight: 0
+    maxHeight: 0
+    underwaterAsset: 1
+  - asset: {fileID: 4698888469727053071, guid: 8ae9bda731aed8040823244eff705ef1, type: 3}
+    rotateToFaceNormal: 0
+    assetsToSpawn: 15
+    useMinSlope: 0
+    minSlope: 0
+    useMaxSlope: 1
+    maxSlope: 30
+    useMinHeight: 0
+    minHeight: 0
+    useMaxHeight: 0
+    maxHeight: 0
+    underwaterAsset: 1
+  - asset: {fileID: 7646758127176492012, guid: f94ff99c261e9924bbbb894292ced45c, type: 3}
+    rotateToFaceNormal: 0
+    assetsToSpawn: 15
+    useMinSlope: 0
+    minSlope: 0
+    useMaxSlope: 1
+    maxSlope: 30
+    useMinHeight: 1
+    minHeight: 50
+    useMaxHeight: 0
+    maxHeight: 0
+    underwaterAsset: 0
+  terrainDensityData: {fileID: 11400000, guid: 864756879a48256409eb8ae5f9a04619, type: 2}
 --- !u!1 &1755042032
 GameObject:
   m_ObjectHideFlags: 0
