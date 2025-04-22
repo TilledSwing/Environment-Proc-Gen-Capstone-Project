@@ -1,7 +1,10 @@
+#if (UNITY_EDITOR)
+
 using UnityEditor;
 using UnityEditor.TerrainTools;
 using UnityEngine;
 using UnityEngine.UIElements;
+
 
 [CustomEditor(typeof(MarchingCubes))]
 [CanEditMultipleObjects]
@@ -137,3 +140,5 @@ public class NoiseEditor : Editor
 
     }
 }
+
+#endif
