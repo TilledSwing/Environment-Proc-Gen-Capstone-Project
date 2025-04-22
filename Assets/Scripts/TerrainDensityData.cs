@@ -57,6 +57,8 @@ public class TerrainDensityData : ScriptableObject
     private NoiseDimension defaultNoiseDimension = NoiseDimension._3D;
     private FastNoiseLite.NoiseType defaultNoiseType = FastNoiseLite.NoiseType.OpenSimplex2;
     private FastNoiseLite.FractalType defaultNoiseFractalType = FastNoiseLite.FractalType.FBm;
+
+    // removed default seeding
     private int defaultNoiseSeed;
     private int defaultNoiseFractalOctaves = 5;
     private float defaultNoiseFractalLacunarity = 2;
@@ -68,6 +70,8 @@ public class TerrainDensityData : ScriptableObject
     private FastNoiseLite.DomainWarpType defaultDomainWarpType = FastNoiseLite.DomainWarpType.OpenSimplex2;
     private FastNoiseLite.FractalType defaultDomainWarpFractalType = FastNoiseLite.FractalType.None;
     private float defaultDomainWarpAmplitude = 1;
+
+    // removed default seeding
     private int defaultDomainWarpSeed;
     private int defaultDomainWarpFractalOctaves = 5;
     private float defaultDomainWarpFractalLacunarity = 2;
@@ -94,7 +98,6 @@ public class TerrainDensityData : ScriptableObject
         noiseDimension = defaultNoiseDimension;
         noiseType = defaultNoiseType;
         noiseFractalType = defaultNoiseFractalType;
-        noiseSeed = defaultNoiseSeed;
         noiseFractalOctaves = defaultNoiseFractalOctaves;
         noiseFractalLacunarity = defaultNoiseFractalLacunarity;
         noiseFractalGain = defaultNoiseFractalGain;
@@ -105,7 +108,6 @@ public class TerrainDensityData : ScriptableObject
         domainWarpType = defaultDomainWarpType;
         domainWarpFractalType = defaultDomainWarpFractalType;
         domainWarpAmplitude = defaultDomainWarpAmplitude;
-        domainWarpSeed = defaultDomainWarpSeed;
         domainWarpFractalOctaves = defaultDomainWarpFractalOctaves;
         domainWarpFractalLacunarity = defaultDomainWarpFractalLacunarity;
         domainWarpFractalGain = defaultDomainWarpFractalGain;
