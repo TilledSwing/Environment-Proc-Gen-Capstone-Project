@@ -50,7 +50,43 @@ public class TerrainDensityData : ScriptableObject
     public bool polygonizationVisualization = false;
     public int polygonizationVisualizationRate = 30000;
 
+    public FastNoiseLite.NoiseType[] noiseTypeOptions = new FastNoiseLite.NoiseType[] {FastNoiseLite.NoiseType.OpenSimplex2,
+                                                                                        FastNoiseLite.NoiseType.OpenSimplex2S,
+                                                                                        FastNoiseLite.NoiseType.Cellular,
+                                                                                        FastNoiseLite.NoiseType.Perlin,
+                                                                                        FastNoiseLite.NoiseType.ValueCubic,
+                                                                                        FastNoiseLite.NoiseType.Value};
 
+    public FastNoiseLite.FractalType[] noiseFractalTypeOptions = new FastNoiseLite.FractalType[] {FastNoiseLite.FractalType.FBm,
+                                                                                                   FastNoiseLite.FractalType.None,
+                                                                                                   FastNoiseLite.FractalType.PingPong,
+                                                                                                   FastNoiseLite.FractalType.Ridged};
+
+    // Domain Warp Values
+    public FastNoiseLite.DomainWarpType[] domainWarpTypeOptions = new FastNoiseLite.DomainWarpType[] {FastNoiseLite.DomainWarpType.OpenSimplex2,
+                                                                                                       FastNoiseLite.DomainWarpType.OpenSimplex2Reduced,
+                                                                                                       FastNoiseLite.DomainWarpType.BasicGrid};
+
+    public FastNoiseLite.FractalType[] domainWarpFractalTypeOptions = new FastNoiseLite.FractalType[] {FastNoiseLite.FractalType.DomainWarpIndependent,
+                                                                                                        FastNoiseLite.FractalType.DomainWarpProgressive,
+                                                                                                        FastNoiseLite.FractalType.None};
+
+    // Cellular Values
+    public FastNoiseLite.CellularDistanceFunction[] cellularDistanceFunctionOptions = new FastNoiseLite.CellularDistanceFunction[] {FastNoiseLite.CellularDistanceFunction.Euclidean,
+                                                                                                                                     FastNoiseLite.CellularDistanceFunction.EuclideanSq,
+                                                                                                                                     FastNoiseLite.CellularDistanceFunction.Hybrid,
+                                                                                                                                     FastNoiseLite.CellularDistanceFunction.Manhattan};
+
+    public FastNoiseLite.CellularReturnType[] cellularReturnTypeOptions = new FastNoiseLite.CellularReturnType[] {FastNoiseLite.CellularReturnType.CellValue,
+                                                                                                                   FastNoiseLite.CellularReturnType.Distance,
+                                                                                                                   FastNoiseLite.CellularReturnType.Distance2,
+                                                                                                                   FastNoiseLite.CellularReturnType.Distance2Add,
+                                                                                                                   FastNoiseLite.CellularReturnType.Distance2Div,
+                                                                                                                   FastNoiseLite.CellularReturnType.Distance2Mul,
+                                                                                                                   FastNoiseLite.CellularReturnType.Distance2Sub};
+    // 2D or 3D Noise
+    public TerrainDensityData.NoiseDimension[] noiseDimensionOptions = new TerrainDensityData.NoiseDimension[] {TerrainDensityData.NoiseDimension._2D,
+                                                                           TerrainDensityData.NoiseDimension._3D};
 
     // Default Values
     // Noise and Fractal Settings

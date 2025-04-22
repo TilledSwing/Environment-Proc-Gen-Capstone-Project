@@ -226,8 +226,11 @@ public class DBManager : MonoBehaviour
                         //Set noise settings
                         FastNoiseLite.NoiseType noiseType = (FastNoiseLite.NoiseType)Enum.Parse(typeof(FastNoiseLite.NoiseType), data.NoiseTypes.Replace(" ", "")); 
                         mc.terrainDensityData.noiseType = noiseType;
+                        mc.terrainDensityData.selectedNoiseType = Array.IndexOf(mc.terrainDensityData.noiseTypeOptions, noiseType);
                         TerrainDensityData.NoiseDimension dimension = (TerrainDensityData.NoiseDimension)Enum.Parse(typeof(TerrainDensityData.NoiseDimension), data.NoiseDimensions.Replace(" ", ""));
                         mc.terrainDensityData.noiseDimension = dimension;
+                        mc.terrainDensityData.selectedNoiseDimension = Array.IndexOf(mc.terrainDensityData.noiseDimensionOptions, dimension);
+
                         mc.terrainDensityData.noiseSeed = data.Seed;
                         mc.terrainDensityData.width = data.Width;
                         mc.terrainDensityData.height = data.Height;
@@ -239,8 +242,10 @@ public class DBManager : MonoBehaviour
                         //Domain warp settings
                         FastNoiseLite.DomainWarpType domainWarp = (FastNoiseLite.DomainWarpType)Enum.Parse(typeof(FastNoiseLite.DomainWarpType), data.WarpType); 
                         mc.terrainDensityData.domainWarpType = domainWarp;
+                        mc.terrainDensityData.selectedDomainWarpType = Array.IndexOf(mc.terrainDensityData.domainWarpTypeOptions, domainWarp);
                         FastNoiseLite.FractalType WarpfractalType = (FastNoiseLite.FractalType)Enum.Parse(typeof(FastNoiseLite.FractalType), data.WarpFractalTypes.Replace(" ", "")); 
                         mc.terrainDensityData.domainWarpFractalType = WarpfractalType;
+                        mc.terrainDensityData.selectedDomainWarpFractalType = Array.IndexOf(mc.terrainDensityData.domainWarpFractalTypeOptions, WarpfractalType);
                         mc.terrainDensityData.domainWarpAmplitude = data.WarpAmplitude;
                         mc.terrainDensityData.domainWarpSeed = data.WarpSeed;
                         mc.terrainDensityData.domainWarpFrequency = data.WarpFrequency;
@@ -250,8 +255,9 @@ public class DBManager : MonoBehaviour
                         mc.terrainDensityData.domainWarpToggle = data.DomainWarp;
 
                         //Fractal Settings
-                        FastNoiseLite.FractalType fractalType = (FastNoiseLite.FractalType)Enum.Parse(typeof(FastNoiseLite.FractalType), data.WarpFractalTypes.Replace(" ", "")); 
+                        FastNoiseLite.FractalType fractalType = (FastNoiseLite.FractalType)Enum.Parse(typeof(FastNoiseLite.FractalType), data.FractalTypes.Replace(" ", "")); 
                         mc.terrainDensityData.noiseFractalType = fractalType;
+                        mc.terrainDensityData.selectedNoiseFractalType = Array.IndexOf(mc.terrainDensityData.noiseFractalTypeOptions, fractalType);
                         mc.terrainDensityData.noiseFractalOctaves = data.FractalOctaves;
                         mc.terrainDensityData.noiseFractalLacunarity = data.FractalLacunarity;
                         mc.terrainDensityData.noiseFractalGain = data.FractalGain;
