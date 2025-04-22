@@ -70,7 +70,7 @@ public class ChatBroadcast : MonoBehaviour
         else if (InstanceFinder.IsClientStarted)
         {
             var conn = InstanceFinder.ClientManager.Connection;
-            msg.username = "Remote Client " + conn.ClientId.ToString();
+            msg.username = "Client " + conn.ClientId.ToString();
             InstanceFinder.ClientManager.Broadcast<Message>(msg);
         }
 
