@@ -9,6 +9,7 @@ using FishNet.Connection;
 using FishNet.Object;
 using static TerrainDensityData;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider))]
 public class MarchingCubes : NetworkBehaviour
@@ -28,7 +29,7 @@ public class MarchingCubes : NetworkBehaviour
     private bool lerp;
 
     private Vector2 noiseOffset;
-    
+
     void Start()
     {
         //meshFilter = GetComponent<MeshFilter>();
@@ -39,24 +40,33 @@ public class MarchingCubes : NetworkBehaviour
         //UpdateMesh();
     }
 
+    public override void OnStartServer()
+    {
+        base.OnStartServer();
+        terrainDensityData = Resources.Load<TerrainDensityData>("TerrainDensityData");
+        terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 10000);
+        terrainDensityData.domainWarpSeed = UnityEngine.Random.Range(0, 10000);
+        // UpdateMesh();
+    }
+
     public override void OnStartClient()
     {
         base.OnStartClient();
         meshFilter = GetComponent<MeshFilter>();
         meshCollider = GetComponent<MeshCollider>();
-        if (base.IsServerStarted)
-        {
-            // Server initialization
-            terrainDensityData = Resources.Load<TerrainDensityData>("TerrainDensityData");
-            terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 10000);
-            terrainDensityData.domainWarpSeed = UnityEngine.Random.Range(0, 10000);
-            UpdateMesh();
-        }
-        else
-        {
-            // Client requests terrain data
-            ClientReady(LocalConnection);
-        }
+        // if (base.IsServerStarted)
+        // {
+        //     // Server initialization
+        //     terrainDensityData = Resources.Load<TerrainDensityData>("TerrainDensityData");
+        //     terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 10000);
+        //     terrainDensityData.domainWarpSeed = UnityEngine.Random.Range(0, 10000);
+        //     UpdateMesh();
+        // }
+        // else
+        // {
+        // Client requests terrain data
+        ClientReady(LocalConnection);
+        // }
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -69,7 +79,7 @@ public class MarchingCubes : NetworkBehaviour
     [TargetRpc]
     void UpdateClientMesh(NetworkConnection conn, TerrainSettings settings)
     {
-        ApplySettingsToDensityData(settings, this.terrainDensityData);
+        ApplySettingsToDensityData(settings, terrainDensityData);
         UpdateMesh();
     }
 
@@ -84,11 +94,11 @@ public class MarchingCubes : NetworkBehaviour
     {
         // Noise and Fractal Settings
         data.selectedNoiseDimension = settings.selectedNoiseDimension;
-        data.noiseDimension = (NoiseDimension) settings.noiseDimension;
+        data.noiseDimension = (NoiseDimension)settings.noiseDimension;
         data.selectedNoiseType = settings.selectedNoiseType;
-        data.noiseType = (FastNoiseLite.NoiseType) settings.noiseType;
+        data.noiseType = (FastNoiseLite.NoiseType)settings.noiseType;
         data.selectedNoiseFractalType = settings.selectedNoiseFractalType;
-        data.noiseFractalType = (FastNoiseLite.FractalType) settings.noiseFractalType;
+        data.noiseFractalType = (FastNoiseLite.FractalType)settings.noiseFractalType;
         data.noiseSeed = settings.noiseSeed;
         data.noiseFractalOctaves = settings.noiseFractalOctaves;
         data.noiseFractalLacunarity = settings.noiseFractalLacunarity;
@@ -99,9 +109,9 @@ public class MarchingCubes : NetworkBehaviour
         // Domain Warp Values
         data.domainWarpToggle = settings.domainWarpToggle;
         data.selectedDomainWarpType = settings.selectedDomainWarpType;
-        data.domainWarpType = (FastNoiseLite.DomainWarpType) settings.domainWarpType;
+        data.domainWarpType = (FastNoiseLite.DomainWarpType)settings.domainWarpType;
         data.selectedDomainWarpFractalType = settings.selectedDomainWarpFractalType;
-        data.domainWarpFractalType = (FastNoiseLite.FractalType) settings.domainWarpFractalType;
+        data.domainWarpFractalType = (FastNoiseLite.FractalType)settings.domainWarpFractalType;
         data.domainWarpAmplitude = settings.domainWarpAmplitude;
         data.domainWarpSeed = settings.domainWarpSeed;
         data.domainWarpFractalOctaves = settings.domainWarpFractalOctaves;
@@ -111,9 +121,9 @@ public class MarchingCubes : NetworkBehaviour
 
         // Cellular (Voronoi) Values
         data.selectedCellularDistanceFunction = settings.selectedCellularDistanceFunction;
-        data.cellularDistanceFunction = (FastNoiseLite.CellularDistanceFunction) settings.cellularDistanceFunction;
+        data.cellularDistanceFunction = (FastNoiseLite.CellularDistanceFunction)settings.cellularDistanceFunction;
         data.selectedCellularReturnType = settings.selectedCellularReturnType;
-        data.cellularReturnType = (FastNoiseLite.CellularReturnType) settings.cellularReturnType;
+        data.cellularReturnType = (FastNoiseLite.CellularReturnType)settings.cellularReturnType;
         data.cellularJitter = settings.cellularJitter;
 
         // Terrain Values
@@ -127,7 +137,8 @@ public class MarchingCubes : NetworkBehaviour
     /// <summary>
     /// Updates the terrain mesh
     /// </summary>
-    public void UpdateMesh() {
+    public void UpdateMesh()
+    {
         SetNoiseSetting();
         SetHeights();
         MarchCubes();
@@ -145,11 +156,11 @@ public class MarchingCubes : NetworkBehaviour
         {
             // Noise and Fractal Settings
             selectedNoiseDimension = terrainDensityData.selectedNoiseDimension,
-            noiseDimension = (int) terrainDensityData.noiseDimension,
+            noiseDimension = (int)terrainDensityData.noiseDimension,
             selectedNoiseType = terrainDensityData.selectedNoiseType,
-            noiseType = (int) terrainDensityData.noiseType,
+            noiseType = (int)terrainDensityData.noiseType,
             selectedNoiseFractalType = terrainDensityData.selectedNoiseFractalType,
-            noiseFractalType = (int) terrainDensityData.noiseFractalType,
+            noiseFractalType = (int)terrainDensityData.noiseFractalType,
             noiseSeed = terrainDensityData.noiseSeed,
             noiseFractalOctaves = terrainDensityData.noiseFractalOctaves,
             noiseFractalLacunarity = terrainDensityData.noiseFractalLacunarity,
@@ -160,9 +171,9 @@ public class MarchingCubes : NetworkBehaviour
             // Domain Warp Values
             domainWarpToggle = terrainDensityData.domainWarpToggle,
             selectedDomainWarpType = terrainDensityData.selectedDomainWarpType,
-            domainWarpType = (int) terrainDensityData.domainWarpType,
+            domainWarpType = (int)terrainDensityData.domainWarpType,
             selectedDomainWarpFractalType = terrainDensityData.selectedDomainWarpFractalType,
-            domainWarpFractalType = (int) terrainDensityData.domainWarpFractalType,
+            domainWarpFractalType = (int)terrainDensityData.domainWarpFractalType,
             domainWarpAmplitude = terrainDensityData.domainWarpAmplitude,
             domainWarpSeed = terrainDensityData.domainWarpSeed,
             domainWarpFractalOctaves = terrainDensityData.domainWarpFractalOctaves,
@@ -172,9 +183,9 @@ public class MarchingCubes : NetworkBehaviour
 
             // Cellular (Voronoi) Values
             selectedCellularDistanceFunction = terrainDensityData.selectedCellularDistanceFunction,
-            cellularDistanceFunction = (int) terrainDensityData.cellularDistanceFunction,
+            cellularDistanceFunction = (int)terrainDensityData.cellularDistanceFunction,
             selectedCellularReturnType = terrainDensityData.selectedCellularReturnType,
-            cellularReturnType = (int) terrainDensityData.cellularReturnType,
+            cellularReturnType = (int)terrainDensityData.cellularReturnType,
             cellularJitter = terrainDensityData.cellularJitter,
 
             // Terrain Values
@@ -238,7 +249,8 @@ public class MarchingCubes : NetworkBehaviour
     /// <summary>
     /// Set up the MeshFilter's mesh with the given vertices and triangle
     /// </summary>
-    private void SetupMesh() {
+    private void SetupMesh()
+    {
         Mesh mesh = new Mesh();
         mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
         mesh.vertices = vertices.ToArray();
@@ -249,7 +261,8 @@ public class MarchingCubes : NetworkBehaviour
         meshCollider.sharedMesh = mesh;
     }
 
-    private void SetNoiseSetting() {
+    private void SetNoiseSetting()
+    {
         width = terrainDensityData.width;
         height = terrainDensityData.height;
         noiseScale = terrainDensityData.noiseScale;
@@ -265,13 +278,15 @@ public class MarchingCubes : NetworkBehaviour
         noiseGenerator.SetFractalWeightedStrength(terrainDensityData.fractalWeightedStrength);
         noiseGenerator.SetFrequency(terrainDensityData.noiseFrequency);
         // Cellular Values
-        if(terrainDensityData.noiseType == FastNoiseLite.NoiseType.Cellular) {
+        if (terrainDensityData.noiseType == FastNoiseLite.NoiseType.Cellular)
+        {
             noiseGenerator.SetCellularDistanceFunction(terrainDensityData.cellularDistanceFunction);
             noiseGenerator.SetCellularReturnType(terrainDensityData.cellularReturnType);
             noiseGenerator.SetCellularJitter(terrainDensityData.cellularJitter);
         }
         // Domain Warp Values
-        if(terrainDensityData.domainWarpToggle) {
+        if (terrainDensityData.domainWarpToggle)
+        {
             domainWarp.SetNoiseType(terrainDensityData.noiseType);
             domainWarp.SetFractalType(terrainDensityData.noiseFractalType);
             domainWarp.SetDomainWarpType(terrainDensityData.domainWarpType);
@@ -287,38 +302,47 @@ public class MarchingCubes : NetworkBehaviour
     /// <summary>
     /// Essentially the density function that will dictate the heights of the terrain
     /// </summary>
-    private void SetHeights() {
-        heights = new float[width+1, height+1, width+1];
+    private void SetHeights()
+    {
+        heights = new float[width + 1, height + 1, width + 1];
 
         float xWarp = 0;
         float yWarp = 0;
         float zWarp = 0;
 
-        for(int x = 0; x < width+1; x++) {
-            for(int y = 0; y < height+1; y++) {
-                for(int z = 0; z < width+1; z++) {
+        for (int x = 0; x < width + 1; x++)
+        {
+            for (int y = 0; y < height + 1; y++)
+            {
+                for (int z = 0; z < width + 1; z++)
+                {
                     float currentHeight = 0;
                     xWarp = x * noiseScale;
                     yWarp = y * noiseScale;
                     zWarp = z * noiseScale;
-                    if(terrainDensityData.domainWarpToggle) {
-                        if(terrainDensityData.noiseDimension == TerrainDensityData.NoiseDimension._2D) {
+                    if (terrainDensityData.domainWarpToggle)
+                    {
+                        if (terrainDensityData.noiseDimension == TerrainDensityData.NoiseDimension._2D)
+                        {
                             domainWarp.DomainWarp(ref xWarp, ref zWarp);
                         }
-                        else {
+                        else
+                        {
                             domainWarp.DomainWarp(ref xWarp, ref yWarp, ref zWarp);
                         }
                     }
-                    if(terrainDensityData.noiseDimension == TerrainDensityData.NoiseDimension._2D) {
-                        currentHeight = height * ((noiseGenerator.GetNoise(xWarp, zWarp)+1)/2);
+                    if (terrainDensityData.noiseDimension == TerrainDensityData.NoiseDimension._2D)
+                    {
+                        currentHeight = height * ((noiseGenerator.GetNoise(xWarp, zWarp) + 1) / 2);
                     }
-                    else {
-                        currentHeight = height * ((noiseGenerator.GetNoise(xWarp, yWarp, zWarp)+1)/2);
+                    else
+                    {
+                        currentHeight = height * ((noiseGenerator.GetNoise(xWarp, yWarp, zWarp) + 1) / 2);
                     }
 
                     // if(currentHeight < 0) currentHeight = 0;
 
-                    heights[x,y,z] = y - currentHeight;
+                    heights[x, y, z] = y - currentHeight;
                 }
             }
         }
@@ -327,20 +351,25 @@ public class MarchingCubes : NetworkBehaviour
     /// <summary>
     /// Marches through every cube in a given chunk
     /// </summary>
-    public void MarchCubes() {
+    public void MarchCubes()
+    {
         vertices.Clear();
         triangles.Clear();
 
-        for(int x = 0; x < width; x++) {
-            for(int y = 0; y < height; y++) {
-                for(int z = 0; z < width; z++) {
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                for (int z = 0; z < width; z++)
+                {
                     float[] cubeVertices = new float[8];
-                    for(int i = 0; i < 8; i++) {
+                    for (int i = 0; i < 8; i++)
+                    {
                         Vector3Int vertex = new Vector3Int(x, y, z) + MarchingCubesTables.vertexOffsetTable[i];
-                        cubeVertices[i] = heights[vertex.x,vertex.y,vertex.z];
+                        cubeVertices[i] = heights[vertex.x, vertex.y, vertex.z];
                     }
 
-                    MarchCube(new Vector3(x,y,z), cubeVertices);
+                    MarchCube(new Vector3(x, y, z), cubeVertices);
                 }
             }
         }
@@ -351,32 +380,39 @@ public class MarchingCubes : NetworkBehaviour
     /// </summary>
     /// <param name="cubePosition"> The world space position of the cube within the chunk </param>
     /// <param name="cubeVertices"> The values of the vertices for the given cube to be marched which will be used to get the configuration </param>
-    public void MarchCube(Vector3 cubePosition, float[] cubeVertices) {
+    public void MarchCube(Vector3 cubePosition, float[] cubeVertices)
+    {
         int configurationIndex = GetCubeConfiguration(cubeVertices);
 
-        if(configurationIndex == 0 || configurationIndex == 255) {
-            return ;
+        if (configurationIndex == 0 || configurationIndex == 255)
+        {
+            return;
         }
 
         int edgeIndex = 0;
 
-        for(int tri = 0; tri < 5; tri++) {
-            for(int vert = 0; vert < 3; vert++) {
+        for (int tri = 0; tri < 5; tri++)
+        {
+            for (int vert = 0; vert < 3; vert++)
+            {
                 int edgeValue = MarchingCubesTables.triangleTable[configurationIndex, edgeIndex];
 
-                if(edgeValue == -1) {
-                    return ;
+                if (edgeValue == -1)
+                {
+                    return;
                 }
 
                 Vector3 edgeV1 = cubePosition + MarchingCubesTables.vertexOffsetTable[MarchingCubesTables.edgeIndexTable[edgeValue, 0]];
                 Vector3 edgeV2 = cubePosition + MarchingCubesTables.vertexOffsetTable[MarchingCubesTables.edgeIndexTable[edgeValue, 1]];
 
                 Vector3 vertex;
-                if(lerp) {
-                    vertex = Vector3.Lerp(edgeV1, edgeV2, 
+                if (lerp)
+                {
+                    vertex = Vector3.Lerp(edgeV1, edgeV2,
                     (isolevel - cubeVertices[MarchingCubesTables.edgeIndexTable[edgeValue, 0]]) / (cubeVertices[MarchingCubesTables.edgeIndexTable[edgeValue, 1]] - cubeVertices[MarchingCubesTables.edgeIndexTable[edgeValue, 0]]));
                 }
-                else {
+                else
+                {
                     vertex = (edgeV1 + edgeV2) / 2;
                 }
 
@@ -393,11 +429,13 @@ public class MarchingCubes : NetworkBehaviour
     /// </summary>
     /// <param name="cubeValues"> The values of the vertices for the given cube </param>
     /// <returns></returns>
-    private int GetCubeConfiguration(float[] cubeValues) {
+    private int GetCubeConfiguration(float[] cubeValues)
+    {
         int cubeIndex = 0;
         // Compare the value of each vertice with the iso level and do bitshifting
-        for(int i = 0; i < 8; i++) {
-            if(cubeValues[i] > isolevel) cubeIndex |= 1 << i;
+        for (int i = 0; i < 8; i++)
+        {
+            if (cubeValues[i] > isolevel) cubeIndex |= 1 << i;
         }
 
         return cubeIndex;
