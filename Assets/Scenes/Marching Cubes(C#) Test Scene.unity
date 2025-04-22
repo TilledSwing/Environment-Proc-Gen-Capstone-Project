@@ -7117,7 +7117,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1627581233}
         m_TargetAssemblyTypeName: MarchingCubes, Assembly-CSharp
-        m_MethodName: UpdateMesh
+        m_MethodName: GenerateTerrianData
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
