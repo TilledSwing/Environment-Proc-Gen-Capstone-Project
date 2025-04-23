@@ -205,6 +205,7 @@ public class DBManager : MonoBehaviour
 
     IEnumerator LoadTerrainData()
     {
+        Debug.Log($"Loading terrain {loadedTerrainId}");
         string url = "http://localhost/sqlconnect/loadTerrainData.php";
         WWWForm form = new();
 

@@ -1,8 +1,10 @@
 using System.Collections.Generic;
+using LiteNetLib;
 using NUnit.Framework;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+
 
 public class LoadManager : MonoBehaviour
 {
@@ -10,11 +12,11 @@ public class LoadManager : MonoBehaviour
     public Dictionary<int, string> loadList = new();
     public DBManager db;
 
+    [RuntimeInitializeOnLoadMethod]
     void Start()
     {
-        db.retreiveTerrainNames();
+        db = FindFirstObjectByType<DBManager>();
         loadList = db.responseList;
-
         foreach(KeyValuePair<int, string> entry in loadList)
         {
             switch(button.name)

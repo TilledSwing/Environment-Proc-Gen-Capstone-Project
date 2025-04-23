@@ -38,5 +38,6 @@ public class SteamValidation : MonoBehaviour
 
         DBManager db = GameObject.FindObjectOfType<DBManager>();
         db.checkRegisteredUser(steamID, steamProfileName);
+        db.retreiveTerrainNames();
     }
 }
