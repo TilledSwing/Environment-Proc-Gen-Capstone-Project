@@ -118,10 +118,10 @@ public class EditUI : MonoBehaviour
         }
     }
 
-    public void SetToDefault()
+    public void ResetButton()
     {
         tdd.ResetToDefault();
-        mc.UpdateMesh();
+        mc.GenerateTerrainData();
     }
 
     /// <summary>

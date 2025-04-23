@@ -38,6 +38,14 @@ public class MarchingCubes : MonoBehaviour
         Material mat = GetComponent<Renderer>().material;
         mat.SetFloat("_UnderwaterTexHeightEnd", terrainDensityData.waterLevel-15f);
         mat.SetFloat("_Tex1HeightStart", terrainDensityData.waterLevel-18f);
+        GenerateTerrainData();
+    }
+
+    /// <summary>
+    /// Generates the terrain data for new seeds.
+    /// </summary>
+    public void GenerateTerrainData()
+    {
         terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 10000);
         terrainDensityData.domainWarpSeed = UnityEngine.Random.Range(0, 10000);
         UpdateMesh();

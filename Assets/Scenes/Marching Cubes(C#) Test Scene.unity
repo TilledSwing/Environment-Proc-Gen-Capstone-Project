@@ -7059,7 +7059,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1118295765}
         m_TargetAssemblyTypeName: EditUI, Assembly-CSharp
-        m_MethodName: SetToDefault
+        m_MethodName: ResetButton
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
