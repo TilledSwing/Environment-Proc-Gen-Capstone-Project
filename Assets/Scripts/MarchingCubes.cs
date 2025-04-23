@@ -32,13 +32,6 @@ public class MarchingCubes : MonoBehaviour
     {
         meshFilter = GetComponent<MeshFilter>();
         meshCollider = GetComponent<MeshCollider>();
-        GenerateTerrianData();
-    }
-
-    /// <summary>
-    /// Creates new terrian data to randomly generate a new terrian
-    /// </summary>
-    public void GenerateTerrianData() {
         terrainDensityData = Resources.Load<TerrainDensityData>("TerrainDensityData");
         waterGen = gameObject.GetComponentInChildren<WaterPlaneGenerator>();
         assetSpawner = gameObject.GetComponent<AssetSpawner>();

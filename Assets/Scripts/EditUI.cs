@@ -14,7 +14,40 @@ public class EditUI : MonoBehaviour
     /// </summary>
     void Start()
     {
+        UpdateSettings();
 
+    }
+
+    void Update()
+    {
+        // setting inputs on update to make sure they're always correct
+        switch(input.name)
+        {
+            case "NoiseSeedInput":
+                input.text = tdd.noiseSeed.ToString();
+                break;
+            case "DWSeedInput":
+                input.text = tdd.domainWarpSeed.ToString();
+                break;     
+        }
+    }
+
+    /// <summary>
+    /// Updates the mesh only when a UI slider is released
+    /// </summary>
+    public void OnDeselect()
+    {
+        Debug.Log("deselected slider");
+        mc.UpdateMesh();
+    }
+
+    /// <summary>
+    /// Method updates the settings when the terrain is generated/regenerated to reflect the proper values.
+    /// </summary>
+    public void UpdateSettings()
+    {
+
+        // setting toggles
         switch(toggle.name)
         {
             case "LERPToggle":
@@ -26,19 +59,12 @@ public class EditUI : MonoBehaviour
             case "DWToggle":
                 toggle.isOn = tdd.domainWarpToggle;
                 break;
+            case "VisualizeToggle":
+                toggle.isOn = tdd.polygonizationVisualization;
+                break;
         }
 
-        switch(input.name)
-        {
-            case "NoiseSeedInput":
-                input.text = tdd.noiseSeed.ToString();
-                break;
-            case "DWSeedInput":
-                input.text = tdd.domainWarpSeed.ToString();
-                break;
-           
-        }
-
+        // setting sliders
         switch(slider.name)
         {
             case "HeightSlider":
@@ -92,12 +118,9 @@ public class EditUI : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Updates the mesh only when a UI element is released
-    /// </summary>
-    public void OnDeselect()
+    public void SetToDefault()
     {
-        Debug.Log("deselected");
+        tdd.ResetToDefault();
         mc.UpdateMesh();
     }
 
@@ -108,17 +131,26 @@ public class EditUI : MonoBehaviour
     public void OnLERPToggleChanged(bool marked)
     {
         tdd.lerp = marked;
-        Debug.Log("value changed");
+        Debug.Log("toggle changed");
+        mc.UpdateMesh();
     }
     public void OnTerraceToggleChanged(bool marked)
     {
         tdd.terracing = marked;
-        Debug.Log("value changed");
+        Debug.Log("toggle changed");
+        mc.UpdateMesh();
     }
     public void OnDWToggleChanged(bool marked)
     {
         tdd.domainWarpToggle = marked;
-        Debug.Log("value changed");
+        Debug.Log("toggle changed");
+        mc.UpdateMesh();
+    }
+    public void OnVisualizeChanged(bool marked)
+    {
+        tdd.polygonizationVisualization = marked;
+        Debug.Log("toggle changed");
+        mc.UpdateMesh();
     }
 
     /// <summary>
@@ -128,16 +160,14 @@ public class EditUI : MonoBehaviour
     public void OnNoiseSeedChanged(string seed)
     {
         tdd.noiseSeed = System.Convert.ToInt32(seed);
-        Debug.Log("value changed");
-        input.text = seed;
-        OnDeselect();
+        Debug.Log("seed changed");
+        mc.UpdateMesh();
     }
     public void OnDWSeedChanged(string seed)
     {
         tdd.domainWarpSeed = System.Convert.ToInt32(seed);
-        Debug.Log("value changed");
-        input.text = seed;
-        OnDeselect();
+        Debug.Log("seed changed");
+        mc.UpdateMesh();
     }
 
     /// <summary>
