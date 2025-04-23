@@ -177,6 +177,7 @@ public class DBManager : MonoBehaviour
                     PHPTerrainNameResponse response = JsonUtility.FromJson<PHPTerrainNameResponse>(request.downloadHandler.text);
                     if (response.success)
                     {
+                        responseList.Clear();
                         // Process data
                         foreach (var item in response.data)
                         {
