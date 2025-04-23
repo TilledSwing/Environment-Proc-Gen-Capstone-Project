@@ -23,7 +23,7 @@
     
         $conn->begin_transaction();
         try{
-            $retreiveTerrainNames = $conn->prepare("SELECT TerrainName, TerrainId FROM Terrains WHERE (SELECT Id FROM Users WHERE SteamId = ?)");
+            $retreiveTerrainNames = $conn->prepare("SELECT TerrainName, TerrainId FROM Terrains WHERE UserId = (SELECT Id FROM Users WHERE SteamId = ?)");
             $retreiveTerrainNames->bind_param("s", $steamId);
             $retreiveTerrainNames->execute();
             $terrainNames = $retreiveTerrainNames->get_result();
