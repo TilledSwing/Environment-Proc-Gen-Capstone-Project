@@ -40,9 +40,10 @@ public class DBManager : MonoBehaviour
     /// <summary>
     /// This starts the DB save of current terrain data
     /// </summary>
-    public void saveTerrainData(){
-        MarchingCubes mc = GameObject.FindFirstObjectByType<MarchingCubes>();
-        StartCoroutine(SaveTerrainData(mc.terrainDensityData, "Testing"));
+    public void saveTerrainData(string tName){
+        MarchingCubes mc = FindFirstObjectByType<MarchingCubes>();
+        StartCoroutine(SaveTerrainData(mc.terrainDensityData, tName));
+        Debug.Log("Got name:");
     }
 
      /// <summary>
