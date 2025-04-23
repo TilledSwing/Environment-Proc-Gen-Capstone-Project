@@ -3,13 +3,16 @@ using System;
 using System.Collections;
 using UnityEngine.Networking;
 using Unity.VisualScripting;
+using FishNet.Example.Authenticating;
+using System.Collections.Generic;
 /// <summary>
 /// This class will act as a manager script that will facilitate all DB operations
 /// </summary>
 public class DBManager : MonoBehaviour
 {
-    private int loadedTerrainId = 4;
+    public int loadedTerrainId = 4;
     public bool IsTerrainLoaded = false;
+    public Dictionary<int, string> responseList = new();
     /// <summary>
     /// Starts the DB process to determine if a user is registered or not
     /// </summary>
@@ -177,6 +180,7 @@ public class DBManager : MonoBehaviour
                         // Process data
                         foreach (var item in response.data)
                         {
+                            responseList.Add(item.TerrainId, item.TerrainName);
                             Debug.Log($"Terrain Name: {item.TerrainName} TerrainId: {item.TerrainId}");
                         }
                     }
