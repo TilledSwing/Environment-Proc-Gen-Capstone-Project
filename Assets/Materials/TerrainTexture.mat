@@ -73,15 +73,23 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Texture1:
-        m_Texture: {fileID: 2800000, guid: aed09ca1eca3daf4bbf71465933fada1, type: 3}
+        m_Texture: {fileID: 2800000, guid: d6b52fb7a9b1ee84ea7cd0edefe5a16f, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Texture2:
-        m_Texture: {fileID: 2800000, guid: c4ed3f814a2097a4d8b7b45375297930, type: 3}
+        m_Texture: {fileID: 2800000, guid: 7a27db1b754e1be45bdc0761c2e67eca, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Texture3:
-        m_Texture: {fileID: 2800000, guid: 24a3a457b2d0e364c8eb25f783b0f20f, type: 3}
+        m_Texture: {fileID: 2800000, guid: f76b82eef7b1f6f4ba80e41e7484256f, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Texture4:
+        m_Texture: {fileID: 2800000, guid: b0a49dcef4ecb6c4b8912d6aceb208c0, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _UnderwaterTexture:
+        m_Texture: {fileID: 2800000, guid: 1ca4b8781d7cca747856a5f0a201f743, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
@@ -141,6 +149,12 @@ Material:
     - _Tex3HeightStart: 45
     - _Tex3SlopeEnd: 1
     - _Tex3SlopeStart: 0.8
+    - _Tex4HeightEnd: 70
+    - _Tex4HeightStart: 50
+    - _Tex4SlopeEnd: 1
+    - _Tex4SlopeStart: 0.8
+    - _UnderwaterTexHeightEnd: 40
+    - _UnderwaterTexHeightStart: 0
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:

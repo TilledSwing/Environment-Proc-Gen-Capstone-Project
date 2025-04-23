@@ -5,6 +5,10 @@ Shader "Custom/TerrainTextureShader"
     // because the output color is predefined in the fragment shader code.
     Properties
     { 
+        _UnderwaterTexture("Underwater Texture", 2D) = "white" {}
+        _UnderwaterTexHeightStart("Underwater Texture Height Start", Float) = 0
+        _UnderwaterTexHeightEnd("Underwater Texture Height End", Float) = 0
+
         _Texture1("Texture1", 2D) = "white" {}
         _Tex1HeightStart("Texture 1 Height Start", Float) = 0
         _Tex1HeightEnd("Texture 1 Height End", Float) = 40
@@ -13,15 +17,21 @@ Shader "Custom/TerrainTextureShader"
 
         _Texture2("Texture2", 2D) = "white" {}
         _Tex2HeightStart("Texture 2 Height Start", Float) = 35
-        _Tex2HeightEnd("Texture 2 Height End", Float) = 50
+        _Tex2HeightEnd("Texture 2 Height End", Float) = 45
         _Tex2SlopeStart("Texture 2 Slope Start", Float) = 0.3
         _Tex2SlopeEnd("Texture 2 Slope End", Float) = 0.8
 
         _Texture3("Texture3", 2D) = "white" {}
-        _Tex3HeightStart("Texture 3 Height Start", Float) = 45
-        _Tex3HeightEnd("Texture 3 Height End", Float) = 80
+        _Tex3HeightStart("Texture 3 Height Start", Float) = 40
+        _Tex3HeightEnd("Texture 3 Height End", Float) = 50
         _Tex3SlopeStart("Texture 3 Slope Start", Float) = 0.8
         _Tex3SlopeEnd("Texture 3 Slope End", Float) = 1.0
+
+        _Texture4("Texture4", 2D) = "white" {}
+        _Tex4HeightStart("Texture 4 Height Start", Float) = 50
+        _Tex4HeightEnd("Texture 4 Height End", Float) = 70
+        _Tex4SlopeStart("Texture 4 Slope Start", Float) = 0.8
+        _Tex4SlopeEnd("Texture 4 Slope End", Float) = 1.0
 
         _Scale("Texture Scale", Float) = 10
         _SlopeBlendSharpness("Slope Blend Sharpness", Float) = 1
@@ -43,6 +53,8 @@ Shader "Custom/TerrainTextureShader"
             #pragma vertex vert
             // This line defines the name of the fragment shader.
             #pragma fragment frag
+            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
+            #pragma multi_compile _ _ADDITIONAL_LIGHT_SHADOWS
 
             // The Core.hlsl file contains definitions of frequently used HLSL
             // macros and functions, and also contains #include references to other
@@ -69,7 +81,7 @@ Shader "Custom/TerrainTextureShader"
                 float4 positionHCS : SV_POSITION;
                 float3 worldPos : TEXCOORD0;
                 float3 worldNormal : TEXCOORD1;
-                float4 shadowCoord : TEXCOORD2;
+                float4 shadowCoord : TEXCOORD3;
             };
 
             // The vertex shader definition with properties defined in the Varyings
@@ -78,6 +90,12 @@ Shader "Custom/TerrainTextureShader"
 
             CBUFFER_START(UnityPerMaterial)
                 float _Scale;
+
+                float _UnderwaterTexHeightStart;
+                float _UnderwaterTexHeightEnd;
+                float _UnderwaterTexSlopeStart;
+                float _UnderwaterTexSlopeEnd;
+
                 float _Tex1HeightStart;
                 float _Tex1HeightEnd;
                 float _Tex1SlopeStart;
@@ -93,11 +111,18 @@ Shader "Custom/TerrainTextureShader"
                 float _Tex3SlopeStart;
                 float _Tex3SlopeEnd;
 
+                float _Tex4HeightStart;
+                float _Tex4HeightEnd;
+                float _Tex4SlopeStart;
+                float _Tex4SlopeEnd;
+
                 float _SlopeBlendSharpness;
             CBUFFER_END
+            TEXTURE2D(_UnderwaterTexture); SAMPLER(sampler_UnderwaterTexture);
             TEXTURE2D(_Texture1); SAMPLER(sampler_Texture1);
             TEXTURE2D(_Texture2); SAMPLER(sampler_Texture2);
             TEXTURE2D(_Texture3); SAMPLER(sampler_Texture3);
+            TEXTURE2D(_Texture4); SAMPLER(sampler_Texture4);
 
             Varyings vert(Attributes IN)
             {
@@ -108,7 +133,9 @@ Shader "Custom/TerrainTextureShader"
                 OUT.worldNormal = TransformObjectToWorldNormal(IN.normalOS);
 
                 VertexPositionInputs vertexInput = GetVertexPositionInputs(IN.positionOS.xyz);
+                #if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
                 OUT.shadowCoord = GetShadowCoord(vertexInput);
+                #endif
 
                 return OUT;
             }
@@ -132,14 +159,20 @@ Shader "Custom/TerrainTextureShader"
             float4 frag(Varyings IN) : SV_Target
             {
                 float height = IN.worldPos.y;
-                if(height < min(min(_Tex1HeightStart, _Tex2HeightStart), _Tex3HeightStart)) {
-                    height = min(min(_Tex1HeightStart, _Tex2HeightStart), _Tex3HeightStart) + 1;
+                // if(height < min(min(_Tex1HeightStart, _Tex2HeightStart), min(_Tex3HeightStart, _Tex4HeightStart))) {
+                //     height = min(min(_Tex1HeightStart, _Tex2HeightStart), min(_Tex3HeightStart, _Tex4HeightStart)) + 1;
+                // }
+                if(height < _UnderwaterTexHeightStart) {
+                    height = _UnderwaterTexHeightStart + 1;
                 }
-                if(height > max(max(_Tex1HeightEnd, _Tex2HeightEnd), _Tex3HeightEnd)) {
-                    height = max(max(_Tex1HeightEnd, _Tex2HeightEnd), _Tex3HeightEnd) - 1;
+                if(height > max(max(_Tex1HeightEnd, _Tex2HeightEnd), max(_Tex3HeightEnd, _Tex4HeightEnd))) {
+                    height = max(max(_Tex1HeightEnd, _Tex2HeightEnd), max(_Tex3HeightEnd, _Tex4HeightEnd)) - 1;
                 }
                 float slope = 1 - dot(normalize(IN.worldNormal), float3(0, 1, 0));
                 float3 normal = normalize(IN.worldNormal);
+
+                float underwaterTexClampedHeight = smoothstep(_UnderwaterTexHeightStart, _UnderwaterTexHeightEnd, height) * (1 - smoothstep(_Tex1HeightStart, _Tex1HeightEnd, height));
+                float underwaterTexClampedSlope = smoothstep(_UnderwaterTexSlopeStart, _UnderwaterTexSlopeEnd, slope) * (1 - smoothstep(_Tex1SlopeStart, _Tex1SlopeEnd, slope));
 
                 float tex1ClampedHeight = smoothstep(_Tex1HeightStart, _Tex1HeightEnd, height) * (1 - smoothstep(_Tex2HeightStart, _Tex2HeightEnd, height));
                 float tex1ClampedSlope = smoothstep(_Tex1SlopeStart, _Tex1SlopeEnd, slope) * (1 - smoothstep(_Tex2SlopeStart, _Tex2SlopeEnd, slope));
@@ -147,29 +180,45 @@ Shader "Custom/TerrainTextureShader"
                 float tex2ClampedHeight = smoothstep(_Tex2HeightStart, _Tex2HeightEnd, height) * (1 - smoothstep(_Tex3HeightStart, _Tex3HeightEnd, height));
                 float tex2ClampedSlope = smoothstep(_Tex2SlopeStart, _Tex2SlopeEnd, slope) * (1 - smoothstep(_Tex3SlopeStart, _Tex3SlopeEnd, slope));
 
-                float tex3ClampedHeight = smoothstep(_Tex3HeightStart, _Tex3HeightEnd, height);
-                float tex3ClampedSlope = smoothstep(_Tex3SlopeStart, _Tex3SlopeEnd, slope);
+                float tex3ClampedHeight = smoothstep(_Tex3HeightStart, _Tex3HeightEnd, height) * (1 - smoothstep(_Tex4HeightStart, _Tex4HeightEnd, height));
+                float tex3ClampedSlope = smoothstep(_Tex3SlopeStart, _Tex3SlopeEnd, slope) * (1 - smoothstep(_Tex4SlopeStart, _Tex4SlopeEnd, slope));
 
+                float tex4ClampedHeight = smoothstep(_Tex4HeightStart, _Tex4HeightEnd, height);
+                float tex4ClampedSlope = smoothstep(_Tex4SlopeStart, _Tex4SlopeEnd, slope);
+
+                float underwaterTexWeight = underwaterTexClampedHeight;
                 float tex1Weight = tex1ClampedHeight;
                 float tex2Weight = tex2ClampedHeight;
                 float tex3Weight = tex3ClampedHeight;
+                float tex4Weight = tex4ClampedHeight;
 
-                float total = tex1Weight + tex2Weight + tex3Weight;
+                float total = underwaterTexWeight + tex1Weight + tex2Weight + tex3Weight + tex4Weight;
+                underwaterTexWeight /= total;
                 tex1Weight /= total;
                 tex2Weight /= total;
                 tex3Weight /= total;
+                tex4Weight /= total;
 
+                float4 underwaterTex = TriplanarSample(_UnderwaterTexture, sampler_UnderwaterTexture, IN.worldPos, normal, _Scale);
                 float4 tex1 = TriplanarSample(_Texture1, sampler_Texture1, IN.worldPos, normal, _Scale);
                 float4 tex2 = TriplanarSample(_Texture2, sampler_Texture2, IN.worldPos, normal, _Scale);
                 float4 tex3 = TriplanarSample(_Texture3, sampler_Texture3, IN.worldPos, normal, _Scale);
+                float4 tex4 = TriplanarSample(_Texture4, sampler_Texture4, IN.worldPos, normal, _Scale);
 
                 // Texture blend
-                float4 albedo = tex1 * tex1Weight + tex2 * tex2Weight + tex3 * tex3Weight;
+                float4 albedo = underwaterTex * underwaterTexWeight + tex1 * tex1Weight + tex2 * tex2Weight + tex3 * tex3Weight + tex4 * tex4Weight;
 
                 float3 finalTexture = float3(0, 0, 0);
 
                 // Get main directional light info
                 Light mainLight = GetMainLight();
+                #if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
+                IN.shadowCoord = IN.shadowCoord;
+                #elif defined(MAIN_LIGHT_CALCULATE_SHADOWS)
+                IN.shadowCoord = TransformWorldToShadowCoord(IN.worldPos);
+                #else
+                IN.shadowCoord = float4(0, 0, 0, 0);
+                #endif
                 float shadowAttenuation = MainLightRealtimeShadow(IN.shadowCoord);
 
                 // Calculate diffuse lighting
