@@ -1,12 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-//using UnityEditor.VersionControl;
 using Unity.Mathematics;
 using UnityEngine;
 using Unity.VisualScripting;
 
-[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider))]
 public class MarchingCubes : MonoBehaviour
 {
     public float[,,] heights;
@@ -16,6 +14,7 @@ public class MarchingCubes : MonoBehaviour
     private MeshFilter meshFilter;
     private MeshCollider meshCollider;
     public TerrainDensityData terrainDensityData;
+    public GameObject waterPlaneGenerator;
     private FastNoiseLite noiseGenerator = new FastNoiseLite();
     private FastNoiseLite domainWarp = new FastNoiseLite();
     private int cubesProcessed = 0;
@@ -27,17 +26,27 @@ public class MarchingCubes : MonoBehaviour
     WaterPlaneGenerator waterGen;
     private AssetSpawner assetSpawner;
     private Vector2 noiseOffset;
-    
+    private Renderer mat;
+
+    void Awake()
+    {
+        gameObject.AddComponent<MeshRenderer>();
+        meshFilter = gameObject.AddComponent<MeshFilter>();
+        meshCollider = gameObject.AddComponent<MeshCollider>();
+        terrainDensityData = Resources.Load<TerrainDensityData>("TerrainDensityData");
+        assetSpawner = gameObject.GetComponent<AssetSpawner>();
+        mat = GetComponent<Renderer>();
+        Material terrainMaterial = Resources.Load<Material>("Materials/TerrainTexture");
+        mat.sharedMaterial = terrainMaterial;
+        mat.sharedMaterial.SetFloat("_UnderwaterTexHeightEnd", terrainDensityData.waterLevel-15f);
+        mat.sharedMaterial.SetFloat("_Tex1HeightStart", terrainDensityData.waterLevel-18f);
+        waterPlaneGenerator = new GameObject("Water");
+        waterPlaneGenerator.transform.SetParent(transform);
+        waterGen = waterPlaneGenerator.AddComponent<WaterPlaneGenerator>();
+    }
+
     void Start()
     {
-        meshFilter = GetComponent<MeshFilter>();
-        meshCollider = GetComponent<MeshCollider>();
-        terrainDensityData = Resources.Load<TerrainDensityData>("TerrainDensityData");
-        waterGen = gameObject.GetComponentInChildren<WaterPlaneGenerator>();
-        assetSpawner = gameObject.GetComponent<AssetSpawner>();
-        Material mat = GetComponent<Renderer>().material;
-        mat.SetFloat("_UnderwaterTexHeightEnd", terrainDensityData.waterLevel-15f);
-        mat.SetFloat("_Tex1HeightStart", terrainDensityData.waterLevel-18f);
         GenerateTerrainData();
     }
 
@@ -58,13 +67,13 @@ public class MarchingCubes : MonoBehaviour
         SetNoiseSetting();
         SetHeights();
         waterGen.UpdateMesh();
+        mat.sharedMaterial.SetFloat("_UnderwaterTexHeightEnd", terrainDensityData.waterLevel-15f);
+        mat.sharedMaterial.SetFloat("_Tex1HeightStart", terrainDensityData.waterLevel-18f);
         StartCoroutine(MarchCubes());
         assetSpawner.ClearAssets();
         if(!terrainDensityData.polygonizationVisualization) {
             assetSpawner.SpawnAssets();
         }
-        // MarchCubes();
-        // SetupMesh();
     }
 
     /// <summary>

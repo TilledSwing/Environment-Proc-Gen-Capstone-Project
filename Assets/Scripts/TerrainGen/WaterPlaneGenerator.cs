@@ -4,21 +4,25 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Unity.Mathematics;
 using UnityEngine;
-[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
+
 public class WaterPlaneGenerator : MonoBehaviour
 {
     private List<Vector3> vertices = new List<Vector3>();
     private List<int> triangles = new List<int>();
     private MeshFilter meshFilter;
-    private MarchingCubes marchingCubes;
+    private Renderer mat;
+    public MarchingCubes marchingCubes;
     public TerrainDensityData terrainDensityData;
     private int width;
     private int waterLevel;
-    // private float[,] density2D;
 
-    void Start()
+    void Awake()
     {
-        meshFilter = GetComponent<MeshFilter>();
+        gameObject.AddComponent<MeshRenderer>();
+        meshFilter = gameObject.AddComponent<MeshFilter>();
+        mat = GetComponent<Renderer>();
+        Material waterMaterial = Resources.Load<Material>("Materials/WaterMat");
+        mat.sharedMaterial = waterMaterial;
         marchingCubes = gameObject.GetComponentInParent<MarchingCubes>();
         terrainDensityData = Resources.Load<TerrainDensityData>("TerrainDensityData");
     }
@@ -42,17 +46,6 @@ public class WaterPlaneGenerator : MonoBehaviour
 
         meshFilter.mesh = mesh;
     }
-
-    // private void CalculateDensity() {
-    //     density2D = new float[width + 1, width + 1];
-    //     for (int x = 0; x <= width; x++) {
-    //         for (int z = 0; z <= width; z++) {
-    //             UnityEngine.Debug.Log(marchingCubes.heights[x, waterLevel, z]);
-    //             density2D[x, z] = marchingCubes.heights[x, waterLevel, z];
-    //         }
-    //     }
-    // }
-
 
     private void GenerateWaterPlane() {
         vertices.Clear();
