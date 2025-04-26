@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using FishNet.Demo.Benchmarks.NetworkTransforms;
+using Unity.VisualScripting;
 using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
 using UnityEngine.Scripting;
@@ -20,6 +22,7 @@ public class AssetSpawner : MonoBehaviour
     private Vector3[] worldVertices;
     private Vector3[] worldNormals;
     public Vector3Int chunkPos;
+    public int assetSpacing = 50;
 
     public void SpawnAssets()
     {
@@ -69,11 +72,19 @@ public class AssetSpawner : MonoBehaviour
             if(worldVertices.Length < Mathf.Pow(terrainDensityData.width, 2)/2) {
                 spawnThreshold /= 2;
             }
-            else if(worldVertices.Length < 100) {
-                spawnThreshold = 1;
-            }
             while(spawnPoints[i].Count < spawnThreshold) {
                 if(breakCounter >= 250) break;
+                float highestVertexHeight = 0;
+                float lowestVertexHeight = 0;
+                foreach(Vector3 vertex in worldVertices) {
+                    if(vertex.y > highestVertexHeight) highestVertexHeight = vertex.y;
+                    if(vertex.y < lowestVertexHeight) lowestVertexHeight = vertex.y;
+                }
+                if(assetSpawnData.spawnableAssets[i].useMinHeight && highestVertexHeight < assetSpawnData.spawnableAssets[i].minHeight) break;
+                else if(assetSpawnData.spawnableAssets[i].useMaxHeight && lowestVertexHeight > assetSpawnData.spawnableAssets[i].maxHeight) break;
+                else if(assetSpawnData.spawnableAssets[i].underwaterAsset && lowestVertexHeight > terrainDensityData.waterLevel-3f) break;
+                else if(!assetSpawnData.spawnableAssets[i].underwaterAsset && highestVertexHeight < terrainDensityData.waterLevel) break;
+                if(worldVertices.Length == 0) break;
                 int random = UnityEngine.Random.Range(0, worldVertices.Length);
                 Vector3 spawnPoint = worldVertices[random];
                 Vector3 spawnPointNormal = worldNormals[random];
@@ -85,6 +96,14 @@ public class AssetSpawner : MonoBehaviour
                 }
                 float height = spawnPoint.y;
                 float slope = Vector3.Angle(worldNormals[random], Vector3.up);
+                for(int j = 0; j < spawnPoints.Count; j++) {
+                    for(int k = 0; k < spawnPoints[j].Count; k++) {
+                        Vector3 usedSpawnPoint = spawnPoints[j][k];
+                        if(Vector3.Distance(usedSpawnPoint, spawnPoint) < assetSpacing) {
+                            break;
+                        }
+                    }
+                }
                 if((assetSpawnData.spawnableAssets[i].useMinSlope ? slope > assetSpawnData.spawnableAssets[i].minSlope : true) && 
                    (assetSpawnData.spawnableAssets[i].useMaxSlope ? slope < assetSpawnData.spawnableAssets[i].maxSlope : true) && 
                    (assetSpawnData.spawnableAssets[i].useMinHeight ? height > assetSpawnData.spawnableAssets[i].minHeight : true) && 

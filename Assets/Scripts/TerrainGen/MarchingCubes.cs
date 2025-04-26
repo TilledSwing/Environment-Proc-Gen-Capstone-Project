@@ -201,7 +201,7 @@ public class MarchingCubes : MonoBehaviour
             }
         }
         SetupMesh();
-        // assetSpawner.SpawnAssets();
+        assetSpawner.SpawnAssets();
     }
 
     /// <summary>

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using FishNet.Object;
 using UnityEngine;
 
-public class ChunkGen : MonoBehaviour
+public class ChunkGen : NetworkBehaviour
 {
     public static float maxViewDst = 50;
     public Transform viewer;
@@ -24,11 +24,18 @@ public class ChunkGen : MonoBehaviour
         chunksVisible = Mathf.RoundToInt(maxViewDst/chunkSize);
     }
 
-    // public override void OnStartClient()
-    // {
-    //     base.OnStartClient();
-    //     viewer = GameObject.Find("Player(Clone)").transform;
-    // }
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+        viewer = GameObject.Find("Player(Clone)").transform;
+    }
+
+    public override void OnStartServer()
+    {
+        base.OnStartServer();
+        terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 10000);
+        terrainDensityData.domainWarpSeed = UnityEngine.Random.Range(0, 10000);
+    }
 
     void Update()
     {
