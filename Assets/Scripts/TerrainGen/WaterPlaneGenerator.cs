@@ -53,10 +53,10 @@ public class WaterPlaneGenerator : MonoBehaviour
 
         for(int x = 0; x < width; x++) {
             for(int z = 0; z < width; z++) {
-                Vector3 vertex00 = new Vector3(x, waterLevel, z);
-                Vector3 vertex10 = new Vector3(x+1, waterLevel, z);
-                Vector3 vertex01 = new Vector3(x, waterLevel, z+1);
-                Vector3 vertex11 = new Vector3(x+1, waterLevel, z+1);
+                Vector3 vertex00 = new Vector3(marchingCubes.chunkPos.x + x, waterLevel, marchingCubes.chunkPos.z + z);
+                Vector3 vertex10 = new Vector3(marchingCubes.chunkPos.x + x+1, waterLevel, marchingCubes.chunkPos.z + z);
+                Vector3 vertex01 = new Vector3(marchingCubes.chunkPos.x + x, waterLevel, marchingCubes.chunkPos.z + z+1);
+                Vector3 vertex11 = new Vector3(marchingCubes.chunkPos.x + x+1, waterLevel, marchingCubes.chunkPos.z + z+1);
                 int vertCount = vertices.Count;
                 
                 vertices.Add(vertex00);

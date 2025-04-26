@@ -13,6 +13,7 @@ public class MarchingCubes : MonoBehaviour
     private List<Vector3> normals = new List<Vector3>();
     private MeshFilter meshFilter;
     private MeshCollider meshCollider;
+    private Renderer mat;
     public TerrainDensityData terrainDensityData;
     public GameObject waterPlaneGenerator;
     private FastNoiseLite noiseGenerator = new FastNoiseLite();
@@ -25,16 +26,26 @@ public class MarchingCubes : MonoBehaviour
     private bool lerp;
     WaterPlaneGenerator waterGen;
     private AssetSpawner assetSpawner;
-    private Vector2 noiseOffset;
-    private Renderer mat;
+    public Vector3Int chunkPos;
 
     void Awake()
     {
+        InitializeChunk();
+    }
+
+    void Start()
+    {
+        GenerateTerrainData();
+    }
+
+    public void InitializeChunk() { 
         gameObject.AddComponent<MeshRenderer>();
         meshFilter = gameObject.AddComponent<MeshFilter>();
         meshCollider = gameObject.AddComponent<MeshCollider>();
         terrainDensityData = Resources.Load<TerrainDensityData>("TerrainDensityData");
         assetSpawner = gameObject.GetComponent<AssetSpawner>();
+        // assetSpawner = gameObject.AddComponent<AssetSpawner>();
+        // assetSpawner.chunkPos = chunkPos;
         mat = GetComponent<Renderer>();
         Material terrainMaterial = Resources.Load<Material>("Materials/TerrainTexture");
         mat.sharedMaterial = terrainMaterial;
@@ -45,18 +56,13 @@ public class MarchingCubes : MonoBehaviour
         waterGen = waterPlaneGenerator.AddComponent<WaterPlaneGenerator>();
     }
 
-    void Start()
-    {
-        GenerateTerrainData();
-    }
-
     /// <summary>
     /// Generates the terrain data for new seeds.
     /// </summary>
     public void GenerateTerrainData()
     {
-        terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 10000);
-        terrainDensityData.domainWarpSeed = UnityEngine.Random.Range(0, 10000);
+        // terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 10000);
+        // terrainDensityData.domainWarpSeed = UnityEngine.Random.Range(0, 10000);
         UpdateMesh();
     }
 
@@ -66,11 +72,13 @@ public class MarchingCubes : MonoBehaviour
     public void UpdateMesh() {
         SetNoiseSetting();
         SetHeights();
-        waterGen.UpdateMesh();
+        if(Mathf.RoundToInt(chunkPos.y/terrainDensityData.width) == 0) {
+            waterGen.UpdateMesh();
+        }
         mat.sharedMaterial.SetFloat("_UnderwaterTexHeightEnd", terrainDensityData.waterLevel-15f);
         mat.sharedMaterial.SetFloat("_Tex1HeightStart", terrainDensityData.waterLevel-18f);
         StartCoroutine(MarchCubes());
-        assetSpawner.ClearAssets();
+        // assetSpawner.ClearAssets();
         if(!terrainDensityData.polygonizationVisualization) {
             assetSpawner.SpawnAssets();
         }
@@ -129,19 +137,19 @@ public class MarchingCubes : MonoBehaviour
     /// Essentially the density function that will dictate the heights of the terrain
     /// </summary>
     private void SetHeights() {
-        heights = new float[width+1, height+1, width+1];
+        heights = new float[width+1, width+1, width+1];
 
         float xWarp = 0;
         float yWarp = 0;
         float zWarp = 0;
 
         for(int x = 0; x < width+1; x++) {
-            for(int y = 0; y < height+1; y++) {
+            for(int y = 0; y < width+1; y++) {
                 for(int z = 0; z < width+1; z++) {
                     float currentHeight = 0;
-                    xWarp = x * noiseScale;
-                    yWarp = y * noiseScale;
-                    zWarp = z * noiseScale;
+                    xWarp = (x + chunkPos.x) * noiseScale;
+                    yWarp = (y + chunkPos.y) * noiseScale;
+                    zWarp = (z + chunkPos.z) * noiseScale;
                     if(terrainDensityData.domainWarpToggle) {
                         if(terrainDensityData.noiseDimension == TerrainDensityData.NoiseDimension._2D) {
                             domainWarp.DomainWarp(ref xWarp, ref zWarp);
@@ -157,7 +165,7 @@ public class MarchingCubes : MonoBehaviour
                         currentHeight = height * ((noiseGenerator.GetNoise(xWarp, yWarp, zWarp)+1)/2) + (terrainDensityData.terracing ? (y%terrainDensityData.terraceHeight) : 0);
                     }
 
-                    heights[x,y,z] = y - currentHeight;
+                    heights[x, y, z] = chunkPos.y + y - currentHeight;
                 }
             }
         }
@@ -171,15 +179,15 @@ public class MarchingCubes : MonoBehaviour
         triangles.Clear();
 
         for(int x = 0; x < width; x++) {
-            for(int y = 0; y < height; y++) {
+            for(int y = 0; y < width; y++) {
                 for(int z = 0; z < width; z++) {
                     float[] cubeVertices = new float[8];
                     for(int i = 0; i < 8; i++) {
-                        Vector3Int vertex = new Vector3Int(x, y, z) + MarchingCubesTables.vertexOffsetTable[i];
+                        Vector3Int vertex = new Vector3Int(x,y,z) + MarchingCubesTables.vertexOffsetTable[i];
                         cubeVertices[i] = heights[vertex.x,vertex.y,vertex.z];
                     }
 
-                    MarchCube(new Vector3(x,y,z), cubeVertices);
+                    MarchCube(new Vector3(chunkPos.x + x,chunkPos.y + y,chunkPos.z + z), cubeVertices);
                     cubesProcessed++;
 
                     if(cubesProcessed % terrainDensityData.polygonizationVisualizationRate == 0 && terrainDensityData.polygonizationVisualization) {
@@ -193,7 +201,7 @@ public class MarchingCubes : MonoBehaviour
             }
         }
         SetupMesh();
-        assetSpawner.SpawnAssets();
+        // assetSpawner.SpawnAssets();
     }
 
     /// <summary>
