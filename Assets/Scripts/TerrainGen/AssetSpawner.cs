@@ -29,7 +29,7 @@ public class AssetSpawner : MonoBehaviour
     {
         assetLayer = LayerMask.GetMask("Asset Layer");
         terrainDensityData = Resources.Load<TerrainDensityData>("TerrainDensityData");
-        assetSpawnData = Resources.Load<AssetSpawnData>("AssetSpawnData");
+        assetSpawnData = Resources.Load<AssetSpawnData>("AssetSpawnData1");
         if(!assetSpawnData.assets.ContainsKey(chunkPos)) {
             GetTerrainVerticesWorldPosition();
             InitializeData();
@@ -75,7 +75,7 @@ public class AssetSpawner : MonoBehaviour
                 spawnThreshold /= 2;
             }
             while(spawnPoints[i].Count < spawnThreshold) {
-                if(breakCounter >= 50) break;
+                if(breakCounter >= 250) break;
 
                 float highestVertexHeight = 0;
                 float lowestVertexHeight = 0;

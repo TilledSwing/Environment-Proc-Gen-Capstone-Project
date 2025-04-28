@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class ChunkGenLocal : MonoBehaviour
 {
-    public static float maxViewDst = 100;
+    public float maxViewDst = 80;
     public Transform viewer;
     public static Vector3 viewerPos;
     public int chunkSize;
@@ -52,7 +52,7 @@ public class ChunkGenLocal : MonoBehaviour
                     if(viewedChunkCoord.y < 0) break;
 
                     if(chunkDictionary.ContainsKey(viewedChunkCoord)) {
-                        chunkDictionary[viewedChunkCoord].UpdateChunk();
+                        chunkDictionary[viewedChunkCoord].UpdateChunk(maxViewDst);
                         if(chunkDictionary[viewedChunkCoord].IsVisible()) {
                             chunksVisibleLastUpdate.Add(chunkDictionary[viewedChunkCoord]);
                         }
@@ -83,7 +83,7 @@ public class ChunkGenLocal : MonoBehaviour
             SetVisible(false);
         }
 
-        public void UpdateChunk() {
+        public void UpdateChunk(float maxViewDst) {
             float viewerDstFromBound = Mathf.Sqrt(bounds.SqrDistance(viewerPos));
             bool visible = viewerDstFromBound <= maxViewDst;
             SetVisible(visible);

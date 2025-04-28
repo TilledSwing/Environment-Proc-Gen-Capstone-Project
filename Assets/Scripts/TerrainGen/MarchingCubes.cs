@@ -61,8 +61,8 @@ public class MarchingCubes : MonoBehaviour
     /// </summary>
     public void GenerateTerrainData()
     {
-        // terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 10000);
-        // terrainDensityData.domainWarpSeed = UnityEngine.Random.Range(0, 10000);
+        terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 10000);
+        terrainDensityData.domainWarpSeed = UnityEngine.Random.Range(0, 10000);
         UpdateMesh();
     }
 

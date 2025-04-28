@@ -14819,7 +14819,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1618158069
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14832,6 +14832,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50dd4dba7109d9c44bf81d255e0ab9c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  maxViewDst: 110
   viewer: {fileID: 1588582780}
   chunkSize: 0
   chunksVisible: 0
@@ -14869,7 +14870,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1627581232
 Transform:
   m_ObjectHideFlags: 0
@@ -14913,9 +14914,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   terrainDensityData: {fileID: 11400000, guid: 864756879a48256409eb8ae5f9a04619, type: 2}
-  assetSpawnData: {fileID: 11400000, guid: 29949715b352478458342a45d2b907a0, type: 2}
+  assetSpawnData: {fileID: 11400000, guid: ab99a77c69cf7db40993f26b05db1132, type: 2}
   chunkPos: {x: 0, y: 0, z: 0}
-  assetSpacing: 4
+  assetLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  assetSpacing: 10
 --- !u!1 &1649543614
 GameObject:
   m_ObjectHideFlags: 0
@@ -16608,7 +16612,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1838274976
 MonoBehaviour:
   m_ObjectHideFlags: 0

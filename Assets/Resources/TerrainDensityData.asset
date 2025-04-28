@@ -18,7 +18,7 @@ MonoBehaviour:
   noiseType: 0
   selectedNoiseFractalType: 0
   noiseFractalType: 1
-  noiseSeed: 2242
+  noiseSeed: 9156
   noiseFractalOctaves: 5
   noiseFractalLacunarity: 2
   noiseFractalGain: 0.5
@@ -29,8 +29,8 @@ MonoBehaviour:
   domainWarpType: 0
   selectedDomainWarpFractalType: 2
   domainWarpFractalType: 0
-  domainWarpAmplitude: 1
-  domainWarpSeed: 1564
+  domainWarpAmplitude: 0
+  domainWarpSeed: 191
   domainWarpFractalOctaves: 5
   domainWarpFractalLacunarity: 2
   domainWarpFractalGain: 0.5
@@ -41,10 +41,10 @@ MonoBehaviour:
   cellularReturnType: 1
   cellularJitter: 1
   width: 32
-  height: 100
+  height: 120
   noiseScale: 0.6
   isolevel: 0.5
-  waterLevel: 30
+  waterLevel: 35
   lerp: 1
   terracing: 0
   terraceHeight: 2

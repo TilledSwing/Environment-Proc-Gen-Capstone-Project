@@ -1,0 +1,339 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc7345c3cfdb9e941ad2d82d380718da, type: 3}
+  m_Name: AssetSpawnData1
+  m_EditorClassIdentifier: 
+  spawnableAssets:
+  - asset: {fileID: 6577857602279842889, guid: 6ecd8b4bc211e454ea918d6d527c28f7, type: 3}
+    spawnPoints:
+    - {x: 100, y: 42.37835, z: 108}
+    - {x: 25, y: 44.25, z: 177.99843}
+    - {x: 146, y: 42.281483, z: 93}
+    - {x: 125, y: 37.5603, z: 53}
+    - {x: 104, y: 46.27135, z: 122}
+    - {x: 9, y: 46.262398, z: 178}
+    - {x: 136.80592, y: 40.25, z: 37}
+    - {x: 119, y: 43.646378, z: 18}
+    - {x: 112, y: 44.89665, z: 140}
+    - {x: 157, y: 49.020687, z: 97}
+    - {x: 25.098318, y: 47.25, z: 161}
+    spawnPointsNormals:
+    - {x: 0.445875, y: 0.87990797, z: -0.16418724}
+    - {x: -0.26275304, y: 0.9532589, z: -0.14919208}
+    - {x: -0.33857185, y: 0.93149257, z: -0.13300629}
+    - {x: -0.21790095, y: 0.97431946, z: 0.056750808}
+    - {x: -0.042168472, y: 0.92984587, z: -0.36552516}
+    - {x: 0.13486592, y: 0.9905938, z: 0.02313013}
+    - {x: -0.391162, y: 0.9067072, z: 0.15771584}
+    - {x: 0.26370662, y: 0.95328146, z: -0.14735381}
+    - {x: 0.20208159, y: 0.8688471, z: -0.45195997}
+    - {x: -0.18533242, y: 0.98202616, z: 0.035726864}
+    - {x: 0.20892891, y: 0.9297856, z: 0.30306333}
+    spawnedAssets:
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    rotateToFaceNormal: 0
+    assetsToSpawn: 30
+    useMinSlope: 0
+    minSlope: 0
+    useMaxSlope: 1
+    maxSlope: 30
+    useMinHeight: 0
+    minHeight: 0
+    useMaxHeight: 1
+    maxHeight: 50
+    underwaterAsset: 0
+  - asset: {fileID: 2007192654614371893, guid: db907286f5ae1d5498c4f2ab90c984f2, type: 3}
+    spawnPoints:
+    - {x: 21, y: 46.616707, z: 195}
+    - {x: 120.93895, y: 39.9, z: 43}
+    - {x: 46, y: 44.714317, z: 172}
+    - {x: 134.23972, y: 43.9, z: 122}
+    - {x: 111, y: 39.647335, z: 30}
+    spawnPointsNormals:
+    - {x: -0.07943285, y: 0.96135026, z: 0.263621}
+    - {x: 0.07005098, y: 0.974866, z: -0.21149252}
+    - {x: -0.4223853, y: 0.89437985, z: -0.14722548}
+    - {x: -0.4597969, y: 0.88202125, z: 0.10307825}
+    - {x: 0.0064798873, y: 0.98644805, z: 0.16394642}
+    spawnedAssets:
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    rotateToFaceNormal: 1
+    assetsToSpawn: 25
+    useMinSlope: 0
+    minSlope: 0
+    useMaxSlope: 1
+    maxSlope: 30
+    useMinHeight: 0
+    minHeight: 0
+    useMaxHeight: 1
+    maxHeight: 50
+    underwaterAsset: 0
+  - asset: {fileID: 7646758127176492012, guid: f94ff99c261e9924bbbb894292ced45c, type: 3}
+    spawnPoints:
+    - {x: 180, y: 61.84235, z: 114}
+    - {x: 75, y: 64.8013, z: 192}
+    - {x: 70, y: 61.25, z: 66.68245}
+    - {x: 28.853, y: 72.25, z: 21}
+    - {x: 163, y: 68.83271, z: 147}
+    - {x: 162, y: 63.25, z: 161.86595}
+    - {x: 69, y: 70.71768, z: 85}
+    - {x: 166.67264, y: 69.25, z: 32}
+    - {x: 49, y: 63.25, z: 125.99633}
+    - {x: 165, y: 64.864136, z: 136}
+    - {x: 191, y: 64.424255, z: 20}
+    - {x: 174, y: 73.25, z: 40.482513}
+    spawnPointsNormals:
+    - {x: 0.31570274, y: 0.94854474, z: 0.024384473}
+    - {x: -0.33412784, y: 0.9158644, z: -0.2226005}
+    - {x: 0.051755857, y: 0.87796515, z: 0.4759186}
+    - {x: -0.24549812, y: 0.87030995, z: -0.42695564}
+    - {x: -0.35949874, y: 0.90673345, z: 0.22044349}
+    - {x: -0.20228797, y: 0.89785975, z: 0.39105937}
+    - {x: 0.14062752, y: 0.97851723, z: 0.15075819}
+    - {x: 0.3233378, y: 0.9318139, z: 0.16485001}
+    - {x: 0.059302572, y: 0.95483005, z: 0.29117465}
+    - {x: -0.011732627, y: 0.99923253, z: 0.03737059}
+    - {x: 0.4022052, y: 0.876527, z: -0.26444536}
+    - {x: -0.03995572, y: 0.89760613, z: -0.43898377}
+    spawnedAssets:
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    rotateToFaceNormal: 0
+    assetsToSpawn: 20
+    useMinSlope: 0
+    minSlope: 0
+    useMaxSlope: 1
+    maxSlope: 30
+    useMinHeight: 1
+    minHeight: 60
+    useMaxHeight: 0
+    maxHeight: 0
+    underwaterAsset: 0
+  - asset: {fileID: 7762856170357784386, guid: 1f761016c03a561418ff210aec563e01, type: 3}
+    spawnPoints:
+    - {x: 156.1345, y: 58.9, z: 183}
+    - {x: 185.8412, y: 70.9, z: 26}
+    - {x: 46, y: 77.6258, z: 80}
+    - {x: 153, y: 53.323784, z: 192}
+    - {x: 153, y: 51.692722, z: 109}
+    - {x: 112, y: 57.9, z: 173.37971}
+    - {x: 13, y: 69.49015, z: 109}
+    - {x: 68, y: 70.9, z: 29.870995}
+    - {x: 160, y: 66.8456, z: 8}
+    - {x: 161, y: 59.9, z: 65.41389}
+    - {x: 54.31273, y: 72.9, z: 109}
+    - {x: 2.7520742, y: 54.9, z: 154}
+    - {x: 79.402664, y: 57.9, z: 37}
+    - {x: 70, y: 61.65628, z: 16}
+    - {x: 198, y: 68.16508, z: 196}
+    - {x: 192, y: 74.3384, z: 38}
+    - {x: 31, y: 52.799187, z: 148}
+    - {x: 181, y: 69.84787, z: 156}
+    - {x: 176, y: 69.07207, z: 27}
+    - {x: 67, y: 60.612152, z: 177}
+    spawnPointsNormals:
+    - {x: 0.26684412, y: 0.9623529, z: 0.051682618}
+    - {x: 0.42174223, y: 0.6641555, z: -0.617277}
+    - {x: 0.29034588, y: 0.90516984, z: 0.31042996}
+    - {x: -0.5980313, y: 0.69122535, z: 0.40566748}
+    - {x: -0.46867523, y: 0.69446796, z: -0.5459467}
+    - {x: 0.16342601, y: 0.88000226, z: -0.4459686}
+    - {x: -0.63332695, y: 0.6830318, z: 0.36381948}
+    - {x: 0.6640836, y: 0.669331, z: -0.33314997}
+    - {x: 0.5260567, y: 0.6556713, z: -0.54162663}
+    - {x: -0.3739846, y: 0.6478947, z: 0.66360223}
+    - {x: 0.50290084, y: 0.6832549, z: 0.5293897}
+    - {x: 0.7496503, y: 0.6599105, z: -0.050422393}
+    - {x: 0.68521625, y: 0.7228315, z: -0.08940558}
+    - {x: 0.5053788, y: 0.84909016, z: 0.1537474}
+    - {x: -0.25661367, y: 0.9625081, z: 0.087907284}
+    - {x: 0.3432327, y: 0.6728106, z: -0.6553756}
+    - {x: -0.016817024, y: 0.99920267, z: 0.03621073}
+    - {x: -0.15585713, y: 0.9871228, z: 0.036013953}
+    - {x: -0.1497833, y: 0.9185607, z: -0.36580232}
+    - {x: -0.42940006, y: 0.8861265, z: -0.17434257}
+    spawnedAssets:
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    rotateToFaceNormal: 1
+    assetsToSpawn: 30
+    useMinSlope: 0
+    minSlope: 0
+    useMaxSlope: 1
+    maxSlope: 50
+    useMinHeight: 1
+    minHeight: 50
+    useMaxHeight: 0
+    maxHeight: 0
+    underwaterAsset: 0
+  - asset: {fileID: 5314847637665799501, guid: f2612ce08bab1de44b3c77b0ccafd3a6, type: 3}
+    spawnPoints:
+    - {x: 110, y: 57.330383, z: 4}
+    - {x: 171.7608, y: 56.9, z: 200}
+    - {x: 50, y: 54.58821, z: 193}
+    - {x: 126, y: 42.9, z: 144.58372}
+    - {x: 52, y: 74.298996, z: 97}
+    - {x: 135, y: 51.420082, z: 170}
+    - {x: 48, y: 53.9, z: 139.52647}
+    - {x: 113, y: 42.458065, z: 104}
+    - {x: 12, y: 71.699776, z: 15}
+    - {x: 184, y: 60.335846, z: 95}
+    - {x: 2.030512, y: 58.9, z: 3}
+    - {x: 8, y: 65.46191, z: 93}
+    - {x: 60, y: 58.98995, z: 2}
+    - {x: 12, y: 48.024822, z: 168}
+    - {x: 82, y: 64.49125, z: 84}
+    - {x: 98.76764, y: 49.9, z: 25}
+    - {x: 6.265485, y: 66.9, z: 46}
+    - {x: 8, y: 65.1415, z: 66}
+    - {x: 84, y: 55.9, z: 117.75213}
+    - {x: 104.320045, y: 35.9, z: 87}
+    - {x: 167, y: 59.90396, z: 188}
+    - {x: 55, y: 73.93209, z: 44}
+    - {x: 87, y: 65.9, z: 186.69684}
+    - {x: 123.917694, y: 36.9, z: 98}
+    - {x: 61, y: 64.57522, z: 114}
+    spawnPointsNormals:
+    - {x: -0.5884592, y: 0.74842834, z: 0.30589336}
+    - {x: 0.16586734, y: 0.98467505, z: 0.053881027}
+    - {x: -0.3464061, y: 0.93786955, z: 0.020088721}
+    - {x: 0.14024581, y: 0.8660275, z: -0.4799245}
+    - {x: -0.04515895, y: 0.9911376, z: 0.12492817}
+    - {x: 0.31140426, y: 0.9431643, z: -0.11605342}
+    - {x: -0.034146223, y: 0.79967153, z: 0.5994661}
+    - {x: 0.24239735, y: 0.88262767, z: -0.40275544}
+    - {x: -0.39347884, y: 0.91875046, z: 0.03274142}
+    - {x: -0.035718746, y: 0.9981298, z: 0.049608737}
+    - {x: -0.41273347, y: 0.88506013, z: 0.21522008}
+    - {x: -0.4954992, y: 0.861262, z: -0.11273067}
+    - {x: 0.65283513, y: 0.7496663, z: 0.10865906}
+    - {x: 0.42555943, y: 0.8792437, z: 0.21407887}
+    - {x: 0.30286756, y: 0.8368988, z: -0.45592955}
+    - {x: 0.23446168, y: 0.7575779, z: 0.60918266}
+    - {x: -0.5768051, y: 0.7876369, z: 0.21661937}
+    - {x: -0.34240535, y: 0.89364517, z: -0.29009786}
+    - {x: 0.5971967, y: 0.7314984, z: 0.32903814}
+    - {x: 0.2754213, y: 0.94135773, z: 0.19490685}
+    - {x: -0.10170015, y: 0.91556734, z: 0.38909325}
+    - {x: -0.22694144, y: 0.9738896, z: -0.006055603}
+    - {x: -0.36977634, y: 0.86630154, z: -0.335838}
+    - {x: 0.46458364, y: 0.8650528, z: -0.1893293}
+    - {x: 0.33032814, y: 0.9332608, z: 0.14109418}
+    spawnedAssets:
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    rotateToFaceNormal: 1
+    assetsToSpawn: 35
+    useMinSlope: 0
+    minSlope: 0
+    useMaxSlope: 1
+    maxSlope: 50
+    useMinHeight: 0
+    minHeight: 0
+    useMaxHeight: 0
+    maxHeight: 0
+    underwaterAsset: 0
+  - asset: {fileID: 4698888469727053071, guid: 8ae9bda731aed8040823244eff705ef1, type: 3}
+    spawnPoints: []
+    spawnPointsNormals: []
+    spawnedAssets: []
+    rotateToFaceNormal: 0
+    assetsToSpawn: 15
+    useMinSlope: 0
+    minSlope: 0
+    useMaxSlope: 1
+    maxSlope: 30
+    useMinHeight: 0
+    minHeight: 0
+    useMaxHeight: 0
+    maxHeight: 0
+    underwaterAsset: 1
+  - asset: {fileID: 8085658037914830548, guid: 18981bbe1e4a71543b15e4922dd3247f, type: 3}
+    spawnPoints: []
+    spawnPointsNormals: []
+    spawnedAssets: []
+    rotateToFaceNormal: 1
+    assetsToSpawn: 12
+    useMinSlope: 0
+    minSlope: 0
+    useMaxSlope: 0
+    maxSlope: 0
+    useMinHeight: 0
+    minHeight: 0
+    useMaxHeight: 0
+    maxHeight: 0
+    underwaterAsset: 1
