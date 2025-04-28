@@ -22,10 +22,12 @@ public class AssetSpawner : MonoBehaviour
     private Vector3[] worldVertices;
     private Vector3[] worldNormals;
     public Vector3Int chunkPos;
-    public int assetSpacing = 50;
+    public LayerMask assetLayer;
+    public int assetSpacing = 12;
 
     public void SpawnAssets()
     {
+        assetLayer = LayerMask.GetMask("Asset Layer");
         terrainDensityData = Resources.Load<TerrainDensityData>("TerrainDensityData");
         assetSpawnData = Resources.Load<AssetSpawnData>("AssetSpawnData");
         if(!assetSpawnData.assets.ContainsKey(chunkPos)) {
@@ -73,18 +75,21 @@ public class AssetSpawner : MonoBehaviour
                 spawnThreshold /= 2;
             }
             while(spawnPoints[i].Count < spawnThreshold) {
-                if(breakCounter >= 250) break;
+                if(breakCounter >= 50) break;
+
                 float highestVertexHeight = 0;
                 float lowestVertexHeight = 0;
                 foreach(Vector3 vertex in worldVertices) {
                     if(vertex.y > highestVertexHeight) highestVertexHeight = vertex.y;
                     if(vertex.y < lowestVertexHeight) lowestVertexHeight = vertex.y;
                 }
-                if(assetSpawnData.spawnableAssets[i].useMinHeight && highestVertexHeight < assetSpawnData.spawnableAssets[i].minHeight) break;
+
+                if(worldVertices.Length == 0) break;
+                else if(assetSpawnData.spawnableAssets[i].useMinHeight && highestVertexHeight < assetSpawnData.spawnableAssets[i].minHeight) break;
                 else if(assetSpawnData.spawnableAssets[i].useMaxHeight && lowestVertexHeight > assetSpawnData.spawnableAssets[i].maxHeight) break;
                 else if(assetSpawnData.spawnableAssets[i].underwaterAsset && lowestVertexHeight > terrainDensityData.waterLevel-3f) break;
                 else if(!assetSpawnData.spawnableAssets[i].underwaterAsset && highestVertexHeight < terrainDensityData.waterLevel) break;
-                if(worldVertices.Length == 0) break;
+
                 int random = UnityEngine.Random.Range(0, worldVertices.Length);
                 Vector3 spawnPoint = worldVertices[random];
                 Vector3 spawnPointNormal = worldNormals[random];
@@ -96,14 +101,28 @@ public class AssetSpawner : MonoBehaviour
                 }
                 float height = spawnPoint.y;
                 float slope = Vector3.Angle(worldNormals[random], Vector3.up);
-                for(int j = 0; j < spawnPoints.Count; j++) {
-                    for(int k = 0; k < spawnPoints[j].Count; k++) {
-                        Vector3 usedSpawnPoint = spawnPoints[j][k];
-                        if(Vector3.Distance(usedSpawnPoint, spawnPoint) < assetSpacing) {
+
+                float spacingSquared = assetSpacing * assetSpacing;
+                bool invalidSpawnPoint = false;
+                for(int j = 0; j < assetSpawnData.spawnableAssets.Count && !invalidSpawnPoint; j++) {
+                    foreach(Vector3 point in spawnPoints[j]) {
+                        if((spawnPoint - point).sqrMagnitude <= spacingSquared) {
+                            invalidSpawnPoint = true;
                             break;
                         }
                     }
                 }
+                if(invalidSpawnPoint) {
+                    breakCounter++;
+                    continue;
+                }
+
+                Collider[] colliders = Physics.OverlapSphere(spawnPoint, assetSpacing, assetLayer);
+                if(colliders.Length > 0) {
+                    breakCounter++;
+                    continue;
+                }
+
                 if((assetSpawnData.spawnableAssets[i].useMinSlope ? slope > assetSpawnData.spawnableAssets[i].minSlope : true) && 
                    (assetSpawnData.spawnableAssets[i].useMaxSlope ? slope < assetSpawnData.spawnableAssets[i].maxSlope : true) && 
                    (assetSpawnData.spawnableAssets[i].useMinHeight ? height > assetSpawnData.spawnableAssets[i].minHeight : true) && 
@@ -130,13 +149,16 @@ public class AssetSpawner : MonoBehaviour
             for(int j = 0; j < assetSpawnData.assets[chunkPos][i].spawnPoints.Count; j++) {
                 float randomRotationDeg = UnityEngine.Random.Range(0f, 360f);
                 Quaternion randomYRotation = Quaternion.Euler(0f, randomRotationDeg, 0f);
-                GameObject assetToSpawn = Instantiate(assetSpawnData.assets[chunkPos][i].asset, assetSpawnData.assets[chunkPos][i].spawnPoints[j], randomYRotation);
-                assetToSpawn.transform.SetParent(gameObject.transform);
+                GameObject assetToSpawn;
                 if(assetSpawnData.assets[chunkPos][i].rotateToFaceNormal) {
-                    assetToSpawn.transform.rotation = Quaternion.FromToRotation(Vector3.up, assetSpawnData.assets[chunkPos][i].spawnPointsNormals[j]);
+                    Quaternion normal = Quaternion.FromToRotation(Vector3.up, assetSpawnData.assets[chunkPos][i].spawnPointsNormals[j]);
+                    assetToSpawn = Instantiate(assetSpawnData.assets[chunkPos][i].asset, assetSpawnData.assets[chunkPos][i].spawnPoints[j], normal*randomYRotation);
                 }
+                else{
+                    assetToSpawn = Instantiate(assetSpawnData.assets[chunkPos][i].asset, assetSpawnData.assets[chunkPos][i].spawnPoints[j], randomYRotation);
+                }
+                assetToSpawn.transform.SetParent(gameObject.transform);
                 spawnedAssets[i].Add(assetToSpawn);
-                // assetToSpawn.SetActive(false);
             }
         }
     }

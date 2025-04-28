@@ -18,7 +18,7 @@ MonoBehaviour:
     spawnPointsNormals: []
     spawnedAssets: []
     rotateToFaceNormal: 0
-    assetsToSpawn: 3
+    assetsToSpawn: 1
     useMinSlope: 0
     minSlope: 0
     useMaxSlope: 1
@@ -33,7 +33,7 @@ MonoBehaviour:
     spawnPointsNormals: []
     spawnedAssets: []
     rotateToFaceNormal: 1
-    assetsToSpawn: 3
+    assetsToSpawn: 2
     useMinSlope: 0
     minSlope: 0
     useMaxSlope: 1
@@ -48,7 +48,7 @@ MonoBehaviour:
     spawnPointsNormals: []
     spawnedAssets: []
     rotateToFaceNormal: 0
-    assetsToSpawn: 3
+    assetsToSpawn: 2
     useMinSlope: 0
     minSlope: 0
     useMaxSlope: 1
@@ -59,50 +59,26 @@ MonoBehaviour:
     maxHeight: 0
     underwaterAsset: 0
   - asset: {fileID: 7762856170357784386, guid: 1f761016c03a561418ff210aec563e01, type: 3}
-    spawnPoints:
-    - {x: -152.00002, y: 52.47863, z: 56}
-    - {x: -154.00002, y: 50.45907, z: 57}
-    - {x: -151.68355, y: 52.9, z: 51}
-    - {x: -150.00002, y: 51.842243, z: 61}
-    spawnPointsNormals:
-    - {x: -0.69804335, y: 0.7159726, z: -0.010892101}
-    - {x: -0.69969517, y: 0.70695704, z: 0.10314285}
-    - {x: -0.63201714, y: 0.7647179, z: 0.1255432}
-    - {x: -0.4001702, y: 0.672272, z: 0.62282753}
-    spawnedAssets:
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
+    spawnPoints: []
+    spawnPointsNormals: []
+    spawnedAssets: []
     rotateToFaceNormal: 1
-    assetsToSpawn: 8
+    assetsToSpawn: 4
     useMinSlope: 0
     minSlope: 0
     useMaxSlope: 1
     maxSlope: 50
     useMinHeight: 1
-    minHeight: 40
+    minHeight: 50
     useMaxHeight: 0
     maxHeight: 0
     underwaterAsset: 0
   - asset: {fileID: 5314847637665799501, guid: f2612ce08bab1de44b3c77b0ccafd3a6, type: 3}
-    spawnPoints:
-    - {x: -153.78127, y: 50.9, z: 55}
-    - {x: -151.47826, y: 52.9, z: 52}
-    - {x: -155.60701, y: 49.9, z: 52}
-    - {x: -150.30739, y: 53.9, z: 52}
-    spawnPointsNormals:
-    - {x: -0.6399326, y: 0.7636788, z: 0.08532773}
-    - {x: -0.663265, y: 0.7441579, z: 0.079426624}
-    - {x: -0.6330636, y: 0.7674159, z: -0.10150501}
-    - {x: -0.6641617, y: 0.74584556, z: 0.05102537}
-    spawnedAssets:
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
+    spawnPoints: []
+    spawnPointsNormals: []
+    spawnedAssets: []
     rotateToFaceNormal: 1
-    assetsToSpawn: 8
+    assetsToSpawn: 5
     useMinSlope: 0
     minSlope: 0
     useMaxSlope: 1
@@ -117,7 +93,7 @@ MonoBehaviour:
     spawnPointsNormals: []
     spawnedAssets: []
     rotateToFaceNormal: 0
-    assetsToSpawn: 6
+    assetsToSpawn: 3
     useMinSlope: 0
     minSlope: 0
     useMaxSlope: 1
@@ -132,7 +108,7 @@ MonoBehaviour:
     spawnPointsNormals: []
     spawnedAssets: []
     rotateToFaceNormal: 1
-    assetsToSpawn: 6
+    assetsToSpawn: 2
     useMinSlope: 0
     minSlope: 0
     useMaxSlope: 0

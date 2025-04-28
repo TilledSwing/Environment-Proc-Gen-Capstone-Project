@@ -142,7 +142,7 @@ Material:
     - _SrcBlendAlpha: 1
     - _Surface: 0
     - _Tex1HeightEnd: 50
-    - _Tex1HeightStart: 22
+    - _Tex1HeightStart: 12
     - _Tex1SlopeEnd: 0.3
     - _Tex1SlopeStart: 0
     - _Tex2HeightEnd: 55
@@ -157,7 +157,7 @@ Material:
     - _Tex4HeightStart: 60
     - _Tex4SlopeEnd: 1
     - _Tex4SlopeStart: 0.8
-    - _UnderwaterTexHeightEnd: 25
+    - _UnderwaterTexHeightEnd: 15
     - _UnderwaterTexHeightStart: 0
     - _WorkflowMode: 1
     - _ZWrite: 1

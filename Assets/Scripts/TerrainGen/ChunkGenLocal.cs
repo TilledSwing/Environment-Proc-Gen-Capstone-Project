@@ -3,13 +3,15 @@ using System.Collections.Generic;
 using FishNet.Object;
 using UnityEngine;
 
-public class ChunkGen : NetworkBehaviour
+public class ChunkGenLocal : MonoBehaviour
 {
-    public static float maxViewDst = 50;
+    public static float maxViewDst = 100;
     public Transform viewer;
     public static Vector3 viewerPos;
     public int chunkSize;
     public int chunksVisible;
+    // public bool setMapSize = true;
+    // public int mapSize = 30;
     public TerrainDensityData terrainDensityData;
     public AssetSpawnData assetSpawnData;
     public Dictionary<Vector3, TerrainChunk> chunkDictionary = new Dictionary<Vector3, TerrainChunk>();
@@ -22,17 +24,6 @@ public class ChunkGen : NetworkBehaviour
         assetSpawnData = Resources.Load<AssetSpawnData>("AssetSpawnData");
         chunkSize = terrainDensityData.width;
         chunksVisible = Mathf.RoundToInt(maxViewDst/chunkSize);
-    }
-
-    public override void OnStartClient()
-    {
-        base.OnStartClient();
-        viewer = GameObject.Find("Player(Clone)").transform;
-    }
-
-    public override void OnStartServer()
-    {
-        base.OnStartServer();
         terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 10000);
         terrainDensityData.domainWarpSeed = UnityEngine.Random.Range(0, 10000);
     }
@@ -57,6 +48,8 @@ public class ChunkGen : NetworkBehaviour
             for(int yOffset = -chunksVisible; yOffset <= chunksVisible; yOffset++) {
                 for(int zOffset = -chunksVisible; zOffset <= chunksVisible; zOffset++) {
                     Vector3Int viewedChunkCoord = new Vector3Int(currentChunkCoordX + xOffset, currentChunkCoordY + yOffset, currentChunkCoordZ + zOffset);
+
+                    if(viewedChunkCoord.y < 0) break;
 
                     if(chunkDictionary.ContainsKey(viewedChunkCoord)) {
                         chunkDictionary[viewedChunkCoord].UpdateChunk();
