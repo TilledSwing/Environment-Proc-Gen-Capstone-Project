@@ -34,7 +34,7 @@ float noiseScale;
 bool terracing;
 int terraceHeight;
 
-int ChunkSize;
+uint ChunkSize;
 float3 ChunkPos;
 
 float xWarp;

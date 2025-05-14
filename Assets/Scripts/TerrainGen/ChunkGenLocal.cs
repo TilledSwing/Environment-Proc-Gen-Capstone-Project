@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class ChunkGenLocal : MonoBehaviour
 {
-    public float maxViewDst = 80;
+    public float maxViewDst = 100;
     public Transform viewer;
     public static Vector3 viewerPos;
     public int chunkSize;
@@ -24,8 +24,8 @@ public class ChunkGenLocal : MonoBehaviour
         assetSpawnData = Resources.Load<AssetSpawnData>("AssetSpawnData");
         chunkSize = terrainDensityData.width;
         chunksVisible = Mathf.RoundToInt(maxViewDst/chunkSize);
-        terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 10000);
-        terrainDensityData.domainWarpSeed = UnityEngine.Random.Range(0, 10000);
+        terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 100000);
+        terrainDensityData.domainWarpSeed = UnityEngine.Random.Range(0, 100000);
     }
 
     void Update()

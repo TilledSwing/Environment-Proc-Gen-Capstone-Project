@@ -9,8 +9,8 @@ struct Triangle {
 };
 
 AppendStructuredBuffer<Triangle> VertexBuffer;
-RWStructuredBuffer<float> HeightsBuffer;
-int ChunkSize;
+StructuredBuffer<float> HeightsBuffer;
+uint ChunkSize;
 float3 ChunkPos;
 float isolevel;
 bool lerpToggle;

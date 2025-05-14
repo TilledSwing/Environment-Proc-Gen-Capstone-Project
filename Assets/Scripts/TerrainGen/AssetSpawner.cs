@@ -2,6 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using FishNet.Demo.Benchmarks.NetworkTransforms;
+using Unity.Burst;
+using Unity.Collections;
+using Unity.Jobs;
+using Unity.Mathematics;
 using Unity.VisualScripting;
 using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
@@ -9,12 +13,14 @@ using UnityEngine.Scripting;
 
 public class AssetSpawner : MonoBehaviour
 {
-    // public List<SpawnableAsset> assets = new List<SpawnableAsset>();
+    public List<SpawnableAsset> assets = new List<SpawnableAsset>();
     private List<List<GameObject>> spawnedAssets = new List<List<GameObject>>();
-    public TerrainDensityData terrainDensityData;
+    public TerrainDensityData1 terrainDensityData;
     public AssetSpawnData assetSpawnData;
     public List<List<Vector3>> spawnPoints;
     public List<List<Vector3>> spawnPointsNormals;
+    // public NativeArray<float3> spawnPoints;
+    // public NativeArray<float3> spawnPointsNormals;
     private MeshFilter mf;
     private Mesh mesh; 
     private Vector3[] localVertices;
@@ -28,7 +34,7 @@ public class AssetSpawner : MonoBehaviour
     public void SpawnAssets()
     {
         assetLayer = LayerMask.GetMask("Asset Layer");
-        terrainDensityData = Resources.Load<TerrainDensityData>("TerrainDensityData");
+        terrainDensityData = Resources.Load<TerrainDensityData1>("TerrainDensityData1");
         assetSpawnData = Resources.Load<AssetSpawnData>("AssetSpawnData");
         if(!assetSpawnData.assets.ContainsKey(chunkPos)) {
             GetTerrainVerticesWorldPosition();
@@ -71,11 +77,11 @@ public class AssetSpawner : MonoBehaviour
         for(int i = 0; i < assetSpawnData.spawnableAssets.Count; i++) {
             int breakCounter = 0;
             int spawnThreshold = assetSpawnData.spawnableAssets[i].assetsToSpawn;
-            if(worldVertices.Length < Mathf.Pow(terrainDensityData.width, 2)/2) {
-                spawnThreshold /= 2;
-            }
+            int chunkSeed = terrainDensityData.noiseSeed + terrainDensityData.width * 73856093 + terrainDensityData.width * 19349663;
+            System.Random rng = new System.Random(chunkSeed);
+
             while(spawnPoints[i].Count < spawnThreshold) {
-                if(breakCounter >= 250) break;
+                if(breakCounter >= 150) break;
 
                 float highestVertexHeight = 0;
                 float lowestVertexHeight = 0;
@@ -90,15 +96,14 @@ public class AssetSpawner : MonoBehaviour
                 else if(assetSpawnData.spawnableAssets[i].underwaterAsset && lowestVertexHeight > terrainDensityData.waterLevel-3f) break;
                 else if(!assetSpawnData.spawnableAssets[i].underwaterAsset && highestVertexHeight < terrainDensityData.waterLevel) break;
 
-                int random = UnityEngine.Random.Range(0, worldVertices.Length);
+                // int random = UnityEngine.Random.Range(0, worldVertices.Length);
+                int random = rng.Next(0, worldVertices.Length);
                 Vector3 spawnPoint = worldVertices[random];
                 Vector3 spawnPointNormal = worldNormals[random];
-                if(!assetSpawnData.spawnableAssets[i].rotateToFaceNormal) {
-                    spawnPoint.y -= 0.75f;
-                }
-                else {
-                    spawnPoint.y -= 0.1f;
-                }
+
+                if(!assetSpawnData.spawnableAssets[i].rotateToFaceNormal) spawnPoint.y -= 0.75f;
+                else spawnPoint.y -= 0.1f;
+
                 float height = spawnPoint.y;
                 float slope = Vector3.Angle(worldNormals[random], Vector3.up);
 
@@ -135,6 +140,45 @@ public class AssetSpawner : MonoBehaviour
             }
         }
     }
+
+    // private void CreateSpawnPoints() {
+    //     spawnPoints = new NativeArray<float3>(assetsToSpawn, Allocator.TempJob);
+    //     spawnPoints = new NativeArray<float3>(assetsToSpawn, Allocator.TempJob);
+
+    //     SpawnJob spawnJob = new SpawnJob
+    //     {
+    //         seed = terrainDensityData.noiseSeed,
+    //         spawnPoints = spawnPoints,
+    //         spawnPointsNormals = spawnPointsNormals
+    //     };
+
+    //     JobHandle handle = spawnJob.Schedule(assetsToSpawn, 64);
+    //     handle.Complete();
+
+
+
+    //     spawnPoints.Dispose();
+    //     spawnPointsNormals.Dispose();
+    // }
+
+    // [BurstCompile]
+    // struct SpawnJob : IJobParallelFor
+    // {
+    //     public int seed;
+    //     public NativeArray<float3> spawnPoints;
+    //     public NativeArray<float3> spawnPointsNormals;
+
+    //     public void Execute(int index)
+    //     {
+    //         var rng = new Unity.Mathematics.Random((uint)(seed + index));
+    //         float3 pos = new float3(
+    //             rng.NextFloat(0f, areaSize.x),
+    //             rng.NextFloat(0f, areaSize.y),
+    //             rng.NextFloat(0f, areaSize.z)
+    //         );
+    //         spawnPoints[index] = pos;
+    //     }
+    // }
 
     private void SetSpawnPoints() {
         for(int i = 0; i < assetSpawnData.spawnableAssets.Count; i++) {

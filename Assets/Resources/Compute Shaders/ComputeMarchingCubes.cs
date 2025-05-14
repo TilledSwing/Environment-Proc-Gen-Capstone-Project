@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Collections;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class ComputeMarchingCubes : MonoBehaviour
 {
@@ -8,8 +10,7 @@ public class ComputeMarchingCubes : MonoBehaviour
     ComputeShader terrainDensityComputeShader;
     private MeshFilter meshFilter;
     private MeshCollider meshCollider;
-    public float[] flatHeights;
-    private List<Vector3> vertices = new List<Vector3>();
+    public List<Vector3> vertices = new List<Vector3>();
     private List<int> triangles = new List<int>();
     private Renderer mat;
     public TerrainDensityData1 terrainDensityData;
@@ -29,25 +30,31 @@ public class ComputeMarchingCubes : MonoBehaviour
     {
         InitializeChunk();
         SetNoiseSetting();
-        SetHeights();
+        GenerateMesh();
         if(Mathf.RoundToInt(chunkPos.y/terrainDensityData.width) == 0) {
             waterGen.UpdateMesh();
         }
-        GenerateMesh();
-        assetSpawner.SpawnAssets();
+        // assetSpawner.SpawnAssets();
+        SetTexture();
+    }
+
+    void OnMeshReady() {
+        // if(Mathf.RoundToInt(chunkPos.y/terrainDensityData.width) == 0) {
+        //     waterGen.UpdateMesh();
+        // }
+        // assetSpawner.SpawnAssets();
         SetTexture();
     }
 
     public void GenerateMesh() {
-        vertices.Clear();
-        triangles.Clear();
-        int kernel = marchingCubesComputeShader.FindKernel("MarchingCubes");
+        int marchingKernel = marchingCubesComputeShader.FindKernel("MarchingCubes");
+        int densityKernel = terrainDensityComputeShader.FindKernel("TerrainDensity");
 
-        ComputeBuffer heightsBuffer = new ComputeBuffer(flatHeights.Length, sizeof(float));
-        heightsBuffer.SetData(flatHeights);
-        marchingCubesComputeShader.SetBuffer(kernel, "HeightsBuffer", heightsBuffer);
+        ComputeBuffer heightsBuffer = new ComputeBuffer((terrainDensityData.width+1) * (terrainDensityData.width+1) * (terrainDensityData.width+1), sizeof(float));
+        terrainDensityComputeShader.SetBuffer(densityKernel, "HeightsBuffer", heightsBuffer);
+        marchingCubesComputeShader.SetBuffer(marchingKernel, "HeightsBuffer", heightsBuffer);
         ComputeBuffer vertexBuffer = new ComputeBuffer(terrainDensityData.width*terrainDensityData.width*terrainDensityData.width*5, sizeof(float) * 9, ComputeBufferType.Append);
-        marchingCubesComputeShader.SetBuffer(kernel, "VertexBuffer", vertexBuffer);
+        marchingCubesComputeShader.SetBuffer(marchingKernel, "VertexBuffer", vertexBuffer);
 
         marchingCubesComputeShader.SetInt("ChunkSize", terrainDensityData.width);
         marchingCubesComputeShader.SetVector("ChunkPos", (Vector3)chunkPos);
@@ -55,12 +62,48 @@ public class ComputeMarchingCubes : MonoBehaviour
         marchingCubesComputeShader.SetBool("lerpToggle", terrainDensityData.lerp);
 
         vertexBuffer.SetCounterValue(0);
-        marchingCubesComputeShader.Dispatch(kernel, Mathf.CeilToInt(terrainDensityData.width / 8f), Mathf.CeilToInt(terrainDensityData.width / 8f), Mathf.CeilToInt(terrainDensityData.width / 8f));
+        terrainDensityComputeShader.Dispatch(densityKernel, Mathf.CeilToInt(terrainDensityData.width / 8f)+1, Mathf.CeilToInt(terrainDensityData.width / 8f)+1, Mathf.CeilToInt(terrainDensityData.width / 8f)+1);
+        marchingCubesComputeShader.Dispatch(marchingKernel, Mathf.CeilToInt(terrainDensityData.width / 8f), Mathf.CeilToInt(terrainDensityData.width / 8f), Mathf.CeilToInt(terrainDensityData.width / 8f));
 
         heightsBuffer.Release();
 
         ComputeBuffer vertexCountBuffer = new ComputeBuffer(1, sizeof(int), ComputeBufferType.Raw);
         ComputeBuffer.CopyCount(vertexBuffer, vertexCountBuffer, 0);
+
+        // AsyncGPUReadback.Request(vertexCountBuffer, (AsyncGPUReadbackRequest countRequest) => {
+        //     if (countRequest.hasError)
+        //     {
+        //         Debug.LogError("Failed to read vertex count.");
+        //         vertexCountBuffer.Release();
+        //         vertexBuffer.Release();
+        //         return ;
+        //     }
+
+        //     int vertexCount = countRequest.GetData<int>()[0];
+        //     vertexCountBuffer.Release();
+
+        //     AsyncGPUReadback.Request(vertexBuffer, (AsyncGPUReadbackRequest dataRequest) => {
+        //         if (dataRequest.hasError)
+        //         {
+        //             Debug.LogError("Failed to read vertex buffer.");
+        //             vertexBuffer.Release();
+        //             return ;
+        //         }
+
+        //         Triangle[] vertexArray = new Triangle[vertexCount];
+        //         NativeArray<Triangle> rawData = dataRequest.GetData<Triangle>();
+
+        //         for (int i = 0; i < vertexCount; i++) {
+        //             vertexArray[i] = rawData[i];
+        //         }
+
+        //         vertexBuffer.Release();
+
+        //         SetupMesh(vertexCount, vertexArray);
+        //         OnMeshReady();
+        //     });
+        // });
+
         int[] vertexCountArray = { 0 };
         vertexCountBuffer.GetData(vertexCountArray);
         vertexCountBuffer.Release();
@@ -70,10 +113,14 @@ public class ComputeMarchingCubes : MonoBehaviour
         vertexBuffer.GetData(vertexArray, 0, 0, vertexCount);
         vertexBuffer.Release();
 
-        StartCoroutine(SetupMesh(vertexCount, vertexArray));
+        SetupMesh(vertexCount, vertexArray);
     }
 
-    public IEnumerator SetupMesh(int vertexCount, Triangle[] vertexArray) {
+    public void SetupMesh(int vertexCount, Triangle[] vertexArray) {
+        vertices.Clear();
+        triangles.Clear();
+        vertices.Capacity = vertexCount * 3;
+        triangles.Capacity = vertexCount * 3;
         for (int i = 0; i < vertexCount; i++) {
             Triangle t = vertexArray[i];
             vertices.Add(t.v1);
@@ -86,14 +133,14 @@ public class ComputeMarchingCubes : MonoBehaviour
 
         Mesh mesh = new Mesh();
         mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
-        mesh.vertices = vertices.ToArray();
-        mesh.triangles = triangles.ToArray();
+        mesh.SetVertices(vertices);
+        mesh.SetTriangles(triangles, 0);
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
+        mesh.RecalculateTangents();
 
         meshFilter.mesh = mesh;
         meshCollider.sharedMesh = mesh;
-        yield return null;
     }
 
     public void InitializeChunk() {
@@ -112,9 +159,9 @@ public class ComputeMarchingCubes : MonoBehaviour
     public void SetTexture() {
         mat = GetComponent<Renderer>();
         Material terrainMaterial = Resources.Load<Material>("Materials/TerrainTexture");
-        mat.sharedMaterial = terrainMaterial;
-        mat.sharedMaterial.SetFloat("_UnderwaterTexHeightEnd", terrainDensityData.waterLevel-15f);
-        mat.sharedMaterial.SetFloat("_Tex1HeightStart", terrainDensityData.waterLevel-18f);
+        mat.material = terrainMaterial;
+        mat.material.SetFloat("_UnderwaterTexHeightEnd", terrainDensityData.waterLevel-15f);
+        mat.material.SetFloat("_Tex1HeightStart", terrainDensityData.waterLevel-18f);
     }
 
     private void SetNoiseSetting() {
@@ -150,20 +197,5 @@ public class ComputeMarchingCubes : MonoBehaviour
         terrainDensityComputeShader.SetInt("terraceHeight", terrainDensityData.terraceHeight);
         terrainDensityComputeShader.SetInt("ChunkSize", terrainDensityData.width);
         terrainDensityComputeShader.SetVector("ChunkPos", (Vector3)chunkPos);
-    }
-
-    /// <summary>
-    /// Essentially the density function that will dictate the heights of the terrain
-    /// </summary>
-    private void SetHeights() {
-        flatHeights = new float[(terrainDensityData.width+1) * (terrainDensityData.width+1) * (terrainDensityData.width+1)];
-
-        int kernel = terrainDensityComputeShader.FindKernel("TerrainDensity");
-
-        ComputeBuffer heightsBuffer = new ComputeBuffer(flatHeights.Length, sizeof(float));
-        terrainDensityComputeShader.SetBuffer(kernel, "HeightsBuffer", heightsBuffer);
-        terrainDensityComputeShader.Dispatch(kernel, Mathf.CeilToInt(terrainDensityData.width / 8f)+1, Mathf.CeilToInt(terrainDensityData.width / 8f)+1, Mathf.CeilToInt(terrainDensityData.width / 8f)+1);
-        heightsBuffer.GetData(flatHeights);
-        heightsBuffer.Release();
     }
 }

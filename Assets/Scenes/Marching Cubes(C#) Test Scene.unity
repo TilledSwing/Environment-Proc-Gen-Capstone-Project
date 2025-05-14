@@ -14944,7 +14944,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0dda44ec4e4e2374ebe51af9f0c70b57, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  terrainDensityData: {fileID: 11400000, guid: 864756879a48256409eb8ae5f9a04619, type: 2}
+  assets: []
+  terrainDensityData: {fileID: 0}
   assetSpawnData: {fileID: 11400000, guid: ab99a77c69cf7db40993f26b05db1132, type: 2}
   chunkPos: {x: 0, y: 0, z: 0}
   assetLayer:
