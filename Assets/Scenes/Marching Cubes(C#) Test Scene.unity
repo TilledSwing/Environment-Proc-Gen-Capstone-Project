@@ -976,6 +976,37 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 106299902}
   m_CullTransparentMesh: 1
+--- !u!1 &113929773
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 113929775}
+  m_Layer: 0
+  m_Name: ComputeShaderTest
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &113929775
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 113929773}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -6.9375706, y: 57.742813, z: 111.951126}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &114449012
 GameObject:
   m_ObjectHideFlags: 0
@@ -14819,7 +14850,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1618158069
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14836,7 +14867,7 @@ MonoBehaviour:
   viewer: {fileID: 1588582780}
   chunkSize: 0
   chunksVisible: 0
-  terrainDensityData: {fileID: 11400000, guid: 864756879a48256409eb8ae5f9a04619, type: 2}
+  terrainDensityData: {fileID: 11400000, guid: 4bc939f839855ea45ade17dce060eea5, type: 2}
   assetSpawnData: {fileID: 11400000, guid: 29949715b352478458342a45d2b907a0, type: 2}
 --- !u!4 &1618158070
 Transform:
@@ -14870,7 +14901,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1627581232
 Transform:
   m_ObjectHideFlags: 0
@@ -16612,7 +16643,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1838274976
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16631,7 +16662,7 @@ MonoBehaviour:
   viewer: {fileID: 1588582780}
   chunkSize: 0
   chunksVisible: 0
-  terrainDensityData: {fileID: 11400000, guid: 864756879a48256409eb8ae5f9a04619, type: 2}
+  terrainDensityData: {fileID: 11400000, guid: 4bc939f839855ea45ade17dce060eea5, type: 2}
   assetSpawnData: {fileID: 11400000, guid: 29949715b352478458342a45d2b907a0, type: 2}
 --- !u!4 &1838274977
 Transform:
@@ -19852,3 +19883,4 @@ SceneRoots:
   - {fileID: 1838274977}
   - {fileID: 1618158070}
   - {fileID: 1588582780}
+  - {fileID: 113929775}

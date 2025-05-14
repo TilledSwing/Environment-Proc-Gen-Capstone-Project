@@ -3,12 +3,6 @@ using UnityEngine;
 
 public class MarchingCubesTables : MonoBehaviour
 {
-    struct Triangle {
-        float3 vertA;
-        float3 vertB;
-        float3 vertC;
-    }
-
     public static readonly Vector3Int[] vertexOffsetTable = new Vector3Int[8]{
         new Vector3Int(0, 0, 0),
 		new Vector3Int(1, 0, 0),
@@ -26,8 +20,7 @@ public class MarchingCubesTables : MonoBehaviour
 
     };
 
-    public static readonly int[,] triangleTable = new int[,]
-    {
+    public static readonly int[,] triangleTable = new int[,] {
         {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
         {0, 8, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
         {0, 1, 9, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},

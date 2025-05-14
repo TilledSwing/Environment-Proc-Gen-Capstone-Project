@@ -1,0 +1,81 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c29ee72cee6fb9144bd844ec6a8f7ebb, type: 3}
+  m_Name: TerrainDensityData1
+  m_EditorClassIdentifier: 
+  selectedNoiseDimension: 1
+  noiseDimension: 1
+  selectedNoiseType: 0
+  noiseType: 0
+  selectedNoiseFractalType: 1
+  noiseFractalType: 1
+  selectedRotationType3D: 0
+  rotationType3D: 0
+  noiseSeed: 4449
+  noiseFractalOctaves: 5
+  noiseFractalLacunarity: 2
+  noiseFractalGain: 0.5
+  fractalWeightedStrength: 0
+  noiseFrequency: 0.01
+  domainWarpToggle: 0
+  selectedDomainWarpType: 0
+  domainWarpType: 0
+  selectedDomainWarpFractalType: 0
+  domainWarpFractalType: 0
+  domainWarpAmplitude: 1
+  domainWarpSeed: 7158
+  domainWarpFractalOctaves: 5
+  domainWarpFractalLacunarity: 2
+  domainWarpFractalGain: 0.5
+  domainWarpFrequency: 0.01
+  selectedCellularDistanceFunction: 1
+  cellularDistanceFunction: 1
+  selectedCellularReturnType: 1
+  cellularReturnType: 1
+  cellularJitter: 1
+  width: 32
+  height: 100
+  noiseScale: 0.6
+  isolevel: 0.5
+  waterLevel: 35
+  lerp: 1
+  terracing: 0
+  terraceHeight: 2
+  defaultNoiseDimension: 1
+  defaultNoiseType: 0
+  defaultNoiseFractalType: 1
+  defaultNoiseSeed: 0
+  defaultNoiseFractalOctaves: 5
+  defaultNoiseFractalLacunarity: 2
+  defaultNoiseFractalGain: 0.5
+  defaultFractalWeightedStrength: 0
+  defaultNoiseFrequency: 0.01
+  defaultDomainWarpToggle: 0
+  defaultDomainWarpType: 0
+  defaultDomainWarpFractalType: 0
+  defaultDomainWarpAmplitude: 1
+  defaultDomainWarpSeed: 0
+  defaultDomainWarpFractalOctaves: 5
+  defaultDomainWarpFractalLacunarity: 2
+  defaultDomainWarpFractalGain: 0.5
+  defaultDomainWarpFrequency: 0.01
+  defaultCellularDistanceFunction: 1
+  defaultCellularReturnType: 1
+  defaultCellularJitter: 1
+  defaultWidth: 32
+  defaultHeight: 90
+  defaultNoiseScale: 0.6
+  defaultIsolevel: 0.5
+  defaultWaterLevel: 35
+  defaultLerp: 1
+  defaultTerracing: 0
+  defaultTerraceHeight: 2

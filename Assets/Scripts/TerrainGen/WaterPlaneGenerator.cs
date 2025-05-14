@@ -11,7 +11,7 @@ public class WaterPlaneGenerator : MonoBehaviour
     private List<int> triangles = new List<int>();
     private MeshFilter meshFilter;
     private Renderer mat;
-    public MarchingCubes marchingCubes;
+    public ComputeMarchingCubes marchingCubes;
     public TerrainDensityData terrainDensityData;
     private int width;
     private int waterLevel;
@@ -23,7 +23,7 @@ public class WaterPlaneGenerator : MonoBehaviour
         mat = GetComponent<Renderer>();
         Material waterMaterial = Resources.Load<Material>("Materials/WaterMat");
         mat.sharedMaterial = waterMaterial;
-        marchingCubes = gameObject.GetComponentInParent<MarchingCubes>();
+        marchingCubes = gameObject.GetComponentInParent<ComputeMarchingCubes>();
         terrainDensityData = Resources.Load<TerrainDensityData>("TerrainDensityData");
     }
 

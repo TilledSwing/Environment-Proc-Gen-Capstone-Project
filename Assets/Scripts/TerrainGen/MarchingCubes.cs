@@ -10,7 +10,6 @@ public class MarchingCubes : MonoBehaviour
     public float[,,] heights;
     private List<Vector3> vertices = new List<Vector3>();
     private List<int> triangles = new List<int>();
-    private List<Vector3> normals = new List<Vector3>();
     private MeshFilter meshFilter;
     private MeshCollider meshCollider;
     private Renderer mat;
@@ -44,8 +43,6 @@ public class MarchingCubes : MonoBehaviour
         meshCollider = gameObject.AddComponent<MeshCollider>();
         terrainDensityData = Resources.Load<TerrainDensityData>("TerrainDensityData");
         assetSpawner = gameObject.GetComponent<AssetSpawner>();
-        // assetSpawner = gameObject.AddComponent<AssetSpawner>();
-        // assetSpawner.chunkPos = chunkPos;
         mat = GetComponent<Renderer>();
         Material terrainMaterial = Resources.Load<Material>("Materials/TerrainTexture");
         mat.sharedMaterial = terrainMaterial;
@@ -61,8 +58,8 @@ public class MarchingCubes : MonoBehaviour
     /// </summary>
     public void GenerateTerrainData()
     {
-        terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 10000);
-        terrainDensityData.domainWarpSeed = UnityEngine.Random.Range(0, 10000);
+        // terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 10000);
+        // terrainDensityData.domainWarpSeed = UnityEngine.Random.Range(0, 10000);
         UpdateMesh();
     }
 
@@ -240,9 +237,6 @@ public class MarchingCubes : MonoBehaviour
 
                 vertices.Add(vertex);
                 triangles.Add(vertices.Count - 1);
-
-                Vector3 faceNormal = Vector3.Cross(edgeV2 - vertex, edgeV1 - vertex).normalized;
-                normals.Add(faceNormal);
 
                 edgeIndex++;
             }

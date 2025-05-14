@@ -12,7 +12,7 @@ public class ChunkGenLocal : MonoBehaviour
     public int chunksVisible;
     // public bool setMapSize = true;
     // public int mapSize = 30;
-    public TerrainDensityData terrainDensityData;
+    public TerrainDensityData1 terrainDensityData;
     public AssetSpawnData assetSpawnData;
     public Dictionary<Vector3, TerrainChunk> chunkDictionary = new Dictionary<Vector3, TerrainChunk>();
     public Dictionary<Vector3Int, List<SpawnableAsset>> assets = new Dictionary<Vector3Int, List<SpawnableAsset>>();
@@ -20,7 +20,7 @@ public class ChunkGenLocal : MonoBehaviour
 
     void Start()
     {
-        terrainDensityData = Resources.Load<TerrainDensityData>("TerrainDensityData");
+        terrainDensityData = Resources.Load<TerrainDensityData1>("TerrainDensityData1");
         assetSpawnData = Resources.Load<AssetSpawnData>("AssetSpawnData");
         chunkSize = terrainDensityData.width;
         chunksVisible = Mathf.RoundToInt(maxViewDst/chunkSize);
@@ -67,7 +67,7 @@ public class ChunkGenLocal : MonoBehaviour
 
     public class TerrainChunk {
         GameObject chunk;
-        MarchingCubes marchingCubes;
+        ComputeMarchingCubes marchingCubes;
         AssetSpawner assetSpawner;
         Vector3Int chunkPos;
         Bounds bounds;
@@ -77,7 +77,7 @@ public class ChunkGenLocal : MonoBehaviour
             chunk = new GameObject("Chunk");
             assetSpawner = chunk.AddComponent<AssetSpawner>();
             assetSpawner.chunkPos = chunkPos;
-            marchingCubes = chunk.AddComponent<MarchingCubes>();
+            marchingCubes = chunk.AddComponent<ComputeMarchingCubes>();
             marchingCubes.chunkPos = chunkPos;
             chunk.transform.SetParent(parent);
             SetVisible(false);

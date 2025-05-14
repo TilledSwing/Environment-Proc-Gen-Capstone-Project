@@ -29,7 +29,7 @@ public class AssetSpawner : MonoBehaviour
     {
         assetLayer = LayerMask.GetMask("Asset Layer");
         terrainDensityData = Resources.Load<TerrainDensityData>("TerrainDensityData");
-        assetSpawnData = Resources.Load<AssetSpawnData>("AssetSpawnData1");
+        assetSpawnData = Resources.Load<AssetSpawnData>("AssetSpawnData");
         if(!assetSpawnData.assets.ContainsKey(chunkPos)) {
             GetTerrainVerticesWorldPosition();
             InitializeData();

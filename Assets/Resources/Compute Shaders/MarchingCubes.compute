@@ -1,0 +1,100 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel MarchingCubes
+#include "/MarchingCubesTables.hlsl"
+
+struct Triangle {
+    float3 v1;
+    float3 v2;
+    float3 v3;
+};
+
+AppendStructuredBuffer<Triangle> VertexBuffer;
+RWStructuredBuffer<float> HeightsBuffer;
+int ChunkSize;
+float3 ChunkPos;
+float isolevel;
+bool lerpToggle;
+
+int FlattenIndex(float3 id, int size) {
+    return id.x * (size + 1) * (size + 1) + id.y * (size + 1) + id.z;
+}
+
+[numthreads(8,8,8)]
+void MarchingCubes (uint3 id : SV_DispatchThreadID)
+{
+    if(id.x >= ChunkSize || id.y >= ChunkSize || id.z >= ChunkSize) {
+        return ;
+    }
+
+    float cubeVertices[8] = {
+        HeightsBuffer[FlattenIndex(float3(id.x,id.y,id.z) + vertexOffsetTable[0], ChunkSize)],
+        HeightsBuffer[FlattenIndex(float3(id.x,id.y,id.z) + vertexOffsetTable[1], ChunkSize)],
+        HeightsBuffer[FlattenIndex(float3(id.x,id.y,id.z) + vertexOffsetTable[2], ChunkSize)],
+        HeightsBuffer[FlattenIndex(float3(id.x,id.y,id.z) + vertexOffsetTable[3], ChunkSize)],
+        HeightsBuffer[FlattenIndex(float3(id.x,id.y,id.z) + vertexOffsetTable[4], ChunkSize)],
+        HeightsBuffer[FlattenIndex(float3(id.x,id.y,id.z) + vertexOffsetTable[5], ChunkSize)],
+        HeightsBuffer[FlattenIndex(float3(id.x,id.y,id.z) + vertexOffsetTable[6], ChunkSize)],
+        HeightsBuffer[FlattenIndex(float3(id.x,id.y,id.z) + vertexOffsetTable[7], ChunkSize)]
+    };
+
+    float3 cubePosition = float3(id.x + ChunkPos.x, id.y + ChunkPos.y, id.z + ChunkPos.z);
+
+    int configurationIndex = 0;
+    
+    if (cubeVertices[0] < isolevel) configurationIndex |= 1;
+    if (cubeVertices[1] < isolevel) configurationIndex |= 2;
+    if (cubeVertices[2] < isolevel) configurationIndex |= 4;
+    if (cubeVertices[3] < isolevel) configurationIndex |= 8;
+    if (cubeVertices[4] < isolevel) configurationIndex |= 16;
+    if (cubeVertices[5] < isolevel) configurationIndex |= 32;
+    if (cubeVertices[6] < isolevel) configurationIndex |= 64;
+    if (cubeVertices[7] < isolevel) configurationIndex |= 128;
+
+    if(configurationIndex == 0 || configurationIndex == 255) {
+        return ;
+    }
+
+    int edgeIndex = 0;
+
+    for(int tri = 0; tri < 5; tri++) {
+        int edge1Value = triangleTable[configurationIndex][edgeIndex];
+        int edge2Value = triangleTable[configurationIndex][edgeIndex+1];
+        int edge3Value = triangleTable[configurationIndex][edgeIndex+2];
+
+        if(edge1Value == -1 || edge2Value == -1 || edge3Value == -1) {
+            return ;
+        }
+
+        float3 edge1V1 = cubePosition + vertexOffsetTable[edgeIndexTable[edge1Value][0]];
+        float3 edge1V2 = cubePosition + vertexOffsetTable[edgeIndexTable[edge1Value][1]];
+
+        float3 edge2V1 = cubePosition + vertexOffsetTable[edgeIndexTable[edge2Value][0]];
+        float3 edge2V2 = cubePosition + vertexOffsetTable[edgeIndexTable[edge2Value][1]];
+
+        float3 edge3V1 = cubePosition + vertexOffsetTable[edgeIndexTable[edge3Value][0]];
+        float3 edge3V2 = cubePosition + vertexOffsetTable[edgeIndexTable[edge3Value][1]];
+
+        float3 vertex1;
+        float3 vertex2;
+        float3 vertex3;
+
+        if(lerpToggle) {
+            vertex1 = lerp(edge1V1, edge1V2, (isolevel - cubeVertices[edgeIndexTable[edge1Value][0]]) / (cubeVertices[edgeIndexTable[edge1Value][1]] - cubeVertices[edgeIndexTable[edge1Value][0]]));
+            vertex2 = lerp(edge2V1, edge2V2, (isolevel - cubeVertices[edgeIndexTable[edge2Value][0]]) / (cubeVertices[edgeIndexTable[edge2Value][1]] - cubeVertices[edgeIndexTable[edge2Value][0]]));
+            vertex3 = lerp(edge3V1, edge3V2, (isolevel - cubeVertices[edgeIndexTable[edge3Value][0]]) / (cubeVertices[edgeIndexTable[edge3Value][1]] - cubeVertices[edgeIndexTable[edge3Value][0]]));
+        }
+        else {
+            vertex1 = (edge1V1 + edge1V2) / 2;
+            vertex2 = (edge2V1 + edge2V2) / 2;
+            vertex3 = (edge3V1 + edge3V2) / 2;
+        }
+
+        Triangle tri;
+        tri.v1 = vertex1;
+        tri.v2 = vertex2;
+        tri.v3 = vertex3;
+        VertexBuffer.Append(tri);
+
+        edgeIndex+=3;
+    }
+}

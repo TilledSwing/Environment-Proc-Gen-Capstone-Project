@@ -10,7 +10,7 @@ public class ChunkGenNetwork : NetworkBehaviour
     public static Vector3 viewerPos;
     public int chunkSize;
     public int chunksVisible;
-    public TerrainDensityData terrainDensityData;
+    public TerrainDensityData1 terrainDensityData;
     public AssetSpawnData assetSpawnData;
     public Dictionary<Vector3, TerrainChunk> chunkDictionary = new Dictionary<Vector3, TerrainChunk>();
     public Dictionary<Vector3Int, List<SpawnableAsset>> assets = new Dictionary<Vector3Int, List<SpawnableAsset>>();
@@ -18,7 +18,7 @@ public class ChunkGenNetwork : NetworkBehaviour
 
     void Awake()
     {
-        terrainDensityData = Resources.Load<TerrainDensityData>("TerrainDensityData");
+        terrainDensityData = Resources.Load<TerrainDensityData1>("TerrainDensityData1");
         assetSpawnData = Resources.Load<AssetSpawnData>("AssetSpawnData");
         chunkSize = terrainDensityData.width;
         chunksVisible = Mathf.RoundToInt(maxViewDst/chunkSize);
@@ -29,7 +29,9 @@ public class ChunkGenNetwork : NetworkBehaviour
         base.OnStartClient();
         viewer = GameObject.Find("Player(Clone)").transform;
         GameObject localChunkManager = GameObject.Find("LocalChunkManager");
-        if(localChunkManager.activeSelf) localChunkManager.SetActive(false);
+        if(localChunkManager) {
+            if(localChunkManager.activeSelf) localChunkManager.SetActive(false);
+        }
     }
 
     // public override void OnStartServer()
@@ -74,7 +76,7 @@ public class ChunkGenNetwork : NetworkBehaviour
 
     public class TerrainChunk {
         GameObject chunk;
-        MarchingCubes marchingCubes;
+        ComputeMarchingCubes marchingCubes;
         AssetSpawner assetSpawner;
         Vector3Int chunkPos;
         Bounds bounds;
@@ -84,7 +86,7 @@ public class ChunkGenNetwork : NetworkBehaviour
             chunk = new GameObject("Chunk");
             assetSpawner = chunk.AddComponent<AssetSpawner>();
             assetSpawner.chunkPos = chunkPos;
-            marchingCubes = chunk.AddComponent<MarchingCubes>();
+            marchingCubes = chunk.AddComponent<ComputeMarchingCubes>();
             marchingCubes.chunkPos = chunkPos;
             chunk.transform.SetParent(parent);
             SetVisible(false);
