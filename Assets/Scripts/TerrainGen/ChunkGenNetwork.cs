@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class ChunkGenNetwork : NetworkBehaviour
 {
-    public static float maxViewDst = 100;
+    public float maxViewDst = 100;
     public Transform viewer;
     public static Vector3 viewerPos;
     public int chunkSize;
@@ -34,11 +34,6 @@ public class ChunkGenNetwork : NetworkBehaviour
         }
     }
 
-    // public override void OnStartServer()
-    // {
-    //     base.OnStartServer();
-    // }
-
     void Update()
     {
         viewerPos = new Vector3(viewer.position.x,viewer.position.y,viewer.position.z);
@@ -61,7 +56,7 @@ public class ChunkGenNetwork : NetworkBehaviour
                     Vector3Int viewedChunkCoord = new Vector3Int(currentChunkCoordX + xOffset, currentChunkCoordY + yOffset, currentChunkCoordZ + zOffset);
 
                     if(chunkDictionary.ContainsKey(viewedChunkCoord)) {
-                        chunkDictionary[viewedChunkCoord].UpdateChunk();
+                        chunkDictionary[viewedChunkCoord].UpdateChunk(maxViewDst, chunkSize);
                         if(chunkDictionary[viewedChunkCoord].IsVisible()) {
                             chunksVisibleLastUpdate.Add(chunkDictionary[viewedChunkCoord]);
                         }
@@ -80,10 +75,12 @@ public class ChunkGenNetwork : NetworkBehaviour
         AssetSpawner assetSpawner;
         Vector3Int chunkPos;
         Bounds bounds;
+        MeshCollider meshCollider;
         public TerrainChunk(Vector3Int chunkCoord, int chunkSize, Transform parent) {
             chunkPos = chunkCoord * chunkSize;
             bounds = new Bounds(chunkPos, Vector3.one * chunkSize);
             chunk = new GameObject("Chunk");
+            meshCollider = chunk.AddComponent<MeshCollider>();
             assetSpawner = chunk.AddComponent<AssetSpawner>();
             assetSpawner.chunkPos = chunkPos;
             marchingCubes = chunk.AddComponent<ComputeMarchingCubes>();
@@ -92,15 +89,20 @@ public class ChunkGenNetwork : NetworkBehaviour
             SetVisible(false);
         }
 
-        public void UpdateChunk() {
+        public void UpdateChunk(float maxViewDst, int chunkSize) {
             float viewerDstFromBound = Mathf.Sqrt(bounds.SqrDistance(viewerPos));
+            bool colliderEnable = viewerDstFromBound <= chunkSize;
             bool visible = viewerDstFromBound <= maxViewDst;
+            SetCollider(colliderEnable);
             SetVisible(visible);
         }
 
         public void SetVisible(bool visible) {
             chunk.SetActive(visible);
-            // assetSpawner.SetAssetsActive(visible);
+        }
+
+        public void SetCollider(bool colliderEnable) {
+            meshCollider.enabled = colliderEnable;
         }
 
         public bool IsVisible(){

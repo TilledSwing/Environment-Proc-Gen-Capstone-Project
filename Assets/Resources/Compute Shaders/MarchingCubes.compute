@@ -2,10 +2,17 @@
 #pragma kernel MarchingCubes
 #include "/MarchingCubesTables.hlsl"
 
-struct Triangle {
-    float3 v1;
-    float3 v2;
-    float3 v3;
+struct Vertex
+{
+    float3 position;
+    float3 normal;
+};
+
+struct Triangle
+{
+    Vertex v1;
+    Vertex v2;
+    Vertex v3;
 };
 
 AppendStructuredBuffer<Triangle> VertexBuffer;
@@ -89,10 +96,15 @@ void MarchingCubes (uint3 id : SV_DispatchThreadID)
             vertex3 = (edge3V1 + edge3V2) / 2;
         }
 
+        float3 normal = normalize(cross(vertex2 - vertex1, vertex3 - vertex1));
+
         Triangle tri;
-        tri.v1 = vertex1;
-        tri.v2 = vertex2;
-        tri.v3 = vertex3;
+        tri.v1.position = vertex1;
+        tri.v2.position = vertex2;
+        tri.v3.position = vertex3;
+        tri.v1.normal = normal;
+        tri.v2.normal = normal;
+        tri.v3.normal = normal;
         VertexBuffer.Append(tri);
 
         edgeIndex+=3;

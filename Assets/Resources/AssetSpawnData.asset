@@ -14,11 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   spawnableAssets:
   - asset: {fileID: 6577857602279842889, guid: 6ecd8b4bc211e454ea918d6d527c28f7, type: 3}
-    spawnPoints: []
-    spawnPointsNormals: []
     spawnedAssets: []
     rotateToFaceNormal: 0
-    assetsToSpawn: 1
+    spawnProbability: 0.5
     useMinSlope: 0
     minSlope: 0
     useMaxSlope: 1
@@ -29,11 +27,9 @@ MonoBehaviour:
     maxHeight: 50
     underwaterAsset: 0
   - asset: {fileID: 2007192654614371893, guid: db907286f5ae1d5498c4f2ab90c984f2, type: 3}
-    spawnPoints: []
-    spawnPointsNormals: []
     spawnedAssets: []
     rotateToFaceNormal: 1
-    assetsToSpawn: 2
+    spawnProbability: 0.4
     useMinSlope: 0
     minSlope: 0
     useMaxSlope: 1
@@ -44,11 +40,10 @@ MonoBehaviour:
     maxHeight: 50
     underwaterAsset: 0
   - asset: {fileID: 7646758127176492012, guid: f94ff99c261e9924bbbb894292ced45c, type: 3}
-    spawnPoints: []
-    spawnPointsNormals: []
-    spawnedAssets: []
+    spawnedAssets:
+    - {fileID: 0}
     rotateToFaceNormal: 0
-    assetsToSpawn: 2
+    spawnProbability: 0.7
     useMinSlope: 0
     minSlope: 0
     useMaxSlope: 1
@@ -59,11 +54,9 @@ MonoBehaviour:
     maxHeight: 0
     underwaterAsset: 0
   - asset: {fileID: 7762856170357784386, guid: 1f761016c03a561418ff210aec563e01, type: 3}
-    spawnPoints: []
-    spawnPointsNormals: []
     spawnedAssets: []
     rotateToFaceNormal: 1
-    assetsToSpawn: 4
+    spawnProbability: 0.5
     useMinSlope: 0
     minSlope: 0
     useMaxSlope: 1
@@ -74,11 +67,9 @@ MonoBehaviour:
     maxHeight: 0
     underwaterAsset: 0
   - asset: {fileID: 5314847637665799501, guid: f2612ce08bab1de44b3c77b0ccafd3a6, type: 3}
-    spawnPoints: []
-    spawnPointsNormals: []
     spawnedAssets: []
     rotateToFaceNormal: 1
-    assetsToSpawn: 5
+    spawnProbability: 0.6
     useMinSlope: 0
     minSlope: 0
     useMaxSlope: 1
@@ -89,11 +80,9 @@ MonoBehaviour:
     maxHeight: 0
     underwaterAsset: 0
   - asset: {fileID: 4698888469727053071, guid: 8ae9bda731aed8040823244eff705ef1, type: 3}
-    spawnPoints: []
-    spawnPointsNormals: []
     spawnedAssets: []
     rotateToFaceNormal: 0
-    assetsToSpawn: 3
+    spawnProbability: 0.6
     useMinSlope: 0
     minSlope: 0
     useMaxSlope: 1
@@ -104,11 +93,9 @@ MonoBehaviour:
     maxHeight: 0
     underwaterAsset: 1
   - asset: {fileID: 8085658037914830548, guid: 18981bbe1e4a71543b15e4922dd3247f, type: 3}
-    spawnPoints: []
-    spawnPointsNormals: []
     spawnedAssets: []
     rotateToFaceNormal: 1
-    assetsToSpawn: 2
+    spawnProbability: 0.5
     useMinSlope: 0
     minSlope: 0
     useMaxSlope: 0

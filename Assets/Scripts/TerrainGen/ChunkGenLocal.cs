@@ -52,7 +52,7 @@ public class ChunkGenLocal : MonoBehaviour
                     if(viewedChunkCoord.y < 0) break;
 
                     if(chunkDictionary.ContainsKey(viewedChunkCoord)) {
-                        chunkDictionary[viewedChunkCoord].UpdateChunk(maxViewDst);
+                        chunkDictionary[viewedChunkCoord].UpdateChunk(maxViewDst, chunkSize);
                         if(chunkDictionary[viewedChunkCoord].IsVisible()) {
                             chunksVisibleLastUpdate.Add(chunkDictionary[viewedChunkCoord]);
                         }
@@ -71,10 +71,12 @@ public class ChunkGenLocal : MonoBehaviour
         AssetSpawner assetSpawner;
         Vector3Int chunkPos;
         Bounds bounds;
+        MeshCollider meshCollider;
         public TerrainChunk(Vector3Int chunkCoord, int chunkSize, Transform parent) {
             chunkPos = chunkCoord * chunkSize;
             bounds = new Bounds(chunkPos, Vector3.one * chunkSize);
             chunk = new GameObject("Chunk");
+            meshCollider = chunk.AddComponent<MeshCollider>();
             assetSpawner = chunk.AddComponent<AssetSpawner>();
             assetSpawner.chunkPos = chunkPos;
             marchingCubes = chunk.AddComponent<ComputeMarchingCubes>();
@@ -83,15 +85,20 @@ public class ChunkGenLocal : MonoBehaviour
             SetVisible(false);
         }
 
-        public void UpdateChunk(float maxViewDst) {
+        public void UpdateChunk(float maxViewDst, int chunkSize) {
             float viewerDstFromBound = Mathf.Sqrt(bounds.SqrDistance(viewerPos));
+            bool colliderEnable = viewerDstFromBound <= chunkSize;
             bool visible = viewerDstFromBound <= maxViewDst;
+            SetCollider(colliderEnable);
             SetVisible(visible);
         }
 
         public void SetVisible(bool visible) {
             chunk.SetActive(visible);
-            // assetSpawner.SetAssetsActive(visible);
+        }
+
+        public void SetCollider(bool colliderEnable) {
+            meshCollider.enabled = colliderEnable;
         }
 
         public bool IsVisible(){

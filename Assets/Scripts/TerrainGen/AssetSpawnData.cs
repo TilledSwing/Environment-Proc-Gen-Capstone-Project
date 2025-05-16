@@ -10,8 +10,6 @@ public class AssetSpawnData : ScriptableObject
 
     public void ResetSpawnPoints() {
         for(int i = 0; i < spawnableAssets.Count; i++) {
-            spawnableAssets[i].spawnPoints.Clear();
-            spawnableAssets[i].spawnPointsNormals.Clear();
             spawnableAssets[i].spawnedAssets.Clear();
         }
     }

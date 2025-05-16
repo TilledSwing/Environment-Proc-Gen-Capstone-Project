@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using FishNet.Demo.Benchmarks.NetworkTransforms;
@@ -10,201 +11,156 @@ using Unity.VisualScripting;
 using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
 using UnityEngine.Scripting;
+using UnityEngine.UIElements;
 
 public class AssetSpawner : MonoBehaviour
 {
+    ComputeShader spawnPointsComputeShader;
+    public int vertexBufferLength;
     public List<SpawnableAsset> assets = new List<SpawnableAsset>();
     private List<List<GameObject>> spawnedAssets = new List<List<GameObject>>();
     public TerrainDensityData1 terrainDensityData;
     public AssetSpawnData assetSpawnData;
-    public List<List<Vector3>> spawnPoints;
-    public List<List<Vector3>> spawnPointsNormals;
-    // public NativeArray<float3> spawnPoints;
-    // public NativeArray<float3> spawnPointsNormals;
+    public List<ComputeMarchingCubes.Vertex[]> spawnPoints;
+    public List<List<ComputeMarchingCubes.Vertex>> acceptedSpawnPoints;
     private MeshFilter mf;
-    private Mesh mesh; 
-    private Vector3[] localVertices;
-    private Vector3[] localNormals;
-    private Vector3[] worldVertices;
-    private Vector3[] worldNormals;
+    private Mesh mesh;
+    public ComputeMarchingCubes.Vertex[] worldVertices;
     public Vector3Int chunkPos;
     public LayerMask assetLayer;
-    public int assetSpacing = 12;
+    public int assetSpacing = 8;
+    public int maxAttempts = 16;
 
     public void SpawnAssets()
     {
         assetLayer = LayerMask.GetMask("Asset Layer");
         terrainDensityData = Resources.Load<TerrainDensityData1>("TerrainDensityData1");
         assetSpawnData = Resources.Load<AssetSpawnData>("AssetSpawnData");
-        if(!assetSpawnData.assets.ContainsKey(chunkPos)) {
-            GetTerrainVerticesWorldPosition();
+        vertexBufferLength = worldVertices.Length;
+        if(!assetSpawnData.assets.ContainsKey(chunkPos) && vertexBufferLength > 0) {
             InitializeData();
             CreateSpawnPoints();
             SetSpawnPoints();
-            AssetSpawnHandler();
+            StartCoroutine(AssetSpawnHandler());
         }
     }
 
     private void InitializeData() {
-        spawnPoints = new List<List<Vector3>>(assetSpawnData.spawnableAssets.Count);
-        spawnPointsNormals = new List<List<Vector3>>(assetSpawnData.spawnableAssets.Count);
+        spawnPointsComputeShader = Resources.Load<ComputeShader>("Compute Shaders/SpawnPoints");
+        spawnPoints = new List<ComputeMarchingCubes.Vertex[]>(assetSpawnData.spawnableAssets.Count);
+        acceptedSpawnPoints = new List<List<ComputeMarchingCubes.Vertex>>(assetSpawnData.spawnableAssets.Count);
         spawnedAssets = new List<List<GameObject>>(assetSpawnData.spawnableAssets.Count);
         assetSpawnData.assets.Add(chunkPos, assetSpawnData.spawnableAssets);
         for (int i = 0; i < assetSpawnData.spawnableAssets.Count; i++) {
-            spawnPoints.Add(new List<Vector3>());
-            spawnPointsNormals.Add(new List<Vector3>());
+            spawnPoints.Add(new ComputeMarchingCubes.Vertex[maxAttempts]);
+            acceptedSpawnPoints.Add(new List<ComputeMarchingCubes.Vertex>());
             spawnedAssets.Add(new List<GameObject>());
-        }
-
-    }
-
-    private void GetTerrainVerticesWorldPosition()
-    {
-        mf = GetComponent<MeshFilter>();
-        mesh = mf.mesh;
-        localVertices = mesh.vertices;
-        localNormals = mesh.normals;
-        worldVertices = new Vector3[localVertices.Length];
-        worldNormals = new Vector3[localNormals.Length];
-        for (int i = 0; i < localVertices.Length; i++)
-        {
-            worldVertices[i] = mf.transform.TransformPoint(localVertices[i]);
-            worldNormals[i] = mf.transform.TransformDirection(localNormals[i]);
         }
     }
 
     private void CreateSpawnPoints() {
+        int spawnPointsKernel = spawnPointsComputeShader.FindKernel("SpawnPoints");
+        ComputeBuffer vertexBuffer = new ComputeBuffer(vertexBufferLength, sizeof(float) * 6);
+        vertexBuffer.SetData(worldVertices);
+        spawnPointsComputeShader.SetBuffer(spawnPointsKernel, "VertexBuffer", vertexBuffer);
         for(int i = 0; i < assetSpawnData.spawnableAssets.Count; i++) {
-            int breakCounter = 0;
-            int spawnThreshold = assetSpawnData.spawnableAssets[i].assetsToSpawn;
-            int chunkSeed = terrainDensityData.noiseSeed + terrainDensityData.width * 73856093 + terrainDensityData.width * 19349663;
-            System.Random rng = new System.Random(chunkSeed);
+            int chunkSeed = terrainDensityData.noiseSeed + chunkPos.x * 73856093 + chunkPos.y * 19349663 + chunkPos.z * 41793205 + i * 83492791;
+            spawnPointsComputeShader.SetInt("chunkSeed", chunkSeed);
+            spawnPointsComputeShader.SetInt("maxAttempts", maxAttempts);
+            spawnPointsComputeShader.SetBool("rotateToFaceNormal", assetSpawnData.spawnableAssets[i].rotateToFaceNormal);
+            spawnPointsComputeShader.SetFloat("spawnProbability", assetSpawnData.spawnableAssets[i].spawnProbability);
+            spawnPointsComputeShader.SetBool("useMinSlope", assetSpawnData.spawnableAssets[i].useMinSlope);
+            spawnPointsComputeShader.SetInt("minSlope", assetSpawnData.spawnableAssets[i].minSlope);
+            spawnPointsComputeShader.SetBool("useMaxSlope", assetSpawnData.spawnableAssets[i].useMaxSlope);
+            spawnPointsComputeShader.SetInt("maxSlope", assetSpawnData.spawnableAssets[i].maxSlope);
+            spawnPointsComputeShader.SetBool("useMinHeight", assetSpawnData.spawnableAssets[i].useMinHeight);
+            spawnPointsComputeShader.SetInt("minHeight", assetSpawnData.spawnableAssets[i].minHeight);
+            spawnPointsComputeShader.SetBool("useMaxHeight", assetSpawnData.spawnableAssets[i].useMaxHeight);
+            spawnPointsComputeShader.SetInt("maxHeight", assetSpawnData.spawnableAssets[i].maxHeight);
+            spawnPointsComputeShader.SetBool("underwaterAsset", assetSpawnData.spawnableAssets[i].underwaterAsset);
+            spawnPointsComputeShader.SetInt("waterLevel", terrainDensityData.waterLevel);
+            spawnPointsComputeShader.SetInt("VertexBufferLength", vertexBufferLength);
+            ComputeBuffer spawnPointsBuffer = new ComputeBuffer(maxAttempts, sizeof(float) * 6, ComputeBufferType.Append);
+            spawnPointsComputeShader.SetBuffer(spawnPointsKernel, "SpawnPointBuffer", spawnPointsBuffer);
+            spawnPointsBuffer.SetCounterValue(0);
 
-            while(spawnPoints[i].Count < spawnThreshold) {
-                if(breakCounter >= 150) break;
+            spawnPointsComputeShader.Dispatch(spawnPointsKernel, Mathf.CeilToInt(maxAttempts / 8.0f), 1, 1);
 
-                float highestVertexHeight = 0;
-                float lowestVertexHeight = 0;
-                foreach(Vector3 vertex in worldVertices) {
-                    if(vertex.y > highestVertexHeight) highestVertexHeight = vertex.y;
-                    if(vertex.y < lowestVertexHeight) lowestVertexHeight = vertex.y;
-                }
+            ComputeBuffer spawnPointsCountBuffer = new ComputeBuffer(1, sizeof(int), ComputeBufferType.Raw);
+            ComputeBuffer.CopyCount(spawnPointsBuffer, spawnPointsCountBuffer, 0);
 
-                if(worldVertices.Length == 0) break;
-                else if(assetSpawnData.spawnableAssets[i].useMinHeight && highestVertexHeight < assetSpawnData.spawnableAssets[i].minHeight) break;
-                else if(assetSpawnData.spawnableAssets[i].useMaxHeight && lowestVertexHeight > assetSpawnData.spawnableAssets[i].maxHeight) break;
-                else if(assetSpawnData.spawnableAssets[i].underwaterAsset && lowestVertexHeight > terrainDensityData.waterLevel-3f) break;
-                else if(!assetSpawnData.spawnableAssets[i].underwaterAsset && highestVertexHeight < terrainDensityData.waterLevel) break;
+            int[] spawnPointsCountArray = { 0 };
+            spawnPointsCountBuffer.GetData(spawnPointsCountArray);
+            spawnPointsCountBuffer.Release();
+            int spawnPointsCount = spawnPointsCountArray[0];
 
-                // int random = UnityEngine.Random.Range(0, worldVertices.Length);
-                int random = rng.Next(0, worldVertices.Length);
-                Vector3 spawnPoint = worldVertices[random];
-                Vector3 spawnPointNormal = worldNormals[random];
-
-                if(!assetSpawnData.spawnableAssets[i].rotateToFaceNormal) spawnPoint.y -= 0.75f;
-                else spawnPoint.y -= 0.1f;
-
-                float height = spawnPoint.y;
-                float slope = Vector3.Angle(worldNormals[random], Vector3.up);
+            if(spawnPointsCount > 0) {
+                spawnPoints[i] = new ComputeMarchingCubes.Vertex[spawnPointsCount];
+                spawnPointsBuffer.GetData(spawnPoints[i], 0, 0, spawnPointsCount);
 
                 float spacingSquared = assetSpacing * assetSpacing;
-                bool invalidSpawnPoint = false;
-                for(int j = 0; j < assetSpawnData.spawnableAssets.Count && !invalidSpawnPoint; j++) {
-                    foreach(Vector3 point in spawnPoints[j]) {
-                        if((spawnPoint - point).sqrMagnitude <= spacingSquared) {
-                            invalidSpawnPoint = true;
+                List<ComputeMarchingCubes.Vertex> tempAccepted = new();
+                tempAccepted.Add(spawnPoints[i][0]);
+
+                for (int j = 1; j < spawnPoints[i].Length; j++) {
+                    bool tooClose = false;
+                    foreach (var accepted in tempAccepted) {
+                        if ((spawnPoints[i][j].position - accepted.position).sqrMagnitude <= spacingSquared) {
+                            tooClose = true;
                             break;
                         }
+                        Collider[] colliders = Physics.OverlapSphere(spawnPoints[i][j].position, assetSpacing, assetLayer);
+                        if(colliders.Length > 0) {
+                            tooClose = true;
+                        }
+                    }
+
+                    if (!tooClose) {
+                        tempAccepted.Add(spawnPoints[i][j]);
                     }
                 }
-                if(invalidSpawnPoint) {
-                    breakCounter++;
-                    continue;
-                }
 
-                Collider[] colliders = Physics.OverlapSphere(spawnPoint, assetSpacing, assetLayer);
-                if(colliders.Length > 0) {
-                    breakCounter++;
-                    continue;
-                }
-
-                if((assetSpawnData.spawnableAssets[i].useMinSlope ? slope > assetSpawnData.spawnableAssets[i].minSlope : true) && 
-                   (assetSpawnData.spawnableAssets[i].useMaxSlope ? slope < assetSpawnData.spawnableAssets[i].maxSlope : true) && 
-                   (assetSpawnData.spawnableAssets[i].useMinHeight ? height > assetSpawnData.spawnableAssets[i].minHeight : true) && 
-                   (assetSpawnData.spawnableAssets[i].useMaxHeight ? height < assetSpawnData.spawnableAssets[i].maxHeight : true) && 
-                   (assetSpawnData.spawnableAssets[i].underwaterAsset ? height < terrainDensityData.waterLevel-3f : height > terrainDensityData.waterLevel)) {
-                    spawnPoints[i].Add(spawnPoint);
-                    spawnPointsNormals[i].Add(spawnPointNormal);
-                }
-                breakCounter++;
+                acceptedSpawnPoints[i].AddRange(tempAccepted);
             }
+            else {
+                spawnPoints[i] = Array.Empty<ComputeMarchingCubes.Vertex>();
+            }
+            spawnPointsBuffer.Release();
         }
+        vertexBuffer.Release();
     }
-
-    // private void CreateSpawnPoints() {
-    //     spawnPoints = new NativeArray<float3>(assetsToSpawn, Allocator.TempJob);
-    //     spawnPoints = new NativeArray<float3>(assetsToSpawn, Allocator.TempJob);
-
-    //     SpawnJob spawnJob = new SpawnJob
-    //     {
-    //         seed = terrainDensityData.noiseSeed,
-    //         spawnPoints = spawnPoints,
-    //         spawnPointsNormals = spawnPointsNormals
-    //     };
-
-    //     JobHandle handle = spawnJob.Schedule(assetsToSpawn, 64);
-    //     handle.Complete();
-
-
-
-    //     spawnPoints.Dispose();
-    //     spawnPointsNormals.Dispose();
-    // }
-
-    // [BurstCompile]
-    // struct SpawnJob : IJobParallelFor
-    // {
-    //     public int seed;
-    //     public NativeArray<float3> spawnPoints;
-    //     public NativeArray<float3> spawnPointsNormals;
-
-    //     public void Execute(int index)
-    //     {
-    //         var rng = new Unity.Mathematics.Random((uint)(seed + index));
-    //         float3 pos = new float3(
-    //             rng.NextFloat(0f, areaSize.x),
-    //             rng.NextFloat(0f, areaSize.y),
-    //             rng.NextFloat(0f, areaSize.z)
-    //         );
-    //         spawnPoints[index] = pos;
-    //     }
-    // }
 
     private void SetSpawnPoints() {
         for(int i = 0; i < assetSpawnData.spawnableAssets.Count; i++) {
-            assetSpawnData.assets[chunkPos][i].spawnPoints = spawnPoints[i];
-            assetSpawnData.assets[chunkPos][i].spawnPointsNormals = spawnPointsNormals[i];
+            assetSpawnData.assets[chunkPos][i].spawnPoints = acceptedSpawnPoints[i].ToArray();
             assetSpawnData.assets[chunkPos][i].spawnedAssets = spawnedAssets[i];
         }
     }
 
-    private void AssetSpawnHandler() {
+    private IEnumerator AssetSpawnHandler() {
         for(int i = 0; i < assetSpawnData.spawnableAssets.Count; i++) {
-            for(int j = 0; j < assetSpawnData.assets[chunkPos][i].spawnPoints.Count; j++) {
+            ComputeMarchingCubes.Vertex[] points = assetSpawnData.assets[chunkPos][i].spawnPoints;
+            if(points == null || points.Length == 0) {
+                continue;
+            }
+            for(int j = 0; j < assetSpawnData.assets[chunkPos][i].spawnPoints.Length; j++) {
                 float randomRotationDeg = UnityEngine.Random.Range(0f, 360f);
                 Quaternion randomYRotation = Quaternion.Euler(0f, randomRotationDeg, 0f);
                 GameObject assetToSpawn;
                 if(assetSpawnData.assets[chunkPos][i].rotateToFaceNormal) {
-                    Quaternion normal = Quaternion.FromToRotation(Vector3.up, assetSpawnData.assets[chunkPos][i].spawnPointsNormals[j]);
-                    assetToSpawn = Instantiate(assetSpawnData.assets[chunkPos][i].asset, assetSpawnData.assets[chunkPos][i].spawnPoints[j], normal*randomYRotation);
+                    Quaternion normal = Quaternion.FromToRotation(Vector3.up, assetSpawnData.assets[chunkPos][i].spawnPoints[j].normal);
+                    assetToSpawn = Instantiate(assetSpawnData.assets[chunkPos][i].asset, assetSpawnData.assets[chunkPos][i].spawnPoints[j].position, normal*randomYRotation);
+                    assetToSpawn.transform.SetParent(gameObject.transform);
+                    spawnedAssets[i].Add(assetToSpawn);
                 }
                 else{
-                    assetToSpawn = Instantiate(assetSpawnData.assets[chunkPos][i].asset, assetSpawnData.assets[chunkPos][i].spawnPoints[j], randomYRotation);
+                    assetToSpawn = Instantiate(assetSpawnData.assets[chunkPos][i].asset, assetSpawnData.assets[chunkPos][i].spawnPoints[j].position, randomYRotation);
+                    assetToSpawn.transform.SetParent(gameObject.transform);
+                    spawnedAssets[i].Add(assetToSpawn);
                 }
-                assetToSpawn.transform.SetParent(gameObject.transform);
-                spawnedAssets[i].Add(assetToSpawn);
             }
         }
+        yield return null;
     }
 
     public void ClearAssets() {
@@ -218,28 +174,17 @@ public class AssetSpawner : MonoBehaviour
     }
 
     public void ClearData() {
-        spawnPoints.Clear();
-        spawnPointsNormals.Clear();
         assetSpawnData.ResetSpawnPoints();
-    }
-
-    public void SetAssetsActive(bool active) {
-        for(int i = 0; i < assetSpawnData.assets[chunkPos].Count; i++) {
-            foreach(GameObject asset in assetSpawnData.assets[chunkPos][i].spawnedAssets) {
-                asset.SetActive(active);
-            }
-        }
     }
 }
 
 [Serializable]
 public class SpawnableAsset {
     public GameObject asset;
-    public List<Vector3> spawnPoints;
-    public List<Vector3> spawnPointsNormals;
+    public ComputeMarchingCubes.Vertex[] spawnPoints;
     public List<GameObject> spawnedAssets = new List<GameObject>();
     public bool rotateToFaceNormal;
-    public int assetsToSpawn;
+    public float spawnProbability;
     public bool useMinSlope;
     public int minSlope;
     public bool useMaxSlope;
@@ -249,9 +194,9 @@ public class SpawnableAsset {
     public bool useMaxHeight;
     public int maxHeight;
     public bool underwaterAsset;
-    public SpawnableAsset(GameObject asset, int assetsToSpawn, bool useMinSlope, int minSlope, bool useMaxSlope, int maxSlope, bool useMinHeight, int minHeight, bool useMaxHeight, int maxHeight, bool underwaterAsset) {
+    public SpawnableAsset(GameObject asset, float spawnProbability, bool useMinSlope, int minSlope, bool useMaxSlope, int maxSlope, bool useMinHeight, int minHeight, bool useMaxHeight, int maxHeight, bool underwaterAsset) {
         this.asset = asset;
-        this.assetsToSpawn = assetsToSpawn;
+        this.spawnProbability = spawnProbability;
         this.useMinSlope = useMinSlope;
         this.minSlope = minSlope;
         this.useMaxSlope = useMaxSlope;

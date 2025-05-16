@@ -1,0 +1,94 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel SpawnPoints
+
+struct Vertex
+{
+    float3 position;
+    float3 normal;
+};
+
+struct Triangle
+{
+    Vertex v1;
+    Vertex v2;
+    Vertex v3;
+};
+
+uint HashUInt(uint x, uint seed)
+{
+    x ^= seed;
+    x ^= x >> 17;
+    x *= 0xED5AD4BBu;
+    x ^= x >> 11;
+    x *= 0xAC4C1B51u;
+    x ^= x >> 15;
+    x *= 0x31848BABu;
+    x ^= x >> 14;
+    return x;
+}
+
+float HashFloat01(uint x, uint seed)
+{
+    return (float)(HashUInt(x, seed)) / 4294967296.0;
+}
+
+
+RWStructuredBuffer<Vertex> VertexBuffer;
+AppendStructuredBuffer<Vertex> SpawnPointBuffer;
+int VertexBufferLength;
+uint chunkSeed;
+uint maxAttempts;
+
+bool rotateToFaceNormal;
+float spawnProbability;
+bool useMinSlope;
+int minSlope;
+bool useMaxSlope;
+int maxSlope;
+bool useMinHeight;
+int minHeight;
+bool useMaxHeight;
+int maxHeight;
+bool underwaterAsset;
+int waterLevel;
+
+[numthreads(8,1,1)]
+void SpawnPoints (uint3 id : SV_DispatchThreadID)
+{
+    if(VertexBufferLength == 0 || id.x >= maxAttempts) {
+        return ;
+    }
+
+    uint hash = HashUInt(id.x, chunkSeed);
+    float roll = (float)hash / 4294967296.0;
+
+    if(spawnProbability > roll) {
+        uint randomIndex = hash % VertexBufferLength;;
+        float3 spawnPoint = VertexBuffer[randomIndex].position;
+        float3 spawnPointNormal = VertexBuffer[randomIndex].normal;
+
+        if(!rotateToFaceNormal) {
+            spawnPoint.y -= 0.75;
+        }
+        else {
+            spawnPoint.y -= 0.1;
+        }
+
+        float height = spawnPoint.y;
+        float slope = degrees(acos(dot(normalize(spawnPointNormal), normalize(float3(0.0, 1.0, 0.0)))));
+
+        if((useMinSlope ? slope > minSlope : true) && 
+           (useMaxSlope ? slope < maxSlope : true) && 
+           (useMinHeight ? height > minHeight : true) && 
+           (useMaxHeight ? height < maxHeight : true) && 
+           (underwaterAsset ? height < waterLevel-3 : height > waterLevel)) {
+            Vertex vert;
+            vert.position = spawnPoint;
+            vert.normal = spawnPointNormal;
+            SpawnPointBuffer.Append(vert);
+        }
+    }
+    else {
+        return ;
+    }
+}

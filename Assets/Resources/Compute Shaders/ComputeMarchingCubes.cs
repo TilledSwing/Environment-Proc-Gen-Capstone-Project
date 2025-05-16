@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -11,6 +12,7 @@ public class ComputeMarchingCubes : MonoBehaviour
     private MeshFilter meshFilter;
     private MeshCollider meshCollider;
     public List<Vector3> vertices = new List<Vector3>();
+    public List<Vertex> verticesNormals = new List<Vertex>();
     private List<int> triangles = new List<int>();
     private Renderer mat;
     public TerrainDensityData1 terrainDensityData;
@@ -19,11 +21,17 @@ public class ComputeMarchingCubes : MonoBehaviour
     private AssetSpawner assetSpawner;
     public Vector3Int chunkPos;
 
+    public struct Vertex
+    {
+        public Vector3 position;
+        public Vector3 normal;
+    }
+
     public struct Triangle
     {
-        public Vector3 v1;
-        public Vector3 v2;
-        public Vector3 v3;
+        public Vertex v1;
+        public Vertex v2;
+        public Vertex v3;
     }
 
     void Start()
@@ -34,7 +42,7 @@ public class ComputeMarchingCubes : MonoBehaviour
         if(Mathf.RoundToInt(chunkPos.y/terrainDensityData.width) == 0) {
             waterGen.UpdateMesh();
         }
-        // assetSpawner.SpawnAssets();
+        assetSpawner.SpawnAssets();
         SetTexture();
     }
 
@@ -53,7 +61,7 @@ public class ComputeMarchingCubes : MonoBehaviour
         ComputeBuffer heightsBuffer = new ComputeBuffer((terrainDensityData.width+1) * (terrainDensityData.width+1) * (terrainDensityData.width+1), sizeof(float));
         terrainDensityComputeShader.SetBuffer(densityKernel, "HeightsBuffer", heightsBuffer);
         marchingCubesComputeShader.SetBuffer(marchingKernel, "HeightsBuffer", heightsBuffer);
-        ComputeBuffer vertexBuffer = new ComputeBuffer(terrainDensityData.width*terrainDensityData.width*terrainDensityData.width*5, sizeof(float) * 9, ComputeBufferType.Append);
+        ComputeBuffer vertexBuffer = new ComputeBuffer(terrainDensityData.width*terrainDensityData.width*terrainDensityData.width*5, sizeof(float) * 18, ComputeBufferType.Append);
         marchingCubesComputeShader.SetBuffer(marchingKernel, "VertexBuffer", vertexBuffer);
 
         marchingCubesComputeShader.SetInt("ChunkSize", terrainDensityData.width);
@@ -120,16 +128,32 @@ public class ComputeMarchingCubes : MonoBehaviour
         vertices.Clear();
         triangles.Clear();
         vertices.Capacity = vertexCount * 3;
+        verticesNormals.Capacity = vertexCount * 3;
         triangles.Capacity = vertexCount * 3;
         for (int i = 0; i < vertexCount; i++) {
             Triangle t = vertexArray[i];
-            vertices.Add(t.v1);
-            vertices.Add(t.v2);
-            vertices.Add(t.v3);
+            vertices.Add(t.v1.position);
+            vertices.Add(t.v2.position);
+            vertices.Add(t.v3.position);
+            
+            Vertex v1;
+            v1.position = t.v1.position;
+            v1.normal = t.v1.normal;
+            verticesNormals.Add(v1);
+            Vertex v2;
+            v2.position = t.v2.position;
+            v2.normal = t.v2.normal;
+            verticesNormals.Add(v2);
+            Vertex v3;
+            v3.position = t.v3.position;
+            v3.normal = t.v3.normal;
+            verticesNormals.Add(v3);
+
             triangles.Add(i * 3);
             triangles.Add(i * 3 + 1);
             triangles.Add(i * 3 + 2);
         }
+        assetSpawner.worldVertices = verticesNormals.ToArray();
 
         Mesh mesh = new Mesh();
         mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
@@ -146,10 +170,10 @@ public class ComputeMarchingCubes : MonoBehaviour
     public void InitializeChunk() {
         terrainDensityData = Resources.Load<TerrainDensityData1>("TerrainDensityData1");
         marchingCubesComputeShader = Resources.Load<ComputeShader>("Compute Shaders/MarchingCubes");
-        terrainDensityComputeShader = Resources.Load<ComputeShader>("Compute Shaders/ComputeTerrainDensity");
+        terrainDensityComputeShader = Resources.Load<ComputeShader>("Compute Shaders/TerrainDensity");
         gameObject.AddComponent<MeshRenderer>();
         meshFilter = gameObject.AddComponent<MeshFilter>();
-        meshCollider = gameObject.AddComponent<MeshCollider>();
+        meshCollider = gameObject.GetComponent<MeshCollider>();
         assetSpawner = gameObject.GetComponent<AssetSpawner>();
         waterPlaneGenerator = new GameObject("Water");
         waterPlaneGenerator.transform.SetParent(transform);
