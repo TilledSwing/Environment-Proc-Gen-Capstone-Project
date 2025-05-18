@@ -18,7 +18,7 @@ public class AssetSpawner : MonoBehaviour
     ComputeShader spawnPointsComputeShader;
     public int vertexBufferLength;
     public List<SpawnableAsset> assets = new List<SpawnableAsset>();
-    private List<List<GameObject>> spawnedAssets = new List<List<GameObject>>();
+    public List<List<GameObject>> spawnedAssets = new List<List<GameObject>>();
     public TerrainDensityData1 terrainDensityData;
     public AssetSpawnData assetSpawnData;
     public List<ComputeMarchingCubes.Vertex[]> spawnPoints;

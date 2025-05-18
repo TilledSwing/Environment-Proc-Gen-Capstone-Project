@@ -68,18 +68,55 @@ public class ChunkGenNetwork : NetworkBehaviour
             }
         }
     }
+    
+    public TerrainChunk[] GetChunkAndNeighbors(Vector3Int chunkCoord)
+    {
+        TerrainChunk[] chunkAndNeighbors = new TerrainChunk[] {
+            chunkDictionary[new Vector3Int(chunkCoord.x, chunkCoord.y, chunkCoord.z)],       // 1
+            chunkDictionary[new Vector3Int(chunkCoord.x, chunkCoord.y+1, chunkCoord.z)],     // 2
+            chunkDictionary[new Vector3Int(chunkCoord.x, chunkCoord.y, chunkCoord.z+1)],     // 3
+            chunkDictionary[new Vector3Int(chunkCoord.x, chunkCoord.y+1, chunkCoord.z+1)],   // 4
+            chunkDictionary[new Vector3Int(chunkCoord.x, chunkCoord.y-1, chunkCoord.z)],     // 5
+            chunkDictionary[new Vector3Int(chunkCoord.x, chunkCoord.y, chunkCoord.z-1)],     // 6
+            chunkDictionary[new Vector3Int(chunkCoord.x, chunkCoord.y-1, chunkCoord.z-1)],   // 7
+            chunkDictionary[new Vector3Int(chunkCoord.x, chunkCoord.y+1, chunkCoord.z-1)],   // 8
+            chunkDictionary[new Vector3Int(chunkCoord.x, chunkCoord.y-1, chunkCoord.z+1)],   // 9
+            chunkDictionary[new Vector3Int(chunkCoord.x+1, chunkCoord.y, chunkCoord.z)],     // 10
+            chunkDictionary[new Vector3Int(chunkCoord.x+1, chunkCoord.y+1, chunkCoord.z)],   // 11
+            chunkDictionary[new Vector3Int(chunkCoord.x+1, chunkCoord.y, chunkCoord.z+1)],   // 12
+            chunkDictionary[new Vector3Int(chunkCoord.x+1, chunkCoord.y+1, chunkCoord.z+1)], // 13
+            chunkDictionary[new Vector3Int(chunkCoord.x+1, chunkCoord.y-1, chunkCoord.z)],   // 14
+            chunkDictionary[new Vector3Int(chunkCoord.x+1, chunkCoord.y, chunkCoord.z-1)],   // 15
+            chunkDictionary[new Vector3Int(chunkCoord.x+1, chunkCoord.y-1, chunkCoord.z-1)], // 16
+            chunkDictionary[new Vector3Int(chunkCoord.x+1, chunkCoord.y+1, chunkCoord.z-1)], // 17
+            chunkDictionary[new Vector3Int(chunkCoord.x+1, chunkCoord.y-1, chunkCoord.z+1)], // 18
+            chunkDictionary[new Vector3Int(chunkCoord.x-1, chunkCoord.y, chunkCoord.z)],     // 19
+            chunkDictionary[new Vector3Int(chunkCoord.x-1, chunkCoord.y+1, chunkCoord.z)],   // 20
+            chunkDictionary[new Vector3Int(chunkCoord.x-1, chunkCoord.y, chunkCoord.z+1)],   // 21
+            chunkDictionary[new Vector3Int(chunkCoord.x-1, chunkCoord.y+1, chunkCoord.z+1)], // 22
+            chunkDictionary[new Vector3Int(chunkCoord.x-1, chunkCoord.y-1, chunkCoord.z)],   // 23
+            chunkDictionary[new Vector3Int(chunkCoord.x-1, chunkCoord.y, chunkCoord.z-1)],   // 24
+            chunkDictionary[new Vector3Int(chunkCoord.x-1, chunkCoord.y-1, chunkCoord.z-1)], // 25
+            chunkDictionary[new Vector3Int(chunkCoord.x-1, chunkCoord.y+1, chunkCoord.z-1)], // 26
+            chunkDictionary[new Vector3Int(chunkCoord.x-1, chunkCoord.y-1, chunkCoord.z+1)], // 27
+        };
+        return chunkAndNeighbors;
+    }
 
-    public class TerrainChunk {
-        GameObject chunk;
-        ComputeMarchingCubes marchingCubes;
-        AssetSpawner assetSpawner;
-        Vector3Int chunkPos;
-        Bounds bounds;
-        MeshCollider meshCollider;
-        public TerrainChunk(Vector3Int chunkCoord, int chunkSize, Transform parent) {
+    public class TerrainChunk
+    {
+        public GameObject chunk;
+        public ComputeMarchingCubes marchingCubes;
+        public AssetSpawner assetSpawner;
+        public Vector3Int chunkPos;
+        public Bounds bounds;
+        public MeshCollider meshCollider;
+        public TerrainChunk(Vector3Int chunkCoord, int chunkSize, Transform parent)
+        {
             chunkPos = chunkCoord * chunkSize;
-            bounds = new Bounds(chunkPos, Vector3.one * chunkSize);
+            bounds = new Bounds(chunkPos + (new Vector3(0.5f, 0.5f, 0.5f) * chunkSize), Vector3.one * chunkSize);
             chunk = new GameObject("Chunk");
+            chunk.layer = 3;
             meshCollider = chunk.AddComponent<MeshCollider>();
             assetSpawner = chunk.AddComponent<AssetSpawner>();
             assetSpawner.chunkPos = chunkPos;
@@ -89,7 +126,8 @@ public class ChunkGenNetwork : NetworkBehaviour
             SetVisible(false);
         }
 
-        public void UpdateChunk(float maxViewDst, int chunkSize) {
+        public void UpdateChunk(float maxViewDst, int chunkSize)
+        {
             float viewerDstFromBound = Mathf.Sqrt(bounds.SqrDistance(viewerPos));
             bool colliderEnable = viewerDstFromBound <= chunkSize;
             bool visible = viewerDstFromBound <= maxViewDst;
@@ -97,15 +135,25 @@ public class ChunkGenNetwork : NetworkBehaviour
             SetVisible(visible);
         }
 
-        public void SetVisible(bool visible) {
+        public void SetVisible(bool visible)
+        {
             chunk.SetActive(visible);
         }
 
-        public void SetCollider(bool colliderEnable) {
+        public void SetCollider(bool colliderEnable)
+        {
             meshCollider.enabled = colliderEnable;
+            for (int i = 0; i < assetSpawner.spawnedAssets.Count; i++)
+            {
+                foreach (GameObject asset in assetSpawner.spawnedAssets[i])
+                {
+                    asset.GetComponent<MeshCollider>().enabled = colliderEnable;
+                }
+            }
         }
 
-        public bool IsVisible(){
+        public bool IsVisible()
+        {
             return chunk.activeSelf;
         }
     }

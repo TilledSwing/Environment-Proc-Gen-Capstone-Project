@@ -1,0 +1,37 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel Terraform
+
+RWStructuredBuffer<float> HeightsBuffer;
+float3 TerraformCenter;
+float3 TerraformOffset;
+float TerraformRadius;
+float TerraformStrength;
+uint ChunkSize;
+float3 ChunkPos;
+bool TerraformMode;
+
+int FlattenIndex(int3 id, int size) {
+    return id.x * (size + 1) * (size + 1) + id.y * (size + 1) + id.z;
+}
+
+[numthreads(1,1,1)]
+void Terraform (uint3 id : SV_DispatchThreadID)
+{
+    uint3 localVoxelPos = TerraformOffset + id;
+
+    if(localVoxelPos.x >= ChunkSize+1 || localVoxelPos.y >= ChunkSize+1 || localVoxelPos.z >= ChunkSize+1) {
+        return ;
+    }
+
+    float3 worldVoxelPos = localVoxelPos + ChunkPos;
+    float dstToCenter = length(worldVoxelPos - TerraformCenter);
+
+    if(dstToCenter < TerraformRadius) {
+        if(TerraformMode) {
+            HeightsBuffer[FlattenIndex(localVoxelPos, ChunkSize)] -= TerraformStrength * (1.0 - (dstToCenter / TerraformRadius));
+        }
+        else if(!TerraformMode) {
+            HeightsBuffer[FlattenIndex(localVoxelPos, ChunkSize)] += TerraformStrength * (1.0 - (dstToCenter / TerraformRadius));
+        }
+    }
+}

@@ -121,6 +121,7 @@ GameObject:
   - component: {fileID: 3092386480338805281}
   - component: {fileID: 1324032884783071196}
   - component: {fileID: 3464545069803304171}
+  - component: {fileID: -2765541620985245343}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -182,15 +183,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 04a3c30018241ed4f9c2c47f95277b03, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
+  _componentIndexCache: 0
   _addedNetworkObject: {fileID: 1324032884783071196}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 1324032884783071196}
   walkingSpeed: 7.5
-  runningSpeed: 11.5
+  runningSpeed: 20
   jumpSpeed: 8
   gravity: 20
   lookSpeed: 2
-  lookXLimit: 45
+  lookXLimit: 75
+  flightSpeed: 6
   canMove: 1
   cameraYOffset: 0.4
 --- !u!114 &1324032884783071196
@@ -209,7 +211,9 @@ MonoBehaviour:
   <ComponentIndex>k__BackingField: 0
   <PredictedSpawn>k__BackingField: {fileID: 0}
   <PredictedOwner>k__BackingField: {fileID: 0}
-  NetworkBehaviours: []
+  NetworkBehaviours:
+  - {fileID: 3092386480338805281}
+  - {fileID: 3464545069803304171}
   InitializedParentNetworkBehaviour: {fileID: 0}
   InitializedNestedNetworkObjects: []
   RuntimeParentNetworkBehaviour: {fileID: 0}
@@ -234,15 +238,15 @@ MonoBehaviour:
   _spectatorInterpolation: 2
   _enableTeleport: 0
   _teleportThreshold: 1
-  <PrefabId>k__BackingField: 65535
+  <PrefabId>k__BackingField: 4
   <SpawnableCollectionId>k__BackingField: 0
   <AssetPathHash>k__BackingField: 7807759643866311769
   <SceneId>k__BackingField: 0
   SerializedTransformProperties:
     Position: {x: 0, y: 0, z: 0}
-    Rotation: {x: 0, y: 0, z: 0, w: 0}
-    Scale: {x: 0, y: 0, z: 0}
-    IsValid: 0
+    Rotation: {x: 0, y: 0, z: 0, w: 1}
+    Scale: {x: 1, y: 1, z: 1}
+    IsValid: 1
 --- !u!114 &3464545069803304171
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -255,9 +259,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2836e36774ca1c4bbbee976e17b649c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
+  _componentIndexCache: 1
   _addedNetworkObject: {fileID: 1324032884783071196}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 1324032884783071196}
   _componentConfiguration: 0
   _synchronizeParent: 0
   _packing:
@@ -286,6 +290,21 @@ MonoBehaviour:
     X: 0
     Y: 0
     Z: 0
+--- !u!114 &-2765541620985245343
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3941859824757792008}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d7302960a134294dba262e9cc6e9c3e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  terraformMaxDst: 20
+  terraformRadius: 3
+  terraformStrength: 2
 --- !u!1 &8935483582062294650
 GameObject:
   m_ObjectHideFlags: 0
