@@ -15,9 +15,8 @@ using UnityEngine.UIElements;
 
 public class AssetSpawner : MonoBehaviour
 {
-    ComputeShader spawnPointsComputeShader;
+    public ComputeShader spawnPointsComputeShader;
     public int vertexBufferLength;
-    public List<SpawnableAsset> assets = new List<SpawnableAsset>();
     public List<List<GameObject>> spawnedAssets = new List<List<GameObject>>();
     public TerrainDensityData1 terrainDensityData;
     public AssetSpawnData assetSpawnData;
@@ -34,19 +33,16 @@ public class AssetSpawner : MonoBehaviour
     public void SpawnAssets()
     {
         assetLayer = LayerMask.GetMask("Asset Layer");
-        terrainDensityData = Resources.Load<TerrainDensityData1>("TerrainDensityData1");
-        assetSpawnData = Resources.Load<AssetSpawnData>("AssetSpawnData");
         vertexBufferLength = worldVertices.Length;
         if(!assetSpawnData.assets.ContainsKey(chunkPos) && vertexBufferLength > 0) {
             InitializeData();
             CreateSpawnPoints();
             SetSpawnPoints();
-            StartCoroutine(AssetSpawnHandler());
+            AssetSpawnHandler();
         }
     }
 
     private void InitializeData() {
-        spawnPointsComputeShader = Resources.Load<ComputeShader>("Compute Shaders/SpawnPoints");
         spawnPoints = new List<ComputeMarchingCubes.Vertex[]>(assetSpawnData.spawnableAssets.Count);
         acceptedSpawnPoints = new List<List<ComputeMarchingCubes.Vertex>>(assetSpawnData.spawnableAssets.Count);
         spawnedAssets = new List<List<GameObject>>(assetSpawnData.spawnableAssets.Count);
@@ -137,7 +133,7 @@ public class AssetSpawner : MonoBehaviour
         }
     }
 
-    private IEnumerator AssetSpawnHandler() {
+    private void AssetSpawnHandler() {
         for(int i = 0; i < assetSpawnData.spawnableAssets.Count; i++) {
             ComputeMarchingCubes.Vertex[] points = assetSpawnData.assets[chunkPos][i].spawnPoints;
             if(points == null || points.Length == 0) {
@@ -160,7 +156,6 @@ public class AssetSpawner : MonoBehaviour
                 }
             }
         }
-        yield return null;
     }
 
     public void ClearAssets() {

@@ -1,0 +1,102 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel TerrainNoise
+#include "/FastNoiseLite.hlsl"
+
+RWStructuredBuffer<float> TerrainNoiseBuffer;
+// Noise and Fractal Values
+int noiseDimension;
+int noiseType;
+int noiseFractalType;
+int rotationType3D;
+int noiseSeed;
+int noiseFractalOctaves;
+float noiseFractalLacunarity;
+float noiseFractalGain;
+float fractalWeightedStrength;
+float noiseFrequency;
+// Domain Warp Values
+bool domainWarpToggle;
+int domainWarpType;
+int domainWarpFractalType;
+float domainWarpAmplitude;
+int domainWarpSeed;
+int domainWarpFractalOctaves;
+float domainWarpFractalLacunarity;
+float domainWarpFractalGain;
+float domainWarpFrequency;
+// Cellular(Voronoi) Values
+int cellularDistanceFunction;
+int cellularReturnType;
+float cellularJitter;
+// Terrain Values
+float noiseScale;
+uint ChunkSize;
+float3 ChunkPos;
+
+float xWarp;
+float yWarp;
+float zWarp;
+
+int FlattenIndex(float3 id, int size) {
+    return id.x * (size + 1) * (size + 1) + id.y * (size + 1) + id.z;
+}
+
+[numthreads(4,4,4)]
+void TerrainNoise (uint3 id : SV_DispatchThreadID)
+{
+
+    if(id.x >= ChunkSize+1 || id.y >= ChunkSize+1 || id.z >= ChunkSize+1) {
+        return ;
+    }
+
+    xWarp = (id.x + ChunkPos.x) * noiseScale;
+    yWarp = (id.y + ChunkPos.y) * noiseScale;
+    zWarp = (id.z + ChunkPos.z) * noiseScale;
+
+    // Noise Settings
+    fnl_state noiseGenerator = fnlCreateState();
+    // Domain Warp Values
+    if(domainWarpToggle) {
+        noiseGenerator.domain_warp_type = domainWarpType;
+        noiseGenerator.fractal_type = domainWarpFractalType;
+        noiseGenerator.domain_warp_amp = domainWarpAmplitude;
+        noiseGenerator.seed = domainWarpSeed;
+        noiseGenerator.octaves = domainWarpFractalOctaves;
+        noiseGenerator.lacunarity = domainWarpFractalLacunarity;
+        noiseGenerator.gain = domainWarpFractalGain;
+        noiseGenerator.frequency = domainWarpFrequency;
+        if(noiseDimension == 0) {
+            fnlDomainWarp2D(noiseGenerator, xWarp, zWarp);
+        }
+        else {
+            fnlDomainWarp3D(noiseGenerator, xWarp, yWarp, zWarp);
+        }
+    }
+    // Noise Values
+    noiseGenerator.noise_type = noiseType;
+    noiseGenerator.fractal_type = noiseFractalType;
+    noiseGenerator.rotation_type_3d = rotationType3D;
+    noiseGenerator.seed = noiseSeed;
+    noiseGenerator.octaves = noiseFractalOctaves;
+    noiseGenerator.lacunarity = noiseFractalLacunarity;
+    noiseGenerator.gain = noiseFractalGain;
+    noiseGenerator.weighted_strength = fractalWeightedStrength;
+    noiseGenerator.frequency = noiseFrequency;
+    // Cellular Values
+    if(noiseType == 2) {
+        noiseGenerator.cellular_distance_func = cellularDistanceFunction;
+        noiseGenerator.cellular_return_type = cellularReturnType;
+        noiseGenerator.cellular_jitter_mod = cellularJitter;
+    }
+
+    float noise;
+
+    if(noiseDimension == 0) {
+        noise = fnlGetNoise2D(noiseGenerator, xWarp, zWarp);
+    }
+    else {
+        noise = fnlGetNoise3D(noiseGenerator, xWarp, yWarp, zWarp);
+    }
+
+    TerrainNoiseBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)] = noise;
+}

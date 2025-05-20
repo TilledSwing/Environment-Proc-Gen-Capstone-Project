@@ -3,107 +3,43 @@
 #include "/FastNoiseLite.hlsl"
 
 RWStructuredBuffer<float> HeightsBuffer;
-// Noise and Fractal Values
-int noiseDimension;
-int noiseType;
-int noiseFractalType;
-int rotationType3D;
-int noiseSeed;
-int noiseFractalOctaves;
-float noiseFractalLacunarity;
-float noiseFractalGain;
-float fractalWeightedStrength;
-float noiseFrequency;
-// Domain Warp Values
-bool domainWarpToggle;
-int domainWarpType;
-int domainWarpFractalType;
-float domainWarpAmplitude;
-int domainWarpSeed;
-int domainWarpFractalOctaves;
-float domainWarpFractalLacunarity;
-float domainWarpFractalGain;
-float domainWarpFrequency;
-// Cellular(Voronoi) Values
-int cellularDistanceFunction;
-int cellularReturnType;
-float cellularJitter;
+StructuredBuffer<float> TerrainNoiseBuffer;
+StructuredBuffer<float> CaveNoiseBuffer;
 // Terrain Values
 int height;
-float noiseScale;
 bool terracing;
 int terraceHeight;
+float isolevel;
 
 uint ChunkSize;
 float3 ChunkPos;
-
-float xWarp;
-float yWarp;
-float zWarp;
 
 int FlattenIndex(float3 id, int size) {
     return id.x * (size + 1) * (size + 1) + id.y * (size + 1) + id.z;
 }
 
-[numthreads(8,8,8)]
+[numthreads(4,4,4)]
 void TerrainDensity (uint3 id : SV_DispatchThreadID)
 {
 
     if(id.x >= ChunkSize+1 || id.y >= ChunkSize+1 || id.z >= ChunkSize+1) {
         return ;
     }
-    // Noise Settings
-    fnl_state noiseGenerator = fnlCreateState();
-    fnl_state domainWarp = fnlCreateState();
-    // Noise Values
-    noiseGenerator.noise_type = noiseType;
-    noiseGenerator.fractal_type = noiseFractalType;
-    noiseGenerator.rotation_type_3d = rotationType3D;
-    noiseGenerator.seed = noiseSeed;
-    noiseGenerator.octaves = noiseFractalOctaves;
-    noiseGenerator.lacunarity = noiseFractalLacunarity;
-    noiseGenerator.gain = noiseFractalGain;
-    noiseGenerator.weighted_strength = fractalWeightedStrength;
-    noiseGenerator.frequency = noiseFrequency;
-    // Domain Warp Values
-    if(domainWarpToggle) {
-        domainWarp.domain_warp_type = domainWarpType;
-        domainWarp.fractal_type = domainWarpFractalType;
-        domainWarp.domain_warp_amp = domainWarpAmplitude;
-        domainWarp.seed = domainWarpSeed;
-        domainWarp.octaves = domainWarpFractalOctaves;
-        domainWarp.lacunarity = domainWarpFractalLacunarity;
-        domainWarp.gain = domainWarpFractalGain;
-        domainWarp.frequency = domainWarpFrequency;
-    }
-    // Cellular Values
-    if(noiseType == 2) {
-        noiseGenerator.cellular_distance_func = cellularDistanceFunction;
-        noiseGenerator.cellular_return_type = cellularReturnType;
-        noiseGenerator.cellular_jitter_mod = cellularJitter;
-    }
 
-    float currentHeight = 0;
-    xWarp = (id.x + ChunkPos.x) * noiseScale;
-    yWarp = (id.y + ChunkPos.y) * noiseScale;
-    zWarp = (id.z + ChunkPos.z) * noiseScale;
-    if(domainWarpToggle) {
-        if(noiseDimension == 0) {
-            fnlDomainWarp2D(domainWarp, xWarp, zWarp);
-        }
-        else {
-            fnlDomainWarp3D(domainWarp, xWarp, yWarp, zWarp);
-        }
-    }
+    // float caveNoise = CaveNoiseBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)];
+    // float caveCarve = smoothstep(-0.4, 0.4, abs(caveNoise)); // [0,1] → caves near 0.0
+    // caveCarve = 1.0 - caveCarve; // Invert so center of cave = 1.0, outside = 0.0
 
-    if(noiseDimension == 0) {
-        float noise2D = fnlGetNoise2D(noiseGenerator, xWarp, zWarp);
-        currentHeight = height * ((noise2D+1)/2) + (terracing ? (id.y%terraceHeight) : 0);
-    }
-    else {
-        float noise3D = fnlGetNoise3D(noiseGenerator, xWarp, yWarp, zWarp);
-        currentHeight = height * ((noise3D+1)/2) + (terracing ? (id.y%terraceHeight) : 0);
-    }
+    float terrainNoise = TerrainNoiseBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)];
+    float currentHeight = (height * ((terrainNoise+1)/2) + (terracing ? (id.y%terraceHeight) : 0));
+
+    float terrainDensity = currentHeight - (ChunkPos.y + id.y);
+    float surfaceFade = saturate((terrainDensity - 2.0) / 8.0);
     
-    HeightsBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)] = currentHeight - (ChunkPos.y + id.y);
+    // if(ChunkPos.y <= 0) {
+    //     HeightsBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)] = terrainDensity + (ChunkPos.y + id.y) - (caveCarve * height * surfaceFade);
+    // }
+    // else {
+        HeightsBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)] = terrainDensity;
+    // }
 }

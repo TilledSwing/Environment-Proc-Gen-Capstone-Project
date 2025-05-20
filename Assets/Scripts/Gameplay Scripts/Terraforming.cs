@@ -39,6 +39,10 @@ public class Terraforming : MonoBehaviour
         Ray ray = playerCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
         if (Physics.Raycast(ray, out RaycastHit hit, terraformMaxDst, terrainLayer))
         {
+            if (hit.distance <= 1.5f)
+            {
+                return;
+            }
             Vector3 terraformCenter = hit.point;
             GameObject hitChunk = hit.collider.gameObject;
             ComputeMarchingCubes hitMarchingCubes = hitChunk.GetComponent<ComputeMarchingCubes>();
@@ -46,7 +50,8 @@ public class Terraforming : MonoBehaviour
             ChunkGenNetwork.TerrainChunk[] chunkAndNeighbors = chunkGen.GetChunkAndNeighbors(new Vector3Int(Mathf.CeilToInt(hitChunkPos.x / terrainDensityData.width), Mathf.CeilToInt(hitChunkPos.y / terrainDensityData.width), Mathf.CeilToInt(hitChunkPos.z / terrainDensityData.width)));
             foreach (ChunkGenNetwork.TerrainChunk terrainChunk in chunkAndNeighbors)
             {
-                if (Mathf.Sqrt(terrainChunk.bounds.SqrDistance(terraformCenter)) <= terraformRadius) {
+                if (Mathf.Sqrt(terrainChunk.bounds.SqrDistance(terraformCenter)) <= terraformRadius)
+                {
                     ComputeMarchingCubes marchingCubes = terrainChunk.marchingCubes;
                     Vector3Int chunkPos = terrainChunk.chunkPos;
                     Vector3Int radius = new Vector3Int(Mathf.CeilToInt(terraformRadius), Mathf.CeilToInt(terraformRadius), Mathf.CeilToInt(terraformRadius));
@@ -58,8 +63,7 @@ public class Terraforming : MonoBehaviour
                     int threadSizeZ = Mathf.CeilToInt((end.z - start.z) + 1f);
 
                     int terraformKernel = marchingCubes.terraformComputeShader.FindKernel("Terraform");
-                    ComputeBuffer heightsBuffer = marchingCubes.heightsBuffer;
-                    marchingCubes.terraformComputeShader.SetBuffer(terraformKernel, "HeightsBuffer", heightsBuffer);
+                    marchingCubes.terraformComputeShader.SetBuffer(terraformKernel, "HeightsBuffer", marchingCubes.heightsBuffer);
                     marchingCubes.terraformComputeShader.SetInt("ChunkSize", terrainDensityData.width);
                     marchingCubes.terraformComputeShader.SetVector("ChunkPos", (Vector3)chunkPos);
                     marchingCubes.terraformComputeShader.SetVector("TerraformOffset", (Vector3)start);
@@ -68,15 +72,9 @@ public class Terraforming : MonoBehaviour
                     marchingCubes.terraformComputeShader.SetFloat("TerraformStrength", terraformStrength);
                     marchingCubes.terraformComputeShader.SetBool("TerraformMode", mode);
 
-                    if (threadSizeX <= 0 || threadSizeY <= 0 || threadSizeZ <= 0)
-                    {
-                        Debug.LogWarning($"Skipped dispatch: Invalid thread sizes — X:{threadSizeX} Y:{threadSizeY} Z:{threadSizeZ}");
-                        Debug.Log($"Start: {start}, End: {end}, ChunkPos: {chunkPos}, Radius: {radius}");
-                    }
-
                     marchingCubes.terraformComputeShader.Dispatch(terraformKernel, threadSizeX, threadSizeY, threadSizeZ);
 
-                    marchingCubes.MarchingCubes(heightsBuffer);
+                    marchingCubes.MarchingCubes(marchingCubes.heightsBuffer);
                 }
             }
         }

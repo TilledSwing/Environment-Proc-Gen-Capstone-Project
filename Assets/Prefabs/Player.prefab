@@ -304,7 +304,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   terraformMaxDst: 20
   terraformRadius: 3
-  terraformStrength: 2
+  terraformStrength: 1
 --- !u!1 &8935483582062294650
 GameObject:
   m_ObjectHideFlags: 0

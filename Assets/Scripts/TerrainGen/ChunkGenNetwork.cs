@@ -11,6 +11,13 @@ public class ChunkGenNetwork : NetworkBehaviour
     public int chunkSize;
     public int chunksVisible;
     public TerrainDensityData1 terrainDensityData;
+    public ComputeShader marchingCubesComputeShader;
+    public ComputeShader terrainDensityComputeShader;
+    public ComputeShader terrainNoiseComputeShader;
+    public ComputeShader caveNoiseComputeShader;
+    public ComputeShader terraformComputeShader;
+    public ComputeShader spawnPointsComputeShader;
+    public Material terrainMaterial;
     public AssetSpawnData assetSpawnData;
     public Dictionary<Vector3, TerrainChunk> chunkDictionary = new Dictionary<Vector3, TerrainChunk>();
     public Dictionary<Vector3Int, List<SpawnableAsset>> assets = new Dictionary<Vector3Int, List<SpawnableAsset>>();
@@ -18,10 +25,11 @@ public class ChunkGenNetwork : NetworkBehaviour
 
     void Awake()
     {
-        terrainDensityData = Resources.Load<TerrainDensityData1>("TerrainDensityData1");
-        assetSpawnData = Resources.Load<AssetSpawnData>("AssetSpawnData");
         chunkSize = terrainDensityData.width;
-        chunksVisible = Mathf.RoundToInt(maxViewDst/chunkSize);
+        chunksVisible = Mathf.RoundToInt(maxViewDst / chunkSize);
+        terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 100000);
+        terrainDensityData.caveNoiseSeed = UnityEngine.Random.Range(0, 100000);
+        terrainDensityData.domainWarpSeed = UnityEngine.Random.Range(0, 100000);
     }
 
     public override void OnStartClient()
@@ -62,7 +70,7 @@ public class ChunkGenNetwork : NetworkBehaviour
                         }
                     }
                     else {
-                        chunkDictionary.Add(viewedChunkCoord, new TerrainChunk(viewedChunkCoord, chunkSize, transform));
+                        chunkDictionary.Add(viewedChunkCoord, new TerrainChunk(viewedChunkCoord, chunkSize, transform, terrainDensityData, assetSpawnData, marchingCubesComputeShader, terrainDensityComputeShader, terrainNoiseComputeShader, caveNoiseComputeShader, terraformComputeShader, spawnPointsComputeShader, terrainMaterial));
                     }
                 }
             }
@@ -111,7 +119,7 @@ public class ChunkGenNetwork : NetworkBehaviour
         public Vector3Int chunkPos;
         public Bounds bounds;
         public MeshCollider meshCollider;
-        public TerrainChunk(Vector3Int chunkCoord, int chunkSize, Transform parent)
+        public TerrainChunk(Vector3Int chunkCoord, int chunkSize, Transform parent, TerrainDensityData1 terrainDensityData, AssetSpawnData assetSpawnData, ComputeShader marchingCubesComputeShader, ComputeShader terrainDensityComputeShader, ComputeShader terrainNoiseComputeShader, ComputeShader caveNoiseComputeShader, ComputeShader terraformComputeShader, ComputeShader spawnPointsComputeShader, Material terrainMaterial)
         {
             chunkPos = chunkCoord * chunkSize;
             bounds = new Bounds(chunkPos + (new Vector3(0.5f, 0.5f, 0.5f) * chunkSize), Vector3.one * chunkSize);
@@ -120,8 +128,18 @@ public class ChunkGenNetwork : NetworkBehaviour
             meshCollider = chunk.AddComponent<MeshCollider>();
             assetSpawner = chunk.AddComponent<AssetSpawner>();
             assetSpawner.chunkPos = chunkPos;
+            assetSpawner.terrainDensityData = terrainDensityData;
+            assetSpawner.assetSpawnData = assetSpawnData;
+            assetSpawner.spawnPointsComputeShader = spawnPointsComputeShader;
             marchingCubes = chunk.AddComponent<ComputeMarchingCubes>();
             marchingCubes.chunkPos = chunkPos;
+            marchingCubes.marchingCubesComputeShader = marchingCubesComputeShader;
+            marchingCubes.terrainDensityComputeShader = terrainDensityComputeShader;
+            marchingCubes.terrainNoiseComputeShader = terrainNoiseComputeShader;
+            marchingCubes.caveNoiseComputeShader = caveNoiseComputeShader;
+            marchingCubes.terraformComputeShader = terraformComputeShader;
+            marchingCubes.terrainDensityData = terrainDensityData;
+            marchingCubes.terrainMaterial = terrainMaterial;
             chunk.transform.SetParent(parent);
             SetVisible(false);
         }
