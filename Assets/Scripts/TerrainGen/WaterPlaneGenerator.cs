@@ -10,7 +10,6 @@ public class WaterPlaneGenerator : MonoBehaviour
     private List<Vector3> vertices = new List<Vector3>();
     private List<int> triangles = new List<int>();
     private MeshFilter meshFilter;
-    private Renderer mat;
     public ComputeMarchingCubes marchingCubes;
     public TerrainDensityData1 terrainDensityData;
     private int width;
@@ -18,18 +17,10 @@ public class WaterPlaneGenerator : MonoBehaviour
 
     void Awake()
     {
-        gameObject.AddComponent<MeshRenderer>();
-        meshFilter = gameObject.AddComponent<MeshFilter>();
-        mat = GetComponent<Renderer>();
-        Material waterMaterial = Resources.Load<Material>("Materials/WaterMat");
-        mat.material = waterMaterial;
-        marchingCubes = gameObject.GetComponentInParent<ComputeMarchingCubes>();
-        terrainDensityData = Resources.Load<TerrainDensityData1>("TerrainDensityData1");
+        meshFilter = gameObject.GetComponent<MeshFilter>();
     }
 
     public void UpdateMesh() {
-        width = terrainDensityData.width;
-        waterLevel = terrainDensityData.waterLevel;
         GenerateWaterPlane();
         SetupMesh();
     }
@@ -51,12 +42,12 @@ public class WaterPlaneGenerator : MonoBehaviour
         vertices.Clear();
         triangles.Clear();
 
-        for(int x = 0; x < width; x++) {
-            for(int z = 0; z < width; z++) {
-                Vector3 vertex00 = new Vector3(marchingCubes.chunkPos.x + x, waterLevel, marchingCubes.chunkPos.z + z);
-                Vector3 vertex10 = new Vector3(marchingCubes.chunkPos.x + x+1, waterLevel, marchingCubes.chunkPos.z + z);
-                Vector3 vertex01 = new Vector3(marchingCubes.chunkPos.x + x, waterLevel, marchingCubes.chunkPos.z + z+1);
-                Vector3 vertex11 = new Vector3(marchingCubes.chunkPos.x + x+1, waterLevel, marchingCubes.chunkPos.z + z+1);
+        for(int x = 0; x < terrainDensityData.width; x++) {
+            for(int z = 0; z < terrainDensityData.width; z++) {
+                Vector3 vertex00 = new Vector3(marchingCubes.chunkPos.x + x, terrainDensityData.waterLevel, marchingCubes.chunkPos.z + z);
+                Vector3 vertex10 = new Vector3(marchingCubes.chunkPos.x + x+1, terrainDensityData.waterLevel, marchingCubes.chunkPos.z + z);
+                Vector3 vertex01 = new Vector3(marchingCubes.chunkPos.x + x, terrainDensityData.waterLevel, marchingCubes.chunkPos.z + z+1);
+                Vector3 vertex11 = new Vector3(marchingCubes.chunkPos.x + x+1, terrainDensityData.waterLevel, marchingCubes.chunkPos.z + z+1);
                 int vertCount = vertices.Count;
                 
                 vertices.Add(vertex00);

@@ -19,6 +19,7 @@ public class ChunkGenLocal : MonoBehaviour
     public ComputeShader terraformComputeShader;
     public ComputeShader spawnPointsComputeShader;
     public Material terrainMaterial;
+    public Material waterMaterial;
     public AssetSpawnData assetSpawnData;
     public Dictionary<Vector3, TerrainChunk> chunkDictionary = new Dictionary<Vector3, TerrainChunk>();
     public Dictionary<Vector3Int, List<SpawnableAsset>> assets = new Dictionary<Vector3Int, List<SpawnableAsset>>();
@@ -36,19 +37,21 @@ public class ChunkGenLocal : MonoBehaviour
 
     void Update()
     {
-        viewerPos = new Vector3(viewer.position.x,viewer.position.y,viewer.position.z);
+        viewerPos = new Vector3(viewer.position.x, viewer.position.y, viewer.position.z);
         UpdateVisibleChunks();
     }
 
-    public void UpdateVisibleChunks() {
-        for(int i = 0; i < chunksVisibleLastUpdate.Count; i++) {
+    public void UpdateVisibleChunks()
+    {
+        for (int i = 0; i < chunksVisibleLastUpdate.Count; i++)
+        {
             chunksVisibleLastUpdate[i].SetVisible(false);
         }
         chunksVisibleLastUpdate.Clear();
 
-        int currentChunkCoordX = Mathf.RoundToInt(viewerPos.x/chunkSize);
-        int currentChunkCoordY = Mathf.RoundToInt(viewerPos.y/chunkSize);
-        int currentChunkCoordZ = Mathf.RoundToInt(viewerPos.z/chunkSize);
+        int currentChunkCoordX = Mathf.RoundToInt(viewerPos.x / chunkSize);
+        int currentChunkCoordY = Mathf.RoundToInt(viewerPos.y / chunkSize);
+        int currentChunkCoordZ = Mathf.RoundToInt(viewerPos.z / chunkSize);
 
         for (int xOffset = -chunksVisible; xOffset <= chunksVisible; xOffset++)
         {
@@ -70,7 +73,17 @@ public class ChunkGenLocal : MonoBehaviour
                     }
                     else
                     {
-                        chunkDictionary.Add(viewedChunkCoord, new TerrainChunk(viewedChunkCoord, chunkSize, transform, terrainDensityData, assetSpawnData, marchingCubesComputeShader, terrainDensityComputeShader, terrainNoiseComputeShader, caveNoiseComputeShader, terraformComputeShader, spawnPointsComputeShader, terrainMaterial));
+                        TerrainChunk chunk = new TerrainChunk(viewedChunkCoord, chunkSize, transform, terrainDensityData, assetSpawnData,
+                                                         marchingCubesComputeShader, terrainDensityComputeShader, terrainNoiseComputeShader,
+                                                         caveNoiseComputeShader, terraformComputeShader, spawnPointsComputeShader,
+                                                         terrainMaterial, waterMaterial);
+                        chunkDictionary.Add(viewedChunkCoord, chunk);
+                        chunk.UpdateChunk(maxViewDst, chunkSize);
+
+                        if (chunk.IsVisible())
+                        {
+                            chunksVisibleLastUpdate.Add(chunk);
+                        }
                     }
                 }
             }
@@ -126,13 +139,18 @@ public class ChunkGenLocal : MonoBehaviour
         public Vector3Int chunkPos;
         public Bounds bounds;
         public MeshCollider meshCollider;
-        public TerrainChunk(Vector3Int chunkCoord, int chunkSize, Transform parent, TerrainDensityData1 terrainDensityData, AssetSpawnData assetSpawnData, ComputeShader marchingCubesComputeShader, ComputeShader terrainDensityComputeShader, ComputeShader terrainNoiseComputeShader, ComputeShader caveNoiseComputeShader, ComputeShader terraformComputeShader, ComputeShader spawnPointsComputeShader, Material terrainMaterial)
+        public TerrainChunk(Vector3Int chunkCoord, int chunkSize, Transform parent, TerrainDensityData1 terrainDensityData, AssetSpawnData assetSpawnData, ComputeShader marchingCubesComputeShader, ComputeShader terrainDensityComputeShader, ComputeShader terrainNoiseComputeShader, ComputeShader caveNoiseComputeShader, ComputeShader terraformComputeShader, ComputeShader spawnPointsComputeShader, Material terrainMaterial, Material waterMaterial)
         {
             chunkPos = chunkCoord * chunkSize;
             bounds = new Bounds(chunkPos + (new Vector3(0.5f, 0.5f, 0.5f) * chunkSize), Vector3.one * chunkSize);
             chunk = new GameObject("Chunk");
             chunk.layer = 3;
             meshCollider = chunk.AddComponent<MeshCollider>();
+            chunk.AddComponent<MeshFilter>();
+            MeshRenderer mr = chunk.AddComponent<MeshRenderer>();
+            mr.material = terrainMaterial;
+            mr.material.SetFloat("_UnderwaterTexHeightEnd", terrainDensityData.waterLevel - 15f);
+            mr.material.SetFloat("_Tex1HeightStart", terrainDensityData.waterLevel - 18f);
             assetSpawner = chunk.AddComponent<AssetSpawner>();
             assetSpawner.chunkPos = chunkPos;
             assetSpawner.terrainDensityData = terrainDensityData;
@@ -147,6 +165,7 @@ public class ChunkGenLocal : MonoBehaviour
             marchingCubes.terraformComputeShader = terraformComputeShader;
             marchingCubes.terrainDensityData = terrainDensityData;
             marchingCubes.terrainMaterial = terrainMaterial;
+            marchingCubes.waterMaterial = waterMaterial;
             chunk.transform.SetParent(parent);
             SetVisible(false);
         }

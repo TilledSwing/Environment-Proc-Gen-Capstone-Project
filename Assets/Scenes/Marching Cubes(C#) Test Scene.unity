@@ -14819,7 +14819,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1618158069
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14844,6 +14844,7 @@ MonoBehaviour:
   terraformComputeShader: {fileID: 7200000, guid: e41356404106d3e4487dd76d300e0a73, type: 3}
   spawnPointsComputeShader: {fileID: 7200000, guid: 34d051a95d32b2f4d9a80dca89ef00d5, type: 3}
   terrainMaterial: {fileID: 2100000, guid: d644a1ee14ca32a44b080e9c6de5ed62, type: 2}
+  waterMaterial: {fileID: 2100000, guid: 804af839dce47f748a2151ac2e3113a9, type: 2}
   assetSpawnData: {fileID: 11400000, guid: 29949715b352478458342a45d2b907a0, type: 2}
 --- !u!4 &1618158070
 Transform:
@@ -16650,6 +16651,7 @@ MonoBehaviour:
   terraformComputeShader: {fileID: 7200000, guid: e41356404106d3e4487dd76d300e0a73, type: 3}
   spawnPointsComputeShader: {fileID: 7200000, guid: 34d051a95d32b2f4d9a80dca89ef00d5, type: 3}
   terrainMaterial: {fileID: 2100000, guid: d644a1ee14ca32a44b080e9c6de5ed62, type: 2}
+  waterMaterial: {fileID: 2100000, guid: 804af839dce47f748a2151ac2e3113a9, type: 2}
   assetSpawnData: {fileID: 11400000, guid: 29949715b352478458342a45d2b907a0, type: 2}
 --- !u!4 &1838274977
 Transform:

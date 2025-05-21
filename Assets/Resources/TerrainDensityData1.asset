@@ -20,7 +20,7 @@ MonoBehaviour:
   noiseFractalType: 1
   selectedRotationType3D: 0
   rotationType3D: 0
-  noiseSeed: 29629
+  noiseSeed: 26401
   noiseFractalOctaves: 5
   noiseFractalLacunarity: 2
   noiseFractalGain: 0.5
@@ -32,7 +32,7 @@ MonoBehaviour:
   selectedDomainWarpFractalType: 0
   domainWarpFractalType: 0
   domainWarpAmplitude: 1
-  domainWarpSeed: 56648
+  domainWarpSeed: 42754
   domainWarpFractalOctaves: 5
   domainWarpFractalLacunarity: 2
   domainWarpFractalGain: 0.5
@@ -42,40 +42,42 @@ MonoBehaviour:
   selectedCellularReturnType: 1
   cellularReturnType: 1
   cellularJitter: 1
-  width: 32
-  height: 100
   noiseScale: 0.6
+  selectedCaveNoiseDimension: 1
+  caveNoiseDimension: 1
+  selectedCaveNoiseType: 0
+  caveNoiseType: 0
+  selectedCaveNoiseFractalType: 1
+  caveNoiseFractalType: 1
+  selectedCaveRotationType3D: 0
+  caveRotationType3D: 0
+  caveNoiseSeed: 3299
+  caveNoiseFractalOctaves: 5
+  caveNoiseFractalLacunarity: 2
+  caveNoiseFractalGain: 0.5
+  caveFractalWeightedStrength: 0
+  caveNoiseFrequency: 0.01
+  caveDomainWarpToggle: 0
+  caveSelectedDomainWarpType: 0
+  caveDomainWarpType: 0
+  caveSelectedDomainWarpFractalType: 0
+  caveDomainWarpFractalType: 0
+  caveDomainWarpAmplitude: 1
+  caveDomainWarpSeed: 95468
+  caveDomainWarpFractalOctaves: 5
+  caveDomainWarpFractalLacunarity: 2
+  caveDomainWarpFractalGain: 0.5
+  caveDomainWarpFrequency: 0.01
+  caveSelectedCellularDistanceFunction: 1
+  caveCellularDistanceFunction: 1
+  caveSelectedCellularReturnType: 1
+  caveCellularReturnType: 1
+  caveCellularJitter: 1
+  caveNoiseScale: 0.6
+  width: 24
+  height: 80
   isolevel: 0.5
   waterLevel: 35
   lerp: 1
   terracing: 0
   terraceHeight: 2
-  defaultNoiseDimension: 1
-  defaultNoiseType: 0
-  defaultNoiseFractalType: 1
-  defaultNoiseSeed: 0
-  defaultNoiseFractalOctaves: 5
-  defaultNoiseFractalLacunarity: 2
-  defaultNoiseFractalGain: 0.5
-  defaultFractalWeightedStrength: 0
-  defaultNoiseFrequency: 0.01
-  defaultDomainWarpToggle: 0
-  defaultDomainWarpType: 0
-  defaultDomainWarpFractalType: 0
-  defaultDomainWarpAmplitude: 1
-  defaultDomainWarpSeed: 0
-  defaultDomainWarpFractalOctaves: 5
-  defaultDomainWarpFractalLacunarity: 2
-  defaultDomainWarpFractalGain: 0.5
-  defaultDomainWarpFrequency: 0.01
-  defaultCellularDistanceFunction: 1
-  defaultCellularReturnType: 1
-  defaultCellularJitter: 1
-  defaultWidth: 32
-  defaultHeight: 90
-  defaultNoiseScale: 0.6
-  defaultIsolevel: 0.5
-  defaultWaterLevel: 35
-  defaultLerp: 1
-  defaultTerracing: 0
-  defaultTerraceHeight: 2

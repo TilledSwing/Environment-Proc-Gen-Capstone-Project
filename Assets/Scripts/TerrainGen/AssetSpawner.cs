@@ -28,7 +28,7 @@ public class AssetSpawner : MonoBehaviour
     public Vector3Int chunkPos;
     public LayerMask assetLayer;
     public int assetSpacing = 8;
-    public int maxAttempts = 16;
+    public int maxAttempts = 8;
 
     public void SpawnAssets()
     {

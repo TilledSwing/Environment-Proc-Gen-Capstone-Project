@@ -13,6 +13,7 @@ public class ComputeMarchingCubes : MonoBehaviour
     public ComputeShader caveNoiseComputeShader;
     public ComputeShader terraformComputeShader;
     public Material terrainMaterial;
+    public Material waterMaterial;
     private MeshFilter meshFilter;
     private MeshCollider meshCollider;
     public List<Vector3> vertices = new List<Vector3>();
@@ -41,43 +42,26 @@ public class ComputeMarchingCubes : MonoBehaviour
 
     void Start()
     {
-        InitializeChunk();
+        ChunkSetup();
         SetNoiseSetting();
         GenerateMesh();
-        if (Mathf.RoundToInt(chunkPos.y / terrainDensityData.width) == 0)
-        {
-            waterGen.UpdateMesh();
-        }
-        assetSpawner.SpawnAssets();
-        SetTexture();
+        // StartCoroutine(GenerateMesh());
     }
 
-    void OnMeshReady()
+    public void ChunkSetup()
     {
-        if(Mathf.RoundToInt(chunkPos.y/terrainDensityData.width) == 0) {
-            waterGen.UpdateMesh();
-        }
-        assetSpawner.SpawnAssets();
-        SetTexture();
-    }
-
-    public void InitializeChunk()
-    {
-        gameObject.AddComponent<MeshRenderer>();
-        meshFilter = gameObject.AddComponent<MeshFilter>();
+        meshFilter = gameObject.GetComponent<MeshFilter>();
         meshCollider = gameObject.GetComponent<MeshCollider>();
         assetSpawner = gameObject.GetComponent<AssetSpawner>();
+
         waterPlaneGenerator = new GameObject("Water");
         waterPlaneGenerator.transform.SetParent(transform);
+        waterPlaneGenerator.AddComponent<MeshFilter>();
+        MeshRenderer waterMat = waterPlaneGenerator.AddComponent<MeshRenderer>();
+        waterMat.material = waterMaterial;
         waterGen = waterPlaneGenerator.AddComponent<WaterPlaneGenerator>();
-    }
-
-    public void SetTexture()
-    {
-        mat = GetComponent<Renderer>();
-        mat.material = terrainMaterial;
-        mat.material.SetFloat("_UnderwaterTexHeightEnd", terrainDensityData.waterLevel - 15f);
-        mat.material.SetFloat("_Tex1HeightStart", terrainDensityData.waterLevel - 18f);
+        waterGen.terrainDensityData = terrainDensityData;
+        waterGen.marchingCubes = this;
     }
 
     private void SetNoiseSetting()
@@ -155,7 +139,8 @@ public class ComputeMarchingCubes : MonoBehaviour
     public void GenerateMesh()
     {
         heightsBuffer = SetHeights();
-        MarchingCubes(heightsBuffer);
+        // yield return new WaitForEndOfFrame();
+        MarchingCubes(heightsBuffer, false);
     }
 
     public ComputeBuffer SetHeights()
@@ -185,7 +170,7 @@ public class ComputeMarchingCubes : MonoBehaviour
         return heightsBuffer;
     }
 
-    public void MarchingCubes(ComputeBuffer heightsBuffer)
+    public void MarchingCubes(ComputeBuffer heightsBuffer, bool terraforming)
     {
         int marchingKernel = marchingCubesComputeShader.FindKernel("MarchingCubes");
 
@@ -199,61 +184,117 @@ public class ComputeMarchingCubes : MonoBehaviour
         marchingCubesComputeShader.SetBool("lerpToggle", terrainDensityData.lerp);
 
         vertexBuffer.SetCounterValue(0);
-        marchingCubesComputeShader.Dispatch(marchingKernel, Mathf.CeilToInt(terrainDensityData.width / 8f), Mathf.CeilToInt(terrainDensityData.width / 8f), Mathf.CeilToInt(terrainDensityData.width / 8f));
+        marchingCubesComputeShader.Dispatch(marchingKernel, Mathf.CeilToInt(terrainDensityData.width / 4f), Mathf.CeilToInt(terrainDensityData.width / 4f), Mathf.CeilToInt(terrainDensityData.width / 4f));
 
         ComputeBuffer vertexCountBuffer = new ComputeBuffer(1, sizeof(int), ComputeBufferType.Raw);
         ComputeBuffer.CopyCount(vertexBuffer, vertexCountBuffer, 0);
 
-        // AsyncGPUReadback.Request(vertexCountBuffer, (AsyncGPUReadbackRequest countRequest) => {
-        //     if (countRequest.hasError)
-        //     {
-        //         Debug.LogError("Failed to read vertex count.");
-        //         vertexCountBuffer.Release();
-        //         vertexBuffer.Release();
-        //         return ;
-        //     }
+        AsyncGPUReadback.Request(vertexCountBuffer, (AsyncGPUReadbackRequest countRequest) => {
+            if (countRequest.hasError)
+            {
+                Debug.LogError("Failed to read vertex count.");
+                vertexCountBuffer.Release();
+                vertexBuffer.Release();
+                return ;
+            }
 
-        //     int vertexCount = countRequest.GetData<int>()[0];
-        //     vertexCountBuffer.Release();
+            int vertexCount = countRequest.GetData<int>()[0];
+            vertexCountBuffer.Release();
 
-        //     AsyncGPUReadback.Request(vertexBuffer, (AsyncGPUReadbackRequest dataRequest) => {
-        //         if (dataRequest.hasError)
-        //         {
-        //             Debug.LogError("Failed to read vertex buffer.");
-        //             vertexBuffer.Release();
-        //             return ;
-        //         }
+            AsyncGPUReadback.Request(vertexBuffer, (AsyncGPUReadbackRequest dataRequest) => {
+                if (dataRequest.hasError)
+                {
+                    Debug.LogError("Failed to read vertex buffer.");
+                    vertexBuffer.Release();
+                    return ;
+                }
 
-        //         Triangle[] vertexArray = new Triangle[vertexCount];
-        //         NativeArray<Triangle> rawData = dataRequest.GetData<Triangle>();
+                Triangle[] vertexArray = new Triangle[vertexCount];
+                NativeArray<Triangle> rawData = dataRequest.GetData<Triangle>();
 
-        //         for (int i = 0; i < vertexCount; i++) {
-        //             vertexArray[i] = rawData[i];
-        //         }
+                for (int i = 0; i < vertexCount; i++) {
+                    vertexArray[i] = rawData[i];
+                }
 
-        //         vertexBuffer.Release();
+                vertexBuffer.Release();
+                
+                if (Mathf.RoundToInt(chunkPos.y / terrainDensityData.width) == 0)
+                {
+                    waterGen.UpdateMesh();
+                }
 
-        //         SetupMesh(vertexCount, vertexArray);
-        //         OnMeshReady();
-        //     });
-        // });
+                if (vertexCount > 0)
+                {
+                    SetMeshValuesPerformant(vertexCount, vertexArray, terraforming);
+                }
+            });
+        });
 
-        int[] vertexCountArray = { 0 };
-        vertexCountBuffer.GetData(vertexCountArray);
+        // int[] vertexCountArray = { 0 };
+        // vertexCountBuffer.GetData(vertexCountArray);
 
-        vertexCountBuffer.Release();
+        // vertexCountBuffer.Release();
 
-        int vertexCount = vertexCountArray[0];
+        // int vertexCount = vertexCountArray[0];
 
-        Triangle[] vertexArray = new Triangle[vertexCount];
-        vertexBuffer.GetData(vertexArray, 0, 0, vertexCount);
+        // Triangle[] vertexArray = new Triangle[vertexCount];
+        // vertexBuffer.GetData(vertexArray, 0, 0, vertexCount);
 
-        vertexBuffer.Release();
+        // vertexBuffer.Release();
 
-        SetupMesh(vertexCount, vertexArray);
+        // SetMeshValues(vertexCount, vertexArray);
     }
 
-    public void SetupMesh(int vertexCount, Triangle[] vertexArray)
+    public void SetMeshValuesPerformant(int vertexCount, Triangle[] vertexArray, bool terraforming)
+    {
+        Mesh.MeshDataArray meshDataArray = Mesh.AllocateWritableMeshData(1);
+        Mesh.MeshData meshData = meshDataArray[0];
+
+        meshData.SetVertexBufferParams(vertexCount * 3,
+        new VertexAttributeDescriptor(VertexAttribute.Position),
+        new VertexAttributeDescriptor(VertexAttribute.Normal));
+
+        var vertexBuffer = meshData.GetVertexData<Vertex>(0);
+
+        meshData.SetIndexBufferParams(vertexCount * 3, IndexFormat.UInt32);
+        var indexBuffer = meshData.GetIndexData<int>();
+
+        for (int i = 0; i < vertexCount; i++)
+        {
+            int start = i * 3;
+            Triangle t = vertexArray[i];
+
+            vertexBuffer[start] = t.v1;
+            vertexBuffer[start + 1] = t.v2;
+            vertexBuffer[start + 2] = t.v3;
+
+            indexBuffer[start] = start;
+            indexBuffer[start + 1] = start + 1;
+            indexBuffer[start + 2] = start + 2;
+        }
+
+        meshData.subMeshCount = 1;
+        meshData.SetSubMesh(0, new SubMeshDescriptor(0, vertexCount * 3, MeshTopology.Triangles));
+
+        if (!terraforming)
+        {
+            assetSpawner.worldVertices = vertexBuffer.ToArray();
+        }
+
+        Mesh mesh = new Mesh();
+        Mesh.ApplyAndDisposeWritableMeshData(meshDataArray, mesh, MeshUpdateFlags.Default);
+
+        meshFilter.mesh = mesh;
+        meshCollider.sharedMesh = mesh;
+        mesh.bounds = new Bounds(chunkPos + (new Vector3(0.5f, 0.5f, 0.5f) * terrainDensityData.width), Vector3.one * terrainDensityData.width);
+
+        if (!terraforming)
+        {
+            assetSpawner.SpawnAssets();
+        }
+    }
+
+    public void SetMeshValues(int vertexCount, Triangle[] vertexArray, bool terraforming)
     {
         vertices.Clear();
         triangles.Clear();
@@ -285,18 +326,38 @@ public class ComputeMarchingCubes : MonoBehaviour
             triangles.Add(i * 3 + 1);
             triangles.Add(i * 3 + 2);
         }
-        assetSpawner.worldVertices = verticesNormals.ToArray();
+        SetupMesh(terraforming);
+    }
 
+    public void SetupMesh(bool terraforming)
+    {
         Mesh mesh = new Mesh();
         mesh.indexFormat = IndexFormat.UInt32;
         mesh.SetVertices(vertices);
         mesh.SetTriangles(triangles, 0);
-        mesh.RecalculateNormals();
+        List<Vector3> normals = new List<Vector3>(verticesNormals.Count);
+        for (int i = 0; i < verticesNormals.Count; i++)
+        {
+            normals.Add(verticesNormals[i].normal);
+        }
+        mesh.SetNormals(normals);
         mesh.RecalculateBounds();
-        mesh.RecalculateTangents();
+
 
         meshFilter.mesh = mesh;
         meshCollider.sharedMesh = mesh;
+
+        assetSpawner.worldVertices = verticesNormals.ToArray();
+        if (!terraforming)
+        {
+            assetSpawner.SpawnAssets();
+        }
+
+        if (Mathf.RoundToInt(chunkPos.y / terrainDensityData.width) == 0)
+        {
+            waterGen.UpdateMesh();
+        }
+
         vertices.Clear();
         triangles.Clear();
         verticesNormals.Clear();
@@ -310,13 +371,13 @@ public class ComputeMarchingCubes : MonoBehaviour
         }
     }
 
-    // void OnDrawGizmos()
-    // {
-    //     if (terrainDensityData == null)
-    //     {
-    //         terrainDensityData = Resources.Load<TerrainDensityData1>("TerrainDensityData1");
-    //         if (terrainDensityData == null) return; // still not found
-    //     }
-    //     Gizmos.DrawWireCube(chunkPos + (new Vector3(0.5f,0.5f,0.5f) * terrainDensityData.width), Vector3.one * terrainDensityData.width);
-    // }
+    void OnDrawGizmos()
+    {
+        if (terrainDensityData == null)
+        {
+            terrainDensityData = Resources.Load<TerrainDensityData1>("TerrainDensityData1");
+            if (terrainDensityData == null) return; // still not found
+        }
+        Gizmos.DrawWireCube(chunkPos + (new Vector3(0.5f,0.5f,0.5f) * terrainDensityData.width), Vector3.one * terrainDensityData.width);
+    }
 }
