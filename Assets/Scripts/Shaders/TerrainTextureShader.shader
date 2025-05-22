@@ -42,7 +42,7 @@ Shader "Custom/TerrainTextureShader"
     {
         // SubShader Tags define when and under which conditions a SubShader block or
         // a pass is executed.
-        Tags { "RenderType" = "Opaque" "RenderPipeline" = "UniversalPipeline" }
+        Tags { "RenderType" = "Opaque" "RenderPipeline" = "UniversalPipeline" "Lightmode" = "UniversalForward" }
         LOD 200
 
         Pass
@@ -55,6 +55,7 @@ Shader "Custom/TerrainTextureShader"
             #pragma fragment frag
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
             #pragma multi_compile _ _ADDITIONAL_LIGHT_SHADOWS
+            #pragma multi_compile _ _FORWARD_PLUS
 
             // The Core.hlsl file contains definitions of frequently used HLSL
             // macros and functions, and also contains #include references to other
@@ -63,6 +64,8 @@ Shader "Custom/TerrainTextureShader"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderVariablesFunctions.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
+            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/CommonMaterial.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/RealtimeLights.hlsl"
 
             // The structure definition defines which variables it contains.
             // This example uses the Attributes structure as an input structure in
@@ -159,9 +162,6 @@ Shader "Custom/TerrainTextureShader"
             float4 frag(Varyings IN) : SV_Target
             {
                 float height = IN.worldPos.y;
-                // if(height < min(min(_Tex1HeightStart, _Tex2HeightStart), min(_Tex3HeightStart, _Tex4HeightStart))) {
-                //     height = min(min(_Tex1HeightStart, _Tex2HeightStart), min(_Tex3HeightStart, _Tex4HeightStart)) + 1;
-                // }
                 if(height < _UnderwaterTexHeightStart) {
                     height = _UnderwaterTexHeightStart + 1;
                 }
@@ -226,8 +226,8 @@ Shader "Custom/TerrainTextureShader"
                 float3 mainLightColor = mainLight.color.rgb * NdotL * shadowAttenuation;
                 finalTexture += albedo.rgb * mainLightColor;
 
-                uint additionalLightCount = GetAdditionalLightsCount();
-                for (uint i = 0; i < additionalLightCount; ++i)
+                uint maxVisibleLights = 50;
+                UNITY_LOOP for (uint i = 0; i < maxVisibleLights; i++)
                 {
                     Light light = GetAdditionalLight(i, IN.worldPos);
                     float3 lightDir = normalize(light.direction);
@@ -236,7 +236,7 @@ Shader "Custom/TerrainTextureShader"
                 }
 
                 // Optional ambient light (from Unity's shading environment)
-                finalTexture += albedo.rgb * 0.015; // tweak ambient strength as needed
+                finalTexture += albedo.rgb * 0.020; // tweak ambient strength as needed
 
                 return float4(finalTexture, 1.0);
             }

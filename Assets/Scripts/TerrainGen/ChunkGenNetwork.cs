@@ -27,6 +27,7 @@ public class ChunkGenNetwork : NetworkBehaviour
     private Queue<Vector3Int> chunkLoadQueue = new Queue<Vector3Int>();
     private bool isLoadingChunks = false;
     private bool initialLoadComplete = false;
+    public GameObject lightingBlocker;
 
     void Awake()
     {
@@ -50,6 +51,7 @@ public class ChunkGenNetwork : NetworkBehaviour
     void Update()
     {
         viewerPos = new Vector3(viewer.position.x,viewer.position.y,viewer.position.z);
+        lightingBlocker.transform.position = new Vector3(viewerPos.x, 0, viewerPos.z);
         UpdateVisibleChunks();
     }
 
@@ -64,6 +66,21 @@ public class ChunkGenNetwork : NetworkBehaviour
         int currentChunkCoordX = Mathf.RoundToInt(viewerPos.x / chunkSize);
         int currentChunkCoordY = Mathf.RoundToInt(viewerPos.y / chunkSize);
         int currentChunkCoordZ = Mathf.RoundToInt(viewerPos.z / chunkSize);
+
+        if (viewerPos.y <= -5)
+        {
+            if (!lightingBlocker.activeSelf)
+            {
+                lightingBlocker.SetActive(true);
+            }
+        }
+        else
+        {
+            if (lightingBlocker.activeSelf)
+            {
+                lightingBlocker.SetActive(false);
+            }
+        }
 
         for (int xOffset = -chunksVisible; xOffset <= chunksVisible; xOffset++)
         {
@@ -228,7 +245,7 @@ public class ChunkGenNetwork : NetworkBehaviour
             float viewerDstFromBound = Mathf.Sqrt(bounds.SqrDistance(viewerPos));
             bool colliderEnable = viewerDstFromBound <= chunkSize;
             bool visible = viewerDstFromBound <= maxViewDst;
-            SetCollider(colliderEnable);
+            // SetCollider(colliderEnable);
             SetVisible(visible);
         }
 

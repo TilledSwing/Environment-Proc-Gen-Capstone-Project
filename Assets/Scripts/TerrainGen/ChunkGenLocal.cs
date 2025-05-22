@@ -24,6 +24,7 @@ public class ChunkGenLocal : MonoBehaviour
     public Dictionary<Vector3, TerrainChunk> chunkDictionary = new Dictionary<Vector3, TerrainChunk>();
     public Dictionary<Vector3Int, List<SpawnableAsset>> assets = new Dictionary<Vector3Int, List<SpawnableAsset>>();
     public List<TerrainChunk> chunksVisibleLastUpdate = new List<TerrainChunk>();
+    public GameObject lightingBlocker;
 
     void Start()
     {
@@ -38,6 +39,7 @@ public class ChunkGenLocal : MonoBehaviour
     void Update()
     {
         viewerPos = new Vector3(viewer.position.x, viewer.position.y, viewer.position.z);
+        lightingBlocker.transform.position = new Vector3(viewerPos.x, 0, viewerPos.z);
         UpdateVisibleChunks();
     }
 
@@ -53,6 +55,21 @@ public class ChunkGenLocal : MonoBehaviour
         int currentChunkCoordY = Mathf.RoundToInt(viewerPos.y / chunkSize);
         int currentChunkCoordZ = Mathf.RoundToInt(viewerPos.z / chunkSize);
 
+        if (viewerPos.y <= -5)
+        {
+            if (!lightingBlocker.activeSelf)
+            {
+                lightingBlocker.SetActive(true);
+            }
+        }
+        else
+        {
+            if (lightingBlocker.activeSelf)
+            {
+                lightingBlocker.SetActive(false);
+            }
+        }
+
         for (int xOffset = -chunksVisible; xOffset <= chunksVisible; xOffset++)
         {
             for (int yOffset = -chunksVisible; yOffset <= chunksVisible; yOffset++)
@@ -60,8 +77,6 @@ public class ChunkGenLocal : MonoBehaviour
                 for (int zOffset = -chunksVisible; zOffset <= chunksVisible; zOffset++)
                 {
                     Vector3Int viewedChunkCoord = new Vector3Int(currentChunkCoordX + xOffset, currentChunkCoordY + yOffset, currentChunkCoordZ + zOffset);
-
-                    // if (viewedChunkCoord.y < 0) break;
 
                     if (chunkDictionary.ContainsKey(viewedChunkCoord))
                     {

@@ -39,7 +39,7 @@ public class Terraforming : MonoBehaviour
         Ray ray = playerCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
         if (Physics.Raycast(ray, out RaycastHit hit, terraformMaxDst, terrainLayer))
         {
-            if (hit.distance <= 1.5f)
+            if (hit.distance <= 1.1f)
             {
                 return;
             }

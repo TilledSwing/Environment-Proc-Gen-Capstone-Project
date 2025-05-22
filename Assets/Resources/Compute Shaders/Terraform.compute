@@ -26,6 +26,9 @@ void Terraform (uint3 id : SV_DispatchThreadID)
     float3 worldVoxelPos = localVoxelPos + ChunkPos;
     float dstToCenter = length(worldVoxelPos - TerraformCenter);
 
+    float density = HeightsBuffer[FlattenIndex(localVoxelPos, ChunkSize)];
+    TerraformStrength *= 1.0 + abs(density / 3.0);
+
     if(dstToCenter < TerraformRadius) {
         if(TerraformMode) {
             HeightsBuffer[FlattenIndex(localVoxelPos, ChunkSize)] -= TerraformStrength * (1.0 - (dstToCenter / TerraformRadius));
