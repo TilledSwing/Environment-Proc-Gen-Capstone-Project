@@ -232,11 +232,20 @@ Shader "Custom/TerrainTextureShader"
                     Light light = GetAdditionalLight(i, IN.worldPos);
                     float3 lightDir = normalize(light.direction);
                     float NdotLAdd = max(0, dot(normal, lightDir));
-                    finalTexture += albedo.rgb * light.color.rgb * NdotLAdd * light.distanceAttenuation;
+                    finalTexture += albedo.rgb * light.color.rgb * NdotLAdd * pow(light.distanceAttenuation, 0.6);
                 }
 
                 // Optional ambient light (from Unity's shading environment)
-                finalTexture += albedo.rgb * 0.0125; // tweak ambient strength as needed
+                // Brighter ambient for surface areas
+                float surfaceAmbient = 0.1;
+                float caveAmbient = 0.015;
+
+                // Threshold for cave vs surface
+                float caveThreshold = 0.0;
+                float ambientStrength = lerp(caveAmbient, surfaceAmbient, saturate((IN.worldPos.y - caveThreshold) * 0.02));
+
+                float shadowBoost = 1.0 - shadowAttenuation;
+                finalTexture += albedo.rgb * ambientStrength * shadowBoost;
 
                 return float4(finalTexture, 1.0);
             }
