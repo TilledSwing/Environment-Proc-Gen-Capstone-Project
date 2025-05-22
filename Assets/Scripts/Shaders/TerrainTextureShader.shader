@@ -236,7 +236,7 @@ Shader "Custom/TerrainTextureShader"
                 }
 
                 // Optional ambient light (from Unity's shading environment)
-                finalTexture += albedo.rgb * 0.020; // tweak ambient strength as needed
+                finalTexture += albedo.rgb * 0.0125; // tweak ambient strength as needed
 
                 return float4(finalTexture, 1.0);
             }

@@ -22,10 +22,11 @@ float3 ChunkPos;
 float isolevel;
 bool lerpToggle;
 
+// Convert a 3D array index into a 1D flat array index
 int FlattenIndex(float3 id, int size) {
     return id.x * (size + 1) * (size + 1) + id.y * (size + 1) + id.z;
 }
-
+// Just marching cubes done inside a compute shader
 [numthreads(4,4,4)]
 void MarchingCubes (uint3 id : SV_DispatchThreadID)
 {

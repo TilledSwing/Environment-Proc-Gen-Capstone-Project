@@ -30,6 +30,7 @@ public class ChunkGenLocal : MonoBehaviour
     {
         chunkSize = terrainDensityData.width;
         chunksVisible = Mathf.RoundToInt(maxViewDst / chunkSize);
+        // Set seeds
         terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 100000);
         terrainDensityData.caveNoiseSeed = UnityEngine.Random.Range(0, 100000);
         terrainDensityData.domainWarpSeed = UnityEngine.Random.Range(0, 100000);
@@ -38,11 +39,15 @@ public class ChunkGenLocal : MonoBehaviour
 
     void Update()
     {
+        // Position updates
         viewerPos = new Vector3(viewer.position.x, viewer.position.y, viewer.position.z);
         lightingBlocker.transform.position = new Vector3(viewerPos.x, 0, viewerPos.z);
+        // Update chunks
         UpdateVisibleChunks();
     }
-
+    /// <summary>
+    /// Update all the visible chunks loading in new ones and unloading old ones that are no longer visible
+    /// </summary>
     public void UpdateVisibleChunks()
     {
         for (int i = 0; i < chunksVisibleLastUpdate.Count; i++)
@@ -105,6 +110,11 @@ public class ChunkGenLocal : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Get a TerrainChunk and its neighbors with the given chunk's coordinate
+    /// </summary>
+    /// <param name="chunkCoord">The chunk coordinate</param>
+    /// <returns>A list containing the chunk whose coordinate was passed and its neighbors</returns>
     public TerrainChunk[] GetChunkAndNeighbors(Vector3Int chunkCoord)
     {
         TerrainChunk[] chunkAndNeighbors = new TerrainChunk[] {
@@ -138,14 +148,18 @@ public class ChunkGenLocal : MonoBehaviour
         };
         return chunkAndNeighbors;
     }
-
+    /// <summary>
+    /// Clear out unnecessary data when quitting the application
+    /// </summary>
     void OnApplicationQuit()
     {
         assetSpawnData.assets.Clear();
         chunkDictionary.Clear();
         assets.Clear();
     }
-
+    /// <summary>
+    /// Custom class to store chunk objects and their relevant information and data
+    /// </summary>
     public class TerrainChunk
     {
         public GameObject chunk;
@@ -160,17 +174,20 @@ public class ChunkGenLocal : MonoBehaviour
             bounds = new Bounds(chunkPos + (new Vector3(0.5f, 0.5f, 0.5f) * chunkSize), Vector3.one * chunkSize);
             chunk = new GameObject("Chunk");
             chunk.layer = 3;
+            // Set up basic chunk components
             meshCollider = chunk.AddComponent<MeshCollider>();
             chunk.AddComponent<MeshFilter>();
             MeshRenderer mr = chunk.AddComponent<MeshRenderer>();
             mr.material = terrainMaterial;
             mr.material.SetFloat("_UnderwaterTexHeightEnd", terrainDensityData.waterLevel - 15f);
             mr.material.SetFloat("_Tex1HeightStart", terrainDensityData.waterLevel - 18f);
+            // Set up the chunk's AssetSpawn script
             assetSpawner = chunk.AddComponent<AssetSpawner>();
             assetSpawner.chunkPos = chunkPos;
             assetSpawner.terrainDensityData = terrainDensityData;
             assetSpawner.assetSpawnData = assetSpawnData;
             assetSpawner.spawnPointsComputeShader = spawnPointsComputeShader;
+            // Set up the chunk's ComputeMarchingCubes script
             marchingCubes = chunk.AddComponent<ComputeMarchingCubes>();
             marchingCubes.chunkPos = chunkPos;
             marchingCubes.marchingCubesComputeShader = marchingCubesComputeShader;
@@ -184,7 +201,11 @@ public class ChunkGenLocal : MonoBehaviour
             chunk.transform.SetParent(parent);
             SetVisible(false);
         }
-
+        /// <summary>
+        /// Update the visibility of the chunk
+        /// </summary>
+        /// <param name="maxViewDst">The maximum view distance of the player</param>
+        /// <param name="chunkSize">The chunk size</param>
         public void UpdateChunk(float maxViewDst, int chunkSize)
         {
             float viewerDstFromBound = Mathf.Sqrt(bounds.SqrDistance(viewerPos));
@@ -193,7 +214,10 @@ public class ChunkGenLocal : MonoBehaviour
             SetCollider(colliderEnable);
             SetVisible(visible);
         }
-
+        /// <summary>
+        /// Set the visibility of the chunk
+        /// </summary>
+        /// <param name="visible">Whether the chunk is visible</param>
         public void SetVisible(bool visible)
         {
             if (chunk.activeSelf != visible)
@@ -201,7 +225,11 @@ public class ChunkGenLocal : MonoBehaviour
                 chunk.SetActive(visible);
             }
         }
-
+        /// <summary>
+        /// [Deprecated]
+        /// Disable colliders the viewer is not currently in.
+        /// </summary>
+        /// <param name="colliderEnable">Whether the colliders should be enabled</param>
         public void SetCollider(bool colliderEnable)
         {
             meshCollider.enabled = colliderEnable;
@@ -213,7 +241,10 @@ public class ChunkGenLocal : MonoBehaviour
                 }
             }
         }
-
+        /// <summary>
+        /// Check chunk visibility
+        /// </summary>
+        /// <returns>If the chunk is visible or not</returns>
         public bool IsVisible()
         {
             return chunk.activeSelf;

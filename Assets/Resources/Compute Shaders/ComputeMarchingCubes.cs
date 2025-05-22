@@ -16,10 +16,9 @@ public class ComputeMarchingCubes : MonoBehaviour
     public Material waterMaterial;
     private MeshFilter meshFilter;
     private MeshCollider meshCollider;
-    public List<Vector3> vertices = new List<Vector3>();
-    public List<Vertex> verticesNormals = new List<Vertex>();
-    private List<int> triangles = new List<int>();
-    private Renderer mat;
+    // public List<Vector3> vertices = new List<Vector3>();
+    // public List<Vertex> verticesNormals = new List<Vertex>();
+    // private List<int> triangles = new List<int>();
     public TerrainDensityData1 terrainDensityData;
     public GameObject waterPlaneGenerator;
     WaterPlaneGenerator waterGen;
@@ -47,13 +46,13 @@ public class ComputeMarchingCubes : MonoBehaviour
         GenerateMesh();
         // StartCoroutine(GenerateMesh());
     }
-
+    // Set up the chunk data
     public void ChunkSetup()
     {
         meshFilter = gameObject.GetComponent<MeshFilter>();
         meshCollider = gameObject.GetComponent<MeshCollider>();
         assetSpawner = gameObject.GetComponent<AssetSpawner>();
-
+        // Set up and start water generator
         waterPlaneGenerator = new GameObject("Water");
         waterPlaneGenerator.transform.SetParent(transform);
         waterPlaneGenerator.AddComponent<MeshFilter>();
@@ -63,7 +62,7 @@ public class ComputeMarchingCubes : MonoBehaviour
         waterGen.terrainDensityData = terrainDensityData;
         waterGen.marchingCubes = this;
     }
-
+    // Set all the noise settings from the TerrainDensityData scriptable object
     private void SetNoiseSetting()
     {
         // Noise and Fractal Values
@@ -78,24 +77,24 @@ public class ComputeMarchingCubes : MonoBehaviour
         terrainNoiseComputeShader.SetFloat("fractalWeightedStrength", terrainDensityData.fractalWeightedStrength);
         terrainNoiseComputeShader.SetFloat("noiseFrequency", terrainDensityData.noiseFrequency);
 
-            // Domain Warp Values
-            terrainNoiseComputeShader.SetBool("domainWarpToggle", terrainDensityData.domainWarpToggle);
-            terrainNoiseComputeShader.SetInt("domainWarpType", (int)terrainDensityData.domainWarpType);
-            terrainDensityComputeShader.SetInt("domainWarpFractalType", (int)terrainDensityData.domainWarpFractalType);
-            terrainNoiseComputeShader.SetFloat("domainWarpAmplitude", terrainDensityData.domainWarpAmplitude);
-            terrainNoiseComputeShader.SetInt("domainWarpSeed", terrainDensityData.domainWarpSeed);
-            terrainNoiseComputeShader.SetInt("domainWarpFractalOctaves", terrainDensityData.domainWarpFractalOctaves);
-            terrainNoiseComputeShader.SetFloat("domainWarpFractalLacunarity", terrainDensityData.domainWarpFractalLacunarity);
-            terrainNoiseComputeShader.SetFloat("domainWarpFractalGain", terrainDensityData.domainWarpFractalGain);
-            terrainNoiseComputeShader.SetFloat("domainWarpFrequency", terrainDensityData.domainWarpFrequency);
-            // Cellular(Voronoi) Values
-            terrainNoiseComputeShader.SetInt("cellularDistanceFunction", (int)terrainDensityData.cellularDistanceFunction);
-            terrainNoiseComputeShader.SetInt("cellularReturnType", (int)terrainDensityData.cellularReturnType);
-            terrainNoiseComputeShader.SetFloat("cellularJitter", terrainDensityData.cellularJitter);
-            // Terrain Values
-            terrainNoiseComputeShader.SetFloat("noiseScale", terrainDensityData.noiseScale);
-            terrainNoiseComputeShader.SetInt("ChunkSize", terrainDensityData.width);
-            terrainNoiseComputeShader.SetVector("ChunkPos", (Vector3)chunkPos);
+        // Domain Warp Values
+        terrainNoiseComputeShader.SetBool("domainWarpToggle", terrainDensityData.domainWarpToggle);
+        terrainNoiseComputeShader.SetInt("domainWarpType", (int)terrainDensityData.domainWarpType);
+        terrainDensityComputeShader.SetInt("domainWarpFractalType", (int)terrainDensityData.domainWarpFractalType);
+        terrainNoiseComputeShader.SetFloat("domainWarpAmplitude", terrainDensityData.domainWarpAmplitude);
+        terrainNoiseComputeShader.SetInt("domainWarpSeed", terrainDensityData.domainWarpSeed);
+        terrainNoiseComputeShader.SetInt("domainWarpFractalOctaves", terrainDensityData.domainWarpFractalOctaves);
+        terrainNoiseComputeShader.SetFloat("domainWarpFractalLacunarity", terrainDensityData.domainWarpFractalLacunarity);
+        terrainNoiseComputeShader.SetFloat("domainWarpFractalGain", terrainDensityData.domainWarpFractalGain);
+        terrainNoiseComputeShader.SetFloat("domainWarpFrequency", terrainDensityData.domainWarpFrequency);
+        // Cellular(Voronoi) Values
+        terrainNoiseComputeShader.SetInt("cellularDistanceFunction", (int)terrainDensityData.cellularDistanceFunction);
+        terrainNoiseComputeShader.SetInt("cellularReturnType", (int)terrainDensityData.cellularReturnType);
+        terrainNoiseComputeShader.SetFloat("cellularJitter", terrainDensityData.cellularJitter);
+        // Terrain Values
+        terrainNoiseComputeShader.SetFloat("noiseScale", terrainDensityData.noiseScale);
+        terrainNoiseComputeShader.SetInt("ChunkSize", terrainDensityData.width);
+        terrainNoiseComputeShader.SetVector("ChunkPos", (Vector3)chunkPos);
 
         // Cave Noise and Fractal Values
         caveNoiseComputeShader.SetInt("noiseDimension", (int)terrainDensityData.caveNoiseDimension);
@@ -108,24 +107,24 @@ public class ComputeMarchingCubes : MonoBehaviour
         caveNoiseComputeShader.SetFloat("noiseFractalGain", terrainDensityData.caveNoiseFractalGain);
         caveNoiseComputeShader.SetFloat("fractalWeightedStrength", terrainDensityData.caveFractalWeightedStrength);
         caveNoiseComputeShader.SetFloat("noiseFrequency", terrainDensityData.caveNoiseFrequency);
-            // Domain Warp Values
-            caveNoiseComputeShader.SetBool("domainWarpToggle", terrainDensityData.caveDomainWarpToggle);
-            caveNoiseComputeShader.SetInt("domainWarpType", (int)terrainDensityData.caveDomainWarpType);
-            caveNoiseComputeShader.SetInt("domainWarpFractalType", (int)terrainDensityData.caveDomainWarpFractalType);
-            caveNoiseComputeShader.SetFloat("domainWarpAmplitude", terrainDensityData.caveDomainWarpAmplitude);
-            caveNoiseComputeShader.SetInt("domainWarpSeed", terrainDensityData.caveDomainWarpSeed);
-            caveNoiseComputeShader.SetInt("domainWarpFractalOctaves", terrainDensityData.caveDomainWarpFractalOctaves);
-            caveNoiseComputeShader.SetFloat("domainWarpFractalLacunarity", terrainDensityData.caveDomainWarpFractalLacunarity);
-            caveNoiseComputeShader.SetFloat("domainWarpFractalGain", terrainDensityData.caveDomainWarpFractalGain);
-            caveNoiseComputeShader.SetFloat("domainWarpFrequency", terrainDensityData.caveDomainWarpFrequency);
-            // Cellular(Voronoi) Values
-            caveNoiseComputeShader.SetInt("cellularDistanceFunction", (int)terrainDensityData.caveCellularDistanceFunction);
-            caveNoiseComputeShader.SetInt("cellularReturnType", (int)terrainDensityData.caveCellularReturnType);
-            caveNoiseComputeShader.SetFloat("cellularJitter", terrainDensityData.caveCellularJitter);
-            // Terrain Values
-            caveNoiseComputeShader.SetFloat("noiseScale", terrainDensityData.caveNoiseScale);
-            caveNoiseComputeShader.SetInt("ChunkSize", terrainDensityData.width);
-            caveNoiseComputeShader.SetVector("ChunkPos", (Vector3)chunkPos);
+        // Domain Warp Values
+        caveNoiseComputeShader.SetBool("domainWarpToggle", terrainDensityData.caveDomainWarpToggle);
+        caveNoiseComputeShader.SetInt("domainWarpType", (int)terrainDensityData.caveDomainWarpType);
+        caveNoiseComputeShader.SetInt("domainWarpFractalType", (int)terrainDensityData.caveDomainWarpFractalType);
+        caveNoiseComputeShader.SetFloat("domainWarpAmplitude", terrainDensityData.caveDomainWarpAmplitude);
+        caveNoiseComputeShader.SetInt("domainWarpSeed", terrainDensityData.caveDomainWarpSeed);
+        caveNoiseComputeShader.SetInt("domainWarpFractalOctaves", terrainDensityData.caveDomainWarpFractalOctaves);
+        caveNoiseComputeShader.SetFloat("domainWarpFractalLacunarity", terrainDensityData.caveDomainWarpFractalLacunarity);
+        caveNoiseComputeShader.SetFloat("domainWarpFractalGain", terrainDensityData.caveDomainWarpFractalGain);
+        caveNoiseComputeShader.SetFloat("domainWarpFrequency", terrainDensityData.caveDomainWarpFrequency);
+        // Cellular(Voronoi) Values
+        caveNoiseComputeShader.SetInt("cellularDistanceFunction", (int)terrainDensityData.caveCellularDistanceFunction);
+        caveNoiseComputeShader.SetInt("cellularReturnType", (int)terrainDensityData.caveCellularReturnType);
+        caveNoiseComputeShader.SetFloat("cellularJitter", terrainDensityData.caveCellularJitter);
+        // Terrain Values
+        caveNoiseComputeShader.SetFloat("noiseScale", terrainDensityData.caveNoiseScale);
+        caveNoiseComputeShader.SetInt("ChunkSize", terrainDensityData.width);
+        caveNoiseComputeShader.SetVector("ChunkPos", (Vector3)chunkPos);
 
         // Terrain Values
         terrainDensityComputeShader.SetInt("height", terrainDensityData.height);
@@ -135,14 +134,19 @@ public class ComputeMarchingCubes : MonoBehaviour
         terrainDensityComputeShader.SetVector("ChunkPos", (Vector3)chunkPos);
         terrainDensityComputeShader.SetFloat("isolevel", terrainDensityData.isolevel);
     }
-
+    /// <summary>
+    /// Set density and generate terrain mesh
+    /// </summary>
     public void GenerateMesh()
     {
         heightsBuffer = SetHeights();
         // yield return new WaitForEndOfFrame();
         MarchingCubes(heightsBuffer, false);
     }
-
+    /// <summary>
+    /// Set up the density values for the chunk using compute shaders
+    /// </summary>
+    /// <returns>The buffer the density values are stored in</returns>
     public ComputeBuffer SetHeights()
     {
         int terrainNoiseKernel = terrainNoiseComputeShader.FindKernel("TerrainNoise");
@@ -169,7 +173,11 @@ public class ComputeMarchingCubes : MonoBehaviour
 
         return heightsBuffer;
     }
-
+    /// <summary>
+    /// Perform marching cubes in a compute shader and trigger mesh generation and asset spawning
+    /// </summary>
+    /// <param name="heightsBuffer">The buffer containing the chunks density field</param>
+    /// <param name="terraforming">Whether the user is terraforming</param>
     public void MarchingCubes(ComputeBuffer heightsBuffer, bool terraforming)
     {
         int marchingKernel = marchingCubesComputeShader.FindKernel("MarchingCubes");
@@ -189,35 +197,38 @@ public class ComputeMarchingCubes : MonoBehaviour
         ComputeBuffer vertexCountBuffer = new ComputeBuffer(1, sizeof(int), ComputeBufferType.Raw);
         ComputeBuffer.CopyCount(vertexBuffer, vertexCountBuffer, 0);
 
-        AsyncGPUReadback.Request(vertexCountBuffer, (AsyncGPUReadbackRequest countRequest) => {
+        AsyncGPUReadback.Request(vertexCountBuffer, (AsyncGPUReadbackRequest countRequest) =>
+        {
             if (countRequest.hasError)
             {
                 Debug.LogError("Failed to read vertex count.");
                 vertexCountBuffer.Release();
                 vertexBuffer.Release();
-                return ;
+                return;
             }
 
             int vertexCount = countRequest.GetData<int>()[0];
             vertexCountBuffer.Release();
 
-            AsyncGPUReadback.Request(vertexBuffer, (AsyncGPUReadbackRequest dataRequest) => {
+            AsyncGPUReadback.Request(vertexBuffer, (AsyncGPUReadbackRequest dataRequest) =>
+            {
                 if (dataRequest.hasError)
                 {
                     Debug.LogError("Failed to read vertex buffer.");
                     vertexBuffer.Release();
-                    return ;
+                    return;
                 }
 
                 Triangle[] vertexArray = new Triangle[vertexCount];
                 NativeArray<Triangle> rawData = dataRequest.GetData<Triangle>();
 
-                for (int i = 0; i < vertexCount; i++) {
+                for (int i = 0; i < vertexCount; i++)
+                {
                     vertexArray[i] = rawData[i];
                 }
 
                 vertexBuffer.Release();
-                
+
                 if (Mathf.RoundToInt(chunkPos.y / terrainDensityData.width) == 0)
                 {
                     waterGen.UpdateMesh();
@@ -244,7 +255,12 @@ public class ComputeMarchingCubes : MonoBehaviour
 
         // SetMeshValues(vertexCount, vertexArray);
     }
-
+    /// <summary>
+    /// Sets up a mesh given a vertex array and count using lower level api for better performance
+    /// </summary>
+    /// <param name="vertexCount">The amount of items in the vertex array</param>
+    /// <param name="vertexArray">An array of vertices given by marching cubes</param>
+    /// <param name="terraforming">Whether the user is terraforming</param>
     public void SetMeshValuesPerformant(int vertexCount, Triangle[] vertexArray, bool terraforming)
     {
         Mesh.MeshDataArray meshDataArray = Mesh.AllocateWritableMeshData(1);
@@ -293,76 +309,7 @@ public class ComputeMarchingCubes : MonoBehaviour
             assetSpawner.SpawnAssets();
         }
     }
-
-    public void SetMeshValues(int vertexCount, Triangle[] vertexArray, bool terraforming)
-    {
-        vertices.Clear();
-        triangles.Clear();
-        verticesNormals.Clear();
-        vertices.Capacity = vertexCount * 3;
-        verticesNormals.Capacity = vertexCount * 3;
-        triangles.Capacity = vertexCount * 3;
-        for (int i = 0; i < vertexCount; i++)
-        {
-            Triangle t = vertexArray[i];
-            vertices.Add(t.v1.position);
-            vertices.Add(t.v2.position);
-            vertices.Add(t.v3.position);
-
-            Vertex v1;
-            v1.position = t.v1.position;
-            v1.normal = t.v1.normal;
-            verticesNormals.Add(v1);
-            Vertex v2;
-            v2.position = t.v2.position;
-            v2.normal = t.v2.normal;
-            verticesNormals.Add(v2);
-            Vertex v3;
-            v3.position = t.v3.position;
-            v3.normal = t.v3.normal;
-            verticesNormals.Add(v3);
-
-            triangles.Add(i * 3);
-            triangles.Add(i * 3 + 1);
-            triangles.Add(i * 3 + 2);
-        }
-        SetupMesh(terraforming);
-    }
-
-    public void SetupMesh(bool terraforming)
-    {
-        Mesh mesh = new Mesh();
-        mesh.indexFormat = IndexFormat.UInt32;
-        mesh.SetVertices(vertices);
-        mesh.SetTriangles(triangles, 0);
-        List<Vector3> normals = new List<Vector3>(verticesNormals.Count);
-        for (int i = 0; i < verticesNormals.Count; i++)
-        {
-            normals.Add(verticesNormals[i].normal);
-        }
-        mesh.SetNormals(normals);
-        mesh.RecalculateBounds();
-
-
-        meshFilter.mesh = mesh;
-        meshCollider.sharedMesh = mesh;
-
-        assetSpawner.worldVertices = verticesNormals.ToArray();
-        if (!terraforming)
-        {
-            assetSpawner.SpawnAssets();
-        }
-
-        if (Mathf.RoundToInt(chunkPos.y / terrainDensityData.width) == 0)
-        {
-            waterGen.UpdateMesh();
-        }
-
-        vertices.Clear();
-        triangles.Clear();
-        verticesNormals.Clear();
-    }
-
+    // Releases height buffers when the application is closed
     void OnApplicationQuit()
     {
         if (heightsBuffer != null)
@@ -370,7 +317,9 @@ public class ComputeMarchingCubes : MonoBehaviour
             heightsBuffer.Release();
         }
     }
-
+    /// <summary>
+    /// Draws wireframe cubes to visualize chunks
+    /// </summary>
     void OnDrawGizmos()
     {
         if (terrainDensityData == null)
@@ -378,6 +327,77 @@ public class ComputeMarchingCubes : MonoBehaviour
             terrainDensityData = Resources.Load<TerrainDensityData1>("TerrainDensityData1");
             if (terrainDensityData == null) return; // still not found
         }
-        Gizmos.DrawWireCube(chunkPos + (new Vector3(0.5f,0.5f,0.5f) * terrainDensityData.width), Vector3.one * terrainDensityData.width);
+        Gizmos.DrawWireCube(chunkPos + (new Vector3(0.5f, 0.5f, 0.5f) * terrainDensityData.width), Vector3.one * terrainDensityData.width);
     }
+    
+    // Old mesh setup code saved for reference
+
+    // public void SetMeshValues(int vertexCount, Triangle[] vertexArray, bool terraforming)
+    // {
+    //     vertices.Clear();
+    //     triangles.Clear();
+    //     verticesNormals.Clear();
+    //     vertices.Capacity = vertexCount * 3;
+    //     verticesNormals.Capacity = vertexCount * 3;
+    //     triangles.Capacity = vertexCount * 3;
+    //     for (int i = 0; i < vertexCount; i++)
+    //     {
+    //         Triangle t = vertexArray[i];
+    //         vertices.Add(t.v1.position);
+    //         vertices.Add(t.v2.position);
+    //         vertices.Add(t.v3.position);
+
+    //         Vertex v1;
+    //         v1.position = t.v1.position;
+    //         v1.normal = t.v1.normal;
+    //         verticesNormals.Add(v1);
+    //         Vertex v2;
+    //         v2.position = t.v2.position;
+    //         v2.normal = t.v2.normal;
+    //         verticesNormals.Add(v2);
+    //         Vertex v3;
+    //         v3.position = t.v3.position;
+    //         v3.normal = t.v3.normal;
+    //         verticesNormals.Add(v3);
+
+    //         triangles.Add(i * 3);
+    //         triangles.Add(i * 3 + 1);
+    //         triangles.Add(i * 3 + 2);
+    //     }
+    //     SetupMesh(terraforming);
+    // }
+
+    // public void SetupMesh(bool terraforming)
+    // {
+    //     Mesh mesh = new Mesh();
+    //     mesh.indexFormat = IndexFormat.UInt32;
+    //     mesh.SetVertices(vertices);
+    //     mesh.SetTriangles(triangles, 0);
+    //     List<Vector3> normals = new List<Vector3>(verticesNormals.Count);
+    //     for (int i = 0; i < verticesNormals.Count; i++)
+    //     {
+    //         normals.Add(verticesNormals[i].normal);
+    //     }
+    //     mesh.SetNormals(normals);
+    //     mesh.RecalculateBounds();
+
+
+    //     meshFilter.mesh = mesh;
+    //     meshCollider.sharedMesh = mesh;
+
+    //     assetSpawner.worldVertices = verticesNormals.ToArray();
+    //     if (!terraforming)
+    //     {
+    //         assetSpawner.SpawnAssets();
+    //     }
+
+    //     if (Mathf.RoundToInt(chunkPos.y / terrainDensityData.width) == 0)
+    //     {
+    //         waterGen.UpdateMesh();
+    //     }
+
+    //     vertices.Clear();
+    //     triangles.Clear();
+    //     verticesNormals.Clear();
+    // }
 }

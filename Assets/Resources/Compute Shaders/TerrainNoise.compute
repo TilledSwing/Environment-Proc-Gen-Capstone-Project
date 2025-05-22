@@ -37,10 +37,11 @@ float xWarp;
 float yWarp;
 float zWarp;
 
+// Convert a 3D array index into a 1D flat array index
 int FlattenIndex(float3 id, int size) {
     return id.x * (size + 1) * (size + 1) + id.y * (size + 1) + id.z;
 }
-
+// Generate all the noise for the base terrain
 [numthreads(4,4,4)]
 void TerrainNoise (uint3 id : SV_DispatchThreadID)
 {
@@ -88,7 +89,7 @@ void TerrainNoise (uint3 id : SV_DispatchThreadID)
         noiseGenerator.cellular_return_type = cellularReturnType;
         noiseGenerator.cellular_jitter_mod = cellularJitter;
     }
-
+    // Get the noise value
     float noise;
 
     if(noiseDimension == 0) {

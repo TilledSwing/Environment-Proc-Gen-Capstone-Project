@@ -2,6 +2,10 @@ using UnityEngine;
 
 public class GlowballLogic : MonoBehaviour
 {
+    /// <summary>
+    /// Have the glow ball "stick" in place when it collides with something
+    /// </summary>
+    /// <param name="collision"></param>
     void OnCollisionEnter(Collision collision)
     {
         Rigidbody rb = gameObject.GetComponent<Rigidbody>();

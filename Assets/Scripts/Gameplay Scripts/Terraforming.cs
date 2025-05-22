@@ -33,7 +33,10 @@ public class Terraforming : MonoBehaviour
             Terraform(mode);
         }
     }
-
+    /// <summary>
+    /// Terraform where the player is looking when they use a terraform interaction key
+    /// </summary>
+    /// <param name="mode">Whether to add or subtract terrain</param>
     public void Terraform(bool mode)
     {
         Ray ray = playerCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));

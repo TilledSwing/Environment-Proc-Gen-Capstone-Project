@@ -10,10 +10,11 @@ uint ChunkSize;
 float3 ChunkPos;
 bool TerraformMode;
 
+// Convert a 3D array index into a 1D flat array index
 int FlattenIndex(int3 id, int size) {
     return id.x * (size + 1) * (size + 1) + id.y * (size + 1) + id.z;
 }
-
+// Perform terraformation on the region of density around the point of terraformation
 [numthreads(1,1,1)]
 void Terraform (uint3 id : SV_DispatchThreadID)
 {

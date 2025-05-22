@@ -12,8 +12,6 @@ public class WaterPlaneGenerator : MonoBehaviour
     private MeshFilter meshFilter;
     public ComputeMarchingCubes marchingCubes;
     public TerrainDensityData1 terrainDensityData;
-    private int width;
-    private int waterLevel;
 
     void Awake()
     {
@@ -37,7 +35,10 @@ public class WaterPlaneGenerator : MonoBehaviour
 
         meshFilter.mesh = mesh;
     }
-
+    /// <summary>
+    /// [Needs to be updated to new mesh setup api]
+    /// Generate a simple water plane square at the water level
+    /// </summary>
     private void GenerateWaterPlane() {
         vertices.Clear();
         triangles.Clear();

@@ -29,7 +29,9 @@ public class AssetSpawner : MonoBehaviour
     public LayerMask assetLayer;
     public int assetSpacing = 8;
     public int maxAttempts = 8;
-
+    /// <summary>
+    /// Initiate asset spawning for a given chunk
+    /// </summary>
     public void SpawnAssets()
     {
         assetLayer = LayerMask.GetMask("Asset Layer");
@@ -41,7 +43,9 @@ public class AssetSpawner : MonoBehaviour
             AssetSpawnHandler();
         }
     }
-
+    /// <summary>
+    /// Initizalize all the data structures
+    /// </summary>
     private void InitializeData() {
         spawnPoints = new List<ComputeMarchingCubes.Vertex[]>(assetSpawnData.spawnableAssets.Count);
         acceptedSpawnPoints = new List<List<ComputeMarchingCubes.Vertex>>(assetSpawnData.spawnableAssets.Count);
@@ -53,7 +57,9 @@ public class AssetSpawner : MonoBehaviour
             spawnedAssets.Add(new List<GameObject>());
         }
     }
-
+    /// <summary>
+    /// Create all the spawn points for the given chunk using a compute shader
+    /// </summary>
     private void CreateSpawnPoints() {
         int spawnPointsKernel = spawnPointsComputeShader.FindKernel("SpawnPoints");
         ComputeBuffer vertexBuffer = new ComputeBuffer(vertexBufferLength, sizeof(float) * 6);
@@ -125,14 +131,18 @@ public class AssetSpawner : MonoBehaviour
         }
         vertexBuffer.Release();
     }
-
+    /// <summary>
+    /// Add this chunks spawn points and game objects to a centralized scriptable object
+    /// </summary>
     private void SetSpawnPoints() {
         for(int i = 0; i < assetSpawnData.spawnableAssets.Count; i++) {
             assetSpawnData.assets[chunkPos][i].spawnPoints = acceptedSpawnPoints[i].ToArray();
             assetSpawnData.assets[chunkPos][i].spawnedAssets = spawnedAssets[i];
         }
     }
-
+    /// <summary>
+    /// Use the spawn points from the compute shader to instantiate their respective game objects
+    /// </summary>
     private void AssetSpawnHandler() {
         for(int i = 0; i < assetSpawnData.spawnableAssets.Count; i++) {
             ComputeMarchingCubes.Vertex[] points = assetSpawnData.assets[chunkPos][i].spawnPoints;
@@ -157,7 +167,9 @@ public class AssetSpawner : MonoBehaviour
             }
         }
     }
-
+    /// <summary>
+    /// Destroy all the assets
+    /// </summary>
     public void ClearAssets() {
         for(int i = 0; i < assetSpawnData.assets[chunkPos].Count; i++) {
             if(assetSpawnData.assets[chunkPos][i].spawnedAssets != null) {
@@ -167,12 +179,16 @@ public class AssetSpawner : MonoBehaviour
             }
         }
     }
-
+    /// <summary>
+    /// Clear asset data
+    /// </summary>
     public void ClearData() {
         assetSpawnData.ResetSpawnPoints();
     }
 }
-
+/// <summary>
+/// Custom class to store provided spawnable assets and their relevant information and data
+/// </summary>
 [Serializable]
 public class SpawnableAsset {
     public GameObject asset;

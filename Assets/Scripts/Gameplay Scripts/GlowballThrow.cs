@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class GlowballThrow : MonoBehaviour
 {
@@ -13,9 +14,16 @@ public class GlowballThrow : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.E))
         {
-            GameObject thrownBall = Instantiate(glowball, gameObject.transform.position + gameObject.transform.forward * 2f, Quaternion.identity);
-            Rigidbody ballRB = thrownBall.GetComponent<Rigidbody>();
-            ballRB.AddForce(playerCamera.transform.forward * throwForce, ForceMode.Impulse);
+            ThrowGlowball();
         }
+    }
+    /// <summary>
+    /// Throw a glowball object from in front of the player in the direction they are looking
+    /// </summary>
+    public void ThrowGlowball()
+    {
+        GameObject thrownBall = Instantiate(glowball, gameObject.transform.position + gameObject.transform.forward * 2f, Quaternion.identity);
+        Rigidbody ballRB = thrownBall.GetComponent<Rigidbody>();
+        ballRB.AddForce(playerCamera.transform.forward * throwForce, ForceMode.Impulse);
     }
 }

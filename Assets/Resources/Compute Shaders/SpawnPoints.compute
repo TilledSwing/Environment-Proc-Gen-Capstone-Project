@@ -52,6 +52,7 @@ int maxHeight;
 bool underwaterAsset;
 int waterLevel;
 
+// Compute the spawn points for a given asset
 [numthreads(8,1,1)]
 void SpawnPoints (uint3 id : SV_DispatchThreadID)
 {
