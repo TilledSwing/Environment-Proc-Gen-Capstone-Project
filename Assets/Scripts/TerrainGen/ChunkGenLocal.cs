@@ -181,7 +181,10 @@ public class ChunkGenLocal : MonoBehaviour
 
         public void SetVisible(bool visible)
         {
-            chunk.SetActive(visible);
+            if (chunk.activeSelf != visible)
+            {
+                chunk.SetActive(visible);
+            }
         }
 
         public void SetCollider(bool colliderEnable)

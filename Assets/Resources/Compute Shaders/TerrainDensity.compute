@@ -26,20 +26,17 @@ void TerrainDensity (uint3 id : SV_DispatchThreadID)
         return ;
     }
 
-    // float caveNoise = CaveNoiseBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)];
-    // float caveCarve = smoothstep(-0.4, 0.4, abs(caveNoise)); // [0,1] → caves near 0.0
-    // caveCarve = 1.0 - caveCarve; // Invert so center of cave = 1.0, outside = 0.0
+    float caveNoise = CaveNoiseBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)];
+    float caveCarve = smoothstep(-0.4, 0.0, caveNoise); // [0,1] → caves near 0.0
+    caveCarve = 1.0 - caveCarve; // Invert so center of cave = 1.0, outside = 0.0
 
     float terrainNoise = TerrainNoiseBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)];
     float currentHeight = (height * ((terrainNoise+1)/2) + (terracing ? (id.y%terraceHeight) : 0));
 
     float terrainDensity = currentHeight - (ChunkPos.y + id.y);
-    float surfaceFade = saturate((terrainDensity - 2.0) / 8.0);
+    float surfaceFade = saturate((terrainDensity) / 60.0);
+    // float surfaceFade = smoothstep(-1.0, 50.0, terrainDensity);
+    float caveFade = saturate((terrainDensity - ChunkSize) / 70.0);
     
-    // if(ChunkPos.y <= 0) {
-    //     HeightsBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)] = terrainDensity + (ChunkPos.y + id.y) - (caveCarve * height * surfaceFade);
-    // }
-    // else {
-        HeightsBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)] = terrainDensity;
-    // }
+    HeightsBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)] = terrainDensity + ((ChunkPos.y + id.y) * caveFade) - (caveCarve * height * surfaceFade);
 }

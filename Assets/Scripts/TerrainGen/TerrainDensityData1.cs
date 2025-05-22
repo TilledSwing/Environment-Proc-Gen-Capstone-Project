@@ -43,8 +43,8 @@ public class TerrainDensityData1 : ScriptableObject
     public fnl_noise_dimension caveNoiseDimension = fnl_noise_dimension._3D;
     public int selectedCaveNoiseType = 0;
     public fnl_noise_type caveNoiseType = fnl_noise_type.OpenSimplex2;
-    public int selectedCaveNoiseFractalType = 1;
-    public fnl_fractal_type caveNoiseFractalType =fnl_fractal_type.FBm;
+    public int selectedCaveNoiseFractalType = 0;
+    public fnl_fractal_type caveNoiseFractalType =fnl_fractal_type.None;
     public int selectedCaveRotationType3D = 0;
     public fnl_rotation_type_3d caveRotationType3D = fnl_rotation_type_3d.None;
     public int caveNoiseSeed;

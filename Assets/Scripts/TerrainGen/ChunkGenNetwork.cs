@@ -141,13 +141,10 @@ public class ChunkGenNetwork : NetworkBehaviour
                 chunkBatchCounter++;
             }
 
-            if (chunkBatchCounter % 4 == 0)
+            if (chunkBatchCounter % 2 == 0)
             {
                 yield return new WaitForEndOfFrame();
             }
-
-            // Optional: wait until next frame
-            // yield return null;
         }
 
         isLoadingChunks = false;
@@ -237,7 +234,10 @@ public class ChunkGenNetwork : NetworkBehaviour
 
         public void SetVisible(bool visible)
         {
-            chunk.SetActive(visible);
+            if (chunk.activeSelf != visible)
+            {
+                chunk.SetActive(visible);
+            }
         }
 
         public void SetCollider(bool colliderEnable)
