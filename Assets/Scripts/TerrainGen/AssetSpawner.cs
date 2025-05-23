@@ -17,7 +17,7 @@ public class AssetSpawner : MonoBehaviour
 {
     public ComputeShader spawnPointsComputeShader;
     public int vertexBufferLength;
-    public List<List<GameObject>> spawnedAssets = new List<List<GameObject>>();
+    public List<List<Asset>> spawnedAssets;
     public TerrainDensityData1 terrainDensityData;
     public AssetSpawnData assetSpawnData;
     public List<ComputeMarchingCubes.Vertex[]> spawnPoints;
@@ -25,10 +25,12 @@ public class AssetSpawner : MonoBehaviour
     private MeshFilter mf;
     private Mesh mesh;
     public ComputeMarchingCubes.Vertex[] worldVertices;
+    ChunkGenNetwork chunkGenNetwork;
     public Vector3Int chunkPos;
     public LayerMask assetLayer;
     public int assetSpacing = 8;
     public int maxAttempts = 8;
+    public bool assetsSet = false;
     /// <summary>
     /// Initiate asset spawning for a given chunk
     /// </summary>
@@ -36,7 +38,8 @@ public class AssetSpawner : MonoBehaviour
     {
         assetLayer = LayerMask.GetMask("Asset Layer");
         vertexBufferLength = worldVertices.Length;
-        if(!assetSpawnData.assets.ContainsKey(chunkPos) && vertexBufferLength > 0) {
+        if (!assetSpawnData.assets.ContainsKey(chunkPos) && vertexBufferLength > 0)
+        {
             InitializeData();
             CreateSpawnPoints();
             SetSpawnPoints();
@@ -49,12 +52,12 @@ public class AssetSpawner : MonoBehaviour
     private void InitializeData() {
         spawnPoints = new List<ComputeMarchingCubes.Vertex[]>(assetSpawnData.spawnableAssets.Count);
         acceptedSpawnPoints = new List<List<ComputeMarchingCubes.Vertex>>(assetSpawnData.spawnableAssets.Count);
-        spawnedAssets = new List<List<GameObject>>(assetSpawnData.spawnableAssets.Count);
+        spawnedAssets = new List<List<Asset>>(assetSpawnData.spawnableAssets.Count);
         assetSpawnData.assets.Add(chunkPos, assetSpawnData.spawnableAssets);
         for (int i = 0; i < assetSpawnData.spawnableAssets.Count; i++) {
             spawnPoints.Add(new ComputeMarchingCubes.Vertex[maxAttempts]);
             acceptedSpawnPoints.Add(new List<ComputeMarchingCubes.Vertex>());
-            spawnedAssets.Add(new List<GameObject>());
+            spawnedAssets.Add(new List<Asset>());
         }
     }
     /// <summary>
@@ -137,34 +140,41 @@ public class AssetSpawner : MonoBehaviour
     private void SetSpawnPoints() {
         for(int i = 0; i < assetSpawnData.spawnableAssets.Count; i++) {
             assetSpawnData.assets[chunkPos][i].spawnPoints = acceptedSpawnPoints[i].ToArray();
-            assetSpawnData.assets[chunkPos][i].spawnedAssets = spawnedAssets[i];
+            // assetSpawnData.assets[chunkPos][i].spawnedAssets = spawnedAssets[i];
         }
     }
     /// <summary>
     /// Use the spawn points from the compute shader to instantiate their respective game objects
     /// </summary>
     private void AssetSpawnHandler() {
-        for(int i = 0; i < assetSpawnData.spawnableAssets.Count; i++) {
+        for (int i = 0; i < assetSpawnData.spawnableAssets.Count; i++)
+        {
             ComputeMarchingCubes.Vertex[] points = assetSpawnData.assets[chunkPos][i].spawnPoints;
-            if(points == null || points.Length == 0) {
+            if (points == null || points.Length == 0)
+            {
                 continue;
             }
-            for(int j = 0; j < assetSpawnData.assets[chunkPos][i].spawnPoints.Length; j++) {
+            for (int j = 0; j < assetSpawnData.assets[chunkPos][i].spawnPoints.Length; j++)
+            {
                 float randomRotationDeg = UnityEngine.Random.Range(0f, 360f);
                 Quaternion randomYRotation = Quaternion.Euler(0f, randomRotationDeg, 0f);
                 GameObject assetToSpawn;
-                if(assetSpawnData.assets[chunkPos][i].rotateToFaceNormal) {
+                if (assetSpawnData.assets[chunkPos][i].rotateToFaceNormal)
+                {
                     Quaternion normal = Quaternion.FromToRotation(Vector3.up, assetSpawnData.assets[chunkPos][i].spawnPoints[j].normal);
-                    assetToSpawn = Instantiate(assetSpawnData.assets[chunkPos][i].asset, assetSpawnData.assets[chunkPos][i].spawnPoints[j].position, normal*randomYRotation);
+                    assetToSpawn = Instantiate(assetSpawnData.assets[chunkPos][i].asset, assetSpawnData.assets[chunkPos][i].spawnPoints[j].position, normal * randomYRotation);
                     assetToSpawn.transform.SetParent(gameObject.transform);
-                    spawnedAssets[i].Add(assetToSpawn);
+                    spawnedAssets[i].Add(new Asset(assetToSpawn, assetToSpawn.GetComponent<MeshRenderer>(), assetToSpawn.GetComponent<MeshCollider>()));
                 }
-                else{
+                else
+                {
                     assetToSpawn = Instantiate(assetSpawnData.assets[chunkPos][i].asset, assetSpawnData.assets[chunkPos][i].spawnPoints[j].position, randomYRotation);
                     assetToSpawn.transform.SetParent(gameObject.transform);
-                    spawnedAssets[i].Add(assetToSpawn);
+                    spawnedAssets[i].Add(new Asset(assetToSpawn, assetToSpawn.GetComponent<MeshRenderer>(), assetToSpawn.GetComponent<MeshCollider>()));
                 }
             }
+            assetSpawnData.assets[chunkPos][i].spawnedAssets = spawnedAssets[i];
+            assetsSet = true;
         }
     }
     /// <summary>
@@ -173,8 +183,8 @@ public class AssetSpawner : MonoBehaviour
     public void ClearAssets() {
         for(int i = 0; i < assetSpawnData.assets[chunkPos].Count; i++) {
             if(assetSpawnData.assets[chunkPos][i].spawnedAssets != null) {
-                foreach(GameObject asset in assetSpawnData.assets[chunkPos][i].spawnedAssets) {
-                    Destroy(asset);
+                foreach(Asset asset in assetSpawnData.assets[chunkPos][i].spawnedAssets) {
+                    Destroy(asset.obj);
                 }
             }
         }
@@ -190,10 +200,11 @@ public class AssetSpawner : MonoBehaviour
 /// Custom class to store provided spawnable assets and their relevant information and data
 /// </summary>
 [Serializable]
-public class SpawnableAsset {
+public class SpawnableAsset
+{
     public GameObject asset;
     public ComputeMarchingCubes.Vertex[] spawnPoints;
-    public List<GameObject> spawnedAssets = new List<GameObject>();
+    public List<Asset> spawnedAssets = new List<Asset>();
     public bool rotateToFaceNormal;
     public float spawnProbability;
     public bool useMinSlope;
@@ -205,7 +216,8 @@ public class SpawnableAsset {
     public bool useMaxHeight;
     public int maxHeight;
     public bool underwaterAsset;
-    public SpawnableAsset(GameObject asset, float spawnProbability, bool useMinSlope, int minSlope, bool useMaxSlope, int maxSlope, bool useMinHeight, int minHeight, bool useMaxHeight, int maxHeight, bool underwaterAsset) {
+    public SpawnableAsset(GameObject asset, float spawnProbability, bool useMinSlope, int minSlope, bool useMaxSlope, int maxSlope, bool useMinHeight, int minHeight, bool useMaxHeight, int maxHeight, bool underwaterAsset)
+    {
         this.asset = asset;
         this.spawnProbability = spawnProbability;
         this.useMinSlope = useMinSlope;
@@ -217,5 +229,19 @@ public class SpawnableAsset {
         this.useMaxHeight = useMaxHeight;
         this.maxHeight = maxHeight;
         this.underwaterAsset = underwaterAsset;
+    }
+}
+[Serializable]
+public class Asset
+{
+    public GameObject obj;
+    public MeshRenderer meshRenderer;
+    public MeshCollider meshCollider;
+    public Asset(GameObject obj, MeshRenderer meshRenderer, MeshCollider meshCollider)
+    {
+        this.obj = obj;
+        this.meshRenderer = meshRenderer;
+        this.meshCollider = meshCollider;
+        // Debug.Log(meshRenderer);
     }
 }

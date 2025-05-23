@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using FishNet.Object;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class ChunkGenNetwork : NetworkBehaviour
 {
@@ -28,11 +29,14 @@ public class ChunkGenNetwork : NetworkBehaviour
     private bool isLoadingChunks = false;
     private bool initialLoadComplete = false;
     public GameObject lightingBlocker;
+    private MeshRenderer lightingBlockerRenderer;
 
     void Awake()
     {
         chunkSize = terrainDensityData.width;
         chunksVisible = Mathf.RoundToInt(maxViewDst / chunkSize);
+        lightingBlockerRenderer = lightingBlocker.GetComponent<MeshRenderer>();
+        lightingBlockerRenderer.enabled = false;
          // Set seeds
         terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 100000);
         terrainDensityData.caveNoiseSeed = UnityEngine.Random.Range(0, 100000);
@@ -79,14 +83,14 @@ public class ChunkGenNetwork : NetworkBehaviour
         {
             if (!lightingBlocker.activeSelf)
             {
-                lightingBlocker.SetActive(true);
+                lightingBlockerRenderer.enabled = true;
             }
         }
         else
         {
             if (lightingBlocker.activeSelf)
             {
-                lightingBlocker.SetActive(false);
+                lightingBlockerRenderer.enabled = false;
             }
         }
 
@@ -100,7 +104,7 @@ public class ChunkGenNetwork : NetworkBehaviour
 
                     if (chunkDictionary.ContainsKey(viewedChunkCoord))
                     {
-                        chunkDictionary[viewedChunkCoord].UpdateChunk(maxViewDst, chunkSize);
+                        chunkDictionary[viewedChunkCoord].UpdateChunk(maxViewDst);
                         if (chunkDictionary[viewedChunkCoord].IsVisible())
                         {
                             chunksVisibleLastUpdate.Add(chunkDictionary[viewedChunkCoord]);
@@ -117,7 +121,7 @@ public class ChunkGenNetwork : NetworkBehaviour
                                                          terrainMaterial, waterMaterial);
 
                             chunkDictionary.Add(viewedChunkCoord, chunk);
-                            chunk.UpdateChunk(maxViewDst, chunkSize);
+                            chunk.UpdateChunk(maxViewDst);
 
                             if (chunk.IsVisible())
                             {
@@ -232,9 +236,11 @@ public class ChunkGenNetwork : NetworkBehaviour
         public GameObject chunk;
         public ComputeMarchingCubes marchingCubes;
         public AssetSpawner assetSpawner;
+        // public List<SpawnableAsset> assets;
         public Vector3Int chunkPos;
         public Bounds bounds;
         public MeshCollider meshCollider;
+        public MeshRenderer meshRenderer;
         public TerrainChunk(Vector3Int chunkCoord, int chunkSize, Transform parent, TerrainDensityData1 terrainDensityData, AssetSpawnData assetSpawnData, ComputeShader marchingCubesComputeShader, ComputeShader terrainDensityComputeShader, ComputeShader terrainNoiseComputeShader, ComputeShader caveNoiseComputeShader, ComputeShader terraformComputeShader, ComputeShader spawnPointsComputeShader, Material terrainMaterial, Material waterMaterial)
         {
             chunkPos = chunkCoord * chunkSize;
@@ -244,10 +250,10 @@ public class ChunkGenNetwork : NetworkBehaviour
             // Set up basic chunk components
             meshCollider = chunk.AddComponent<MeshCollider>();
             chunk.AddComponent<MeshFilter>();
-            MeshRenderer mr = chunk.AddComponent<MeshRenderer>();
-            mr.material = terrainMaterial;
-            mr.material.SetFloat("_UnderwaterTexHeightEnd", terrainDensityData.waterLevel - 15f);
-            mr.material.SetFloat("_Tex1HeightStart", terrainDensityData.waterLevel - 18f);
+            meshRenderer = chunk.AddComponent<MeshRenderer>();
+            meshRenderer.material = terrainMaterial;
+            meshRenderer.material.SetFloat("_UnderwaterTexHeightEnd", terrainDensityData.waterLevel - 15f);
+            meshRenderer.material.SetFloat("_Tex1HeightStart", terrainDensityData.waterLevel - 18f);
             // Set up the chunk's AssetSpawn script
             assetSpawner = chunk.AddComponent<AssetSpawner>();
             assetSpawner.chunkPos = chunkPos;
@@ -273,12 +279,10 @@ public class ChunkGenNetwork : NetworkBehaviour
         /// </summary>
         /// <param name="maxViewDst">The maximum view distance of the player</param>
         /// <param name="chunkSize">The chunk size</param>
-        public void UpdateChunk(float maxViewDst, int chunkSize)
+        public void UpdateChunk(float maxViewDst)
         {
             float viewerDstFromBound = Mathf.Sqrt(bounds.SqrDistance(viewerPos));
-            bool colliderEnable = viewerDstFromBound <= chunkSize;
             bool visible = viewerDstFromBound <= maxViewDst;
-            // SetCollider(colliderEnable);
             SetVisible(visible);
         }
         /// <summary>
@@ -287,34 +291,51 @@ public class ChunkGenNetwork : NetworkBehaviour
         /// <param name="visible">Whether the chunk is visible</param>
         public void SetVisible(bool visible)
         {
-            if (chunk.activeSelf != visible)
+            if (meshRenderer != null)
             {
-                chunk.SetActive(visible);
-            }
-        }
-        /// <summary>
-        /// [Deprecated]
-        /// Disable colliders the viewer is not currently in.
-        /// </summary>
-        /// <param name="colliderEnable">Whether the colliders should be enabled</param>
-        public void SetCollider(bool colliderEnable)
-        {
-            meshCollider.enabled = colliderEnable;
-            for (int i = 0; i < assetSpawner.spawnedAssets.Count; i++)
-            {
-                foreach (GameObject asset in assetSpawner.spawnedAssets[i])
+                if (meshRenderer.enabled != visible)
                 {
-                    asset.GetComponent<MeshCollider>().enabled = colliderEnable;
+                    meshRenderer.enabled = visible;
+                    meshCollider.enabled = visible;
+                }
+            }
+            if (assetSpawner.assetsSet)
+            {
+                for (int i = 0; i < assetSpawner.spawnedAssets.Count; i++)
+                {
+                    foreach (Asset asset in assetSpawner.spawnedAssets[i])
+                    {
+                        if (asset.meshRenderer != null)
+                        {
+                            asset.meshRenderer.enabled = visible;
+                        }
+                        if (asset.meshCollider != null)
+                        {
+                            asset.meshCollider.enabled = visible;
+                        }
+                    }
                 }
             }
         }
+        /// <summary>
+        /// Set the visibility of the chunk
+        /// </summary>
+        /// <param name="visible">Whether the chunk is visible</param>
+        // public void SetVisible(bool visible)
+        // {
+        //     if (chunk.activeSelf != visible)
+        //     {
+        //         chunk.SetActive(visible);
+        //     }
+        // }
         /// <summary>
         /// Check chunk visibility
         /// </summary>
         /// <returns>If the chunk is visible or not</returns>
         public bool IsVisible()
         {
-            return chunk.activeSelf;
+            // return chunk.activeSelf;
+            return meshRenderer.enabled;
         }
     }
 }

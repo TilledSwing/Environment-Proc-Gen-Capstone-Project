@@ -231,7 +231,7 @@ public class ComputeMarchingCubes : MonoBehaviour
 
                 if (Mathf.RoundToInt(chunkPos.y / terrainDensityData.width) == 0)
                 {
-                    waterGen.UpdateMesh();
+                    // waterGen.UpdateMesh();
                 }
 
                 if (vertexCount > 0)

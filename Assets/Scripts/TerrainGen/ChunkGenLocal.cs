@@ -235,9 +235,9 @@ public class ChunkGenLocal : MonoBehaviour
             meshCollider.enabled = colliderEnable;
             for (int i = 0; i < assetSpawner.spawnedAssets.Count; i++)
             {
-                foreach (GameObject asset in assetSpawner.spawnedAssets[i])
+                foreach (Asset asset in assetSpawner.spawnedAssets[i])
                 {
-                    asset.GetComponent<MeshCollider>().enabled = colliderEnable;
+                    asset.meshCollider.enabled = colliderEnable;
                 }
             }
         }
