@@ -7210,7 +7210,7 @@ MeshCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 5
   m_Convex: 0
   m_CookingOptions: 30
@@ -7222,7 +7222,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 762416109}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -15041,6 +15041,7 @@ MonoBehaviour:
     m_Bits: 0
   assetSpacing: 10
   maxAttempts: 24
+  assetsSet: 0
 --- !u!1 &1649543614
 GameObject:
   m_ObjectHideFlags: 0
@@ -16763,6 +16764,7 @@ MonoBehaviour:
   terrainMaterial: {fileID: 2100000, guid: d644a1ee14ca32a44b080e9c6de5ed62, type: 2}
   waterMaterial: {fileID: 2100000, guid: 804af839dce47f748a2151ac2e3113a9, type: 2}
   assetSpawnData: {fileID: 11400000, guid: 29949715b352478458342a45d2b907a0, type: 2}
+  updateDistanceThreshold: 5
   lightingBlocker: {fileID: 762416109}
 --- !u!4 &1838274977
 Transform:

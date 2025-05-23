@@ -26,6 +26,8 @@ public class ChunkGenNetwork : NetworkBehaviour
     public Dictionary<Vector3Int, List<SpawnableAsset>> assets = new Dictionary<Vector3Int, List<SpawnableAsset>>();
     public List<TerrainChunk> chunksVisibleLastUpdate = new List<TerrainChunk>();
     private Queue<Vector3Int> chunkLoadQueue = new Queue<Vector3Int>();
+    public float updateDistanceThreshold = 5f;
+    private Vector3 lastUpdateViewerPos;
     private bool isLoadingChunks = false;
     private bool initialLoadComplete = false;
     public GameObject lightingBlocker;
@@ -59,10 +61,15 @@ public class ChunkGenNetwork : NetworkBehaviour
     void Update()
     {
         // Position updates
-        viewerPos = new Vector3(viewer.position.x,viewer.position.y,viewer.position.z);
+        viewerPos = new Vector3(viewer.position.x, viewer.position.y, viewer.position.z);
         lightingBlocker.transform.position = new Vector3(viewerPos.x, 0, viewerPos.z);
         // Update chunks
-        UpdateVisibleChunks();
+        if ((viewerPos - lastUpdateViewerPos).sqrMagnitude > updateDistanceThreshold * updateDistanceThreshold)
+        {
+            UpdateVisibleChunks();
+            lastUpdateViewerPos = viewerPos;
+        }
+        // UpdateVisibleChunks();
     }
     /// <summary>
     /// Update all the visible chunks loading in new ones and unloading old ones that are no longer visible
@@ -81,14 +88,14 @@ public class ChunkGenNetwork : NetworkBehaviour
 
         if (viewerPos.y <= -5)
         {
-            if (!lightingBlocker.activeSelf)
+            if (!lightingBlockerRenderer.enabled)
             {
                 lightingBlockerRenderer.enabled = true;
             }
         }
         else
         {
-            if (lightingBlocker.activeSelf)
+            if (lightingBlockerRenderer.enabled)
             {
                 lightingBlockerRenderer.enabled = false;
             }
@@ -170,6 +177,10 @@ public class ChunkGenNetwork : NetworkBehaviour
                                             terraformComputeShader, spawnPointsComputeShader,
                                             terrainMaterial, waterMaterial);
                 chunkDictionary.Add(coord, chunk);
+                if (chunk.IsVisible())
+                {
+                    chunksVisibleLastUpdate.Add(chunk);
+                }
                 chunkBatchCounter++;
             }
 

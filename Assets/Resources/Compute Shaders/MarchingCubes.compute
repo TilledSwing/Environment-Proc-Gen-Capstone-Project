@@ -4,8 +4,8 @@
 
 struct Vertex
 {
-    float3 position;
-    float3 normal;
+    half3 position;
+    half3 normal;
 };
 
 struct Triangle

@@ -146,7 +146,8 @@ public class AssetSpawner : MonoBehaviour
     /// <summary>
     /// Use the spawn points from the compute shader to instantiate their respective game objects
     /// </summary>
-    private void AssetSpawnHandler() {
+    private void AssetSpawnHandler()
+    {
         for (int i = 0; i < assetSpawnData.spawnableAssets.Count; i++)
         {
             ComputeMarchingCubes.Vertex[] points = assetSpawnData.assets[chunkPos][i].spawnPoints;
@@ -174,8 +175,8 @@ public class AssetSpawner : MonoBehaviour
                 }
             }
             assetSpawnData.assets[chunkPos][i].spawnedAssets = spawnedAssets[i];
-            assetsSet = true;
         }
+        assetsSet = true;
     }
     /// <summary>
     /// Destroy all the assets

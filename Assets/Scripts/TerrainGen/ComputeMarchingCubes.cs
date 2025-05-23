@@ -1,6 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using Unity.Collections;
+using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -140,7 +143,12 @@ public class ComputeMarchingCubes : MonoBehaviour
     public void GenerateMesh()
     {
         heightsBuffer = SetHeights();
-        // yield return new WaitForEndOfFrame();
+
+        // Wait for heights buffer to be set
+        // float[] sync = new float[1];
+        // heightsBuffer.GetData(sync);
+        // yield return null;
+
         MarchingCubes(heightsBuffer, false);
     }
     /// <summary>
@@ -220,7 +228,7 @@ public class ComputeMarchingCubes : MonoBehaviour
                 }
 
                 Triangle[] vertexArray = new Triangle[vertexCount];
-                NativeArray<Triangle> rawData = dataRequest.GetData<Triangle>();
+                NativeArray<Triangle>rawData = dataRequest.GetData<Triangle>();
 
                 for (int i = 0; i < vertexCount; i++)
                 {
