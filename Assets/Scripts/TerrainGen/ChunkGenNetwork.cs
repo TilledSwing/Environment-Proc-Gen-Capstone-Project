@@ -326,10 +326,12 @@ public class ChunkGenNetwork : NetworkBehaviour
         public GameObject chunk;
         public ComputeMarchingCubes marchingCubes;
         public AssetSpawner assetSpawner;
-        // public List<SpawnableAsset> assets;
+        public GameObject waterPlaneGenerator;
+        public WaterPlaneGenerator waterGen;
         public Vector3Int chunkPos;
         public Bounds bounds;
         public MeshCollider meshCollider;
+        public MeshFilter meshFilter;
         public MeshRenderer meshRenderer;
         public TerrainChunk(Vector3Int chunkCoord, int chunkSize, Transform parent, TerrainDensityData1 terrainDensityData, AssetSpawnData assetSpawnData,
                             ComputeShader marchingCubesComputeShader, ComputeShader terrainDensityComputeShader, ComputeShader terrainNoiseComputeShader,
@@ -342,7 +344,7 @@ public class ChunkGenNetwork : NetworkBehaviour
             chunk.layer = 3;
             // Set up basic chunk components
             meshCollider = chunk.AddComponent<MeshCollider>();
-            chunk.AddComponent<MeshFilter>();
+            meshFilter = chunk.AddComponent<MeshFilter>();
             meshRenderer = chunk.AddComponent<MeshRenderer>();
             meshRenderer.material = terrainMaterial;
             meshRenderer.material.SetFloat("_UnderwaterTexHeightEnd", terrainDensityData.waterLevel - 15f);
@@ -355,7 +357,10 @@ public class ChunkGenNetwork : NetworkBehaviour
             assetSpawner.spawnPointsComputeShader = spawnPointsComputeShader;
             // Set up the chunk's ComputeMarchingCubes script
             marchingCubes = chunk.AddComponent<ComputeMarchingCubes>();
+            marchingCubes.meshFilter = meshFilter;
+            marchingCubes.meshCollider = meshCollider;
             marchingCubes.chunkPos = chunkPos;
+            marchingCubes.assetSpawner = assetSpawner;
             marchingCubes.marchingCubesComputeShader = marchingCubesComputeShader;
             marchingCubes.terrainDensityComputeShader = terrainDensityComputeShader;
             marchingCubes.terrainNoiseComputeShader = terrainNoiseComputeShader;
@@ -365,6 +370,16 @@ public class ChunkGenNetwork : NetworkBehaviour
             marchingCubes.terrainMaterial = terrainMaterial;
             marchingCubes.waterMaterial = waterMaterial;
             marchingCubes.chunkGenNetwork = chunkGenNetwork;
+            // Set up water generator
+            waterPlaneGenerator = new GameObject("Water");
+            waterPlaneGenerator.transform.SetParent(chunk.transform);
+            MeshFilter waterGenMeshFilter = waterPlaneGenerator.AddComponent<MeshFilter>();
+            MeshRenderer waterMat = waterPlaneGenerator.AddComponent<MeshRenderer>();
+            waterMat.material = waterMaterial;
+            waterGen = waterPlaneGenerator.AddComponent<WaterPlaneGenerator>();
+            waterGen.meshFilter = waterGenMeshFilter;
+            waterGen.terrainDensityData = terrainDensityData;
+            waterGen.chunkPos = chunkPos;
             chunk.transform.SetParent(parent);
             SetVisible(false);
         }

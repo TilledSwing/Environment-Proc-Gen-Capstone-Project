@@ -17,15 +17,14 @@ public class ComputeMarchingCubes : MonoBehaviour
     public ComputeShader terraformComputeShader;
     public Material terrainMaterial;
     public Material waterMaterial;
-    private MeshFilter meshFilter;
-    private MeshCollider meshCollider;
+    public MeshFilter meshFilter;
+    public MeshCollider meshCollider;
     // public List<Vector3> vertices = new List<Vector3>();
     // public List<Vertex> verticesNormals = new List<Vertex>();
     // private List<int> triangles = new List<int>();
     public TerrainDensityData1 terrainDensityData;
-    public GameObject waterPlaneGenerator;
-    WaterPlaneGenerator waterGen;
-    private AssetSpawner assetSpawner;
+    public WaterPlaneGenerator waterGen;
+    public AssetSpawner assetSpawner;
     public Vector3Int chunkPos;
     public ComputeBuffer heightsBuffer;
     public ChunkGenNetwork chunkGenNetwork;
@@ -45,26 +44,9 @@ public class ComputeMarchingCubes : MonoBehaviour
 
     void Start()
     {
-        ChunkSetup();
         SetNoiseSetting();
         GenerateMesh();
         // StartCoroutine(GenerateMesh());
-    }
-    // Set up the chunk data
-    public void ChunkSetup()
-    {
-        meshFilter = gameObject.GetComponent<MeshFilter>();
-        meshCollider = gameObject.GetComponent<MeshCollider>();
-        assetSpawner = gameObject.GetComponent<AssetSpawner>();
-        // Set up and start water generator
-        waterPlaneGenerator = new GameObject("Water");
-        waterPlaneGenerator.transform.SetParent(transform);
-        waterPlaneGenerator.AddComponent<MeshFilter>();
-        MeshRenderer waterMat = waterPlaneGenerator.AddComponent<MeshRenderer>();
-        waterMat.material = waterMaterial;
-        waterGen = waterPlaneGenerator.AddComponent<WaterPlaneGenerator>();
-        waterGen.terrainDensityData = terrainDensityData;
-        waterGen.marchingCubes = this;
     }
     // Set all the noise settings from the TerrainDensityData scriptable object
     private void SetNoiseSetting()
@@ -330,9 +312,9 @@ public class ComputeMarchingCubes : MonoBehaviour
 
                 vertexBuffer.Release();
 
-                if (Mathf.RoundToInt(chunkPos.y / terrainDensityData.width) == 0)
+                if (terrainDensityData.waterLevel > chunkPos.y && terrainDensityData.waterLevel < Mathf.RoundToInt(chunkPos.y + terrainDensityData.width) )
                 {
-                    // waterGen.UpdateMesh();
+                    waterGen.UpdateMesh();
                 }
 
                 if (vertexCount > 0)
