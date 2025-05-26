@@ -28,6 +28,7 @@ public class ComputeMarchingCubes : MonoBehaviour
     private AssetSpawner assetSpawner;
     public Vector3Int chunkPos;
     public ComputeBuffer heightsBuffer;
+    public ChunkGenNetwork chunkGenNetwork;
 
     public struct Vertex
     {
@@ -149,7 +150,14 @@ public class ComputeMarchingCubes : MonoBehaviour
         // heightsBuffer.GetData(sync);
         // yield return null;
 
-        MarchingCubes(heightsBuffer, false);
+        if (!chunkGenNetwork.initialLoadComplete)
+        {
+            SyncMarchingCubes(heightsBuffer, false);
+        }
+        else
+        {
+            AsyncMarchingCubes(heightsBuffer, false);
+        }
     }
     /// <summary>
     /// Set up the density values for the chunk using compute shaders
@@ -186,7 +194,92 @@ public class ComputeMarchingCubes : MonoBehaviour
     /// </summary>
     /// <param name="heightsBuffer">The buffer containing the chunks density field</param>
     /// <param name="terraforming">Whether the user is terraforming</param>
-    public void MarchingCubes(ComputeBuffer heightsBuffer, bool terraforming)
+    public void AsyncMarchingCubes(ComputeBuffer heightsBuffer, bool terraforming)
+    {
+        int marchingKernel = marchingCubesComputeShader.FindKernel("MarchingCubes");
+
+        marchingCubesComputeShader.SetBuffer(marchingKernel, "HeightsBuffer", heightsBuffer);
+        ComputeBuffer vertexBuffer = new ComputeBuffer(terrainDensityData.width * terrainDensityData.width * terrainDensityData.width * 5, sizeof(float) * 18, ComputeBufferType.Append);
+        marchingCubesComputeShader.SetBuffer(marchingKernel, "VertexBuffer", vertexBuffer);
+
+        marchingCubesComputeShader.SetInt("ChunkSize", terrainDensityData.width);
+        marchingCubesComputeShader.SetVector("ChunkPos", (Vector3)chunkPos);
+        marchingCubesComputeShader.SetFloat("isolevel", terrainDensityData.isolevel);
+        marchingCubesComputeShader.SetBool("lerpToggle", terrainDensityData.lerp);
+
+        vertexBuffer.SetCounterValue(0);
+        marchingCubesComputeShader.Dispatch(marchingKernel, Mathf.CeilToInt(terrainDensityData.width / 4f), Mathf.CeilToInt(terrainDensityData.width / 4f), Mathf.CeilToInt(terrainDensityData.width / 4f));
+
+        ComputeBuffer vertexCountBuffer = new ComputeBuffer(1, sizeof(int), ComputeBufferType.Raw);
+        ComputeBuffer.CopyCount(vertexBuffer, vertexCountBuffer, 0);
+
+        chunkGenNetwork.pendingReadbacks.Enqueue(new ChunkGenNetwork.ReadbackRequest(vertexCountBuffer, (AsyncGPUReadbackRequest countRequest) =>
+        {
+            if (countRequest.hasError)
+            {
+                Debug.LogError("Failed to read vertex count.");
+                vertexCountBuffer.Release();
+                vertexBuffer.Release();
+                return;
+            }
+
+            int vertexCount = countRequest.GetData<int>()[0];
+            vertexCountBuffer.Release();
+
+            chunkGenNetwork.pendingReadbacks.Enqueue(new ChunkGenNetwork.ReadbackRequest(vertexBuffer, (AsyncGPUReadbackRequest dataRequest) =>
+            {
+                if (dataRequest.hasError)
+                {
+                    Debug.LogError("Failed to read vertex buffer.");
+                    vertexBuffer.Release();
+                    return;
+                }
+
+                Triangle[] vertexArray = new Triangle[vertexCount];
+                NativeArray<Triangle> rawData = dataRequest.GetData<Triangle>();
+
+                for (int i = 0; i < vertexCount; i++)
+                {
+                    vertexArray[i] = rawData[i];
+                }
+
+                vertexBuffer.Release();
+
+                if (Mathf.RoundToInt(chunkPos.y / terrainDensityData.width) == 0)
+                {
+                    // waterGen.UpdateMesh();
+                }
+
+                if (vertexCount > 0)
+                {
+                    SetMeshValuesPerformant(vertexCount, vertexArray, terraforming);
+                    // chunkGenNetwork.pendingMeshInits.Enqueue(() =>
+                    //     SetMeshValuesPerformant(vertexCount, vertexArray, terraforming)
+                    // );
+                }
+            }));
+        }));
+
+        // int[] vertexCountArray = { 0 };
+        // vertexCountBuffer.GetData(vertexCountArray);
+
+        // vertexCountBuffer.Release();
+
+        // int vertexCount = vertexCountArray[0];
+
+        // Triangle[] vertexArray = new Triangle[vertexCount];
+        // vertexBuffer.GetData(vertexArray, 0, 0, vertexCount);
+
+        // vertexBuffer.Release();
+
+        // SetMeshValues(vertexCount, vertexArray);
+    }
+    /// <summary>
+    /// Perform marching cubes in a compute shader and trigger mesh generation and asset spawning
+    /// </summary>
+    /// <param name="heightsBuffer">The buffer containing the chunks density field</param>
+    /// <param name="terraforming">Whether the user is terraforming</param>
+    public void SyncMarchingCubes(ComputeBuffer heightsBuffer, bool terraforming)
     {
         int marchingKernel = marchingCubesComputeShader.FindKernel("MarchingCubes");
 
@@ -248,20 +341,6 @@ public class ComputeMarchingCubes : MonoBehaviour
                 }
             });
         });
-
-        // int[] vertexCountArray = { 0 };
-        // vertexCountBuffer.GetData(vertexCountArray);
-
-        // vertexCountBuffer.Release();
-
-        // int vertexCount = vertexCountArray[0];
-
-        // Triangle[] vertexArray = new Triangle[vertexCount];
-        // vertexBuffer.GetData(vertexArray, 0, 0, vertexCount);
-
-        // vertexBuffer.Release();
-
-        // SetMeshValues(vertexCount, vertexArray);
     }
     /// <summary>
     /// Sets up a mesh given a vertex array and count using lower level api for better performance

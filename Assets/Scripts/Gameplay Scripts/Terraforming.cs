@@ -77,7 +77,7 @@ public class Terraforming : MonoBehaviour
 
                     marchingCubes.terraformComputeShader.Dispatch(terraformKernel, threadSizeX, threadSizeY, threadSizeZ);
 
-                    marchingCubes.MarchingCubes(marchingCubes.heightsBuffer, true);
+                    marchingCubes.SyncMarchingCubes(marchingCubes.heightsBuffer, true);
                 }
             }
         }

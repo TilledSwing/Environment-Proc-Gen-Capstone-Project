@@ -7,31 +7,54 @@ using UnityEngine.Rendering;
 
 public class ChunkGenNetwork : NetworkBehaviour
 {
+    // Viewer Settings
     public float maxViewDst = 100;
     public Transform viewer;
     public static Vector3 viewerPos;
+    public float updateDistanceThreshold = 5f;
+    private Vector3 lastUpdateViewerPos;
     public int chunkSize;
     public int chunksVisible;
+    // Scriptable Object References
     public TerrainDensityData1 terrainDensityData;
+    public AssetSpawnData assetSpawnData;
+    // Compute Shader References
     public ComputeShader marchingCubesComputeShader;
     public ComputeShader terrainDensityComputeShader;
     public ComputeShader terrainNoiseComputeShader;
     public ComputeShader caveNoiseComputeShader;
     public ComputeShader terraformComputeShader;
     public ComputeShader spawnPointsComputeShader;
+    // Material References
     public Material terrainMaterial;
     public Material waterMaterial;
-    public AssetSpawnData assetSpawnData;
+    // Chunk Variables
     public Dictionary<Vector3, TerrainChunk> chunkDictionary = new Dictionary<Vector3, TerrainChunk>();
-    public Dictionary<Vector3Int, List<SpawnableAsset>> assets = new Dictionary<Vector3Int, List<SpawnableAsset>>();
     public List<TerrainChunk> chunksVisibleLastUpdate = new List<TerrainChunk>();
     private Queue<Vector3Int> chunkLoadQueue = new Queue<Vector3Int>();
-    public float updateDistanceThreshold = 5f;
-    private Vector3 lastUpdateViewerPos;
     private bool isLoadingChunks = false;
-    private bool initialLoadComplete = false;
+    public bool initialLoadComplete = false;
+    // Lighting Blocker
     public GameObject lightingBlocker;
     private MeshRenderer lightingBlockerRenderer;
+    // Action Queues
+    public bool hasPendingMeshInits = false;
+    public Queue<Action> pendingMeshInits = new Queue<Action>();
+    private bool isLoadingMeshes = false;
+    public bool hasPendingReadbacks = false;
+    public Queue<ReadbackRequest> pendingReadbacks = new Queue<ReadbackRequest>();
+    private bool isLoadingReadbacks = false;
+    public class ReadbackRequest
+    {
+        public ComputeBuffer buffer;
+        public Action<AsyncGPUReadbackRequest> readbackRequest;
+
+        public ReadbackRequest(ComputeBuffer buffer, Action<AsyncGPUReadbackRequest> readbackRequest)
+        {
+            this.buffer = buffer;
+            this.readbackRequest = readbackRequest;
+        }
+    }
 
     void Awake()
     {
@@ -64,12 +87,14 @@ public class ChunkGenNetwork : NetworkBehaviour
         viewerPos = new Vector3(viewer.position.x, viewer.position.y, viewer.position.z);
         lightingBlocker.transform.position = new Vector3(viewerPos.x, 0, viewerPos.z);
         // Update chunks
-        if ((viewerPos - lastUpdateViewerPos).sqrMagnitude > updateDistanceThreshold * updateDistanceThreshold)
+        if ((viewerPos - lastUpdateViewerPos).sqrMagnitude > updateDistanceThreshold * updateDistanceThreshold && initialLoadComplete)
         {
             UpdateVisibleChunks();
             lastUpdateViewerPos = viewerPos;
         }
-        // UpdateVisibleChunks();
+        else if (!initialLoadComplete) {
+            UpdateVisibleChunks();
+        }
     }
     /// <summary>
     /// Update all the visible chunks loading in new ones and unloading old ones that are no longer visible
@@ -125,7 +150,7 @@ public class ChunkGenNetwork : NetworkBehaviour
                             TerrainChunk chunk = new TerrainChunk(viewedChunkCoord, chunkSize, transform, terrainDensityData, assetSpawnData,
                                                          marchingCubesComputeShader, terrainDensityComputeShader, terrainNoiseComputeShader,
                                                          caveNoiseComputeShader, terraformComputeShader, spawnPointsComputeShader,
-                                                         terrainMaterial, waterMaterial);
+                                                         terrainMaterial, waterMaterial, this);
 
                             chunkDictionary.Add(viewedChunkCoord, chunk);
                             chunk.UpdateChunk(maxViewDst);
@@ -142,7 +167,6 @@ public class ChunkGenNetwork : NetworkBehaviour
                                 chunkLoadQueue.Enqueue(viewedChunkCoord);
                             }
                         }
-                        // chunkDictionary.Add(viewedChunkCoord, new TerrainChunk(viewedChunkCoord, chunkSize, transform, terrainDensityData, assetSpawnData, marchingCubesComputeShader, terrainDensityComputeShader, terrainNoiseComputeShader, caveNoiseComputeShader, terraformComputeShader, spawnPointsComputeShader, terrainMaterial, waterMaterial));
                     }
                 }
             }
@@ -154,6 +178,14 @@ public class ChunkGenNetwork : NetworkBehaviour
         if (!isLoadingChunks)
         {
             StartCoroutine(LoadChunksOverTime());
+        }
+        if (!isLoadingReadbacks)
+        {
+            StartCoroutine(LoadReadbacksOverTime());
+        }
+        if (!isLoadingMeshes)
+        {
+            StartCoroutine(LoadMeshesOverTime());
         }
     }
     /// <summary>
@@ -175,7 +207,7 @@ public class ChunkGenNetwork : NetworkBehaviour
                                             marchingCubesComputeShader, terrainDensityComputeShader,
                                             terrainNoiseComputeShader, caveNoiseComputeShader,
                                             terraformComputeShader, spawnPointsComputeShader,
-                                            terrainMaterial, waterMaterial);
+                                            terrainMaterial, waterMaterial, this);
                 chunkDictionary.Add(coord, chunk);
                 if (chunk.IsVisible())
                 {
@@ -191,6 +223,54 @@ public class ChunkGenNetwork : NetworkBehaviour
         }
 
         isLoadingChunks = false;
+    }
+    /// <summary>
+    /// Coroutine for loading chunks asynchronously
+    /// </summary>
+    /// <returns>yield return</returns>
+    private IEnumerator LoadReadbacksOverTime()
+    {
+        isLoadingReadbacks = true;
+
+        int readbackBatchCounter = 0;
+        while (pendingReadbacks.Count > 0)
+        {
+            ReadbackRequest pendingReadback = pendingReadbacks.Dequeue();
+
+            AsyncGPUReadback.Request(pendingReadback.buffer, pendingReadback.readbackRequest);
+
+            readbackBatchCounter++;
+
+            // if (readbackBatchCounter % 2 == 0)
+            // {
+                yield return new WaitForEndOfFrame();
+            // }
+        }
+
+        isLoadingReadbacks = false;
+    }
+    /// <summary>
+    /// Coroutine for loading chunks asynchronously
+    /// </summary>
+    /// <returns>yield return</returns>
+    private IEnumerator LoadMeshesOverTime()
+    {
+        isLoadingMeshes = true;
+
+        int meshBatchCounter = 0;
+        while (pendingMeshInits.Count > 0)
+        {
+            pendingMeshInits.Dequeue()?.Invoke();
+
+            meshBatchCounter++;
+
+            // if (meshBatchCounter % 2 == 0)
+            // {
+                yield return new WaitForEndOfFrame();
+            // }
+        }
+
+        isLoadingMeshes = false;
     }
     /// <summary>
     /// Get a TerrainChunk and its neighbors with the given chunk's coordinate
@@ -237,7 +317,6 @@ public class ChunkGenNetwork : NetworkBehaviour
     {
         assetSpawnData.assets.Clear();
         chunkDictionary.Clear();
-        assets.Clear();
     }
     /// <summary>
     /// Custom class to store chunk objects and their relevant information and data
@@ -252,11 +331,14 @@ public class ChunkGenNetwork : NetworkBehaviour
         public Bounds bounds;
         public MeshCollider meshCollider;
         public MeshRenderer meshRenderer;
-        public TerrainChunk(Vector3Int chunkCoord, int chunkSize, Transform parent, TerrainDensityData1 terrainDensityData, AssetSpawnData assetSpawnData, ComputeShader marchingCubesComputeShader, ComputeShader terrainDensityComputeShader, ComputeShader terrainNoiseComputeShader, ComputeShader caveNoiseComputeShader, ComputeShader terraformComputeShader, ComputeShader spawnPointsComputeShader, Material terrainMaterial, Material waterMaterial)
+        public TerrainChunk(Vector3Int chunkCoord, int chunkSize, Transform parent, TerrainDensityData1 terrainDensityData, AssetSpawnData assetSpawnData,
+                            ComputeShader marchingCubesComputeShader, ComputeShader terrainDensityComputeShader, ComputeShader terrainNoiseComputeShader,
+                            ComputeShader caveNoiseComputeShader, ComputeShader terraformComputeShader, ComputeShader spawnPointsComputeShader,
+                            Material terrainMaterial, Material waterMaterial, ChunkGenNetwork chunkGenNetwork)
         {
             chunkPos = chunkCoord * chunkSize;
             bounds = new Bounds(chunkPos + (new Vector3(0.5f, 0.5f, 0.5f) * chunkSize), Vector3.one * chunkSize);
-            chunk = new GameObject("Chunk");
+            chunk = new GameObject("Chunk" + chunkPos);
             chunk.layer = 3;
             // Set up basic chunk components
             meshCollider = chunk.AddComponent<MeshCollider>();
@@ -282,6 +364,7 @@ public class ChunkGenNetwork : NetworkBehaviour
             marchingCubes.terrainDensityData = terrainDensityData;
             marchingCubes.terrainMaterial = terrainMaterial;
             marchingCubes.waterMaterial = waterMaterial;
+            marchingCubes.chunkGenNetwork = chunkGenNetwork;
             chunk.transform.SetParent(parent);
             SetVisible(false);
         }
