@@ -156,8 +156,6 @@ public class ComputeMarchingCubes : MonoBehaviour
 
         ComputeBuffer terrainNoiseBuffer = ComputeBufferPoolManager.Instance.GetComputeBuffer("NoiseBuffer", (terrainDensityData.width + 1) * (terrainDensityData.width + 1) * (terrainDensityData.width + 1), sizeof(float));
         ComputeBuffer caveNoiseBuffer = ComputeBufferPoolManager.Instance.GetComputeBuffer("NoiseBuffer", (terrainDensityData.width + 1) * (terrainDensityData.width + 1) * (terrainDensityData.width + 1), sizeof(float));
-        // ComputeBuffer terrainNoiseBuffer = new ComputeBuffer((terrainDensityData.width + 1) * (terrainDensityData.width + 1) * (terrainDensityData.width + 1), sizeof(float));
-        // ComputeBuffer caveNoiseBuffer = new ComputeBuffer((terrainDensityData.width + 1) * (terrainDensityData.width + 1) * (terrainDensityData.width + 1), sizeof(float));
         heightsBuffer = new ComputeBuffer((terrainDensityData.width + 1) * (terrainDensityData.width + 1) * (terrainDensityData.width + 1), sizeof(float));
         // ComputeBuffer waterCheckBuffer = new ComputeBuffer(1, sizeof(int));
         // ComputeBuffer undergroundCheckBuffer = new ComputeBuffer(1, sizeof(int));
@@ -187,8 +185,6 @@ public class ComputeMarchingCubes : MonoBehaviour
 
         ComputeBufferPoolManager.Instance.ReturnComputeBuffer("NoiseBuffer", terrainNoiseBuffer);
         ComputeBufferPoolManager.Instance.ReturnComputeBuffer("NoiseBuffer", caveNoiseBuffer);
-        // terrainNoiseBuffer.Release();
-        // caveNoiseBuffer.Release();
 
         return heightsBuffer;
     }
@@ -202,8 +198,7 @@ public class ComputeMarchingCubes : MonoBehaviour
         int marchingKernel = marchingCubesComputeShader.FindKernel("MarchingCubes");
 
         marchingCubesComputeShader.SetBuffer(marchingKernel, "HeightsBuffer", heightsBuffer);
-        ComputeBuffer vertexBuffer = ComputeBufferPoolManager.Instance.GetComputeBuffer("VertexBuffer", terrainDensityData.width * terrainDensityData.width * terrainDensityData.width * 5, sizeof(float) * 18, ComputeBufferType.Append);
-        // ComputeBuffer vertexBuffer = new ComputeBuffer(terrainDensityData.width * terrainDensityData.width * terrainDensityData.width * 5, sizeof(float) * 18, ComputeBufferType.Append);
+        ComputeBuffer vertexBuffer = ComputeBufferPoolManager.Instance.GetComputeBuffer("VertexBuffer", terrainDensityData.width * terrainDensityData.width * terrainDensityData.width * 2, sizeof(float) * 18, ComputeBufferType.Append);
         marchingCubesComputeShader.SetBuffer(marchingKernel, "VertexBuffer", vertexBuffer);
 
         marchingCubesComputeShader.SetInt("ChunkSize", terrainDensityData.width);
@@ -215,7 +210,6 @@ public class ComputeMarchingCubes : MonoBehaviour
         marchingCubesComputeShader.Dispatch(marchingKernel, Mathf.CeilToInt(terrainDensityData.width / 4f), Mathf.CeilToInt(terrainDensityData.width / 4f), Mathf.CeilToInt(terrainDensityData.width / 4f));
 
         ComputeBuffer vertexCountBuffer = ComputeBufferPoolManager.Instance.GetComputeBuffer("VertexCountBuffer", 1, sizeof(int), ComputeBufferType.Raw);
-        // ComputeBuffer vertexCountBuffer = new ComputeBuffer(1, sizeof(int), ComputeBufferType.Raw);
         ComputeBuffer.CopyCount(vertexBuffer, vertexCountBuffer, 0);
 
         ChunkGenNetwork.Instance.pendingReadbacks.Enqueue(new ChunkGenNetwork.ReadbackRequest(vertexCountBuffer, (AsyncGPUReadbackRequest countRequest) =>
@@ -228,7 +222,6 @@ public class ComputeMarchingCubes : MonoBehaviour
 
             int vertexCount = countRequest.GetData<int>()[0];
             ComputeBufferPoolManager.Instance.ReturnComputeBuffer("VertexCountBuffer", vertexCountBuffer);
-            // vertexCountBuffer.Release();
 
             ChunkGenNetwork.Instance.pendingReadbacks.Enqueue(new ChunkGenNetwork.ReadbackRequest(vertexBuffer, (AsyncGPUReadbackRequest dataRequest) =>
             {
@@ -247,7 +240,6 @@ public class ComputeMarchingCubes : MonoBehaviour
                 }
 
                 ComputeBufferPoolManager.Instance.ReturnComputeBuffer("VertexBuffer", vertexBuffer);
-                // vertexBuffer.Release();
 
                 if (terrainDensityData.waterLevel > chunkPos.y && terrainDensityData.waterLevel < Mathf.RoundToInt(chunkPos.y + terrainDensityData.width))
                 {
@@ -265,20 +257,6 @@ public class ComputeMarchingCubes : MonoBehaviour
                 }
             }));
         }));
-
-        // int[] vertexCountArray = { 0 };
-        // vertexCountBuffer.GetData(vertexCountArray);
-
-        // vertexCountBuffer.Release();
-
-        // int vertexCount = vertexCountArray[0];
-
-        // Triangle[] vertexArray = new Triangle[vertexCount];
-        // vertexBuffer.GetData(vertexArray, 0, 0, vertexCount);
-
-        // vertexBuffer.Release();
-
-        // SetMeshValues(vertexCount, vertexArray);
     }
     /// <summary>
     /// Perform marching cubes in a compute shader and trigger mesh generation and asset spawning
@@ -290,8 +268,7 @@ public class ComputeMarchingCubes : MonoBehaviour
         int marchingKernel = marchingCubesComputeShader.FindKernel("MarchingCubes");
 
         marchingCubesComputeShader.SetBuffer(marchingKernel, "HeightsBuffer", heightsBuffer);
-        // ComputeBuffer vertexBuffer = new ComputeBuffer(terrainDensityData.width * terrainDensityData.width * terrainDensityData.width * 5, sizeof(float) * 18, ComputeBufferType.Append);
-        ComputeBuffer vertexBuffer = ComputeBufferPoolManager.Instance.GetComputeBuffer("VertexBuffer", terrainDensityData.width * terrainDensityData.width * terrainDensityData.width * 5, sizeof(float) * 18, ComputeBufferType.Append);
+        ComputeBuffer vertexBuffer = ComputeBufferPoolManager.Instance.GetComputeBuffer("VertexBuffer", terrainDensityData.width * terrainDensityData.width * terrainDensityData.width * 2, sizeof(float) * 18, ComputeBufferType.Append);
         marchingCubesComputeShader.SetBuffer(marchingKernel, "VertexBuffer", vertexBuffer);
 
         marchingCubesComputeShader.SetInt("ChunkSize", terrainDensityData.width);
@@ -302,21 +279,20 @@ public class ComputeMarchingCubes : MonoBehaviour
         vertexBuffer.SetCounterValue(0);
         marchingCubesComputeShader.Dispatch(marchingKernel, Mathf.CeilToInt(terrainDensityData.width / 4f), Mathf.CeilToInt(terrainDensityData.width / 4f), Mathf.CeilToInt(terrainDensityData.width / 4f));
 
-        // ComputeBuffer vertexCountBuffer = new ComputeBuffer(1, sizeof(int), ComputeBufferType.Raw);
         ComputeBuffer vertexCountBuffer = ComputeBufferPoolManager.Instance.GetComputeBuffer("VertexCountBuffer", 1, sizeof(int), ComputeBufferType.Raw);
         ComputeBuffer.CopyCount(vertexBuffer, vertexCountBuffer, 0);
 
         int[] vertexCountArray = { 0 };
         vertexCountBuffer.GetData(vertexCountArray);
 
-        vertexCountBuffer.Release();
+        ComputeBufferPoolManager.Instance.ReturnComputeBuffer("VertexCountBuffer", vertexCountBuffer);
 
         int vertexCount = vertexCountArray[0];
 
         Triangle[] vertexArray = new Triangle[vertexCount];
         vertexBuffer.GetData(vertexArray, 0, 0, vertexCount);
 
-        vertexBuffer.Release();
+        ComputeBufferPoolManager.Instance.ReturnComputeBuffer("VertexBuffer", vertexBuffer);
 
         if (terrainDensityData.waterLevel > chunkPos.y && terrainDensityData.waterLevel < Mathf.RoundToInt(chunkPos.y + terrainDensityData.width))
         {
@@ -378,7 +354,7 @@ public class ComputeMarchingCubes : MonoBehaviour
 
         if (!terraforming)
         {
-            assetSpawner.SpawnAssets();
+            // assetSpawner.SpawnAssets();
         }
     }
     // Releases height buffers when the application is closed

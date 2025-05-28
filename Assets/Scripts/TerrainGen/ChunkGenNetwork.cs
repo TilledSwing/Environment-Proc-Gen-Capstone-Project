@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using FishNet.Object;
 using FishNet.Serializing.Helping;
+using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -31,9 +32,9 @@ public class ChunkGenNetwork : NetworkBehaviour
     public Material terrainMaterial;
     public Material waterMaterial;
     // Chunk Variables
-    public Dictionary<Vector3, TerrainChunk> chunkDictionary = new Dictionary<Vector3, TerrainChunk>();
-    public List<TerrainChunk> chunksVisibleLastUpdate = new List<TerrainChunk>();
-    private Queue<Vector3Int> chunkLoadQueue = new Queue<Vector3Int>();
+    public Dictionary<Vector3, TerrainChunk> chunkDictionary = new();
+    public List<TerrainChunk> chunksVisibleLastUpdate = new();
+    private Queue<Vector3Int> chunkLoadQueue = new();
     private bool isLoadingChunks = false;
     public bool initialLoadComplete = false;
     // Lighting Blocker
@@ -41,10 +42,10 @@ public class ChunkGenNetwork : NetworkBehaviour
     private MeshRenderer lightingBlockerRenderer;
     // Action Queues
     public bool hasPendingMeshInits = false;
-    public Queue<Action> pendingMeshInits = new Queue<Action>();
+    public Queue<Action> pendingMeshInits = new();
     private bool isLoadingMeshes = false;
     public bool hasPendingReadbacks = false;
-    public Queue<ReadbackRequest> pendingReadbacks = new Queue<ReadbackRequest>();
+    public Queue<ReadbackRequest> pendingReadbacks = new();
     private bool isLoadingReadbacks = false;
     // Data structure pools
     public class ReadbackRequest

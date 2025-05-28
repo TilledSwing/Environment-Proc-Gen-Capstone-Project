@@ -21,12 +21,7 @@ public class ComputeBufferPoolManager : MonoBehaviour
     {
         if (bufferPool.TryGetValue(bufferKey, out Queue<ComputeBuffer> bufferQueue) && bufferQueue.Count > 0)
         {
-            ComputeBuffer computeBuffer = bufferQueue.Dequeue();
-            // if (type == ComputeBufferType.Append || type == ComputeBufferType.Counter)
-            // {
-            //     computeBuffer.SetCounterValue(0);
-            // }
-            return computeBuffer;
+            return bufferQueue.Dequeue();
         }
         return new ComputeBuffer(count, stride, type);
     }
