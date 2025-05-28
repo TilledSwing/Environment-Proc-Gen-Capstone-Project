@@ -306,6 +306,8 @@ MonoBehaviour:
   terraformMaxDst: 20
   terraformRadius: 3
   terraformStrength: 1
+  terrainDensityData: {fileID: 11400000, guid: 4bc939f839855ea45ade17dce060eea5, type: 2}
+  chunkGen: {fileID: 0}
 --- !u!114 &1651371401710485035
 MonoBehaviour:
   m_ObjectHideFlags: 0

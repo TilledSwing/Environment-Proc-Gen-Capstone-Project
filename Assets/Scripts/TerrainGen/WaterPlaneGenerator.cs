@@ -11,13 +11,14 @@ public class WaterPlaneGenerator : MonoBehaviour
     private List<int> triangles = new List<int>();
     public MeshFilter meshFilter;
     public Vector3Int chunkPos;
+    public ComputeMarchingCubes marchingCubes;
     public TerrainDensityData1 terrainDensityData;
 
-    public void UpdateMesh() {
+    public void UpdateMesh()
+    {
         GenerateWaterPlane();
         SetupMesh();
     }
-
     /// <summary>
     /// Set up the MeshFilter's mesh with the given vertices and triangle
     /// </summary>

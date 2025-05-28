@@ -10,14 +10,13 @@ public class Terraforming : MonoBehaviour
     public float terraformStrength = 5f;
     bool mode = true;
     LayerMask terrainLayer;
-    TerrainDensityData1 terrainDensityData;
-    ChunkGenNetwork chunkGen;
+    public TerrainDensityData1 terrainDensityData;
     void Start()
     {
         playerCamera = Camera.main;
         terrainLayer = LayerMask.GetMask("Terrain Layer");
-        terrainDensityData = Resources.Load<TerrainDensityData1>("TerrainDensityData1");
-        chunkGen = FindFirstObjectByType<ChunkGenNetwork>();
+        // terrainDensityData = Resources.Load<TerrainDensityData1>("TerrainDensityData1");
+        // chunkGen = FindFirstObjectByType<ChunkGenNetwork>();
     }
 
     void Update()
@@ -50,7 +49,7 @@ public class Terraforming : MonoBehaviour
             GameObject hitChunk = hit.collider.gameObject;
             ComputeMarchingCubes hitMarchingCubes = hitChunk.GetComponent<ComputeMarchingCubes>();
             Vector3Int hitChunkPos = hitMarchingCubes.chunkPos;
-            ChunkGenNetwork.TerrainChunk[] chunkAndNeighbors = chunkGen.GetChunkAndNeighbors(new Vector3Int(Mathf.CeilToInt(hitChunkPos.x / terrainDensityData.width), Mathf.CeilToInt(hitChunkPos.y / terrainDensityData.width), Mathf.CeilToInt(hitChunkPos.z / terrainDensityData.width)));
+            ChunkGenNetwork.TerrainChunk[] chunkAndNeighbors = ChunkGenNetwork.Instance.GetChunkAndNeighbors(new Vector3Int(Mathf.CeilToInt(hitChunkPos.x / terrainDensityData.width), Mathf.CeilToInt(hitChunkPos.y / terrainDensityData.width), Mathf.CeilToInt(hitChunkPos.z / terrainDensityData.width)));
             foreach (ChunkGenNetwork.TerrainChunk terrainChunk in chunkAndNeighbors)
             {
                 if (Mathf.Sqrt(terrainChunk.bounds.SqrDistance(terraformCenter)) <= terraformRadius)

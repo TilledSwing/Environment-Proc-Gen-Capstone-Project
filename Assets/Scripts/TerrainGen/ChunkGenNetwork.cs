@@ -2,11 +2,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using FishNet.Object;
+using FishNet.Serializing.Helping;
 using UnityEngine;
 using UnityEngine.Rendering;
 
 public class ChunkGenNetwork : NetworkBehaviour
 {
+    public static ChunkGenNetwork Instance;
     // Viewer Settings
     public float maxViewDst = 100;
     public Transform viewer;
@@ -44,6 +46,7 @@ public class ChunkGenNetwork : NetworkBehaviour
     public bool hasPendingReadbacks = false;
     public Queue<ReadbackRequest> pendingReadbacks = new Queue<ReadbackRequest>();
     private bool isLoadingReadbacks = false;
+    // Data structure pools
     public class ReadbackRequest
     {
         public ComputeBuffer buffer;
@@ -58,6 +61,12 @@ public class ChunkGenNetwork : NetworkBehaviour
 
     void Awake()
     {
+        if (Instance == null) {
+            Instance = this;
+        }
+        else {
+            Destroy(gameObject);
+        }
         chunkSize = terrainDensityData.width;
         chunksVisible = Mathf.RoundToInt(maxViewDst / chunkSize);
         lightingBlockerRenderer = lightingBlocker.GetComponent<MeshRenderer>();
@@ -76,8 +85,9 @@ public class ChunkGenNetwork : NetworkBehaviour
         base.OnStartClient();
         viewer = GameObject.Find("Player(Clone)").transform;
         GameObject localChunkManager = GameObject.Find("LocalChunkManager");
-        if(localChunkManager) {
-            if(localChunkManager.activeSelf) localChunkManager.SetActive(false);
+        if (localChunkManager)
+        {
+            if (localChunkManager.activeSelf) localChunkManager.SetActive(false);
         }
     }
 
@@ -150,7 +160,7 @@ public class ChunkGenNetwork : NetworkBehaviour
                             TerrainChunk chunk = new TerrainChunk(viewedChunkCoord, chunkSize, transform, terrainDensityData, assetSpawnData,
                                                          marchingCubesComputeShader, terrainDensityComputeShader, terrainNoiseComputeShader,
                                                          caveNoiseComputeShader, terraformComputeShader, spawnPointsComputeShader,
-                                                         terrainMaterial, waterMaterial, this);
+                                                         terrainMaterial, waterMaterial, initialLoadComplete);
 
                             chunkDictionary.Add(viewedChunkCoord, chunk);
                             chunk.UpdateChunk(maxViewDst);
@@ -207,7 +217,7 @@ public class ChunkGenNetwork : NetworkBehaviour
                                             marchingCubesComputeShader, terrainDensityComputeShader,
                                             terrainNoiseComputeShader, caveNoiseComputeShader,
                                             terraformComputeShader, spawnPointsComputeShader,
-                                            terrainMaterial, waterMaterial, this);
+                                            terrainMaterial, waterMaterial, initialLoadComplete);
                 chunkDictionary.Add(coord, chunk);
                 if (chunk.IsVisible())
                 {
@@ -216,10 +226,10 @@ public class ChunkGenNetwork : NetworkBehaviour
                 chunkBatchCounter++;
             }
 
-            if (chunkBatchCounter % 2 == 0)
-            {
+            // if (chunkBatchCounter % 2 == 0)
+            // {
                 yield return new WaitForEndOfFrame();
-            }
+            // }
         }
 
         isLoadingChunks = false;
@@ -241,10 +251,10 @@ public class ChunkGenNetwork : NetworkBehaviour
 
             readbackBatchCounter++;
 
-            // if (readbackBatchCounter % 2 == 0)
-            // {
+            if (readbackBatchCounter % 2 == 0)
+            {
                 yield return new WaitForEndOfFrame();
-            // }
+            }
         }
 
         isLoadingReadbacks = false;
@@ -336,7 +346,7 @@ public class ChunkGenNetwork : NetworkBehaviour
         public TerrainChunk(Vector3Int chunkCoord, int chunkSize, Transform parent, TerrainDensityData1 terrainDensityData, AssetSpawnData assetSpawnData,
                             ComputeShader marchingCubesComputeShader, ComputeShader terrainDensityComputeShader, ComputeShader terrainNoiseComputeShader,
                             ComputeShader caveNoiseComputeShader, ComputeShader terraformComputeShader, ComputeShader spawnPointsComputeShader,
-                            Material terrainMaterial, Material waterMaterial, ChunkGenNetwork chunkGenNetwork)
+                            Material terrainMaterial, Material waterMaterial, bool initialLoadComplete)
         {
             chunkPos = chunkCoord * chunkSize;
             bounds = new Bounds(chunkPos + (new Vector3(0.5f, 0.5f, 0.5f) * chunkSize), Vector3.one * chunkSize);
@@ -369,17 +379,22 @@ public class ChunkGenNetwork : NetworkBehaviour
             marchingCubes.terrainDensityData = terrainDensityData;
             marchingCubes.terrainMaterial = terrainMaterial;
             marchingCubes.waterMaterial = waterMaterial;
-            marchingCubes.chunkGenNetwork = chunkGenNetwork;
+            marchingCubes.initialLoadComplete = initialLoadComplete;
             // Set up water generator
-            waterPlaneGenerator = new GameObject("Water");
-            waterPlaneGenerator.transform.SetParent(chunk.transform);
-            MeshFilter waterGenMeshFilter = waterPlaneGenerator.AddComponent<MeshFilter>();
-            MeshRenderer waterMat = waterPlaneGenerator.AddComponent<MeshRenderer>();
-            waterMat.material = waterMaterial;
-            waterGen = waterPlaneGenerator.AddComponent<WaterPlaneGenerator>();
-            waterGen.meshFilter = waterGenMeshFilter;
-            waterGen.terrainDensityData = terrainDensityData;
-            waterGen.chunkPos = chunkPos;
+            if (terrainDensityData.waterLevel > chunkPos.y && terrainDensityData.waterLevel < Mathf.RoundToInt(chunkPos.y + terrainDensityData.width))
+            {
+                waterPlaneGenerator = new GameObject("Water");
+                waterPlaneGenerator.transform.SetParent(chunk.transform);
+                MeshFilter waterGenMeshFilter = waterPlaneGenerator.AddComponent<MeshFilter>();
+                MeshRenderer waterMat = waterPlaneGenerator.AddComponent<MeshRenderer>();
+                waterMat.material = waterMaterial;
+                waterGen = waterPlaneGenerator.AddComponent<WaterPlaneGenerator>();
+                waterGen.meshFilter = waterGenMeshFilter;
+                waterGen.terrainDensityData = terrainDensityData;
+                waterGen.chunkPos = chunkPos;
+                waterGen.marchingCubes = marchingCubes;
+                marchingCubes.waterGen = waterGen;
+            }
             chunk.transform.SetParent(parent);
             SetVisible(false);
         }
@@ -426,17 +441,6 @@ public class ChunkGenNetwork : NetworkBehaviour
                 }
             }
         }
-        /// <summary>
-        /// Set the visibility of the chunk
-        /// </summary>
-        /// <param name="visible">Whether the chunk is visible</param>
-        // public void SetVisible(bool visible)
-        // {
-        //     if (chunk.activeSelf != visible)
-        //     {
-        //         chunk.SetActive(visible);
-        //     }
-        // }
         /// <summary>
         /// Check chunk visibility
         /// </summary>
