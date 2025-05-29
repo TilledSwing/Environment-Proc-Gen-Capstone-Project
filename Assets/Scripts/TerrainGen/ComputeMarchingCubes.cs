@@ -34,8 +34,8 @@ public class ComputeMarchingCubes : MonoBehaviour
 
     public struct Vertex
     {
-        public Vector3 position;
-        public Vector3 normal;
+        public float3 position;
+        public float3 normal;
     }
 
     public struct Triangle
@@ -198,7 +198,7 @@ public class ComputeMarchingCubes : MonoBehaviour
         int marchingKernel = marchingCubesComputeShader.FindKernel("MarchingCubes");
 
         marchingCubesComputeShader.SetBuffer(marchingKernel, "HeightsBuffer", heightsBuffer);
-        ComputeBuffer vertexBuffer = ComputeBufferPoolManager.Instance.GetComputeBuffer("VertexBuffer", terrainDensityData.width * terrainDensityData.width * terrainDensityData.width * 2, sizeof(float) * 18, ComputeBufferType.Append);
+        ComputeBuffer vertexBuffer = ComputeBufferPoolManager.Instance.GetComputeBuffer("VertexBuffer", terrainDensityData.width * terrainDensityData.width * terrainDensityData.width, sizeof(float) * 18, ComputeBufferType.Append);
         marchingCubesComputeShader.SetBuffer(marchingKernel, "VertexBuffer", vertexBuffer);
 
         marchingCubesComputeShader.SetInt("ChunkSize", terrainDensityData.width);
@@ -268,7 +268,7 @@ public class ComputeMarchingCubes : MonoBehaviour
         int marchingKernel = marchingCubesComputeShader.FindKernel("MarchingCubes");
 
         marchingCubesComputeShader.SetBuffer(marchingKernel, "HeightsBuffer", heightsBuffer);
-        ComputeBuffer vertexBuffer = ComputeBufferPoolManager.Instance.GetComputeBuffer("VertexBuffer", terrainDensityData.width * terrainDensityData.width * terrainDensityData.width * 2, sizeof(float) * 18, ComputeBufferType.Append);
+        ComputeBuffer vertexBuffer = ComputeBufferPoolManager.Instance.GetComputeBuffer("VertexBuffer", terrainDensityData.width * terrainDensityData.width * terrainDensityData.width, sizeof(float) * 18, ComputeBufferType.Append);
         marchingCubesComputeShader.SetBuffer(marchingKernel, "VertexBuffer", vertexBuffer);
 
         marchingCubesComputeShader.SetInt("ChunkSize", terrainDensityData.width);
@@ -342,7 +342,8 @@ public class ComputeMarchingCubes : MonoBehaviour
 
         if (!terraforming)
         {
-            assetSpawner.worldVertices = vertexBuffer.ToArray();
+            assetSpawner.chunkVertices = new NativeArray<Vertex>(vertexBuffer.Length, Allocator.Persistent);
+            assetSpawner.chunkVertices.CopyFrom(vertexBuffer);
         }
 
         Mesh mesh = new Mesh();
@@ -354,7 +355,7 @@ public class ComputeMarchingCubes : MonoBehaviour
 
         if (!terraforming)
         {
-            // assetSpawner.SpawnAssets();
+            assetSpawner.SpawnAssets();
         }
     }
     // Releases height buffers when the application is closed
