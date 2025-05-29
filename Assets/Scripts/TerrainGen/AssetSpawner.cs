@@ -15,7 +15,6 @@ using UnityEngine.UIElements;
 
 public class AssetSpawner : MonoBehaviour
 {
-    public ComputeShader spawnPointsComputeShader;
     public int vertexBufferLength;
     public List<List<Asset>> spawnedAssets;
     public TerrainDensityData1 terrainDensityData;
@@ -243,51 +242,37 @@ public class AssetSpawner : MonoBehaviour
         for (int i = 0; i < assetSpawnData.spawnableAssets.Count; i++)
         {
             ComputeMarchingCubes.Vertex[] points = assetSpawnData.assets[chunkPos][i].spawnPoints;
-            if (points == null || points.Length == 0)
-            {
-                continue;
-            }
+            if (points == null || points.Length == 0) continue;
             for (int j = 0; j < assetSpawnData.assets[chunkPos][i].spawnPoints.Length; j++)
             {
-                float randomRotationDeg = UnityEngine.Random.Range(0f, 360f);
-                Quaternion randomYRotation = Quaternion.Euler(0f, randomRotationDeg, 0f);
-                GameObject assetToSpawn;
-                if (assetSpawnData.assets[chunkPos][i].rotateToFaceNormal)
-                {
-                    Quaternion normal = Quaternion.FromToRotation(Vector3.up, assetSpawnData.assets[chunkPos][i].spawnPoints[j].normal);
-                    assetToSpawn = Instantiate(assetSpawnData.assets[chunkPos][i].asset, assetSpawnData.assets[chunkPos][i].spawnPoints[j].position, normal * randomYRotation);
-                    assetToSpawn.transform.SetParent(gameObject.transform);
-                    spawnedAssets[i].Add(new Asset(assetToSpawn, assetToSpawn.GetComponent<MeshRenderer>(), assetToSpawn.GetComponent<MeshCollider>()));
-                }
-                else
-                {
-                    assetToSpawn = Instantiate(assetSpawnData.assets[chunkPos][i].asset, assetSpawnData.assets[chunkPos][i].spawnPoints[j].position, randomYRotation);
-                    assetToSpawn.transform.SetParent(gameObject.transform);
-                    spawnedAssets[i].Add(new Asset(assetToSpawn, assetToSpawn.GetComponent<MeshRenderer>(), assetToSpawn.GetComponent<MeshCollider>()));
-                }
+                int indexI = i;
+                int indexJ = j;
+                ChunkGenNetwork.Instance.pendingAssetInstantiations.Enqueue(() =>
+                    AssetInstantiation(indexI, indexJ)
+                );
             }
-            assetSpawnData.assets[chunkPos][i].spawnedAssets = spawnedAssets[i];
         }
         assetsSet = true;
     }
-    private void AssetInstantiation(int i, int j)
+    public void AssetInstantiation(int i, int j)
     {
         float randomRotationDeg = UnityEngine.Random.Range(0f, 360f);
         Quaternion randomYRotation = Quaternion.Euler(0f, randomRotationDeg, 0f);
         GameObject assetToSpawn;
         if (assetSpawnData.assets[chunkPos][i].rotateToFaceNormal)
         {
-            Quaternion normal = Quaternion.FromToRotation(Vector3.up, assetSpawnData.assets[chunkPos][i].spawnPoints[j].normal);
-            assetToSpawn = Instantiate(assetSpawnData.assets[chunkPos][i].asset, assetSpawnData.assets[chunkPos][i].spawnPoints[j].position, normal * randomYRotation);
+            Quaternion normal = Quaternion.FromToRotation(Vector3.up, acceptedSpawnPoints[i][j].normal);
+            assetToSpawn = Instantiate(assetSpawnData.assets[chunkPos][i].asset, acceptedSpawnPoints[i][j].position, normal * randomYRotation);
             assetToSpawn.transform.SetParent(gameObject.transform);
             spawnedAssets[i].Add(new Asset(assetToSpawn, assetToSpawn.GetComponent<MeshRenderer>(), assetToSpawn.GetComponent<MeshCollider>()));
         }
         else
         {
-            assetToSpawn = Instantiate(assetSpawnData.assets[chunkPos][i].asset, assetSpawnData.assets[chunkPos][i].spawnPoints[j].position, randomYRotation);
+            assetToSpawn = Instantiate(assetSpawnData.assets[chunkPos][i].asset, acceptedSpawnPoints[i][j].position, randomYRotation);
             assetToSpawn.transform.SetParent(gameObject.transform);
             spawnedAssets[i].Add(new Asset(assetToSpawn, assetToSpawn.GetComponent<MeshRenderer>(), assetToSpawn.GetComponent<MeshCollider>()));
         }
+        assetSpawnData.assets[chunkPos][i].spawnedAssets.Add(new Asset(assetToSpawn, assetToSpawn.GetComponent<MeshRenderer>(), assetToSpawn.GetComponent<MeshCollider>()));
     }
     /// <summary>
     /// Destroy all the assets

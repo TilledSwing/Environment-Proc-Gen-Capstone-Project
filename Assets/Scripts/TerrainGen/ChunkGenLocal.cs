@@ -17,7 +17,6 @@ public class ChunkGenLocal : MonoBehaviour
     public ComputeShader terrainNoiseComputeShader;
     public ComputeShader caveNoiseComputeShader;
     public ComputeShader terraformComputeShader;
-    public ComputeShader spawnPointsComputeShader;
     public Material terrainMaterial;
     public Material waterMaterial;
     public AssetSpawnData assetSpawnData;
@@ -95,7 +94,7 @@ public class ChunkGenLocal : MonoBehaviour
                     {
                         TerrainChunk chunk = new TerrainChunk(viewedChunkCoord, chunkSize, transform, terrainDensityData, assetSpawnData,
                                                          marchingCubesComputeShader, terrainDensityComputeShader, terrainNoiseComputeShader,
-                                                         caveNoiseComputeShader, terraformComputeShader, spawnPointsComputeShader,
+                                                         caveNoiseComputeShader, terraformComputeShader,
                                                          terrainMaterial, waterMaterial);
                         chunkDictionary.Add(viewedChunkCoord, chunk);
                         chunk.UpdateChunk(maxViewDst, chunkSize);
@@ -168,7 +167,7 @@ public class ChunkGenLocal : MonoBehaviour
         public Vector3Int chunkPos;
         public Bounds bounds;
         public MeshCollider meshCollider;
-        public TerrainChunk(Vector3Int chunkCoord, int chunkSize, Transform parent, TerrainDensityData1 terrainDensityData, AssetSpawnData assetSpawnData, ComputeShader marchingCubesComputeShader, ComputeShader terrainDensityComputeShader, ComputeShader terrainNoiseComputeShader, ComputeShader caveNoiseComputeShader, ComputeShader terraformComputeShader, ComputeShader spawnPointsComputeShader, Material terrainMaterial, Material waterMaterial)
+        public TerrainChunk(Vector3Int chunkCoord, int chunkSize, Transform parent, TerrainDensityData1 terrainDensityData, AssetSpawnData assetSpawnData, ComputeShader marchingCubesComputeShader, ComputeShader terrainDensityComputeShader, ComputeShader terrainNoiseComputeShader, ComputeShader caveNoiseComputeShader, ComputeShader terraformComputeShader, Material terrainMaterial, Material waterMaterial)
         {
             chunkPos = chunkCoord * chunkSize;
             bounds = new Bounds(chunkPos + (new Vector3(0.5f, 0.5f, 0.5f) * chunkSize), Vector3.one * chunkSize);
@@ -186,7 +185,6 @@ public class ChunkGenLocal : MonoBehaviour
             assetSpawner.chunkPos = chunkPos;
             assetSpawner.terrainDensityData = terrainDensityData;
             assetSpawner.assetSpawnData = assetSpawnData;
-            assetSpawner.spawnPointsComputeShader = spawnPointsComputeShader;
             // Set up the chunk's ComputeMarchingCubes script
             marchingCubes = chunk.AddComponent<ComputeMarchingCubes>();
             marchingCubes.chunkPos = chunkPos;

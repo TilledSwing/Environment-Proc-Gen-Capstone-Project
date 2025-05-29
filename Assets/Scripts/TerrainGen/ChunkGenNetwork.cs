@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using FishNet.Object;
 using FishNet.Serializing.Helping;
 using Unity.Collections;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -27,7 +28,6 @@ public class ChunkGenNetwork : NetworkBehaviour
     public ComputeShader terrainNoiseComputeShader;
     public ComputeShader caveNoiseComputeShader;
     public ComputeShader terraformComputeShader;
-    public ComputeShader spawnPointsComputeShader;
     // Material References
     public Material terrainMaterial;
     public Material waterMaterial;
@@ -47,6 +47,9 @@ public class ChunkGenNetwork : NetworkBehaviour
     public bool hasPendingReadbacks = false;
     public Queue<ReadbackRequest> pendingReadbacks = new();
     private bool isLoadingReadbacks = false;
+    public bool hasPendingAssetInstantiations = false;
+    public Queue<Action> pendingAssetInstantiations = new();
+    private bool isLoadingAssetInstantiations = false;
     // Data structure pools
     public class ReadbackRequest
     {
@@ -160,7 +163,7 @@ public class ChunkGenNetwork : NetworkBehaviour
                             // Generate immediately during first load
                             TerrainChunk chunk = new TerrainChunk(viewedChunkCoord, chunkSize, transform, terrainDensityData, assetSpawnData,
                                                          marchingCubesComputeShader, terrainDensityComputeShader, terrainNoiseComputeShader,
-                                                         caveNoiseComputeShader, terraformComputeShader, spawnPointsComputeShader,
+                                                         caveNoiseComputeShader, terraformComputeShader,
                                                          terrainMaterial, waterMaterial, initialLoadComplete);
 
                             chunkDictionary.Add(viewedChunkCoord, chunk);
@@ -198,6 +201,10 @@ public class ChunkGenNetwork : NetworkBehaviour
         {
             StartCoroutine(LoadMeshesOverTime());
         }
+        if (!isLoadingAssetInstantiations)
+        {
+            StartCoroutine(LoadAssetInstantiationsOverTime());
+        }
     }
     /// <summary>
     /// Coroutine for loading chunks asynchronously
@@ -217,7 +224,7 @@ public class ChunkGenNetwork : NetworkBehaviour
                 var chunk = new TerrainChunk(coord, chunkSize, transform, terrainDensityData, assetSpawnData,
                                             marchingCubesComputeShader, terrainDensityComputeShader,
                                             terrainNoiseComputeShader, caveNoiseComputeShader,
-                                            terraformComputeShader, spawnPointsComputeShader,
+                                            terraformComputeShader,
                                             terrainMaterial, waterMaterial, initialLoadComplete);
                 chunkDictionary.Add(coord, chunk);
                 if (chunk.IsVisible())
@@ -236,7 +243,7 @@ public class ChunkGenNetwork : NetworkBehaviour
         isLoadingChunks = false;
     }
     /// <summary>
-    /// Coroutine for loading chunks asynchronously
+    /// Coroutine for loading gpu readbacks asynchronously
     /// </summary>
     /// <returns>yield return</returns>
     private IEnumerator LoadReadbacksOverTime()
@@ -261,7 +268,7 @@ public class ChunkGenNetwork : NetworkBehaviour
         isLoadingReadbacks = false;
     }
     /// <summary>
-    /// Coroutine for loading chunks asynchronously
+    /// Coroutine for loading chunk mesh data asynchronously
     /// </summary>
     /// <returns>yield return</returns>
     private IEnumerator LoadMeshesOverTime()
@@ -282,6 +289,29 @@ public class ChunkGenNetwork : NetworkBehaviour
         }
 
         isLoadingMeshes = false;
+    }
+    /// <summary>
+    /// Coroutine for loading chunks asynchronously
+    /// </summary>
+    /// <returns>yield return</returns>
+    private IEnumerator LoadAssetInstantiationsOverTime()
+    {
+        isLoadingAssetInstantiations = true;
+
+        int assetInstantiationBatchCounter = 0;
+        while (pendingAssetInstantiations.Count > 0)
+        {
+            pendingAssetInstantiations.Dequeue()?.Invoke();
+
+            assetInstantiationBatchCounter++;
+
+            if (assetInstantiationBatchCounter % 50 == 0)
+            {
+                yield return new WaitForEndOfFrame();
+            }
+        }
+
+        isLoadingAssetInstantiations = false;
     }
     /// <summary>
     /// Get a TerrainChunk and its neighbors with the given chunk's coordinate
@@ -346,7 +376,7 @@ public class ChunkGenNetwork : NetworkBehaviour
         public MeshRenderer meshRenderer;
         public TerrainChunk(Vector3Int chunkCoord, int chunkSize, Transform parent, TerrainDensityData1 terrainDensityData, AssetSpawnData assetSpawnData,
                             ComputeShader marchingCubesComputeShader, ComputeShader terrainDensityComputeShader, ComputeShader terrainNoiseComputeShader,
-                            ComputeShader caveNoiseComputeShader, ComputeShader terraformComputeShader, ComputeShader spawnPointsComputeShader,
+                            ComputeShader caveNoiseComputeShader, ComputeShader terraformComputeShader,
                             Material terrainMaterial, Material waterMaterial, bool initialLoadComplete)
         {
             chunkPos = chunkCoord * chunkSize;
@@ -365,7 +395,6 @@ public class ChunkGenNetwork : NetworkBehaviour
             assetSpawner.chunkPos = chunkPos;
             assetSpawner.terrainDensityData = terrainDensityData;
             assetSpawner.assetSpawnData = assetSpawnData;
-            assetSpawner.spawnPointsComputeShader = spawnPointsComputeShader;
             // Set up the chunk's ComputeMarchingCubes script
             marchingCubes = chunk.AddComponent<ComputeMarchingCubes>();
             marchingCubes.meshFilter = meshFilter;

@@ -14,6 +14,33 @@ bool TerraformMode;
 int FlattenIndex(int3 id, int size) {
     return id.x * (size + 1) * (size + 1) + id.y * (size + 1) + id.z;
 }
+// Random simple value noise computation(got off the internet)
+float hash(int3 p) {
+    p = (p >> 1) ^ (p.yzx * 1103515245);
+    return frac(sin(dot(p, int3(1, 57, 113))) * 43758.5453);
+}
+
+float ValueNoise(float3 p) {
+    int3 i = (int3)floor(p);
+    float3 f = frac(p);
+    float3 u = f * f * (3.0 - 2.0 * f); // Smoothstep
+
+    // Corners
+    float n000 = hash(i);
+    float n100 = hash(i + int3(1, 0, 0));
+    float n010 = hash(i + int3(0, 1, 0));
+    float n110 = hash(i + int3(1, 1, 0));
+    float n001 = hash(i + int3(0, 0, 1));
+    float n101 = hash(i + int3(1, 0, 1));
+    float n011 = hash(i + int3(0, 1, 1));
+    float n111 = hash(i + int3(1, 1, 1));
+
+    // Trilinear interpolation
+    return lerp(
+        lerp(lerp(n000, n100, u.x), lerp(n010, n110, u.x), u.y),
+        lerp(lerp(n001, n101, u.x), lerp(n011, n111, u.x), u.y),
+        u.z);
+}
 // Perform terraformation on the region of density around the point of terraformation
 [numthreads(1,1,1)]
 void Terraform (uint3 id : SV_DispatchThreadID)
@@ -29,13 +56,14 @@ void Terraform (uint3 id : SV_DispatchThreadID)
 
     float density = HeightsBuffer[FlattenIndex(localVoxelPos, ChunkSize)];
     TerraformStrength *= 1.0 + abs(density / 3.0);
+    float falloff = (1.0 - (dstToCenter / TerraformRadius));
 
     if(dstToCenter < TerraformRadius) {
         if(TerraformMode) {
-            HeightsBuffer[FlattenIndex(localVoxelPos, ChunkSize)] -= TerraformStrength * (1.0 - (dstToCenter / TerraformRadius));
+            HeightsBuffer[FlattenIndex(localVoxelPos, ChunkSize)] -= TerraformStrength * falloff;
         }
         else if(!TerraformMode) {
-            HeightsBuffer[FlattenIndex(localVoxelPos, ChunkSize)] += TerraformStrength * (1.0 - (dstToCenter / TerraformRadius));
+            HeightsBuffer[FlattenIndex(localVoxelPos, ChunkSize)] += TerraformStrength * falloff;
         }
     }
 }
