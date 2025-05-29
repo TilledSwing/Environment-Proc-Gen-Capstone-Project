@@ -49,6 +49,9 @@ public class AssetSpawner : MonoBehaviour
     /// Initizalize all the data structures
     /// </summary>
     private void InitializeData() {
+        spawnPoints?.Clear();
+        acceptedSpawnPoints?.Clear();
+        spawnedAssets?.Clear();
         spawnPoints = new List<List<ComputeMarchingCubes.Vertex>>(assetSpawnData.spawnableAssets.Count);
         acceptedSpawnPoints = new List<List<ComputeMarchingCubes.Vertex>>(assetSpawnData.spawnableAssets.Count);
         spawnedAssets = new List<List<Asset>>(assetSpawnData.spawnableAssets.Count);
@@ -62,7 +65,7 @@ public class AssetSpawner : MonoBehaviour
     public void CreateSpawnPointsJobHandler()
     {
         int totalIterations = assetSpawnData.spawnableAssets.Count * maxAttempts;
-        NativeArray<AssetSpawnFilters> assetSpawnFilters = new(assetSpawnData.spawnableAssets.Count, Allocator.TempJob);
+        NativeArray<AssetSpawnFilters> assetSpawnFilters = AssetSpawnFiltersNativeArrayPoolManager.Instance.GetNativeArray("AssetSpawnFiltersArray", assetSpawnData.spawnableAssets.Count);
         for (int i = 0; i < assetSpawnData.spawnableAssets.Count; i++)
         {
             assetSpawnFilters[i] = new AssetSpawnFilters(assetSpawnData.spawnableAssets[i].rotateToFaceNormal, assetSpawnData.spawnableAssets[i].spawnProbability, assetSpawnData.spawnableAssets[i].useMinSlope,
@@ -70,7 +73,7 @@ public class AssetSpawner : MonoBehaviour
                                                          assetSpawnData.spawnableAssets[i].useMinHeight, assetSpawnData.spawnableAssets[i].minHeight, assetSpawnData.spawnableAssets[i].useMaxHeight,
                                                          assetSpawnData.spawnableAssets[i].maxHeight, assetSpawnData.spawnableAssets[i].underwaterAsset);
         }
-        NativeArray<ComputeMarchingCubes.Vertex> flatSpawnPoints = new(totalIterations, Allocator.TempJob);
+        NativeArray<ComputeMarchingCubes.Vertex> flatSpawnPoints = VertexNativeArrayPoolManager.Instance.GetNativeArray("VertexArray", totalIterations);
         var spawnPointsJob = new CreateSpawnPointsJob
         {
             vertexArray = chunkVertices,
@@ -101,9 +104,10 @@ public class AssetSpawner : MonoBehaviour
 
             spawnPoints[i] = assetPoints;
         }
+        // Debug.Log(spawnPoints.Count);
 
-        assetSpawnFilters.Dispose();
-        flatSpawnPoints.Dispose();
+        AssetSpawnFiltersNativeArrayPoolManager.Instance.ReturnNativeArray("AssetSpawnFiltersArray", assetSpawnFilters);
+        VertexNativeArrayPoolManager.Instance.ReturnNativeArray("VertexArray", flatSpawnPoints);
         chunkVertices.Dispose();
 
         for (int i = 0; i < assetSpawnData.spawnableAssets.Count; i++)
@@ -266,13 +270,36 @@ public class AssetSpawner : MonoBehaviour
         }
         assetsSet = true;
     }
+    private void AssetInstantiation(int i, int j)
+    {
+        float randomRotationDeg = UnityEngine.Random.Range(0f, 360f);
+        Quaternion randomYRotation = Quaternion.Euler(0f, randomRotationDeg, 0f);
+        GameObject assetToSpawn;
+        if (assetSpawnData.assets[chunkPos][i].rotateToFaceNormal)
+        {
+            Quaternion normal = Quaternion.FromToRotation(Vector3.up, assetSpawnData.assets[chunkPos][i].spawnPoints[j].normal);
+            assetToSpawn = Instantiate(assetSpawnData.assets[chunkPos][i].asset, assetSpawnData.assets[chunkPos][i].spawnPoints[j].position, normal * randomYRotation);
+            assetToSpawn.transform.SetParent(gameObject.transform);
+            spawnedAssets[i].Add(new Asset(assetToSpawn, assetToSpawn.GetComponent<MeshRenderer>(), assetToSpawn.GetComponent<MeshCollider>()));
+        }
+        else
+        {
+            assetToSpawn = Instantiate(assetSpawnData.assets[chunkPos][i].asset, assetSpawnData.assets[chunkPos][i].spawnPoints[j].position, randomYRotation);
+            assetToSpawn.transform.SetParent(gameObject.transform);
+            spawnedAssets[i].Add(new Asset(assetToSpawn, assetToSpawn.GetComponent<MeshRenderer>(), assetToSpawn.GetComponent<MeshCollider>()));
+        }
+    }
     /// <summary>
     /// Destroy all the assets
     /// </summary>
-    public void ClearAssets() {
-        for(int i = 0; i < assetSpawnData.assets[chunkPos].Count; i++) {
-            if(assetSpawnData.assets[chunkPos][i].spawnedAssets != null) {
-                foreach(Asset asset in assetSpawnData.assets[chunkPos][i].spawnedAssets) {
+    public void ClearAssets()
+    {
+        for (int i = 0; i < assetSpawnData.assets[chunkPos].Count; i++)
+        {
+            if (assetSpawnData.assets[chunkPos][i].spawnedAssets != null)
+            {
+                foreach (Asset asset in assetSpawnData.assets[chunkPos][i].spawnedAssets)
+                {
                     Destroy(asset.obj);
                 }
             }
