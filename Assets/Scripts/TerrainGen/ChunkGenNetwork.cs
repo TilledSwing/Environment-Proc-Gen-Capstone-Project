@@ -80,6 +80,7 @@ public class ChunkGenNetwork : NetworkBehaviour
         chunksVisible = Mathf.RoundToInt(maxViewDst / chunkSize);
         lightingBlockerRenderer = lightingBlocker.GetComponent<MeshRenderer>();
         lightingBlockerRenderer.enabled = false;
+        TextureSetup();
          // Set seeds
         terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 100000);
         terrainDensityData.caveNoiseSeed = UnityEngine.Random.Range(0, 100000);
@@ -368,6 +369,41 @@ public class ChunkGenNetwork : NetworkBehaviour
         assetSpawnData.assets.Clear();
         chunkDictionary.Clear();
     }
+
+    void TextureSetup()
+    {
+        foreach (TerrainTextureData.BiomeTextureConfigs biomeTextureConfig in terrainTextureData.biomeTextureConfigs)
+        {
+            float textureScale = biomeTextureConfig.textureScale;
+            int textureWidth = biomeTextureConfig.biomeTextures[0].texture.width;
+            int textureHeight = biomeTextureConfig.biomeTextures[0].texture.height;
+            int textureCount = biomeTextureConfig.biomeTextures.Length;
+            TextureFormat textureFormat = biomeTextureConfig.biomeTextures[0].texture.format;
+            Texture2DArray textureArray = new(textureWidth, textureHeight, textureCount, textureFormat, true, false);
+            textureArray.wrapMode = TextureWrapMode.Repeat;
+            textureArray.filterMode = FilterMode.Bilinear;
+            float[] heightStarts = new float[biomeTextureConfig.MAX_TEXTURE_LAYERS];
+            float[] heightEnds = new float[biomeTextureConfig.MAX_TEXTURE_LAYERS];
+            float[] slopeStarts = new float[biomeTextureConfig.MAX_TEXTURE_LAYERS];
+            float[] slopeEnds = new float[biomeTextureConfig.MAX_TEXTURE_LAYERS];
+            for (int i = 0; i < biomeTextureConfig.biomeTextures.Length; i++)
+            {
+                Graphics.CopyTexture(biomeTextureConfig.biomeTextures[i].texture, 0, textureArray, i);
+                heightStarts[i] = biomeTextureConfig.biomeTextures[i].heightRange.heightStart;
+                heightEnds[i] = biomeTextureConfig.biomeTextures[i].heightRange.heightEnd;
+                slopeStarts[i] = biomeTextureConfig.biomeTextures[i].slopeRange.slopeStart;
+                slopeEnds[i] = biomeTextureConfig.biomeTextures[i].slopeRange.slopeEnd;
+            }
+            // textureArray.Apply(false);
+            terrainMaterial.SetFloat("_Scale", textureScale);
+            terrainMaterial.SetTexture("_TextureArray", textureArray);
+            terrainMaterial.SetFloatArray("_HeightStartsArray", heightStarts);
+            terrainMaterial.SetFloatArray("_HeightEndsArray", heightEnds);
+            terrainMaterial.SetFloatArray("_SlopeStartsArray", slopeStarts);
+            terrainMaterial.SetFloatArray("_SlopeEndsArray", slopeEnds);
+            terrainMaterial.SetInt("_LayerCount", biomeTextureConfig.biomeTextures.Length);
+        }
+    }
     /// <summary>
     /// Custom class to store chunk objects and their relevant information and data
     /// </summary>
@@ -398,37 +434,8 @@ public class ChunkGenNetwork : NetworkBehaviour
             meshRenderer = chunk.AddComponent<MeshRenderer>();
             // Chunk texture
             meshRenderer.material = terrainMaterial;
-            foreach (TerrainTextureData.BiomeTextureConfigs biomeTextureConfig in terrainTextureData.biomeTextureConfigs)
-            {
-                float textureScale = biomeTextureConfig.textureScale;
-                int textureWidth = biomeTextureConfig.biomeTextures[0].texture.width;
-                int textureHeight = biomeTextureConfig.biomeTextures[0].texture.height;
-                int textureCount = biomeTextureConfig.biomeTextures.Length;
-                TextureFormat textureFormat = biomeTextureConfig.biomeTextures[0].texture.format;
-                Texture2DArray textureArray = new(textureWidth, textureHeight, textureCount, textureFormat, true, false);
-                textureArray.wrapMode = TextureWrapMode.Repeat;
-                textureArray.filterMode = FilterMode.Bilinear;
-                List<float> heightStarts = new();
-                List<float> heightEnds = new();
-                List<float> slopeStarts = new();
-                List<float> slopeEnds = new();
-                for (int i = 0; i < biomeTextureConfig.biomeTextures.Length; i++)
-                {
-                    Graphics.CopyTexture(biomeTextureConfig.biomeTextures[i].texture, 0, 0, textureArray, i, 0);
-                    heightStarts.Add(biomeTextureConfig.biomeTextures[i].heightRange.heightStart);
-                    heightEnds.Add(biomeTextureConfig.biomeTextures[i].heightRange.heightEnd);
-                    slopeStarts.Add(biomeTextureConfig.biomeTextures[i].slopeRange.slopeStart);
-                    slopeEnds.Add(biomeTextureConfig.biomeTextures[i].slopeRange.slopeEnd);
-                }
-                textureArray.Apply();
-                meshRenderer.material.SetTexture("", textureArray);
-                meshRenderer.material.SetFloatArray("", heightStarts);
-                meshRenderer.material.SetFloatArray("", heightEnds);
-                meshRenderer.material.SetFloatArray("", slopeStarts);
-                meshRenderer.material.SetFloatArray("", slopeEnds);
-            }
-            meshRenderer.material.SetFloat("_UnderwaterTexHeightEnd", terrainDensityData.waterLevel - 15f);
-            meshRenderer.material.SetFloat("_Tex1HeightStart", terrainDensityData.waterLevel - 18f);
+            // meshRenderer.material.SetFloat("_UnderwaterTexHeightEnd", terrainDensityData.waterLevel - 15f);
+            // meshRenderer.material.SetFloat("_Tex1HeightStart", terrainDensityData.waterLevel - 18f);
             // Set up the chunk's AssetSpawn script
             assetSpawner = chunk.AddComponent<AssetSpawner>();
             assetSpawner.chunkPos = chunkPos;

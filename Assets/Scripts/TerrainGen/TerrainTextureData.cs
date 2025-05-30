@@ -10,6 +10,7 @@ public class TerrainTextureData : ScriptableObject
     {
         public string biomeName;
         public float textureScale;
+        public int MAX_TEXTURE_LAYERS;
         public TextureConfig[] biomeTextures;
     }
     [Serializable]

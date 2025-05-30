@@ -16872,6 +16872,7 @@ MonoBehaviour:
   _componentIndexCache: 255
   _addedNetworkObject: {fileID: 1838274978}
   _networkObjectCache: {fileID: 0}
+  maxWorldYChunks: 10
   maxViewDst: 100
   viewer: {fileID: 1588582780}
   updateDistanceThreshold: 5
@@ -16881,6 +16882,7 @@ MonoBehaviour:
   mapSize: 11
   terrainDensityData: {fileID: 11400000, guid: 4bc939f839855ea45ade17dce060eea5, type: 2}
   assetSpawnData: {fileID: 11400000, guid: 29949715b352478458342a45d2b907a0, type: 2}
+  terrainTextureData: {fileID: 11400000, guid: f1603a815dc9cf041bd4a9e99c9988dc, type: 2}
   marchingCubesComputeShader: {fileID: 7200000, guid: d2f49f4c36241c7468a0705fa73f69a5, type: 3}
   terrainDensityComputeShader: {fileID: 7200000, guid: 1caae6b81357a864095f47aab860122c, type: 3}
   terrainNoiseComputeShader: {fileID: 7200000, guid: 93b6fb759617148499ec115b8092bb44, type: 3}

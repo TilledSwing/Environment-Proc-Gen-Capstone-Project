@@ -88,6 +88,10 @@ Material:
         m_Texture: {fileID: 2800000, guid: 6c70b02d0da087e469660d504ddadb91, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _TextureArray:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _Underwater:
         m_Texture: {fileID: 2800000, guid: ac9569eb787e1af4ca584d15a29060d3, type: 3}
         m_Scale: {x: 1, y: 1}
