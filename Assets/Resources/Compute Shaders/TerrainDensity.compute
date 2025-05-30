@@ -15,6 +15,7 @@ float isolevel;
 
 uint ChunkSize;
 float3 ChunkPos;
+int MaxWorldYChunks;
 
 // Convert a 3D array index into a 1D flat array index
 int FlattenIndex(float3 id, int size) {
@@ -38,15 +39,21 @@ void TerrainDensity (uint3 id : SV_DispatchThreadID)
 
     float terrainDensity = currentHeight - (ChunkPos.y + id.y);
     float surfaceFade = saturate((terrainDensity) / 60.0);
-    // float surfaceFade = smoothstep(-1.0, 50.0, terrainDensity);
     float caveFade = saturate((terrainDensity - ChunkSize) / 70.0);
     float finalDensity = terrainDensity + ((ChunkPos.y + id.y) * caveFade) - (caveCarve * height * surfaceFade);
+    if (ChunkPos.y / ChunkSize == -10) {
+        float fadeStart = ChunkSize * 0.1;
+        float fadeRange = ChunkSize * 0.2;
+        float worldDepthFade = saturate((id.y - fadeStart) / fadeRange);
+
+        float caveSuppression = caveCarve * height * surfaceFade * worldDepthFade;
+        finalDensity = terrainDensity + ((ChunkPos.y + id.y) * caveFade) - caveSuppression;
+    }
     // if(WaterCheckBuffer[0] != 1) {
     //     WaterCheckBuffer[0] = terrainDensity > isolevel && finalDensity <= isolevel ? 0 : 1;
     // }
     // if(UndergroundCheckBuffer[0] != 0) {
     //     UndergroundCheckBuffer[0] = finalDensity < isolevel ? 0 : 1;
     // }
-
     HeightsBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)] = finalDensity;
 }

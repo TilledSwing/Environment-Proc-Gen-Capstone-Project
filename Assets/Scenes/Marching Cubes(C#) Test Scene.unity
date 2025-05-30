@@ -15031,7 +15031,6 @@ MonoBehaviour:
   terrainNoiseComputeShader: {fileID: 7200000, guid: 93b6fb759617148499ec115b8092bb44, type: 3}
   caveNoiseComputeShader: {fileID: 7200000, guid: 133c41b8a159bf341895db834619e8be, type: 3}
   terraformComputeShader: {fileID: 7200000, guid: e41356404106d3e4487dd76d300e0a73, type: 3}
-  spawnPointsComputeShader: {fileID: 7200000, guid: 34d051a95d32b2f4d9a80dca89ef00d5, type: 3}
   terrainMaterial: {fileID: 2100000, guid: d644a1ee14ca32a44b080e9c6de5ed62, type: 2}
   waterMaterial: {fileID: 2100000, guid: 804af839dce47f748a2151ac2e3113a9, type: 2}
   assetSpawnData: {fileID: 11400000, guid: 29949715b352478458342a45d2b907a0, type: 2}
@@ -15111,7 +15110,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0dda44ec4e4e2374ebe51af9f0c70b57, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spawnPointsComputeShader: {fileID: 0}
   vertexBufferLength: 0
   terrainDensityData: {fileID: 0}
   assetSpawnData: {fileID: 11400000, guid: ab99a77c69cf7db40993f26b05db1132, type: 2}
@@ -16879,6 +16877,8 @@ MonoBehaviour:
   updateDistanceThreshold: 5
   chunkSize: 0
   chunksVisible: 0
+  useFixedMapSize: 0
+  mapSize: 11
   terrainDensityData: {fileID: 11400000, guid: 4bc939f839855ea45ade17dce060eea5, type: 2}
   assetSpawnData: {fileID: 11400000, guid: 29949715b352478458342a45d2b907a0, type: 2}
   marchingCubesComputeShader: {fileID: 7200000, guid: d2f49f4c36241c7468a0705fa73f69a5, type: 3}
@@ -16886,13 +16886,13 @@ MonoBehaviour:
   terrainNoiseComputeShader: {fileID: 7200000, guid: 93b6fb759617148499ec115b8092bb44, type: 3}
   caveNoiseComputeShader: {fileID: 7200000, guid: 133c41b8a159bf341895db834619e8be, type: 3}
   terraformComputeShader: {fileID: 7200000, guid: e41356404106d3e4487dd76d300e0a73, type: 3}
-  spawnPointsComputeShader: {fileID: 7200000, guid: 34d051a95d32b2f4d9a80dca89ef00d5, type: 3}
   terrainMaterial: {fileID: 2100000, guid: d644a1ee14ca32a44b080e9c6de5ed62, type: 2}
   waterMaterial: {fileID: 2100000, guid: 804af839dce47f748a2151ac2e3113a9, type: 2}
   initialLoadComplete: 0
   lightingBlocker: {fileID: 762416109}
   hasPendingMeshInits: 0
   hasPendingReadbacks: 0
+  hasPendingAssetInstantiations: 0
 --- !u!4 &1838274977
 Transform:
   m_ObjectHideFlags: 0

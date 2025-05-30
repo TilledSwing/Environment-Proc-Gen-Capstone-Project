@@ -1,5 +1,6 @@
 using System;
 using JetBrains.Annotations;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class Terraforming : MonoBehaviour
@@ -41,7 +42,7 @@ public class Terraforming : MonoBehaviour
         Ray ray = playerCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
         if (Physics.Raycast(ray, out RaycastHit hit, terraformMaxDst, terrainLayer))
         {
-            if (hit.distance <= 1f)
+            if (hit.distance <= 1f || math.abs(hit.point.y) > terrainDensityData.width * (mode ? ChunkGenNetwork.Instance.maxWorldYChunks : ChunkGenNetwork.Instance.maxWorldYChunks + 1) - 2)
             {
                 return;
             }
@@ -52,6 +53,7 @@ public class Terraforming : MonoBehaviour
             ChunkGenNetwork.TerrainChunk[] chunkAndNeighbors = ChunkGenNetwork.Instance.GetChunkAndNeighbors(new Vector3Int(Mathf.CeilToInt(hitChunkPos.x / terrainDensityData.width), Mathf.CeilToInt(hitChunkPos.y / terrainDensityData.width), Mathf.CeilToInt(hitChunkPos.z / terrainDensityData.width)));
             foreach (ChunkGenNetwork.TerrainChunk terrainChunk in chunkAndNeighbors)
             {
+                if (terrainChunk == null) continue;
                 if (Mathf.Sqrt(terrainChunk.bounds.SqrDistance(terraformCenter)) <= terraformRadius)
                 {
                     ComputeMarchingCubes marchingCubes = terrainChunk.marchingCubes;
@@ -73,6 +75,7 @@ public class Terraforming : MonoBehaviour
                     marchingCubes.terraformComputeShader.SetFloat("TerraformRadius", terraformRadius);
                     marchingCubes.terraformComputeShader.SetFloat("TerraformStrength", terraformStrength);
                     marchingCubes.terraformComputeShader.SetBool("TerraformMode", mode);
+                    marchingCubes.terraformComputeShader.SetInt("MaxWorldYChunks", ChunkGenNetwork.Instance.maxWorldYChunks);
 
                     marchingCubes.terraformComputeShader.Dispatch(terraformKernel, threadSizeX, threadSizeY, threadSizeZ);
 

@@ -5,6 +5,7 @@ using FishNet.Object;
 using FishNet.Serializing.Helping;
 using Unity.Collections;
 using Unity.Mathematics;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -12,6 +13,7 @@ public class ChunkGenNetwork : NetworkBehaviour
 {
     public static ChunkGenNetwork Instance;
     // Viewer Settings
+    public int maxWorldYChunks = 10;
     public float maxViewDst = 100;
     public Transform viewer;
     public static Vector3 viewerPos;
@@ -19,6 +21,8 @@ public class ChunkGenNetwork : NetworkBehaviour
     private Vector3 lastUpdateViewerPos;
     public int chunkSize;
     public int chunksVisible;
+    public bool useFixedMapSize;
+    public int mapSize;
     // Scriptable Object References
     public TerrainDensityData1 terrainDensityData;
     public AssetSpawnData assetSpawnData;
@@ -148,6 +152,18 @@ public class ChunkGenNetwork : NetworkBehaviour
                 {
                     Vector3Int viewedChunkCoord = new Vector3Int(currentChunkCoordX + xOffset, currentChunkCoordY + yOffset, currentChunkCoordZ + zOffset);
 
+                    if (math.abs(viewedChunkCoord.y) > maxWorldYChunks) {
+                        continue;
+                    }
+
+                    if (useFixedMapSize)
+                    {
+                        if (math.abs(viewedChunkCoord.x) > ((mapSize - 1) / 2) || math.abs(viewedChunkCoord.z) > ((mapSize - 1) / 2))
+                        {
+                            continue;
+                        }
+                    }
+
                     if (chunkDictionary.ContainsKey(viewedChunkCoord))
                     {
                         chunkDictionary[viewedChunkCoord].UpdateChunk(maxViewDst);
@@ -234,10 +250,10 @@ public class ChunkGenNetwork : NetworkBehaviour
                 chunkBatchCounter++;
             }
 
-            // if (chunkBatchCounter % 2 == 0)
-            // {
+            if (chunkBatchCounter % 2 == 0)
+            {
                 yield return new WaitForEndOfFrame();
-            // }
+            }
         }
 
         isLoadingChunks = false;
@@ -320,36 +336,59 @@ public class ChunkGenNetwork : NetworkBehaviour
     /// <returns>A list containing the chunk whose coordinate was passed and its neighbors</returns>
     public TerrainChunk[] GetChunkAndNeighbors(Vector3Int chunkCoord)
     {
-        TerrainChunk[] chunkAndNeighbors = new TerrainChunk[] {
-            chunkDictionary[new Vector3Int(chunkCoord.x, chunkCoord.y, chunkCoord.z)],       // 1
-            chunkDictionary[new Vector3Int(chunkCoord.x, chunkCoord.y+1, chunkCoord.z)],     // 2
-            chunkDictionary[new Vector3Int(chunkCoord.x, chunkCoord.y, chunkCoord.z+1)],     // 3
-            chunkDictionary[new Vector3Int(chunkCoord.x, chunkCoord.y+1, chunkCoord.z+1)],   // 4
-            chunkDictionary[new Vector3Int(chunkCoord.x, chunkCoord.y-1, chunkCoord.z)],     // 5
-            chunkDictionary[new Vector3Int(chunkCoord.x, chunkCoord.y, chunkCoord.z-1)],     // 6
-            chunkDictionary[new Vector3Int(chunkCoord.x, chunkCoord.y-1, chunkCoord.z-1)],   // 7
-            chunkDictionary[new Vector3Int(chunkCoord.x, chunkCoord.y+1, chunkCoord.z-1)],   // 8
-            chunkDictionary[new Vector3Int(chunkCoord.x, chunkCoord.y-1, chunkCoord.z+1)],   // 9
-            chunkDictionary[new Vector3Int(chunkCoord.x+1, chunkCoord.y, chunkCoord.z)],     // 10
-            chunkDictionary[new Vector3Int(chunkCoord.x+1, chunkCoord.y+1, chunkCoord.z)],   // 11
-            chunkDictionary[new Vector3Int(chunkCoord.x+1, chunkCoord.y, chunkCoord.z+1)],   // 12
-            chunkDictionary[new Vector3Int(chunkCoord.x+1, chunkCoord.y+1, chunkCoord.z+1)], // 13
-            chunkDictionary[new Vector3Int(chunkCoord.x+1, chunkCoord.y-1, chunkCoord.z)],   // 14
-            chunkDictionary[new Vector3Int(chunkCoord.x+1, chunkCoord.y, chunkCoord.z-1)],   // 15
-            chunkDictionary[new Vector3Int(chunkCoord.x+1, chunkCoord.y-1, chunkCoord.z-1)], // 16
-            chunkDictionary[new Vector3Int(chunkCoord.x+1, chunkCoord.y+1, chunkCoord.z-1)], // 17
-            chunkDictionary[new Vector3Int(chunkCoord.x+1, chunkCoord.y-1, chunkCoord.z+1)], // 18
-            chunkDictionary[new Vector3Int(chunkCoord.x-1, chunkCoord.y, chunkCoord.z)],     // 19
-            chunkDictionary[new Vector3Int(chunkCoord.x-1, chunkCoord.y+1, chunkCoord.z)],   // 20
-            chunkDictionary[new Vector3Int(chunkCoord.x-1, chunkCoord.y, chunkCoord.z+1)],   // 21
-            chunkDictionary[new Vector3Int(chunkCoord.x-1, chunkCoord.y+1, chunkCoord.z+1)], // 22
-            chunkDictionary[new Vector3Int(chunkCoord.x-1, chunkCoord.y-1, chunkCoord.z)],   // 23
-            chunkDictionary[new Vector3Int(chunkCoord.x-1, chunkCoord.y, chunkCoord.z-1)],   // 24
-            chunkDictionary[new Vector3Int(chunkCoord.x-1, chunkCoord.y-1, chunkCoord.z-1)], // 25
-            chunkDictionary[new Vector3Int(chunkCoord.x-1, chunkCoord.y+1, chunkCoord.z-1)], // 26
-            chunkDictionary[new Vector3Int(chunkCoord.x-1, chunkCoord.y-1, chunkCoord.z+1)], // 27
+        Vector3Int[] offsets = new Vector3Int[]
+        {
+            new Vector3Int( 0,  0,  0), new Vector3Int( 1,  0,  0), new Vector3Int(-1,  0,  0),
+            new Vector3Int( 0,  1,  0), new Vector3Int( 1,  1,  0), new Vector3Int(-1,  1,  0),
+            new Vector3Int( 0,  0,  1), new Vector3Int( 1,  0,  1), new Vector3Int(-1,  0,  1),
+            new Vector3Int( 0,  1,  1), new Vector3Int( 1,  1,  1), new Vector3Int(-1,  1,  1),
+            new Vector3Int( 0, -1,  0), new Vector3Int( 1, -1,  0), new Vector3Int(-1, -1,  0),
+            new Vector3Int( 0,  0, -1), new Vector3Int( 1,  0, -1), new Vector3Int(-1,  0, -1),
+            new Vector3Int( 0, -1, -1), new Vector3Int( 1, -1, -1), new Vector3Int(-1, -1, -1),
+            new Vector3Int( 0,  1, -1), new Vector3Int( 1,  1, -1), new Vector3Int(-1,  1, -1),
+            new Vector3Int( 0, -1,  1), new Vector3Int( 1, -1,  1), new Vector3Int(-1, -1,  1),
         };
+
+        TerrainChunk[] chunkAndNeighbors = new TerrainChunk[offsets.Length];
+
+        for (int i = 0; i < offsets.Length; i++)
+        {
+            Vector3Int neighborCoord = chunkCoord + offsets[i];
+            chunkDictionary.TryGetValue(neighborCoord, out chunkAndNeighbors[i]);
+        }
+
         return chunkAndNeighbors;
+
+        // TerrainChunk[] chunkAndNeighbors = new TerrainChunk[] {
+        //     chunkDictionary[new Vector3Int(chunkCoord.x, chunkCoord.y, chunkCoord.z)],       // 1
+        //     chunkDictionary[new Vector3Int(chunkCoord.x, chunkCoord.y+1, chunkCoord.z)],     // 2
+        //     chunkDictionary[new Vector3Int(chunkCoord.x, chunkCoord.y, chunkCoord.z+1)],     // 3
+        //     chunkDictionary[new Vector3Int(chunkCoord.x, chunkCoord.y+1, chunkCoord.z+1)],   // 4
+        //     chunkDictionary[new Vector3Int(chunkCoord.x, chunkCoord.y-1, chunkCoord.z)],     // 5
+        //     chunkDictionary[new Vector3Int(chunkCoord.x, chunkCoord.y, chunkCoord.z-1)],     // 6
+        //     chunkDictionary[new Vector3Int(chunkCoord.x, chunkCoord.y-1, chunkCoord.z-1)],   // 7
+        //     chunkDictionary[new Vector3Int(chunkCoord.x, chunkCoord.y+1, chunkCoord.z-1)],   // 8
+        //     chunkDictionary[new Vector3Int(chunkCoord.x, chunkCoord.y-1, chunkCoord.z+1)],   // 9
+        //     chunkDictionary[new Vector3Int(chunkCoord.x+1, chunkCoord.y, chunkCoord.z)],     // 10
+        //     chunkDictionary[new Vector3Int(chunkCoord.x+1, chunkCoord.y+1, chunkCoord.z)],   // 11
+        //     chunkDictionary[new Vector3Int(chunkCoord.x+1, chunkCoord.y, chunkCoord.z+1)],   // 12
+        //     chunkDictionary[new Vector3Int(chunkCoord.x+1, chunkCoord.y+1, chunkCoord.z+1)], // 13
+        //     chunkDictionary[new Vector3Int(chunkCoord.x+1, chunkCoord.y-1, chunkCoord.z)],   // 14
+        //     chunkDictionary[new Vector3Int(chunkCoord.x+1, chunkCoord.y, chunkCoord.z-1)],   // 15
+        //     chunkDictionary[new Vector3Int(chunkCoord.x+1, chunkCoord.y-1, chunkCoord.z-1)], // 16
+        //     chunkDictionary[new Vector3Int(chunkCoord.x+1, chunkCoord.y+1, chunkCoord.z-1)], // 17
+        //     chunkDictionary[new Vector3Int(chunkCoord.x+1, chunkCoord.y-1, chunkCoord.z+1)], // 18
+        //     chunkDictionary[new Vector3Int(chunkCoord.x-1, chunkCoord.y, chunkCoord.z)],     // 19
+        //     chunkDictionary[new Vector3Int(chunkCoord.x-1, chunkCoord.y+1, chunkCoord.z)],   // 20
+        //     chunkDictionary[new Vector3Int(chunkCoord.x-1, chunkCoord.y, chunkCoord.z+1)],   // 21
+        //     chunkDictionary[new Vector3Int(chunkCoord.x-1, chunkCoord.y+1, chunkCoord.z+1)], // 22
+        //     chunkDictionary[new Vector3Int(chunkCoord.x-1, chunkCoord.y-1, chunkCoord.z)],   // 23
+        //     chunkDictionary[new Vector3Int(chunkCoord.x-1, chunkCoord.y, chunkCoord.z-1)],   // 24
+        //     chunkDictionary[new Vector3Int(chunkCoord.x-1, chunkCoord.y-1, chunkCoord.z-1)], // 25
+        //     chunkDictionary[new Vector3Int(chunkCoord.x-1, chunkCoord.y+1, chunkCoord.z-1)], // 26
+        //     chunkDictionary[new Vector3Int(chunkCoord.x-1, chunkCoord.y-1, chunkCoord.z+1)], // 27
+        // };
+        // return chunkAndNeighbors;
     }
     /// <summary>
     /// Clear out unnecessary data when quitting the application
