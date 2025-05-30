@@ -5,6 +5,12 @@ Shader "Custom/TerrainTextureShader"
     // because the output color is predefined in the fragment shader code.
     Properties
     { 
+        _TextureArray("Texture Array", 2D) = "white" {}
+        _HeightStartsArray("Height Starts Array", Float) = 0
+        _HeightEndsArray("Height Ends Array", Float) = 0
+        _SlopeStartsArray("Slope Starts Array", Float) = 0
+        _SlopeEndsArray("Slope Ends Array", Float) = 0
+
         _UnderwaterTexture("Underwater Texture", 2D) = "white" {}
         _UnderwaterTexHeightStart("Underwater Texture Height Start", Float) = 0
         _UnderwaterTexHeightEnd("Underwater Texture Height End", Float) = 0

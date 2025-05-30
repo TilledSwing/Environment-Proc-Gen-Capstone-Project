@@ -26,6 +26,7 @@ public class ChunkGenNetwork : NetworkBehaviour
     // Scriptable Object References
     public TerrainDensityData1 terrainDensityData;
     public AssetSpawnData assetSpawnData;
+    public TerrainTextureData terrainTextureData;
     // Compute Shader References
     public ComputeShader marchingCubesComputeShader;
     public ComputeShader terrainDensityComputeShader;
@@ -177,7 +178,7 @@ public class ChunkGenNetwork : NetworkBehaviour
                         if (!initialLoadComplete)
                         {
                             // Generate immediately during first load
-                            TerrainChunk chunk = new TerrainChunk(viewedChunkCoord, chunkSize, transform, terrainDensityData, assetSpawnData,
+                            TerrainChunk chunk = new TerrainChunk(viewedChunkCoord, chunkSize, transform, terrainDensityData, assetSpawnData, terrainTextureData,
                                                          marchingCubesComputeShader, terrainDensityComputeShader, terrainNoiseComputeShader,
                                                          caveNoiseComputeShader, terraformComputeShader,
                                                          terrainMaterial, waterMaterial, initialLoadComplete);
@@ -237,7 +238,7 @@ public class ChunkGenNetwork : NetworkBehaviour
 
             if (!chunkDictionary.ContainsKey(coord))
             {
-                var chunk = new TerrainChunk(coord, chunkSize, transform, terrainDensityData, assetSpawnData,
+                var chunk = new TerrainChunk(coord, chunkSize, transform, terrainDensityData, assetSpawnData, terrainTextureData,
                                             marchingCubesComputeShader, terrainDensityComputeShader,
                                             terrainNoiseComputeShader, caveNoiseComputeShader,
                                             terraformComputeShader,
@@ -358,37 +359,6 @@ public class ChunkGenNetwork : NetworkBehaviour
         }
 
         return chunkAndNeighbors;
-
-        // TerrainChunk[] chunkAndNeighbors = new TerrainChunk[] {
-        //     chunkDictionary[new Vector3Int(chunkCoord.x, chunkCoord.y, chunkCoord.z)],       // 1
-        //     chunkDictionary[new Vector3Int(chunkCoord.x, chunkCoord.y+1, chunkCoord.z)],     // 2
-        //     chunkDictionary[new Vector3Int(chunkCoord.x, chunkCoord.y, chunkCoord.z+1)],     // 3
-        //     chunkDictionary[new Vector3Int(chunkCoord.x, chunkCoord.y+1, chunkCoord.z+1)],   // 4
-        //     chunkDictionary[new Vector3Int(chunkCoord.x, chunkCoord.y-1, chunkCoord.z)],     // 5
-        //     chunkDictionary[new Vector3Int(chunkCoord.x, chunkCoord.y, chunkCoord.z-1)],     // 6
-        //     chunkDictionary[new Vector3Int(chunkCoord.x, chunkCoord.y-1, chunkCoord.z-1)],   // 7
-        //     chunkDictionary[new Vector3Int(chunkCoord.x, chunkCoord.y+1, chunkCoord.z-1)],   // 8
-        //     chunkDictionary[new Vector3Int(chunkCoord.x, chunkCoord.y-1, chunkCoord.z+1)],   // 9
-        //     chunkDictionary[new Vector3Int(chunkCoord.x+1, chunkCoord.y, chunkCoord.z)],     // 10
-        //     chunkDictionary[new Vector3Int(chunkCoord.x+1, chunkCoord.y+1, chunkCoord.z)],   // 11
-        //     chunkDictionary[new Vector3Int(chunkCoord.x+1, chunkCoord.y, chunkCoord.z+1)],   // 12
-        //     chunkDictionary[new Vector3Int(chunkCoord.x+1, chunkCoord.y+1, chunkCoord.z+1)], // 13
-        //     chunkDictionary[new Vector3Int(chunkCoord.x+1, chunkCoord.y-1, chunkCoord.z)],   // 14
-        //     chunkDictionary[new Vector3Int(chunkCoord.x+1, chunkCoord.y, chunkCoord.z-1)],   // 15
-        //     chunkDictionary[new Vector3Int(chunkCoord.x+1, chunkCoord.y-1, chunkCoord.z-1)], // 16
-        //     chunkDictionary[new Vector3Int(chunkCoord.x+1, chunkCoord.y+1, chunkCoord.z-1)], // 17
-        //     chunkDictionary[new Vector3Int(chunkCoord.x+1, chunkCoord.y-1, chunkCoord.z+1)], // 18
-        //     chunkDictionary[new Vector3Int(chunkCoord.x-1, chunkCoord.y, chunkCoord.z)],     // 19
-        //     chunkDictionary[new Vector3Int(chunkCoord.x-1, chunkCoord.y+1, chunkCoord.z)],   // 20
-        //     chunkDictionary[new Vector3Int(chunkCoord.x-1, chunkCoord.y, chunkCoord.z+1)],   // 21
-        //     chunkDictionary[new Vector3Int(chunkCoord.x-1, chunkCoord.y+1, chunkCoord.z+1)], // 22
-        //     chunkDictionary[new Vector3Int(chunkCoord.x-1, chunkCoord.y-1, chunkCoord.z)],   // 23
-        //     chunkDictionary[new Vector3Int(chunkCoord.x-1, chunkCoord.y, chunkCoord.z-1)],   // 24
-        //     chunkDictionary[new Vector3Int(chunkCoord.x-1, chunkCoord.y-1, chunkCoord.z-1)], // 25
-        //     chunkDictionary[new Vector3Int(chunkCoord.x-1, chunkCoord.y+1, chunkCoord.z-1)], // 26
-        //     chunkDictionary[new Vector3Int(chunkCoord.x-1, chunkCoord.y-1, chunkCoord.z+1)], // 27
-        // };
-        // return chunkAndNeighbors;
     }
     /// <summary>
     /// Clear out unnecessary data when quitting the application
@@ -413,7 +383,7 @@ public class ChunkGenNetwork : NetworkBehaviour
         public MeshCollider meshCollider;
         public MeshFilter meshFilter;
         public MeshRenderer meshRenderer;
-        public TerrainChunk(Vector3Int chunkCoord, int chunkSize, Transform parent, TerrainDensityData1 terrainDensityData, AssetSpawnData assetSpawnData,
+        public TerrainChunk(Vector3Int chunkCoord, int chunkSize, Transform parent, TerrainDensityData1 terrainDensityData, AssetSpawnData assetSpawnData, TerrainTextureData terrainTextureData,
                             ComputeShader marchingCubesComputeShader, ComputeShader terrainDensityComputeShader, ComputeShader terrainNoiseComputeShader,
                             ComputeShader caveNoiseComputeShader, ComputeShader terraformComputeShader,
                             Material terrainMaterial, Material waterMaterial, bool initialLoadComplete)
@@ -426,7 +396,37 @@ public class ChunkGenNetwork : NetworkBehaviour
             meshCollider = chunk.AddComponent<MeshCollider>();
             meshFilter = chunk.AddComponent<MeshFilter>();
             meshRenderer = chunk.AddComponent<MeshRenderer>();
+            // Chunk texture
             meshRenderer.material = terrainMaterial;
+            foreach (TerrainTextureData.BiomeTextureConfigs biomeTextureConfig in terrainTextureData.biomeTextureConfigs)
+            {
+                float textureScale = biomeTextureConfig.textureScale;
+                int textureWidth = biomeTextureConfig.biomeTextures[0].texture.width;
+                int textureHeight = biomeTextureConfig.biomeTextures[0].texture.height;
+                int textureCount = biomeTextureConfig.biomeTextures.Length;
+                TextureFormat textureFormat = biomeTextureConfig.biomeTextures[0].texture.format;
+                Texture2DArray textureArray = new(textureWidth, textureHeight, textureCount, textureFormat, true, false);
+                textureArray.wrapMode = TextureWrapMode.Repeat;
+                textureArray.filterMode = FilterMode.Bilinear;
+                List<float> heightStarts = new();
+                List<float> heightEnds = new();
+                List<float> slopeStarts = new();
+                List<float> slopeEnds = new();
+                for (int i = 0; i < biomeTextureConfig.biomeTextures.Length; i++)
+                {
+                    Graphics.CopyTexture(biomeTextureConfig.biomeTextures[i].texture, 0, 0, textureArray, i, 0);
+                    heightStarts.Add(biomeTextureConfig.biomeTextures[i].heightRange.heightStart);
+                    heightEnds.Add(biomeTextureConfig.biomeTextures[i].heightRange.heightEnd);
+                    slopeStarts.Add(biomeTextureConfig.biomeTextures[i].slopeRange.slopeStart);
+                    slopeEnds.Add(biomeTextureConfig.biomeTextures[i].slopeRange.slopeEnd);
+                }
+                textureArray.Apply();
+                meshRenderer.material.SetTexture("", textureArray);
+                meshRenderer.material.SetFloatArray("", heightStarts);
+                meshRenderer.material.SetFloatArray("", heightEnds);
+                meshRenderer.material.SetFloatArray("", slopeStarts);
+                meshRenderer.material.SetFloatArray("", slopeEnds);
+            }
             meshRenderer.material.SetFloat("_UnderwaterTexHeightEnd", terrainDensityData.waterLevel - 15f);
             meshRenderer.material.SetFloat("_Tex1HeightStart", terrainDensityData.waterLevel - 18f);
             // Set up the chunk's AssetSpawn script
