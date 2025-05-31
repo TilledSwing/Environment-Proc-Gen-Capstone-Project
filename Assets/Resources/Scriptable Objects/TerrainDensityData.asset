@@ -20,7 +20,7 @@ MonoBehaviour:
   noiseFractalType: 1
   selectedRotationType3D: 0
   rotationType3D: 0
-  noiseSeed: 94708
+  noiseSeed: 99497
   noiseFractalOctaves: 5
   noiseFractalLacunarity: 2
   noiseFractalGain: 0.5
@@ -32,7 +32,7 @@ MonoBehaviour:
   selectedDomainWarpFractalType: 0
   domainWarpFractalType: 0
   domainWarpAmplitude: 50
-  domainWarpSeed: 43313
+  domainWarpSeed: 6834
   domainWarpFractalOctaves: 5
   domainWarpFractalLacunarity: 2
   domainWarpFractalGain: 0.5
@@ -51,31 +51,31 @@ MonoBehaviour:
   caveNoiseFractalType: 0
   selectedCaveRotationType3D: 0
   caveRotationType3D: 0
-  caveNoiseSeed: 9291
+  caveNoiseSeed: 95332
   caveNoiseFractalOctaves: 4
   caveNoiseFractalLacunarity: 2
   caveNoiseFractalGain: 0.5
   caveFractalWeightedStrength: 0
-  caveNoiseFrequency: 0.007
+  caveNoiseFrequency: 0.01
   caveDomainWarpToggle: 1
   caveSelectedDomainWarpType: 0
   caveDomainWarpType: 0
   caveSelectedDomainWarpFractalType: 0
   caveDomainWarpFractalType: 4
   caveDomainWarpAmplitude: 50
-  caveDomainWarpSeed: 17087
+  caveDomainWarpSeed: 46654
   caveDomainWarpFractalOctaves: 5
   caveDomainWarpFractalLacunarity: 2
   caveDomainWarpFractalGain: 0.5
-  caveDomainWarpFrequency: 0.01
+  caveDomainWarpFrequency: 0.007
   caveSelectedCellularDistanceFunction: 1
   caveCellularDistanceFunction: 1
   caveSelectedCellularReturnType: 1
   caveCellularReturnType: 1
   caveCellularJitter: 1
-  caveNoiseScale: 1.1
+  caveNoiseScale: 1.2
   width: 24
-  height: 100
+  height: 105
   isolevel: 0.5
   waterLevel: 35
   lerp: 1
