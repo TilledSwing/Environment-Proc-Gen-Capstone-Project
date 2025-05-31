@@ -382,23 +382,29 @@ public class ChunkGenNetwork : NetworkBehaviour
             Texture2DArray textureArray = new(textureWidth, textureHeight, textureCount, textureFormat, true, false);
             textureArray.wrapMode = TextureWrapMode.Repeat;
             textureArray.filterMode = FilterMode.Bilinear;
+            float[] useHeights = new float[biomeTextureConfig.MAX_TEXTURE_LAYERS];
             float[] heightStarts = new float[biomeTextureConfig.MAX_TEXTURE_LAYERS];
             float[] heightEnds = new float[biomeTextureConfig.MAX_TEXTURE_LAYERS];
+            float[] useSlopes = new float[biomeTextureConfig.MAX_TEXTURE_LAYERS];
             float[] slopeStarts = new float[biomeTextureConfig.MAX_TEXTURE_LAYERS];
             float[] slopeEnds = new float[biomeTextureConfig.MAX_TEXTURE_LAYERS];
             for (int i = 0; i < biomeTextureConfig.biomeTextures.Length; i++)
             {
                 Graphics.CopyTexture(biomeTextureConfig.biomeTextures[i].texture, 0, textureArray, i);
+                useHeights[i] = biomeTextureConfig.biomeTextures[i].useHeightRange ? 1 : 0;
                 heightStarts[i] = biomeTextureConfig.biomeTextures[i].heightRange.heightStart;
                 heightEnds[i] = biomeTextureConfig.biomeTextures[i].heightRange.heightEnd;
+                useSlopes[i] = biomeTextureConfig.biomeTextures[i].useSlopeRange ? 1 : 0;
                 slopeStarts[i] = biomeTextureConfig.biomeTextures[i].slopeRange.slopeStart;
                 slopeEnds[i] = biomeTextureConfig.biomeTextures[i].slopeRange.slopeEnd;
             }
             // textureArray.Apply(false);
             terrainMaterial.SetFloat("_Scale", textureScale);
             terrainMaterial.SetTexture("_TextureArray", textureArray);
+            terrainMaterial.SetFloatArray("_UseHeightsArray", useHeights);
             terrainMaterial.SetFloatArray("_HeightStartsArray", heightStarts);
             terrainMaterial.SetFloatArray("_HeightEndsArray", heightEnds);
+            terrainMaterial.SetFloatArray("_UseSlopesArray", useSlopes);
             terrainMaterial.SetFloatArray("_SlopeStartsArray", slopeStarts);
             terrainMaterial.SetFloatArray("_SlopeEndsArray", slopeEnds);
             terrainMaterial.SetInt("_LayerCount", biomeTextureConfig.biomeTextures.Length);

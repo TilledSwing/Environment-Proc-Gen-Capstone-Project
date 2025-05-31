@@ -7,8 +7,9 @@ Shader "Custom/TerrainTextureShader"
     { 
         _TextureArray("Texture Array", 2DArray) = "white" {}
 
-        _Scale("Texture Scale", Float) = 10
+        _Scale("Texture Scale", Float) = 0.2
         _SlopeBlendSharpness("Slope Blend Sharpness", Float) = 1
+        _HeightBlendSharpness("Height Blend Sharpness", Float) = 1
     }
 
     // The SubShader block containing the Shader code.
@@ -68,13 +69,16 @@ Shader "Custom/TerrainTextureShader"
             CBUFFER_START(UnityPerMaterial)
                 float _Scale;
                 int _LayerCount;
-
+                
+                float _UseHeightsArray[MAX_TEXTURES];
                 float _HeightStartsArray[MAX_TEXTURES];
                 float _HeightEndsArray[MAX_TEXTURES];
+                float _UseSlopesArray[MAX_TEXTURES];
                 float _SlopeStartsArray[MAX_TEXTURES];
                 float _SlopeEndsArray[MAX_TEXTURES];
 
                 float _SlopeBlendSharpness;
+                float _HeightBlendSharpness;
             CBUFFER_END
             TEXTURE2D_ARRAY(_TextureArray); SAMPLER(sampler_TextureArray);
 
@@ -113,6 +117,7 @@ Shader "Custom/TerrainTextureShader"
             float4 frag(Varyings IN) : SV_Target
             {
                 float4 albedo = float4(0, 0, 0, 0);
+                float weights[MAX_TEXTURES];
                 float totalWeight = 0;
                 float height = IN.worldPos.y;
                 float3 normal = normalize(IN.worldNormal);
@@ -122,7 +127,7 @@ Shader "Custom/TerrainTextureShader"
                 for(int i = 0; i < _LayerCount; i++) {
                     float heightWeight = smoothstep(_HeightStartsArray[i], _HeightEndsArray[i], height) * (i != _LayerCount - 1 ? (1 - smoothstep(_HeightStartsArray[i+1], _HeightEndsArray[i+1], height)) : 1);
                     float slopeWeight = smoothstep(_SlopeStartsArray[i], _SlopeEndsArray[i], slope) * (i != _LayerCount - 1 ? (1 - smoothstep(_SlopeStartsArray[i+1], _SlopeEndsArray[i+1], slope)) : 1);
-                    float weight = heightWeight;
+                    float weight = (_UseHeightsArray[i] == 1 ? heightWeight : 1) * (_UseSlopesArray[i] == 1 ? slopeWeight : 1);
 
                     if(weight > 0.001) {
                         float4 triplanarSample = TriplanarSample(_TextureArray, sampler_TextureArray, IN.worldPos, normal, _Scale, i);
