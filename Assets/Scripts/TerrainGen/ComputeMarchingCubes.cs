@@ -244,7 +244,7 @@ public class ComputeMarchingCubes : MonoBehaviour
                 if (terrainDensityData.waterLevel > chunkPos.y && terrainDensityData.waterLevel < Mathf.RoundToInt(chunkPos.y + terrainDensityData.width))
                 {
                     // if (hasWater) {
-                    // waterGen.UpdateMesh();
+                    waterGen.UpdateMesh();
                     // }
                 }
 
@@ -297,7 +297,7 @@ public class ComputeMarchingCubes : MonoBehaviour
         if (terrainDensityData.waterLevel > chunkPos.y && terrainDensityData.waterLevel < Mathf.RoundToInt(chunkPos.y + terrainDensityData.width))
         {
             // if (hasWater) {
-                // waterGen.UpdateMesh();
+                waterGen.UpdateMesh();
             // }
         }
 

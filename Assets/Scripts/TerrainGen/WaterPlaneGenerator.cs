@@ -9,6 +9,7 @@ public class WaterPlaneGenerator : MonoBehaviour
 {
     private List<Vector3> vertices = new List<Vector3>();
     private List<int> triangles = new List<int>();
+    private List<Vector2> uvs = new List<Vector2>();
     public MeshFilter meshFilter;
     public Vector3Int chunkPos;
     public ComputeMarchingCubes marchingCubes;
@@ -27,6 +28,7 @@ public class WaterPlaneGenerator : MonoBehaviour
         mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
         mesh.vertices = vertices.ToArray();
         mesh.triangles = triangles.ToArray();
+        mesh.uv = uvs.ToArray();
         mesh.RecalculateNormals();
 
         meshFilter.mesh = mesh;
@@ -38,26 +40,34 @@ public class WaterPlaneGenerator : MonoBehaviour
     private void GenerateWaterPlane() {
         vertices.Clear();
         triangles.Clear();
+        uvs.Clear();
 
-        for(int x = 0; x < terrainDensityData.width; x++) {
-            for(int z = 0; z < terrainDensityData.width; z++) {
+        for (int x = 0; x < terrainDensityData.width; x++)
+        {
+            for (int z = 0; z < terrainDensityData.width; z++)
+            {
                 Vector3 vertex00 = new Vector3(chunkPos.x + x, terrainDensityData.waterLevel, chunkPos.z + z);
-                Vector3 vertex10 = new Vector3(chunkPos.x + x+1, terrainDensityData.waterLevel, chunkPos.z + z);
-                Vector3 vertex01 = new Vector3(chunkPos.x + x, terrainDensityData.waterLevel, chunkPos.z + z+1);
-                Vector3 vertex11 = new Vector3(chunkPos.x + x+1, terrainDensityData.waterLevel, chunkPos.z + z+1);
+                Vector3 vertex10 = new Vector3(chunkPos.x + x + 1, terrainDensityData.waterLevel, chunkPos.z + z);
+                Vector3 vertex01 = new Vector3(chunkPos.x + x, terrainDensityData.waterLevel, chunkPos.z + z + 1);
+                Vector3 vertex11 = new Vector3(chunkPos.x + x + 1, terrainDensityData.waterLevel, chunkPos.z + z + 1);
                 int vertCount = vertices.Count;
-                
+
                 vertices.Add(vertex00);
                 vertices.Add(vertex10);
                 vertices.Add(vertex01);
                 vertices.Add(vertex11);
 
-                triangles.Add(vertCount+3);
-                triangles.Add(vertCount+1);
+                uvs.Add(new Vector2(x, z));
+                uvs.Add(new Vector2(x + 1, z));
+                uvs.Add(new Vector2(x, z + 1));
+                uvs.Add(new Vector2(x + 1, z + 1));
+
+                triangles.Add(vertCount + 3);
+                triangles.Add(vertCount + 1);
                 triangles.Add(vertCount);
 
-                triangles.Add(vertCount+2);
-                triangles.Add(vertCount+3);
+                triangles.Add(vertCount + 2);
+                triangles.Add(vertCount + 3);
                 triangles.Add(vertCount);
             }
         }

@@ -64,7 +64,7 @@ Shader "Custom/TerrainTextureShader"
             // The vertex shader definition with properties defined in the Varyings
             // structure. The type of the vert function must match the type (struct)
             // that it returns.
-            #define MAX_TEXTURES 5
+            #define MAX_TEXTURES 10
             CBUFFER_START(UnityPerMaterial)
                 float _Scale;
                 int _LayerCount;
