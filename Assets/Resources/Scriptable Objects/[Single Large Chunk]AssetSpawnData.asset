@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dc7345c3cfdb9e941ad2d82d380718da, type: 3}
-  m_Name: AssetSpawnData1
+  m_Name: '[Single Large Chunk]AssetSpawnData'
   m_EditorClassIdentifier: 
   spawnableAssets:
   - asset: {fileID: 6577857602279842889, guid: 6ecd8b4bc211e454ea918d6d527c28f7, type: 3}

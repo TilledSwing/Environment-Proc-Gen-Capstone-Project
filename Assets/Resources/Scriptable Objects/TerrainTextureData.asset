@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 997bd16a6ad91bd448818cd2210554b3, type: 3}
-  m_Name: TerrainTextures
+  m_Name: TerrainTextureData
   m_EditorClassIdentifier: 
   biomeTextureConfigs:
   - biomeName: Generic Biome

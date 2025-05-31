@@ -1,0 +1,63 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e9e94faf7c753248938f3512f96088a, type: 3}
+  m_Name: '[C# Fastnoise]TerrainDensityData'
+  m_EditorClassIdentifier: 
+  selectedNoiseDimension: 1
+  noiseDimension: 1
+  selectedNoiseType: 0
+  noiseType: 0
+  selectedNoiseFractalType: 0
+  noiseFractalType: 1
+  noiseSeed: 8303
+  noiseFractalOctaves: 5
+  noiseFractalLacunarity: 2
+  noiseFractalGain: 0.5
+  fractalWeightedStrength: 0
+  noiseFrequency: 0.01
+  domainWarpToggle: 0
+  selectedDomainWarpType: 0
+  domainWarpType: 0
+  selectedDomainWarpFractalType: 2
+  domainWarpFractalType: 0
+  domainWarpAmplitude: 0
+  domainWarpSeed: 7185
+  domainWarpFractalOctaves: 5
+  domainWarpFractalLacunarity: 2
+  domainWarpFractalGain: 0.5
+  domainWarpFrequency: 0.01
+  selectedCellularDistanceFunction: 1
+  cellularDistanceFunction: 1
+  selectedCellularReturnType: 1
+  cellularReturnType: 1
+  cellularJitter: 1
+  width: 32
+  height: 100
+  noiseScale: 0.6
+  isolevel: 0.5
+  waterLevel: 35
+  lerp: 1
+  terracing: 0
+  terraceHeight: 2
+  polygonizationVisualization: 0
+  polygonizationVisualizationRate: 30000
+  noiseTypeOptions: 000000000100000002000000030000000400000005000000
+  noiseFractalTypeOptions: 01000000000000000300000002000000
+  domainWarpTypeOptions: 000000000100000002000000
+  domainWarpFractalTypeOptions: 050000000400000000000000
+  cellularDistanceFunctionOptions: 00000000010000000300000002000000
+  cellularReturnTypeOptions: 00000000010000000200000003000000060000000500000004000000
+  noiseDimensionOptions: 0000000001000000
+  defaultTerracing: 0
+  defaultTerraceHeight: 2
+  defaultPolygonizationVisualization: 0
+  defaultPolygonizationVisualizationRate: 30000

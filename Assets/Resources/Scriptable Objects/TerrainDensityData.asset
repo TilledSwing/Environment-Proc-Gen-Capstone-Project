@@ -9,16 +9,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0e9e94faf7c753248938f3512f96088a, type: 3}
+  m_Script: {fileID: 11500000, guid: c29ee72cee6fb9144bd844ec6a8f7ebb, type: 3}
   m_Name: TerrainDensityData
   m_EditorClassIdentifier: 
   selectedNoiseDimension: 1
   noiseDimension: 1
   selectedNoiseType: 0
   noiseType: 0
-  selectedNoiseFractalType: 0
+  selectedNoiseFractalType: 1
   noiseFractalType: 1
-  noiseSeed: 8303
+  selectedRotationType3D: 0
+  rotationType3D: 0
+  noiseSeed: 94708
   noiseFractalOctaves: 5
   noiseFractalLacunarity: 2
   noiseFractalGain: 0.5
@@ -27,10 +29,10 @@ MonoBehaviour:
   domainWarpToggle: 0
   selectedDomainWarpType: 0
   domainWarpType: 0
-  selectedDomainWarpFractalType: 2
+  selectedDomainWarpFractalType: 0
   domainWarpFractalType: 0
-  domainWarpAmplitude: 0
-  domainWarpSeed: 7185
+  domainWarpAmplitude: 50
+  domainWarpSeed: 43313
   domainWarpFractalOctaves: 5
   domainWarpFractalLacunarity: 2
   domainWarpFractalGain: 0.5
@@ -40,24 +42,42 @@ MonoBehaviour:
   selectedCellularReturnType: 1
   cellularReturnType: 1
   cellularJitter: 1
-  width: 32
-  height: 100
   noiseScale: 0.6
+  selectedCaveNoiseDimension: 1
+  caveNoiseDimension: 1
+  selectedCaveNoiseType: 0
+  caveNoiseType: 0
+  selectedCaveNoiseFractalType: 0
+  caveNoiseFractalType: 0
+  selectedCaveRotationType3D: 0
+  caveRotationType3D: 0
+  caveNoiseSeed: 9291
+  caveNoiseFractalOctaves: 4
+  caveNoiseFractalLacunarity: 2
+  caveNoiseFractalGain: 0.5
+  caveFractalWeightedStrength: 0
+  caveNoiseFrequency: 0.007
+  caveDomainWarpToggle: 1
+  caveSelectedDomainWarpType: 0
+  caveDomainWarpType: 0
+  caveSelectedDomainWarpFractalType: 0
+  caveDomainWarpFractalType: 4
+  caveDomainWarpAmplitude: 50
+  caveDomainWarpSeed: 17087
+  caveDomainWarpFractalOctaves: 5
+  caveDomainWarpFractalLacunarity: 2
+  caveDomainWarpFractalGain: 0.5
+  caveDomainWarpFrequency: 0.01
+  caveSelectedCellularDistanceFunction: 1
+  caveCellularDistanceFunction: 1
+  caveSelectedCellularReturnType: 1
+  caveCellularReturnType: 1
+  caveCellularJitter: 1
+  caveNoiseScale: 1.1
+  width: 24
+  height: 100
   isolevel: 0.5
   waterLevel: 35
   lerp: 1
   terracing: 0
   terraceHeight: 2
-  polygonizationVisualization: 0
-  polygonizationVisualizationRate: 30000
-  noiseTypeOptions: 000000000100000002000000030000000400000005000000
-  noiseFractalTypeOptions: 01000000000000000300000002000000
-  domainWarpTypeOptions: 000000000100000002000000
-  domainWarpFractalTypeOptions: 050000000400000000000000
-  cellularDistanceFunctionOptions: 00000000010000000300000002000000
-  cellularReturnTypeOptions: 00000000010000000200000003000000060000000500000004000000
-  noiseDimensionOptions: 0000000001000000
-  defaultTerracing: 0
-  defaultTerraceHeight: 2
-  defaultPolygonizationVisualization: 0
-  defaultPolygonizationVisualizationRate: 30000
