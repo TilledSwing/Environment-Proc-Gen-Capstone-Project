@@ -23,6 +23,7 @@ public class ChunkGenNetwork : NetworkBehaviour
     public int chunksVisible;
     public bool useFixedMapSize;
     public int mapSize;
+    public int resolution = 2;
     // Scriptable Object References
     public TerrainDensityData1 terrainDensityData;
     public AssetSpawnData assetSpawnData;

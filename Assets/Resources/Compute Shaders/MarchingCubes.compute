@@ -4,8 +4,8 @@
 
 struct Vertex
 {
-    half3 position;
-    half3 normal;
+    float3 position;
+    float3 normal;
 };
 
 struct Triangle
@@ -21,6 +21,7 @@ uint ChunkSize;
 float3 ChunkPos;
 float isolevel;
 bool lerpToggle;
+int Resolution;
 
 // Convert a 3D array index into a 1D flat array index
 int FlattenIndex(float3 id, int size) {
@@ -35,17 +36,17 @@ void MarchingCubes (uint3 id : SV_DispatchThreadID)
     }
 
     float cubeVertices[8] = {
-        HeightsBuffer[FlattenIndex(float3(id.x,id.y,id.z) + vertexOffsetTable[0], ChunkSize)],
-        HeightsBuffer[FlattenIndex(float3(id.x,id.y,id.z) + vertexOffsetTable[1], ChunkSize)],
-        HeightsBuffer[FlattenIndex(float3(id.x,id.y,id.z) + vertexOffsetTable[2], ChunkSize)],
-        HeightsBuffer[FlattenIndex(float3(id.x,id.y,id.z) + vertexOffsetTable[3], ChunkSize)],
-        HeightsBuffer[FlattenIndex(float3(id.x,id.y,id.z) + vertexOffsetTable[4], ChunkSize)],
-        HeightsBuffer[FlattenIndex(float3(id.x,id.y,id.z) + vertexOffsetTable[5], ChunkSize)],
-        HeightsBuffer[FlattenIndex(float3(id.x,id.y,id.z) + vertexOffsetTable[6], ChunkSize)],
-        HeightsBuffer[FlattenIndex(float3(id.x,id.y,id.z) + vertexOffsetTable[7], ChunkSize)]
+        HeightsBuffer[FlattenIndex(float3(id.x * Resolution, id.y * Resolution, id.z * Resolution) + (vertexOffsetTable[0] * Resolution), ChunkSize)],
+        HeightsBuffer[FlattenIndex(float3(id.x * Resolution, id.y * Resolution, id.z * Resolution) + (vertexOffsetTable[1] * Resolution), ChunkSize)],
+        HeightsBuffer[FlattenIndex(float3(id.x * Resolution, id.y * Resolution, id.z * Resolution) + (vertexOffsetTable[2] * Resolution), ChunkSize)],
+        HeightsBuffer[FlattenIndex(float3(id.x * Resolution, id.y * Resolution, id.z * Resolution) + (vertexOffsetTable[3] * Resolution), ChunkSize)],
+        HeightsBuffer[FlattenIndex(float3(id.x * Resolution, id.y * Resolution, id.z * Resolution) + (vertexOffsetTable[4] * Resolution), ChunkSize)],
+        HeightsBuffer[FlattenIndex(float3(id.x * Resolution, id.y * Resolution, id.z * Resolution) + (vertexOffsetTable[5] * Resolution), ChunkSize)],
+        HeightsBuffer[FlattenIndex(float3(id.x * Resolution, id.y * Resolution, id.z * Resolution) + (vertexOffsetTable[6] * Resolution), ChunkSize)],
+        HeightsBuffer[FlattenIndex(float3(id.x * Resolution, id.y * Resolution, id.z * Resolution) + (vertexOffsetTable[7] * Resolution), ChunkSize)]
     };
 
-    float3 cubePosition = float3(id.x + ChunkPos.x, id.y + ChunkPos.y, id.z + ChunkPos.z);
+    float3 cubePosition = float3((id.x * Resolution) + ChunkPos.x, (id.y * Resolution) + ChunkPos.y, (id.z * Resolution) + ChunkPos.z);
 
     int configurationIndex = 0;
     
@@ -73,14 +74,14 @@ void MarchingCubes (uint3 id : SV_DispatchThreadID)
             return ;
         }
 
-        float3 edge1V1 = cubePosition + vertexOffsetTable[edgeIndexTable[edge1Value][0]];
-        float3 edge1V2 = cubePosition + vertexOffsetTable[edgeIndexTable[edge1Value][1]];
+        float3 edge1V1 = cubePosition + (vertexOffsetTable[edgeIndexTable[edge1Value][0]] * Resolution);
+        float3 edge1V2 = cubePosition + (vertexOffsetTable[edgeIndexTable[edge1Value][1]] * Resolution);
 
-        float3 edge2V1 = cubePosition + vertexOffsetTable[edgeIndexTable[edge2Value][0]];
-        float3 edge2V2 = cubePosition + vertexOffsetTable[edgeIndexTable[edge2Value][1]];
+        float3 edge2V1 = cubePosition + (vertexOffsetTable[edgeIndexTable[edge2Value][0]] * Resolution);
+        float3 edge2V2 = cubePosition + (vertexOffsetTable[edgeIndexTable[edge2Value][1]] * Resolution);
 
-        float3 edge3V1 = cubePosition + vertexOffsetTable[edgeIndexTable[edge3Value][0]];
-        float3 edge3V2 = cubePosition + vertexOffsetTable[edgeIndexTable[edge3Value][1]];
+        float3 edge3V1 = cubePosition + (vertexOffsetTable[edgeIndexTable[edge3Value][0]] * Resolution);
+        float3 edge3V2 = cubePosition + (vertexOffsetTable[edgeIndexTable[edge3Value][1]] * Resolution);
 
         float3 vertex1;
         float3 vertex2;
@@ -103,6 +104,7 @@ void MarchingCubes (uint3 id : SV_DispatchThreadID)
         tri.v1.position = vertex1;
         tri.v2.position = vertex2;
         tri.v3.position = vertex3;
+
         tri.v1.normal = normal;
         tri.v2.normal = normal;
         tri.v3.normal = normal;

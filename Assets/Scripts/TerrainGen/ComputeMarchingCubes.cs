@@ -31,7 +31,6 @@ public class ComputeMarchingCubes : MonoBehaviour
     public bool hasWater = false;
     public bool waterProcessed = false;
     public bool isUnderground = false;
-
     public struct Vertex
     {
         public float3 position;
@@ -205,9 +204,10 @@ public class ComputeMarchingCubes : MonoBehaviour
         marchingCubesComputeShader.SetVector("ChunkPos", (Vector3)chunkPos);
         marchingCubesComputeShader.SetFloat("isolevel", terrainDensityData.isolevel);
         marchingCubesComputeShader.SetBool("lerpToggle", terrainDensityData.lerp);
+        marchingCubesComputeShader.SetInt("Resolution", ChunkGenNetwork.Instance.resolution);
 
         vertexBuffer.SetCounterValue(0);
-        marchingCubesComputeShader.Dispatch(marchingKernel, Mathf.CeilToInt(terrainDensityData.width / 4f), Mathf.CeilToInt(terrainDensityData.width / 4f), Mathf.CeilToInt(terrainDensityData.width / 4f));
+        marchingCubesComputeShader.Dispatch(marchingKernel, Mathf.CeilToInt(terrainDensityData.width / ChunkGenNetwork.Instance.resolution / 4f), Mathf.CeilToInt(terrainDensityData.width / ChunkGenNetwork.Instance.resolution / 4f), Mathf.CeilToInt(terrainDensityData.width / ChunkGenNetwork.Instance.resolution / 4f));
 
         ComputeBuffer vertexCountBuffer = ComputeBufferPoolManager.Instance.GetComputeBuffer("VertexCountBuffer", 1, sizeof(int), ComputeBufferType.Raw);
         ComputeBuffer.CopyCount(vertexBuffer, vertexCountBuffer, 0);
@@ -275,9 +275,10 @@ public class ComputeMarchingCubes : MonoBehaviour
         marchingCubesComputeShader.SetVector("ChunkPos", (Vector3)chunkPos);
         marchingCubesComputeShader.SetFloat("isolevel", terrainDensityData.isolevel);
         marchingCubesComputeShader.SetBool("lerpToggle", terrainDensityData.lerp);
+        marchingCubesComputeShader.SetInt("Resolution", ChunkGenNetwork.Instance.resolution);
 
         vertexBuffer.SetCounterValue(0);
-        marchingCubesComputeShader.Dispatch(marchingKernel, Mathf.CeilToInt(terrainDensityData.width / 4f), Mathf.CeilToInt(terrainDensityData.width / 4f), Mathf.CeilToInt(terrainDensityData.width / 4f));
+        marchingCubesComputeShader.Dispatch(marchingKernel, Mathf.CeilToInt(terrainDensityData.width / ChunkGenNetwork.Instance.resolution / 4f), Mathf.CeilToInt(terrainDensityData.width / ChunkGenNetwork.Instance.resolution / 4f), Mathf.CeilToInt(terrainDensityData.width / ChunkGenNetwork.Instance.resolution / 4f));
 
         ComputeBuffer vertexCountBuffer = ComputeBufferPoolManager.Instance.GetComputeBuffer("VertexCountBuffer", 1, sizeof(int), ComputeBufferType.Raw);
         ComputeBuffer.CopyCount(vertexBuffer, vertexCountBuffer, 0);

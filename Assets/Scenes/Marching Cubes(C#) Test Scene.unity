@@ -16880,6 +16880,7 @@ MonoBehaviour:
   chunksVisible: 0
   useFixedMapSize: 0
   mapSize: 11
+  resolution: 6
   terrainDensityData: {fileID: 11400000, guid: 4bc939f839855ea45ade17dce060eea5, type: 2}
   assetSpawnData: {fileID: 11400000, guid: 29949715b352478458342a45d2b907a0, type: 2}
   terrainTextureData: {fileID: 11400000, guid: f1603a815dc9cf041bd4a9e99c9988dc, type: 2}

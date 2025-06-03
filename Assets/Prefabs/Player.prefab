@@ -187,12 +187,12 @@ MonoBehaviour:
   _componentIndexCache: 0
   _addedNetworkObject: {fileID: 1324032884783071196}
   _networkObjectCache: {fileID: 1324032884783071196}
-  walkingSpeed: 7.5
+  walkingSpeed: 15
   runningSpeed: 20
-  jumpSpeed: 8
+  jumpSpeed: 12
   gravity: 20
   lookSpeed: 2
-  lookXLimit: 75
+  lookXLimit: 90
   flightSpeed: 6
   canMove: 1
   cameraYOffset: 0.4
@@ -307,7 +307,6 @@ MonoBehaviour:
   terraformRadius: 3
   terraformStrength: 1
   terrainDensityData: {fileID: 11400000, guid: 4bc939f839855ea45ade17dce060eea5, type: 2}
-  chunkGen: {fileID: 0}
 --- !u!114 &1651371401710485035
 MonoBehaviour:
   m_ObjectHideFlags: 0
