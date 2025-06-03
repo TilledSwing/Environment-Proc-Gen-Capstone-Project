@@ -24,6 +24,10 @@ public class ChunkGenNetwork : NetworkBehaviour
     public bool useFixedMapSize;
     public int mapSize;
     public int resolution = 2;
+    public LODData lod1Data = new LODData { lod = LOD.LOD1, resolution = 1 };
+    public LODData lod2Data = new LODData { lod = LOD.LOD2, resolution = 2 };
+    public LODData lod3Data = new LODData { lod = LOD.LOD3, resolution = 3 };
+    public LODData lod6Data = new LODData { lod = LOD.LOD6, resolution = 6 };
     // Scriptable Object References
     public TerrainDensityData1 terrainDensityData;
     public AssetSpawnData assetSpawnData;
@@ -68,7 +72,19 @@ public class ChunkGenNetwork : NetworkBehaviour
             this.readbackRequest = readbackRequest;
         }
     }
-
+    public enum LOD
+    {
+        LOD1 = 1,
+        LOD2 = 2,
+        LOD3 = 3,
+        LOD6 = 6
+    }
+    [Serializable]
+    public class LODData
+    {
+        public LOD lod;
+        public int resolution;
+    }
     void Awake()
     {
         if (Instance == null) {

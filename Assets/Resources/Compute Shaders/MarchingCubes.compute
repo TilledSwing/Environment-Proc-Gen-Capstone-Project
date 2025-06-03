@@ -35,6 +35,10 @@ void MarchingCubes (uint3 id : SV_DispatchThreadID)
         return ;
     }
 
+    // if(id.x % Resolution != 0 || id.y % Resolution != 0 || id.z % Resolution != 0) {
+    //     return ;
+    // }
+
     float cubeVertices[8] = {
         HeightsBuffer[FlattenIndex(float3(id.x * Resolution, id.y * Resolution, id.z * Resolution) + (vertexOffsetTable[0] * Resolution), ChunkSize)],
         HeightsBuffer[FlattenIndex(float3(id.x * Resolution, id.y * Resolution, id.z * Resolution) + (vertexOffsetTable[1] * Resolution), ChunkSize)],

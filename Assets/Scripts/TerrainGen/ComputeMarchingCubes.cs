@@ -31,6 +31,11 @@ public class ComputeMarchingCubes : MonoBehaviour
     public bool hasWater = false;
     public bool waterProcessed = false;
     public bool isUnderground = false;
+    public ChunkGenNetwork curentLOD;
+    public Mesh lod1Mesh;
+    public Mesh lod2Mesh;
+    public Mesh lod3Mesh;
+    public Mesh lod6Mesh;
     public struct Vertex
     {
         public float3 position;
