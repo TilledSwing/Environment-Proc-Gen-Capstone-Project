@@ -45,7 +45,7 @@ void TerrainDensity (uint3 id : SV_DispatchThreadID)
     float surfaceFade = saturate((terrainDensity) / 60.0);
     float caveFade = saturate((terrainDensity - ChunkSize) / 70.0);
     float finalDensity = terrainDensity + ((ChunkPos.y + id.y) * caveFade) - (caveCarve * height * surfaceFade);
-    if (ChunkPos.y / ChunkSize == -10) {
+    if (ChunkPos.y / ChunkSize == -MaxWorldYChunks) {
         float fadeStart = ChunkSize * 0.1;
         float fadeRange = ChunkSize * 0.2;
         float worldDepthFade = saturate((id.y - fadeStart) / fadeRange);

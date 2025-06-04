@@ -24,10 +24,13 @@ public class ChunkGenNetwork : NetworkBehaviour
     public bool useFixedMapSize;
     public int mapSize;
     public int resolution = 2;
-    public LODData lod1Data = new LODData { lod = LOD.LOD1, resolution = 1 };
-    public LODData lod2Data = new LODData { lod = LOD.LOD2, resolution = 2 };
-    public LODData lod3Data = new LODData { lod = LOD.LOD3, resolution = 3 };
-    public LODData lod6Data = new LODData { lod = LOD.LOD6, resolution = 6 };
+    public LODData[] lodData =
+    {
+        new LODData { lod = LOD.LOD1, resolution = 1 },
+        new LODData { lod = LOD.LOD2, resolution = 2 },
+        new LODData { lod = LOD.LOD3, resolution = 3 },
+        new LODData { lod = LOD.LOD6, resolution = 6 }
+    };
     // Scriptable Object References
     public TerrainDensityData1 terrainDensityData;
     public AssetSpawnData assetSpawnData;
@@ -99,10 +102,10 @@ public class ChunkGenNetwork : NetworkBehaviour
         lightingBlockerRenderer.enabled = false;
         TextureSetup();
          // Set seeds
-        terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 100000);
-        terrainDensityData.caveNoiseSeed = UnityEngine.Random.Range(0, 100000);
-        terrainDensityData.domainWarpSeed = UnityEngine.Random.Range(0, 100000);
-        terrainDensityData.caveDomainWarpSeed = UnityEngine.Random.Range(0, 100000);
+        // terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 100000);
+        // terrainDensityData.caveNoiseSeed = UnityEngine.Random.Range(0, 100000);
+        // terrainDensityData.domainWarpSeed = UnityEngine.Random.Range(0, 100000);
+        // terrainDensityData.caveDomainWarpSeed = UnityEngine.Random.Range(0, 100000);
     }
     /// <summary>
     /// Sets the player to the new viewer for chunk generation and disables the local chunk generator
@@ -185,7 +188,7 @@ public class ChunkGenNetwork : NetworkBehaviour
 
                     if (chunkDictionary.ContainsKey(viewedChunkCoord))
                     {
-                        chunkDictionary[viewedChunkCoord].UpdateChunk(maxViewDst);
+                        chunkDictionary[viewedChunkCoord].UpdateChunk(maxViewDst, terrainDensityData.width);
                         if (chunkDictionary[viewedChunkCoord].IsVisible())
                         {
                             chunksVisibleLastUpdate.Add(chunkDictionary[viewedChunkCoord]);
@@ -202,7 +205,7 @@ public class ChunkGenNetwork : NetworkBehaviour
                                                          terrainMaterial, waterMaterial, initialLoadComplete);
 
                             chunkDictionary.Add(viewedChunkCoord, chunk);
-                            chunk.UpdateChunk(maxViewDst);
+                            chunk.UpdateChunk(maxViewDst, terrainDensityData.width);
 
                             if (chunk.IsVisible())
                             {
@@ -405,6 +408,10 @@ public class ChunkGenNetwork : NetworkBehaviour
             float[] useSlopes = new float[biomeTextureConfig.MAX_TEXTURE_LAYERS];
             float[] slopeStarts = new float[biomeTextureConfig.MAX_TEXTURE_LAYERS];
             float[] slopeEnds = new float[biomeTextureConfig.MAX_TEXTURE_LAYERS];
+
+            float lowestStartHeight = float.MaxValue;
+            float greatestEndHeight = float.MinValue;
+
             for (int i = 0; i < biomeTextureConfig.biomeTextures.Length; i++)
             {
                 Graphics.CopyTexture(biomeTextureConfig.biomeTextures[i].texture, 0, textureArray, i);
@@ -414,6 +421,12 @@ public class ChunkGenNetwork : NetworkBehaviour
                 useSlopes[i] = biomeTextureConfig.biomeTextures[i].useSlopeRange ? 1 : 0;
                 slopeStarts[i] = biomeTextureConfig.biomeTextures[i].slopeRange.slopeStart;
                 slopeEnds[i] = biomeTextureConfig.biomeTextures[i].slopeRange.slopeEnd;
+
+                if (heightStarts[i] < lowestStartHeight)
+                    lowestStartHeight = heightStarts[i] + 1;
+
+                if (heightEnds[i] > greatestEndHeight)
+                    greatestEndHeight = heightEnds[i] - 1;
             }
             // textureArray.Apply(false);
             terrainMaterial.SetFloat("_Scale", textureScale);
@@ -425,6 +438,10 @@ public class ChunkGenNetwork : NetworkBehaviour
             terrainMaterial.SetFloatArray("_SlopeStartsArray", slopeStarts);
             terrainMaterial.SetFloatArray("_SlopeEndsArray", slopeEnds);
             terrainMaterial.SetInt("_LayerCount", biomeTextureConfig.biomeTextures.Length);
+            Debug.Log(lowestStartHeight);
+            Debug.Log(greatestEndHeight);
+            terrainMaterial.SetFloat("_LowestStartHeight", lowestStartHeight);
+            terrainMaterial.SetFloat("_GreatestEndHeight", greatestEndHeight);
         }
     }
     /// <summary>
@@ -479,6 +496,11 @@ public class ChunkGenNetwork : NetworkBehaviour
             marchingCubes.terrainMaterial = terrainMaterial;
             marchingCubes.waterMaterial = waterMaterial;
             marchingCubes.initialLoadComplete = initialLoadComplete;
+            // float viewerDstFromBound = Mathf.Sqrt(bounds.SqrDistance(viewerPos));
+            // if (viewerDstFromBound <= chunkSize * 2) marchingCubes.currentLOD = LOD.LOD1;
+            // else if (viewerDstFromBound <= chunkSize * 4) marchingCubes.currentLOD = LOD.LOD2;
+            // else if (viewerDstFromBound <= chunkSize * 6) marchingCubes.currentLOD = LOD.LOD3;
+            // else if (viewerDstFromBound <= chunkSize * 8) marchingCubes.currentLOD = LOD.LOD6;
             // Set up water generator
             if (terrainDensityData.waterLevel > chunkPos.y && terrainDensityData.waterLevel < Mathf.RoundToInt(chunkPos.y + terrainDensityData.width))
             {
@@ -502,9 +524,13 @@ public class ChunkGenNetwork : NetworkBehaviour
         /// </summary>
         /// <param name="maxViewDst">The maximum view distance of the player</param>
         /// <param name="chunkSize">The chunk size</param>
-        public void UpdateChunk(float maxViewDst)
+        public void UpdateChunk(float maxViewDst, int chunkSize)
         {
             float viewerDstFromBound = Mathf.Sqrt(bounds.SqrDistance(viewerPos));
+            // if (viewerDstFromBound <= chunkSize * 2) marchingCubes.UpdateMesh(LOD.LOD1);
+            // else if (viewerDstFromBound <= chunkSize * 4) marchingCubes.UpdateMesh(LOD.LOD2);
+            // else if (viewerDstFromBound <= chunkSize * 6) marchingCubes.UpdateMesh(LOD.LOD3);
+            // else if (viewerDstFromBound <= chunkSize * 8) marchingCubes.UpdateMesh(LOD.LOD6);
             bool visible = viewerDstFromBound <= maxViewDst;
             SetVisible(visible);
         }

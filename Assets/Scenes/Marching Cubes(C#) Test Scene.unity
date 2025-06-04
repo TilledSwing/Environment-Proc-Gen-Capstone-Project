@@ -16872,7 +16872,7 @@ MonoBehaviour:
   _componentIndexCache: 255
   _addedNetworkObject: {fileID: 1838274978}
   _networkObjectCache: {fileID: 0}
-  maxWorldYChunks: 10
+  maxWorldYChunks: 16
   maxViewDst: 100
   viewer: {fileID: 1588582780}
   updateDistanceThreshold: 5
@@ -16881,17 +16881,14 @@ MonoBehaviour:
   useFixedMapSize: 0
   mapSize: 11
   resolution: 1
-  lod1Data:
-    lod: 1
+  lodData:
+  - lod: 1
     resolution: 1
-  lod2Data:
-    lod: 2
+  - lod: 2
     resolution: 2
-  lod3Data:
-    lod: 3
+  - lod: 3
     resolution: 3
-  lod6Data:
-    lod: 6
+  - lod: 6
     resolution: 6
   terrainDensityData: {fileID: 11400000, guid: 4bc939f839855ea45ade17dce060eea5, type: 2}
   assetSpawnData: {fileID: 11400000, guid: 29949715b352478458342a45d2b907a0, type: 2}

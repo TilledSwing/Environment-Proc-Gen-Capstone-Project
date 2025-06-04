@@ -77,6 +77,9 @@ Shader "Custom/TerrainTextureShader"
                 float _SlopeStartsArray[MAX_TEXTURES];
                 float _SlopeEndsArray[MAX_TEXTURES];
 
+                float _LowestStartHeight;
+                float _GreatestEndHeight;
+
                 float _SlopeBlendSharpness;
                 float _HeightBlendSharpness;
             CBUFFER_END
@@ -122,6 +125,9 @@ Shader "Custom/TerrainTextureShader"
                 float height = IN.worldPos.y;
                 float3 normal = normalize(IN.worldNormal);
                 float slope = 1 - dot(normal, float3(0, 1, 0));
+
+                if(height < _LowestStartHeight) height = _LowestStartHeight;
+                if(height > _GreatestEndHeight) height = _GreatestEndHeight;
 
                 [unroll]
                 for(int i = 0; i < _LayerCount; i++) {

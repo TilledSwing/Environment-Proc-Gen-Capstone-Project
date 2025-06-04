@@ -31,7 +31,7 @@ public class ComputeMarchingCubes : MonoBehaviour
     public bool hasWater = false;
     public bool waterProcessed = false;
     public bool isUnderground = false;
-    public ChunkGenNetwork curentLOD;
+    public ChunkGenNetwork.LOD currentLOD;
     public Mesh lod1Mesh;
     public Mesh lod2Mesh;
     public Mesh lod3Mesh;
@@ -126,6 +126,7 @@ public class ComputeMarchingCubes : MonoBehaviour
         terrainDensityComputeShader.SetInt("ChunkSize", terrainDensityData.width);
         terrainDensityComputeShader.SetVector("ChunkPos", (Vector3)chunkPos);
         terrainDensityComputeShader.SetFloat("isolevel", terrainDensityData.isolevel);
+        terrainDensityComputeShader.SetInt("MaxWorldYChunks", ChunkGenNetwork.Instance.maxWorldYChunks);
     }
     /// <summary>
     /// Set density and generate terrain mesh
@@ -141,12 +142,27 @@ public class ComputeMarchingCubes : MonoBehaviour
 
         if (!initialLoadComplete)
         {
+            // foreach(ChunkGenNetwork.LODData lodData in ChunkGenNetwork.Instance.lodData) {
+            //     SyncMarchingCubes(heightsBuffer, false, lodData);
+            // }
             SyncMarchingCubes(heightsBuffer, false);
         }
         else
         {
+            // foreach(ChunkGenNetwork.LODData lodData in ChunkGenNetwork.Instance.lodData) {
+            //     AsyncMarchingCubes(heightsBuffer, false, lodData);
+            // }
             AsyncMarchingCubes(heightsBuffer, false);
         }
+    }
+    public void UpdateMesh(ChunkGenNetwork.LOD lod)
+    {
+        if (currentLOD == lod) return;
+        if (lod == ChunkGenNetwork.LOD.LOD1 && lod1Mesh != null) meshFilter.mesh = lod1Mesh;
+        if (lod == ChunkGenNetwork.LOD.LOD2 && lod2Mesh != null) meshFilter.mesh = lod2Mesh;
+        if (lod == ChunkGenNetwork.LOD.LOD3 && lod3Mesh != null) meshFilter.mesh = lod3Mesh;
+        if (lod == ChunkGenNetwork.LOD.LOD6 && lod6Mesh != null) meshFilter.mesh = lod6Mesh;
+        currentLOD = lod;
     }
     /// <summary>
     /// Set up the density values for the chunk using compute shaders
@@ -354,15 +370,28 @@ public class ComputeMarchingCubes : MonoBehaviour
 
         Mesh mesh = new Mesh();
         Mesh.ApplyAndDisposeWritableMeshData(meshDataArray, mesh, MeshUpdateFlags.Default);
+        // mesh.bounds = new Bounds(chunkPos + (new Vector3(0.5f, 0.5f, 0.5f) * terrainDensityData.width), Vector3.one * terrainDensityData.width);
 
-        meshFilter.mesh = mesh;
-        meshCollider.sharedMesh = mesh;
-        mesh.bounds = new Bounds(chunkPos + (new Vector3(0.5f, 0.5f, 0.5f) * terrainDensityData.width), Vector3.one * terrainDensityData.width);
+        // if (lodData.lod == ChunkGenNetwork.LOD.LOD1)
+        // {
+        //     lod1Mesh = mesh;
+        //     meshCollider.sharedMesh = mesh;
+        // }
+        // if (lodData.lod == ChunkGenNetwork.LOD.LOD2) lod2Mesh = mesh;
+        // if (lodData.lod == ChunkGenNetwork.LOD.LOD3) lod3Mesh = mesh;
+        // if (lodData.lod == ChunkGenNetwork.LOD.LOD6) lod6Mesh = mesh;
 
-        if (!terraforming)
-        {
-            assetSpawner.SpawnAssets();
-        }
+        // if (lodData.lod == currentLOD)
+        // {
+            meshFilter.mesh = mesh;
+            meshCollider.sharedMesh = mesh;
+            mesh.bounds = new Bounds(chunkPos + (new Vector3(0.5f, 0.5f, 0.5f) * terrainDensityData.width), Vector3.one * terrainDensityData.width);
+
+            if (!terraforming)
+            {
+                assetSpawner.SpawnAssets();
+            }
+        // }
     }
     // Releases height buffers when the application is closed
     void OnApplicationQuit()
