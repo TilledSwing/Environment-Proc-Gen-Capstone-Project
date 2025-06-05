@@ -15,6 +15,7 @@ MonoBehaviour:
   noiseGenerators:
   - {fileID: 11400000, guid: 8997d176223be34408e2157b1cb92a3e, type: 2}
   - {fileID: 11400000, guid: 8b48f37d82b57414a9b10e2e22659108, type: 2}
+  - {fileID: 11400000, guid: ba042f300ebfc12449574e9980101924, type: 2}
   width: 24
   height: 105
   isolevel: 0.5
