@@ -33,17 +33,19 @@ void TerrainDensity (uint3 id : SV_DispatchThreadID)
         return ;
     }
 
+    // Cave Carve Calculation
     float caveNoise = LargeCaveNoiseBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)];
     float caveCarve = smoothstep(-0.4, 0.0, caveNoise);
     caveCarve = 1.0 - caveCarve;
-
+    // Terrain Density Calculation
     float terrainNoise = BaseNoiseBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)];
     float currentHeight = (height * ((terrainNoise+1)/2) + (terracing ? (id.y%terraceHeight) : 0));
-
     float terrainDensity = currentHeight - (ChunkPos.y + id.y);
+    // Cave Fade
     float surfaceFade = saturate((terrainDensity) / 60.0);
     float caveFade = saturate((terrainDensity - ChunkSize) / 70.0);
     float finalDensity = terrainDensity + ((ChunkPos.y + id.y) * caveFade) - (caveCarve * height * surfaceFade);
+    // World Depth Fade
     if (ChunkPos.y / ChunkSize == -MaxWorldYChunks) {
         float fadeStart = ChunkSize * 0.1;
         float fadeRange = ChunkSize * 0.2;
