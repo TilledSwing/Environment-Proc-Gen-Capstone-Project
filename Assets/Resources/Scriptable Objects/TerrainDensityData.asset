@@ -12,68 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c29ee72cee6fb9144bd844ec6a8f7ebb, type: 3}
   m_Name: TerrainDensityData
   m_EditorClassIdentifier: 
-  selectedNoiseDimension: 1
-  noiseDimension: 1
-  selectedNoiseType: 0
-  noiseType: 0
-  selectedNoiseFractalType: 1
-  noiseFractalType: 1
-  selectedRotationType3D: 0
-  rotationType3D: 0
-  noiseSeed: 55267
-  noiseFractalOctaves: 5
-  noiseFractalLacunarity: 2
-  noiseFractalGain: 0.5
-  fractalWeightedStrength: 0
-  noiseFrequency: 0.01
-  domainWarpToggle: 0
-  selectedDomainWarpType: 0
-  domainWarpType: 0
-  selectedDomainWarpFractalType: 0
-  domainWarpFractalType: 0
-  domainWarpAmplitude: 50
-  domainWarpSeed: 52119
-  domainWarpFractalOctaves: 5
-  domainWarpFractalLacunarity: 2
-  domainWarpFractalGain: 0.5
-  domainWarpFrequency: 0.01
-  selectedCellularDistanceFunction: 1
-  cellularDistanceFunction: 1
-  selectedCellularReturnType: 1
-  cellularReturnType: 1
-  cellularJitter: 1
-  noiseScale: 0.6
-  selectedCaveNoiseDimension: 1
-  caveNoiseDimension: 1
-  selectedCaveNoiseType: 0
-  caveNoiseType: 0
-  selectedCaveNoiseFractalType: 0
-  caveNoiseFractalType: 0
-  selectedCaveRotationType3D: 0
-  caveRotationType3D: 1
-  caveNoiseSeed: 94059
-  caveNoiseFractalOctaves: 5
-  caveNoiseFractalLacunarity: 2
-  caveNoiseFractalGain: 0.5
-  caveFractalWeightedStrength: 0
-  caveNoiseFrequency: 0.01
-  caveDomainWarpToggle: 1
-  caveSelectedDomainWarpType: 0
-  caveDomainWarpType: 0
-  caveSelectedDomainWarpFractalType: 0
-  caveDomainWarpFractalType: 4
-  caveDomainWarpAmplitude: 50
-  caveDomainWarpSeed: 57905
-  caveDomainWarpFractalOctaves: 5
-  caveDomainWarpFractalLacunarity: 2
-  caveDomainWarpFractalGain: 0.5
-  caveDomainWarpFrequency: 0.007
-  caveSelectedCellularDistanceFunction: 1
-  caveCellularDistanceFunction: 1
-  caveSelectedCellularReturnType: 1
-  caveCellularReturnType: 1
-  caveCellularJitter: 1
-  caveNoiseScale: 1.4
+  noiseGenerators:
+  - {fileID: 11400000, guid: 8997d176223be34408e2157b1cb92a3e, type: 2}
+  - {fileID: 11400000, guid: 8b48f37d82b57414a9b10e2e22659108, type: 2}
   width: 24
   height: 105
   isolevel: 0.5

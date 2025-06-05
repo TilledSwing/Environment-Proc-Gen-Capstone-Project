@@ -17,7 +17,7 @@ public class AssetSpawner : MonoBehaviour
 {
     public int vertexBufferLength;
     public List<List<Asset>> spawnedAssets;
-    public TerrainDensityData1 terrainDensityData;
+    public TerrainDensityData terrainDensityData;
     public AssetSpawnData assetSpawnData;
     public List<List<ComputeMarchingCubes.Vertex>> spawnPoints;
     public List<List<ComputeMarchingCubes.Vertex>> acceptedSpawnPoints;
@@ -78,7 +78,7 @@ public class AssetSpawner : MonoBehaviour
             vertexArray = chunkVertices,
             assetSpawnFilters = assetSpawnFilters,
             spawnPoints = flatSpawnPoints,
-            baseSeed = terrainDensityData.noiseSeed,
+            baseSeed = terrainDensityData.noiseGenerators[0].noiseSeed, // Update Later
             chunkPos = new int3(chunkPos.x, chunkPos.y, chunkPos.z),
             waterLevel = terrainDensityData.waterLevel,
             maxAttempts = maxAttempts
@@ -130,6 +130,7 @@ public class AssetSpawner : MonoBehaviour
                     if (colliders.Length > 0)
                     {
                         tooClose = true;
+                        break;
                     }
                 }
 

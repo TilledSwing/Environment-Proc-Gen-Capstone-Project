@@ -57,7 +57,7 @@ public class DBManager : MonoBehaviour
     /// <param name="steamName"></param>
     /// <returns></returns>
      
-     IEnumerator SaveTerrainData(TerrainDensityData terrainDensityData, string terrainName) //int seed, int width, int height, float noiseScale, float isolevel, bool lerp
+     IEnumerator SaveTerrainData(TerrainDensityDataOld terrainDensityData, string terrainName) //int seed, int width, int height, float noiseScale, float isolevel, bool lerp
     {
          //Set up connection
         string url = "http://localhost/sqlconnect/saveTerrain.php";
@@ -234,7 +234,7 @@ public class DBManager : MonoBehaviour
                         FastNoiseLite.NoiseType noiseType = (FastNoiseLite.NoiseType)Enum.Parse(typeof(FastNoiseLite.NoiseType), data.NoiseTypes.Replace(" ", "")); 
                         mc.terrainDensityData.noiseType = noiseType;
                         mc.terrainDensityData.selectedNoiseType = Array.IndexOf(mc.terrainDensityData.noiseTypeOptions, noiseType);
-                        TerrainDensityData.NoiseDimension dimension = (TerrainDensityData.NoiseDimension)Enum.Parse(typeof(TerrainDensityData.NoiseDimension), data.NoiseDimensions.Replace(" ", ""));
+                        TerrainDensityDataOld.NoiseDimension dimension = (TerrainDensityDataOld.NoiseDimension)Enum.Parse(typeof(TerrainDensityDataOld.NoiseDimension), data.NoiseDimensions.Replace(" ", ""));
                         mc.terrainDensityData.noiseDimension = dimension;
                         mc.terrainDensityData.selectedNoiseDimension = Array.IndexOf(mc.terrainDensityData.noiseDimensionOptions, dimension);
 

@@ -13,7 +13,7 @@ public class MarchingCubes : MonoBehaviour
     private MeshFilter meshFilter;
     private MeshCollider meshCollider;
     private Renderer mat;
-    public TerrainDensityData terrainDensityData;
+    public TerrainDensityDataOld terrainDensityData;
     public GameObject waterPlaneGenerator;
     private FastNoiseLite noiseGenerator = new FastNoiseLite();
     private FastNoiseLite domainWarp = new FastNoiseLite();
@@ -41,7 +41,7 @@ public class MarchingCubes : MonoBehaviour
         gameObject.AddComponent<MeshRenderer>();
         meshFilter = gameObject.AddComponent<MeshFilter>();
         meshCollider = gameObject.AddComponent<MeshCollider>();
-        terrainDensityData = Resources.Load<TerrainDensityData>("TerrainDensityData");
+        terrainDensityData = Resources.Load<TerrainDensityDataOld>("TerrainDensityData");
         assetSpawner = gameObject.GetComponent<AssetSpawner>();
         mat = GetComponent<Renderer>();
         Material terrainMaterial = Resources.Load<Material>("Materials/TerrainTexture");
@@ -148,14 +148,14 @@ public class MarchingCubes : MonoBehaviour
                     yWarp = (y + chunkPos.y) * noiseScale;
                     zWarp = (z + chunkPos.z) * noiseScale;
                     if(terrainDensityData.domainWarpToggle) {
-                        if(terrainDensityData.noiseDimension == TerrainDensityData.NoiseDimension._2D) {
+                        if(terrainDensityData.noiseDimension == TerrainDensityDataOld.NoiseDimension._2D) {
                             domainWarp.DomainWarp(ref xWarp, ref zWarp);
                         }
                         else {
                             domainWarp.DomainWarp(ref xWarp, ref yWarp, ref zWarp);
                         }
                     }
-                    if(terrainDensityData.noiseDimension == TerrainDensityData.NoiseDimension._2D) {
+                    if(terrainDensityData.noiseDimension == TerrainDensityDataOld.NoiseDimension._2D) {
                         currentHeight = height * ((noiseGenerator.GetNoise(xWarp, zWarp)+1)/2) + (terrainDensityData.terracing ? (y%terrainDensityData.terraceHeight) : 0);
                     }
                     else {

@@ -32,7 +32,7 @@ public class ChunkGenNetwork : NetworkBehaviour
         new LODData { lod = LOD.LOD6, resolution = 6 }
     };
     // Scriptable Object References
-    public TerrainDensityData1 terrainDensityData;
+    public TerrainDensityData terrainDensityData;
     public AssetSpawnData assetSpawnData;
     public TerrainTextureData terrainTextureData;
     // Compute Shader References
@@ -90,10 +90,12 @@ public class ChunkGenNetwork : NetworkBehaviour
     }
     void Awake()
     {
-        if (Instance == null) {
+        if (Instance == null)
+        {
             Instance = this;
         }
-        else {
+        else
+        {
             Destroy(gameObject);
         }
         chunkSize = terrainDensityData.width;
@@ -101,7 +103,12 @@ public class ChunkGenNetwork : NetworkBehaviour
         lightingBlockerRenderer = lightingBlocker.GetComponent<MeshRenderer>();
         lightingBlockerRenderer.enabled = false;
         TextureSetup();
-         // Set seeds
+        // Set seeds
+        foreach (NoiseGenerator noiseGenerator in terrainDensityData.noiseGenerators)
+        {
+            noiseGenerator.noiseSeed = UnityEngine.Random.Range(0, 100000);
+            noiseGenerator.domainWarpSeed = UnityEngine.Random.Range(0, 100000);
+        }
         // terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 100000);
         // terrainDensityData.caveNoiseSeed = UnityEngine.Random.Range(0, 100000);
         // terrainDensityData.domainWarpSeed = UnityEngine.Random.Range(0, 100000);
@@ -438,8 +445,6 @@ public class ChunkGenNetwork : NetworkBehaviour
             terrainMaterial.SetFloatArray("_SlopeStartsArray", slopeStarts);
             terrainMaterial.SetFloatArray("_SlopeEndsArray", slopeEnds);
             terrainMaterial.SetInt("_LayerCount", biomeTextureConfig.biomeTextures.Length);
-            Debug.Log(lowestStartHeight);
-            Debug.Log(greatestEndHeight);
             terrainMaterial.SetFloat("_LowestStartHeight", lowestStartHeight);
             terrainMaterial.SetFloat("_GreatestEndHeight", greatestEndHeight);
         }
@@ -459,7 +464,7 @@ public class ChunkGenNetwork : NetworkBehaviour
         public MeshCollider meshCollider;
         public MeshFilter meshFilter;
         public MeshRenderer meshRenderer;
-        public TerrainChunk(Vector3Int chunkCoord, int chunkSize, Transform parent, TerrainDensityData1 terrainDensityData, AssetSpawnData assetSpawnData, TerrainTextureData terrainTextureData,
+        public TerrainChunk(Vector3Int chunkCoord, int chunkSize, Transform parent, TerrainDensityData terrainDensityData, AssetSpawnData assetSpawnData, TerrainTextureData terrainTextureData,
                             ComputeShader marchingCubesComputeShader, ComputeShader terrainDensityComputeShader, ComputeShader terrainNoiseComputeShader,
                             ComputeShader caveNoiseComputeShader, ComputeShader terraformComputeShader,
                             Material terrainMaterial, Material waterMaterial, bool initialLoadComplete)

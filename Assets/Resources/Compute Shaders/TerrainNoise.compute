@@ -33,9 +33,9 @@ float noiseScale;
 uint ChunkSize;
 float3 ChunkPos;
 
-float xWarp;
-float yWarp;
-float zWarp;
+float xWarp = 0.0;
+float yWarp = 0.0;
+float zWarp = 0.0;
 
 // Convert a 3D array index into a 1D flat array index
 int FlattenIndex(float3 id, int size) {

@@ -13,7 +13,7 @@ public class WaterPlaneGenerator : MonoBehaviour
     public MeshFilter meshFilter;
     public Vector3Int chunkPos;
     public ComputeMarchingCubes marchingCubes;
-    public TerrainDensityData1 terrainDensityData;
+    public TerrainDensityData terrainDensityData;
 
     public void UpdateMesh()
     {

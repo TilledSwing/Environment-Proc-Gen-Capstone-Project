@@ -12,7 +12,7 @@ public class NoiseEditor : Editor
 {
 
     private MarchingCubes marchingCubes;
-    private TerrainDensityData terrainDensityData;
+    private TerrainDensityDataOld terrainDensityData;
 
     // Noise Values
     private string[] noiseTypeOptionLabels = new string[] {"OpenSimplex2", "OpenSimplex2S", "Cellular", "Perlin", "ValueCubic", "Value"};

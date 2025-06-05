@@ -11,7 +11,7 @@ public class Terraforming : MonoBehaviour
     public float terraformStrength = 5f;
     bool mode = true;
     LayerMask terrainLayer;
-    public TerrainDensityData1 terrainDensityData;
+    public TerrainDensityData terrainDensityData;
     void Start()
     {
         playerCamera = Camera.main;

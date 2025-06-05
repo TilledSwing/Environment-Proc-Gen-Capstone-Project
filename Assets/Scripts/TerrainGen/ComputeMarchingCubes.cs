@@ -22,7 +22,7 @@ public class ComputeMarchingCubes : MonoBehaviour
     // public List<Vector3> vertices = new List<Vector3>();
     // public List<Vertex> verticesNormals = new List<Vertex>();
     // private List<int> triangles = new List<int>();
-    public TerrainDensityData1 terrainDensityData;
+    public TerrainDensityData terrainDensityData;
     public WaterPlaneGenerator waterGen;
     public AssetSpawner assetSpawner;
     public Vector3Int chunkPos;
@@ -51,74 +51,13 @@ public class ComputeMarchingCubes : MonoBehaviour
 
     void Start()
     {
-        SetNoiseSetting();
+        SetTerrainSettings();
+        // SetNoiseSetting();
         GenerateMesh();
         // StartCoroutine(GenerateMesh());
     }
-    // Set all the noise settings from the TerrainDensityData scriptable object
-    private void SetNoiseSetting()
+    private void SetTerrainSettings()
     {
-        // Noise and Fractal Values
-        terrainNoiseComputeShader.SetInt("noiseDimension", (int)terrainDensityData.noiseDimension);
-        terrainNoiseComputeShader.SetInt("noiseType", (int)terrainDensityData.noiseType);
-        terrainNoiseComputeShader.SetInt("noiseFractalType", (int)terrainDensityData.noiseFractalType);
-        terrainNoiseComputeShader.SetInt("rotationType3D", (int)terrainDensityData.rotationType3D);
-        terrainNoiseComputeShader.SetInt("noiseSeed", terrainDensityData.noiseSeed);
-        terrainNoiseComputeShader.SetInt("noiseFractalOctaves", terrainDensityData.noiseFractalOctaves);
-        terrainNoiseComputeShader.SetFloat("noiseFractalLacunarity", terrainDensityData.noiseFractalLacunarity);
-        terrainNoiseComputeShader.SetFloat("noiseFractalGain", terrainDensityData.noiseFractalGain);
-        terrainNoiseComputeShader.SetFloat("fractalWeightedStrength", terrainDensityData.fractalWeightedStrength);
-        terrainNoiseComputeShader.SetFloat("noiseFrequency", terrainDensityData.noiseFrequency);
-
-        // Domain Warp Values
-        terrainNoiseComputeShader.SetBool("domainWarpToggle", terrainDensityData.domainWarpToggle);
-        terrainNoiseComputeShader.SetInt("domainWarpType", (int)terrainDensityData.domainWarpType);
-        terrainDensityComputeShader.SetInt("domainWarpFractalType", (int)terrainDensityData.domainWarpFractalType);
-        terrainNoiseComputeShader.SetFloat("domainWarpAmplitude", terrainDensityData.domainWarpAmplitude);
-        terrainNoiseComputeShader.SetInt("domainWarpSeed", terrainDensityData.domainWarpSeed);
-        terrainNoiseComputeShader.SetInt("domainWarpFractalOctaves", terrainDensityData.domainWarpFractalOctaves);
-        terrainNoiseComputeShader.SetFloat("domainWarpFractalLacunarity", terrainDensityData.domainWarpFractalLacunarity);
-        terrainNoiseComputeShader.SetFloat("domainWarpFractalGain", terrainDensityData.domainWarpFractalGain);
-        terrainNoiseComputeShader.SetFloat("domainWarpFrequency", terrainDensityData.domainWarpFrequency);
-        // Cellular(Voronoi) Values
-        terrainNoiseComputeShader.SetInt("cellularDistanceFunction", (int)terrainDensityData.cellularDistanceFunction);
-        terrainNoiseComputeShader.SetInt("cellularReturnType", (int)terrainDensityData.cellularReturnType);
-        terrainNoiseComputeShader.SetFloat("cellularJitter", terrainDensityData.cellularJitter);
-        // Terrain Values
-        terrainNoiseComputeShader.SetFloat("noiseScale", terrainDensityData.noiseScale);
-        terrainNoiseComputeShader.SetInt("ChunkSize", terrainDensityData.width);
-        terrainNoiseComputeShader.SetVector("ChunkPos", (Vector3)chunkPos);
-
-        // Cave Noise and Fractal Values
-        caveNoiseComputeShader.SetInt("noiseDimension", (int)terrainDensityData.caveNoiseDimension);
-        caveNoiseComputeShader.SetInt("noiseType", (int)terrainDensityData.caveNoiseType);
-        caveNoiseComputeShader.SetInt("noiseFractalType", (int)terrainDensityData.caveNoiseFractalType);
-        caveNoiseComputeShader.SetInt("rotationType3D", (int)terrainDensityData.caveRotationType3D);
-        caveNoiseComputeShader.SetInt("noiseSeed", terrainDensityData.caveNoiseSeed);
-        caveNoiseComputeShader.SetInt("noiseFractalOctaves", terrainDensityData.caveNoiseFractalOctaves);
-        caveNoiseComputeShader.SetFloat("noiseFractalLacunarity", terrainDensityData.caveNoiseFractalLacunarity);
-        caveNoiseComputeShader.SetFloat("noiseFractalGain", terrainDensityData.caveNoiseFractalGain);
-        caveNoiseComputeShader.SetFloat("fractalWeightedStrength", terrainDensityData.caveFractalWeightedStrength);
-        caveNoiseComputeShader.SetFloat("noiseFrequency", terrainDensityData.caveNoiseFrequency);
-        // Domain Warp Values
-        caveNoiseComputeShader.SetBool("domainWarpToggle", terrainDensityData.caveDomainWarpToggle);
-        caveNoiseComputeShader.SetInt("domainWarpType", (int)terrainDensityData.caveDomainWarpType);
-        caveNoiseComputeShader.SetInt("domainWarpFractalType", (int)terrainDensityData.caveDomainWarpFractalType);
-        caveNoiseComputeShader.SetFloat("domainWarpAmplitude", terrainDensityData.caveDomainWarpAmplitude);
-        caveNoiseComputeShader.SetInt("domainWarpSeed", terrainDensityData.caveDomainWarpSeed);
-        caveNoiseComputeShader.SetInt("domainWarpFractalOctaves", terrainDensityData.caveDomainWarpFractalOctaves);
-        caveNoiseComputeShader.SetFloat("domainWarpFractalLacunarity", terrainDensityData.caveDomainWarpFractalLacunarity);
-        caveNoiseComputeShader.SetFloat("domainWarpFractalGain", terrainDensityData.caveDomainWarpFractalGain);
-        caveNoiseComputeShader.SetFloat("domainWarpFrequency", terrainDensityData.caveDomainWarpFrequency);
-        // Cellular(Voronoi) Values
-        caveNoiseComputeShader.SetInt("cellularDistanceFunction", (int)terrainDensityData.caveCellularDistanceFunction);
-        caveNoiseComputeShader.SetInt("cellularReturnType", (int)terrainDensityData.caveCellularReturnType);
-        caveNoiseComputeShader.SetFloat("cellularJitter", terrainDensityData.caveCellularJitter);
-        // Terrain Values
-        caveNoiseComputeShader.SetFloat("noiseScale", terrainDensityData.caveNoiseScale);
-        caveNoiseComputeShader.SetInt("ChunkSize", terrainDensityData.width);
-        caveNoiseComputeShader.SetVector("ChunkPos", (Vector3)chunkPos);
-
         // Terrain Values
         terrainDensityComputeShader.SetInt("height", terrainDensityData.height);
         terrainDensityComputeShader.SetBool("terracing", terrainDensityData.terracing);
@@ -127,6 +66,39 @@ public class ComputeMarchingCubes : MonoBehaviour
         terrainDensityComputeShader.SetVector("ChunkPos", (Vector3)chunkPos);
         terrainDensityComputeShader.SetFloat("isolevel", terrainDensityData.isolevel);
         terrainDensityComputeShader.SetInt("MaxWorldYChunks", ChunkGenNetwork.Instance.maxWorldYChunks);
+    }
+    // Set all the noise settings from the TerrainDensityData scriptable object
+    private void SetNoiseSettings(NoiseGenerator noiseGenerator)
+    {
+        // Noise and Fractal Values
+        terrainNoiseComputeShader.SetInt("noiseDimension", (int)noiseGenerator.noiseDimension);
+        terrainNoiseComputeShader.SetInt("noiseType", (int)noiseGenerator.noiseType);
+        terrainNoiseComputeShader.SetInt("noiseFractalType", (int)noiseGenerator.noiseFractalType);
+        terrainNoiseComputeShader.SetInt("rotationType3D", (int)noiseGenerator.rotationType3D);
+        terrainNoiseComputeShader.SetInt("noiseSeed", noiseGenerator.noiseSeed);
+        terrainNoiseComputeShader.SetInt("noiseFractalOctaves", noiseGenerator.noiseFractalOctaves);
+        terrainNoiseComputeShader.SetFloat("noiseFractalLacunarity", noiseGenerator.noiseFractalLacunarity);
+        terrainNoiseComputeShader.SetFloat("noiseFractalGain", noiseGenerator.noiseFractalGain);
+        terrainNoiseComputeShader.SetFloat("fractalWeightedStrength", noiseGenerator.fractalWeightedStrength);
+        terrainNoiseComputeShader.SetFloat("noiseFrequency", noiseGenerator.noiseFrequency);
+        // Domain Warp Values
+        terrainNoiseComputeShader.SetBool("domainWarpToggle", noiseGenerator.domainWarpToggle);
+        terrainNoiseComputeShader.SetInt("domainWarpType", (int)noiseGenerator.domainWarpType);
+        terrainNoiseComputeShader.SetInt("domainWarpFractalType", (int)noiseGenerator.domainWarpFractalType);
+        terrainNoiseComputeShader.SetFloat("domainWarpAmplitude", noiseGenerator.domainWarpAmplitude);
+        terrainNoiseComputeShader.SetInt("domainWarpSeed", noiseGenerator.domainWarpSeed);
+        terrainNoiseComputeShader.SetInt("domainWarpFractalOctaves", noiseGenerator.domainWarpFractalOctaves);
+        terrainNoiseComputeShader.SetFloat("domainWarpFractalLacunarity", noiseGenerator.domainWarpFractalLacunarity);
+        terrainNoiseComputeShader.SetFloat("domainWarpFractalGain", noiseGenerator.domainWarpFractalGain);
+        terrainNoiseComputeShader.SetFloat("domainWarpFrequency", noiseGenerator.domainWarpFrequency);
+        // Cellular(Voronoi) Values
+        terrainNoiseComputeShader.SetInt("cellularDistanceFunction", (int)noiseGenerator.cellularDistanceFunction);
+        terrainNoiseComputeShader.SetInt("cellularReturnType", (int)noiseGenerator.cellularReturnType);
+        terrainNoiseComputeShader.SetFloat("cellularJitter", noiseGenerator.cellularJitter);
+        // Terrain Values
+        terrainNoiseComputeShader.SetFloat("noiseScale", noiseGenerator.noiseScale);
+        terrainNoiseComputeShader.SetInt("ChunkSize", noiseGenerator.width);
+        terrainNoiseComputeShader.SetVector("ChunkPos", (Vector3)chunkPos);
     }
     /// <summary>
     /// Set density and generate terrain mesh
@@ -171,43 +143,81 @@ public class ComputeMarchingCubes : MonoBehaviour
     public ComputeBuffer SetHeights()
     {
         int terrainNoiseKernel = terrainNoiseComputeShader.FindKernel("TerrainNoise");
-        int caveNoiseKernel = caveNoiseComputeShader.FindKernel("CaveNoise");
         int densityKernel = terrainDensityComputeShader.FindKernel("TerrainDensity");
 
-        ComputeBuffer terrainNoiseBuffer = ComputeBufferPoolManager.Instance.GetComputeBuffer("NoiseBuffer", (terrainDensityData.width + 1) * (terrainDensityData.width + 1) * (terrainDensityData.width + 1), sizeof(float));
-        ComputeBuffer caveNoiseBuffer = ComputeBufferPoolManager.Instance.GetComputeBuffer("NoiseBuffer", (terrainDensityData.width + 1) * (terrainDensityData.width + 1) * (terrainDensityData.width + 1), sizeof(float));
+        List<ComputeBuffer> noiseBuffers = new();
+
+        foreach (NoiseGenerator noiseGenerator in terrainDensityData.noiseGenerators)
+        {
+            SetNoiseSettings(noiseGenerator);
+            ComputeBuffer noiseBuffer = ComputeBufferPoolManager.Instance.GetComputeBuffer("NoiseBuffer", (terrainDensityData.width + 1) * (terrainDensityData.width + 1) * (terrainDensityData.width + 1), sizeof(float));
+            terrainNoiseComputeShader.SetBuffer(terrainNoiseKernel, "TerrainNoiseBuffer", noiseBuffer);
+            terrainNoiseComputeShader.Dispatch(terrainNoiseKernel, Mathf.CeilToInt(terrainDensityData.width / 4f) + 1, Mathf.CeilToInt(terrainDensityData.width / 4f) + 1, Mathf.CeilToInt(terrainDensityData.width / 4f) + 1);
+            if (noiseGenerator.noiseGeneratorType == NoiseGenerator.NoiseGeneratorType.BaseGenerator) terrainDensityComputeShader.SetBuffer(densityKernel, "BaseNoiseBuffer", noiseBuffer);
+            if (noiseGenerator.noiseGeneratorType == NoiseGenerator.NoiseGeneratorType.LargeCaveGenerator) terrainDensityComputeShader.SetBuffer(densityKernel, "LargeCaveNoiseBuffer", noiseBuffer);
+            if (noiseGenerator.noiseGeneratorType == NoiseGenerator.NoiseGeneratorType.CaveDetailGenerator) terrainDensityComputeShader.SetBuffer(densityKernel, "CaveDetailNoiseBuffer", noiseBuffer);
+            if (noiseGenerator.noiseGeneratorType == NoiseGenerator.NoiseGeneratorType.ContinentalnessGenerator) terrainDensityComputeShader.SetBuffer(densityKernel, "ContinentalnessNoiseBuffer", noiseBuffer);
+            if (noiseGenerator.noiseGeneratorType == NoiseGenerator.NoiseGeneratorType.TemperatureMapGenerator) terrainDensityComputeShader.SetBuffer(densityKernel, "TemperatureNoiseBuffer", noiseBuffer);
+            if (noiseGenerator.noiseGeneratorType == NoiseGenerator.NoiseGeneratorType.HumidityMapGenerator) terrainDensityComputeShader.SetBuffer(densityKernel, "HumidityNoiseBuffer", noiseBuffer);
+            if (noiseGenerator.noiseGeneratorType == NoiseGenerator.NoiseGeneratorType.PeaksAndValleysMapGenerator) terrainDensityComputeShader.SetBuffer(densityKernel, "PeaksAndValleysNoiseBuffer", noiseBuffer);
+            noiseBuffers.Add(noiseBuffer);
+        }
+
         heightsBuffer = new ComputeBuffer((terrainDensityData.width + 1) * (terrainDensityData.width + 1) * (terrainDensityData.width + 1), sizeof(float));
-        // ComputeBuffer waterCheckBuffer = new ComputeBuffer(1, sizeof(int));
-        // ComputeBuffer undergroundCheckBuffer = new ComputeBuffer(1, sizeof(int));
 
-        terrainNoiseComputeShader.SetBuffer(terrainNoiseKernel, "TerrainNoiseBuffer", terrainNoiseBuffer);
-        caveNoiseComputeShader.SetBuffer(caveNoiseKernel, "CaveNoiseBuffer", caveNoiseBuffer);
-
-        terrainDensityComputeShader.SetBuffer(densityKernel, "TerrainNoiseBuffer", terrainNoiseBuffer);
-        terrainDensityComputeShader.SetBuffer(densityKernel, "CaveNoiseBuffer", caveNoiseBuffer);
         terrainDensityComputeShader.SetBuffer(densityKernel, "HeightsBuffer", heightsBuffer);
-        // terrainDensityComputeShader.SetBuffer(densityKernel, "WaterCheckBuffer", waterCheckBuffer);
-        // terrainDensityComputeShader.SetBuffer(densityKernel, "UndergroundCheckBuffer", undergroundCheckBuffer);
-
-        terrainNoiseComputeShader.Dispatch(terrainNoiseKernel, Mathf.CeilToInt(terrainDensityData.width / 4f) + 1, Mathf.CeilToInt(terrainDensityData.width / 4f) + 1, Mathf.CeilToInt(terrainDensityData.width / 4f) + 1);
-        caveNoiseComputeShader.Dispatch(caveNoiseKernel, Mathf.CeilToInt(terrainDensityData.width / 4f) + 1, Mathf.CeilToInt(terrainDensityData.width / 4f) + 1, Mathf.CeilToInt(terrainDensityData.width / 4f) + 1);
         terrainDensityComputeShader.Dispatch(densityKernel, Mathf.CeilToInt(terrainDensityData.width / 4f) + 1, Mathf.CeilToInt(terrainDensityData.width / 4f) + 1, Mathf.CeilToInt(terrainDensityData.width / 4f) + 1);
 
-        // int[] waterCheckResult = new int[1];
-        // waterCheckBuffer.GetData(waterCheckResult);
-        // hasWater = waterCheckResult[0] != 0;
-        // waterCheckBuffer.Release();
-
-        // int[] undergroundCheckResult = new int[1];
-        // undergroundCheckBuffer.GetData(undergroundCheckResult);
-        // isUnderground = undergroundCheckResult[0] != 0;
-        // undergroundCheckBuffer.Release();
-
-        ComputeBufferPoolManager.Instance.ReturnComputeBuffer("NoiseBuffer", terrainNoiseBuffer);
-        ComputeBufferPoolManager.Instance.ReturnComputeBuffer("NoiseBuffer", caveNoiseBuffer);
+        foreach (ComputeBuffer noiseBuffer in noiseBuffers) {
+            ComputeBufferPoolManager.Instance.ReturnComputeBuffer("NoiseBuffer", noiseBuffer);
+        }
 
         return heightsBuffer;
     }
+    /// <summary>
+    /// Set up the density values for the chunk using compute shaders
+    /// </summary>
+    /// <returns>The buffer the density values are stored in</returns>
+    // public ComputeBuffer SetHeights()
+    // {
+    //     int terrainNoiseKernel = terrainNoiseComputeShader.FindKernel("TerrainNoise");
+    //     int caveNoiseKernel = caveNoiseComputeShader.FindKernel("CaveNoise");
+    //     int densityKernel = terrainDensityComputeShader.FindKernel("TerrainDensity");
+
+    //     ComputeBuffer terrainNoiseBuffer = ComputeBufferPoolManager.Instance.GetComputeBuffer("NoiseBuffer", (terrainDensityData.width + 1) * (terrainDensityData.width + 1) * (terrainDensityData.width + 1), sizeof(float));
+    //     ComputeBuffer caveNoiseBuffer = ComputeBufferPoolManager.Instance.GetComputeBuffer("NoiseBuffer", (terrainDensityData.width + 1) * (terrainDensityData.width + 1) * (terrainDensityData.width + 1), sizeof(float));
+    //     heightsBuffer = new ComputeBuffer((terrainDensityData.width + 1) * (terrainDensityData.width + 1) * (terrainDensityData.width + 1), sizeof(float));
+    //     // ComputeBuffer waterCheckBuffer = new ComputeBuffer(1, sizeof(int));
+    //     // ComputeBuffer undergroundCheckBuffer = new ComputeBuffer(1, sizeof(int));
+
+    //     terrainNoiseComputeShader.SetBuffer(terrainNoiseKernel, "TerrainNoiseBuffer", terrainNoiseBuffer);
+    //     caveNoiseComputeShader.SetBuffer(caveNoiseKernel, "CaveNoiseBuffer", caveNoiseBuffer);
+
+    //     terrainDensityComputeShader.SetBuffer(densityKernel, "TerrainNoiseBuffer", terrainNoiseBuffer);
+    //     terrainDensityComputeShader.SetBuffer(densityKernel, "CaveNoiseBuffer", caveNoiseBuffer);
+    //     terrainDensityComputeShader.SetBuffer(densityKernel, "HeightsBuffer", heightsBuffer);
+    //     // terrainDensityComputeShader.SetBuffer(densityKernel, "WaterCheckBuffer", waterCheckBuffer);
+    //     // terrainDensityComputeShader.SetBuffer(densityKernel, "UndergroundCheckBuffer", undergroundCheckBuffer);
+
+    //     terrainNoiseComputeShader.Dispatch(terrainNoiseKernel, Mathf.CeilToInt(terrainDensityData.width / 4f) + 1, Mathf.CeilToInt(terrainDensityData.width / 4f) + 1, Mathf.CeilToInt(terrainDensityData.width / 4f) + 1);
+    //     caveNoiseComputeShader.Dispatch(caveNoiseKernel, Mathf.CeilToInt(terrainDensityData.width / 4f) + 1, Mathf.CeilToInt(terrainDensityData.width / 4f) + 1, Mathf.CeilToInt(terrainDensityData.width / 4f) + 1);
+    //     terrainDensityComputeShader.Dispatch(densityKernel, Mathf.CeilToInt(terrainDensityData.width / 4f) + 1, Mathf.CeilToInt(terrainDensityData.width / 4f) + 1, Mathf.CeilToInt(terrainDensityData.width / 4f) + 1);
+
+    //     // int[] waterCheckResult = new int[1];
+    //     // waterCheckBuffer.GetData(waterCheckResult);
+    //     // hasWater = waterCheckResult[0] != 0;
+    //     // waterCheckBuffer.Release();
+
+    //     // int[] undergroundCheckResult = new int[1];
+    //     // undergroundCheckBuffer.GetData(undergroundCheckResult);
+    //     // isUnderground = undergroundCheckResult[0] != 0;
+    //     // undergroundCheckBuffer.Release();
+
+    //     ComputeBufferPoolManager.Instance.ReturnComputeBuffer("NoiseBuffer", terrainNoiseBuffer);
+    //     ComputeBufferPoolManager.Instance.ReturnComputeBuffer("NoiseBuffer", caveNoiseBuffer);
+
+    //     return heightsBuffer;
+    // }
     /// <summary>
     /// Perform marching cubes in a compute shader and trigger mesh generation and asset spawning
     /// </summary>

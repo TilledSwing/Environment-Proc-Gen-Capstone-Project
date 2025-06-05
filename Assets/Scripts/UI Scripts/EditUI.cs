@@ -4,7 +4,7 @@ using UnityEngine.UI;
 public class EditUI : MonoBehaviour
 {
     public MarchingCubes mc;
-    public TerrainDensityData tdd;
+    public TerrainDensityDataOld tdd;
     public Slider slider;
     public Toggle toggle;
     public TMP_InputField input;
