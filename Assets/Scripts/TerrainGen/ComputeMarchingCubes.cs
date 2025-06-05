@@ -52,7 +52,6 @@ public class ComputeMarchingCubes : MonoBehaviour
     void Start()
     {
         SetTerrainSettings();
-        // SetNoiseSetting();
         GenerateMesh();
         // StartCoroutine(GenerateMesh());
     }
@@ -174,50 +173,6 @@ public class ComputeMarchingCubes : MonoBehaviour
 
         return heightsBuffer;
     }
-    /// <summary>
-    /// Set up the density values for the chunk using compute shaders
-    /// </summary>
-    /// <returns>The buffer the density values are stored in</returns>
-    // public ComputeBuffer SetHeights()
-    // {
-    //     int terrainNoiseKernel = terrainNoiseComputeShader.FindKernel("TerrainNoise");
-    //     int caveNoiseKernel = caveNoiseComputeShader.FindKernel("CaveNoise");
-    //     int densityKernel = terrainDensityComputeShader.FindKernel("TerrainDensity");
-
-    //     ComputeBuffer terrainNoiseBuffer = ComputeBufferPoolManager.Instance.GetComputeBuffer("NoiseBuffer", (terrainDensityData.width + 1) * (terrainDensityData.width + 1) * (terrainDensityData.width + 1), sizeof(float));
-    //     ComputeBuffer caveNoiseBuffer = ComputeBufferPoolManager.Instance.GetComputeBuffer("NoiseBuffer", (terrainDensityData.width + 1) * (terrainDensityData.width + 1) * (terrainDensityData.width + 1), sizeof(float));
-    //     heightsBuffer = new ComputeBuffer((terrainDensityData.width + 1) * (terrainDensityData.width + 1) * (terrainDensityData.width + 1), sizeof(float));
-    //     // ComputeBuffer waterCheckBuffer = new ComputeBuffer(1, sizeof(int));
-    //     // ComputeBuffer undergroundCheckBuffer = new ComputeBuffer(1, sizeof(int));
-
-    //     terrainNoiseComputeShader.SetBuffer(terrainNoiseKernel, "TerrainNoiseBuffer", terrainNoiseBuffer);
-    //     caveNoiseComputeShader.SetBuffer(caveNoiseKernel, "CaveNoiseBuffer", caveNoiseBuffer);
-
-    //     terrainDensityComputeShader.SetBuffer(densityKernel, "TerrainNoiseBuffer", terrainNoiseBuffer);
-    //     terrainDensityComputeShader.SetBuffer(densityKernel, "CaveNoiseBuffer", caveNoiseBuffer);
-    //     terrainDensityComputeShader.SetBuffer(densityKernel, "HeightsBuffer", heightsBuffer);
-    //     // terrainDensityComputeShader.SetBuffer(densityKernel, "WaterCheckBuffer", waterCheckBuffer);
-    //     // terrainDensityComputeShader.SetBuffer(densityKernel, "UndergroundCheckBuffer", undergroundCheckBuffer);
-
-    //     terrainNoiseComputeShader.Dispatch(terrainNoiseKernel, Mathf.CeilToInt(terrainDensityData.width / 4f) + 1, Mathf.CeilToInt(terrainDensityData.width / 4f) + 1, Mathf.CeilToInt(terrainDensityData.width / 4f) + 1);
-    //     caveNoiseComputeShader.Dispatch(caveNoiseKernel, Mathf.CeilToInt(terrainDensityData.width / 4f) + 1, Mathf.CeilToInt(terrainDensityData.width / 4f) + 1, Mathf.CeilToInt(terrainDensityData.width / 4f) + 1);
-    //     terrainDensityComputeShader.Dispatch(densityKernel, Mathf.CeilToInt(terrainDensityData.width / 4f) + 1, Mathf.CeilToInt(terrainDensityData.width / 4f) + 1, Mathf.CeilToInt(terrainDensityData.width / 4f) + 1);
-
-    //     // int[] waterCheckResult = new int[1];
-    //     // waterCheckBuffer.GetData(waterCheckResult);
-    //     // hasWater = waterCheckResult[0] != 0;
-    //     // waterCheckBuffer.Release();
-
-    //     // int[] undergroundCheckResult = new int[1];
-    //     // undergroundCheckBuffer.GetData(undergroundCheckResult);
-    //     // isUnderground = undergroundCheckResult[0] != 0;
-    //     // undergroundCheckBuffer.Release();
-
-    //     ComputeBufferPoolManager.Instance.ReturnComputeBuffer("NoiseBuffer", terrainNoiseBuffer);
-    //     ComputeBufferPoolManager.Instance.ReturnComputeBuffer("NoiseBuffer", caveNoiseBuffer);
-
-    //     return heightsBuffer;
-    // }
     /// <summary>
     /// Perform marching cubes in a compute shader and trigger mesh generation and asset spawning
     /// </summary>
