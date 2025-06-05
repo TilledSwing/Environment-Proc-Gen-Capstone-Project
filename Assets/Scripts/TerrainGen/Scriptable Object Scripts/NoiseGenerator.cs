@@ -48,7 +48,8 @@ public class NoiseGenerator : ScriptableObject
         ContinentalnessGenerator = 3,
         TemperatureMapGenerator = 4,
         HumidityMapGenerator = 5,
-        PeaksAndValleysMapGenerator = 6
+        PeaksAndValleysMapGenerator = 6,
+        ErosionMapGenerator = 7
     }
     public enum fnl_noise_dimension {
         _2D = 0,
