@@ -5,11 +5,19 @@
 RWStructuredBuffer<float> HeightsBuffer;
 StructuredBuffer<float> BaseNoiseBuffer;
 StructuredBuffer<float> LargeCaveNoiseBuffer;
+bool LargeCaveNoiseActivated;
 StructuredBuffer<float> CaveDetailNoiseBuffer;
+bool CaveDetailNoiseActivated = false;
 StructuredBuffer<float> ContinentalnessNoiseBuffer;
+bool ContinentalnessNoiseActivated = false;
 StructuredBuffer<float> TemperatureNoiseBuffer;
+bool TemperatureNoiseActivated = false;
 StructuredBuffer<float> HumidityNoiseBuffer;
+bool HumidityNoiseActivated = false;
 StructuredBuffer<float> PeaksAndValleysNoiseBuffer;
+bool PeaksAndValleysNoiseActivated = false;
+StructuredBuffer<float> ErosionNoiseBuffer;
+bool ErosionNoiseActivated = false;
 // Terrain Values
 int height;
 bool terracing;
@@ -33,28 +41,36 @@ void TerrainDensity (uint3 id : SV_DispatchThreadID)
         return ;
     }
 
-    float continentalnessNoise = ContinentalnessNoiseBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)];
-    float adjustedHeight = height * ((continentalnessNoise + 1.5) * 0.5);
+    // Activation checks don't actually work yet cause hlsl is weird
+    float terrainNoise = BaseNoiseBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)];
+    float baseTerrainHeight = (terrainNoise+1)/2;
+    float largeCaveNoise = (LargeCaveNoiseActivated ? LargeCaveNoiseBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)] : 0);
+    float continentalnessNoise = (ContinentalnessNoiseActivated ? ContinentalnessNoiseBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)] : 0);
+    // float erosionNoise = (ErosionNoiseActivated ? ErosionNoiseBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)] : 0);
+    // float peaksAndValleysNoise = (PeaksAndValleysNoiseActivated ? PeaksAndValleysNoiseBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)] : 0);
+
+    // Continentalness
+    float adjustedBaseTerrainHeight = (ContinentalnessNoiseActivated ? baseTerrainHeight * ((continentalnessNoise + 1.5) * 0.5) : baseTerrainHeight);
+    // Erosion
+    // adjustedBaseTerrainHeight *= (ErosionNoiseActivated ? lerp(0.3, 1.0, ((erosionNoise * -1) + 1) / 2) : 1);
 
     // Cave Carve Calculation
-    float caveNoise = LargeCaveNoiseBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)];
-    float caveCarve = smoothstep(-0.4, 0.0, caveNoise);
+    float caveCarve = smoothstep(-0.4, 0.0, largeCaveNoise);
     caveCarve = 1.0 - caveCarve;
     // Terrain Density Calculation
-    float terrainNoise = BaseNoiseBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)];
-    float currentHeight = (adjustedHeight * ((terrainNoise+1)/2) + (terracing ? (id.y%terraceHeight) : 0));
+    float currentHeight = ((height * adjustedBaseTerrainHeight) + (terracing ? (id.y%terraceHeight) : 0));
     float terrainDensity = currentHeight - (ChunkPos.y + id.y);
     // Cave Fade
     float surfaceFade = saturate((terrainDensity) / 60.0);
     float caveFade = saturate((terrainDensity - ChunkSize) / 70.0);
-    float finalDensity = terrainDensity + ((ChunkPos.y + id.y) * caveFade) - (caveCarve * adjustedHeight * surfaceFade);
+    float finalDensity = LargeCaveNoiseActivated ? terrainDensity + ((ChunkPos.y + id.y) * caveFade) - (caveCarve * height * surfaceFade) : terrainDensity;
     // World Depth Fade
     if (ChunkPos.y / ChunkSize == -MaxWorldYChunks) {
         float fadeStart = ChunkSize * 0.1;
         float fadeRange = ChunkSize * 0.2;
         float worldDepthFade = saturate((id.y - fadeStart) / fadeRange);
 
-        float caveSuppression = caveCarve * adjustedHeight * surfaceFade * worldDepthFade;
+        float caveSuppression = caveCarve * height * surfaceFade * worldDepthFade;
         finalDensity = terrainDensity + ((ChunkPos.y + id.y) * caveFade) - caveSuppression;
     }
 

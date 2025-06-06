@@ -3,6 +3,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "NoiseGenerator", menuName = "Scriptable Objects/NoiseGenerator")]
 public class NoiseGenerator : ScriptableObject
 {
+    public bool activated;
     public NoiseGeneratorType noiseGeneratorType;
     // Noise and Fractal Settings
     public int selectedNoiseDimension = 1;

@@ -516,6 +516,7 @@ public class ChunkGenNetwork : NetworkBehaviour
                 waterMat.material = waterMaterial;
                 waterGen = waterPlaneGenerator.AddComponent<WaterPlaneGenerator>();
                 waterGen.meshFilter = waterGenMeshFilter;
+                waterGen.meshRenderer = waterMat;
                 waterGen.terrainDensityData = terrainDensityData;
                 waterGen.chunkPos = chunkPos;
                 waterGen.marchingCubes = marchingCubes;
@@ -553,23 +554,33 @@ public class ChunkGenNetwork : NetworkBehaviour
                     meshCollider.enabled = visible;
                 }
             }
-            if (assetSpawner.assetsSet)
+            if (Instance.terrainDensityData.waterLevel > chunkPos.y && Instance.terrainDensityData.waterLevel < Mathf.RoundToInt(chunkPos.y + Instance.terrainDensityData.waterLevel))
             {
-                for (int i = 0; i < assetSpawner.spawnedAssets.Count; i++)
+                if (waterGen.meshRenderer != null)
                 {
-                    foreach (Asset asset in assetSpawner.spawnedAssets[i])
+                    if (waterGen.meshRenderer.enabled != visible)
                     {
-                        if (asset.meshRenderer != null)
-                        {
-                            asset.meshRenderer.enabled = visible;
-                        }
-                        if (asset.meshCollider != null)
-                        {
-                            asset.meshCollider.enabled = visible;
-                        }
+                        waterGen.meshRenderer.enabled = visible;
                     }
                 }
             }
+            if (assetSpawner.assetsSet)
+                {
+                    for (int i = 0; i < assetSpawner.spawnedAssets.Count; i++)
+                    {
+                        foreach (Asset asset in assetSpawner.spawnedAssets[i])
+                        {
+                            if (asset.meshRenderer != null)
+                            {
+                                asset.meshRenderer.enabled = visible;
+                            }
+                            if (asset.meshCollider != null)
+                            {
+                                asset.meshCollider.enabled = visible;
+                            }
+                        }
+                    }
+                }
         }
         /// <summary>
         /// Check chunk visibility

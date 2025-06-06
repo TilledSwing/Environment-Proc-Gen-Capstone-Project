@@ -15021,20 +15021,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50dd4dba7109d9c44bf81d255e0ab9c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxViewDst: 100
-  viewer: {fileID: 1588582780}
-  chunkSize: 0
-  chunksVisible: 0
-  terrainDensityData: {fileID: 11400000, guid: 4bc939f839855ea45ade17dce060eea5, type: 2}
-  marchingCubesComputeShader: {fileID: 7200000, guid: d2f49f4c36241c7468a0705fa73f69a5, type: 3}
-  terrainDensityComputeShader: {fileID: 7200000, guid: 1caae6b81357a864095f47aab860122c, type: 3}
-  terrainNoiseComputeShader: {fileID: 7200000, guid: 93b6fb759617148499ec115b8092bb44, type: 3}
-  caveNoiseComputeShader: {fileID: 7200000, guid: 133c41b8a159bf341895db834619e8be, type: 3}
-  terraformComputeShader: {fileID: 7200000, guid: e41356404106d3e4487dd76d300e0a73, type: 3}
-  terrainMaterial: {fileID: 2100000, guid: d644a1ee14ca32a44b080e9c6de5ed62, type: 2}
-  waterMaterial: {fileID: 2100000, guid: 804af839dce47f748a2151ac2e3113a9, type: 2}
-  assetSpawnData: {fileID: 11400000, guid: 29949715b352478458342a45d2b907a0, type: 2}
-  lightingBlocker: {fileID: 762416109}
 --- !u!4 &1618158070
 Transform:
   m_ObjectHideFlags: 0

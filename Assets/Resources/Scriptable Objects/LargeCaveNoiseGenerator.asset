@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 706a95b2ea676fc44a907f69e74100cb, type: 3}
   m_Name: LargeCaveNoiseGenerator
   m_EditorClassIdentifier: 
+  activated: 1
   noiseGeneratorType: 1
   selectedNoiseDimension: 1
   noiseDimension: 1

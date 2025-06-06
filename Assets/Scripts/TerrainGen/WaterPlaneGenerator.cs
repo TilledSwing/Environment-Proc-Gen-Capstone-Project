@@ -11,6 +11,7 @@ public class WaterPlaneGenerator : MonoBehaviour
     private List<int> triangles = new List<int>();
     private List<Vector2> uvs = new List<Vector2>();
     public MeshFilter meshFilter;
+    public MeshRenderer meshRenderer;
     public Vector3Int chunkPos;
     public ComputeMarchingCubes marchingCubes;
     public TerrainDensityData terrainDensityData;

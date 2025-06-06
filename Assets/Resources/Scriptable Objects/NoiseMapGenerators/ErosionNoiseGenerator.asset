@@ -12,28 +12,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 706a95b2ea676fc44a907f69e74100cb, type: 3}
   m_Name: ErosionNoiseGenerator
   m_EditorClassIdentifier: 
+  activated: 1
   noiseGeneratorType: 7
   selectedNoiseDimension: 1
-  noiseDimension: 1
+  noiseDimension: 0
   selectedNoiseType: 0
   noiseType: 0
   selectedNoiseFractalType: 1
   noiseFractalType: 1
   selectedRotationType3D: 0
   rotationType3D: 0
-  noiseSeed: 0
-  noiseFractalOctaves: 5
+  noiseSeed: 32941
+  noiseFractalOctaves: 3
   noiseFractalLacunarity: 2
   noiseFractalGain: 0.5
-  fractalWeightedStrength: 0
-  noiseFrequency: 0.01
+  fractalWeightedStrength: 1
+  noiseFrequency: 0.005
   domainWarpToggle: 0
   selectedDomainWarpType: 0
   domainWarpType: 0
   selectedDomainWarpFractalType: 0
-  domainWarpFractalType: 0
-  domainWarpAmplitude: 1
-  domainWarpSeed: 0
+  domainWarpFractalType: 4
+  domainWarpAmplitude: 30
+  domainWarpSeed: 80184
   domainWarpFractalOctaves: 5
   domainWarpFractalLacunarity: 2
   domainWarpFractalGain: 0.5
@@ -43,5 +44,5 @@ MonoBehaviour:
   selectedCellularReturnType: 1
   cellularReturnType: 1
   cellularJitter: 1
-  noiseScale: 0.6
+  noiseScale: 1
   width: 24
