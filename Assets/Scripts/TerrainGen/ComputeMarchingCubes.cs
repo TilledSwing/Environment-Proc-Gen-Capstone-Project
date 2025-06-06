@@ -13,7 +13,6 @@ public class ComputeMarchingCubes : MonoBehaviour
     public ComputeShader marchingCubesComputeShader;
     public ComputeShader terrainDensityComputeShader;
     public ComputeShader terrainNoiseComputeShader;
-    public ComputeShader caveNoiseComputeShader;
     public ComputeShader terraformComputeShader;
     public Material terrainMaterial;
     public Material waterMaterial;
@@ -404,7 +403,7 @@ public class ComputeMarchingCubes : MonoBehaviour
     /// </summary>
     void OnDrawGizmos()
     {
-        if (terrainDensityData == null) return; // still not found
+        if (terrainDensityData == null || gameObject.GetComponent<MeshRenderer>().enabled == false) return; // still not found
         Gizmos.DrawWireCube(chunkPos + (new Vector3(0.5f, 0.5f, 0.5f) * terrainDensityData.width), Vector3.one * terrainDensityData.width);
     }
     

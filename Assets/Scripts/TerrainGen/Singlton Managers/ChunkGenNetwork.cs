@@ -39,7 +39,6 @@ public class ChunkGenNetwork : NetworkBehaviour
     public ComputeShader marchingCubesComputeShader;
     public ComputeShader terrainDensityComputeShader;
     public ComputeShader terrainNoiseComputeShader;
-    public ComputeShader caveNoiseComputeShader;
     public ComputeShader terraformComputeShader;
     // Material References
     public Material terrainMaterial;
@@ -207,8 +206,7 @@ public class ChunkGenNetwork : NetworkBehaviour
                         {
                             // Generate immediately during first load
                             TerrainChunk chunk = new TerrainChunk(viewedChunkCoord, chunkSize, transform, terrainDensityData, assetSpawnData, terrainTextureData,
-                                                         marchingCubesComputeShader, terrainDensityComputeShader, terrainNoiseComputeShader,
-                                                         caveNoiseComputeShader, terraformComputeShader,
+                                                         marchingCubesComputeShader, terrainDensityComputeShader, terrainNoiseComputeShader, terraformComputeShader,
                                                          terrainMaterial, waterMaterial, initialLoadComplete);
 
                             chunkDictionary.Add(viewedChunkCoord, chunk);
@@ -263,12 +261,14 @@ public class ChunkGenNetwork : NetworkBehaviour
         while (chunkLoadQueue.Count > 0)
         {
             Vector3Int coord = chunkLoadQueue.Dequeue();
+            Bounds bounds = new Bounds((coord * chunkSize) + (new Vector3(0.5f, 0.5f, 0.5f) * chunkSize), Vector3.one * chunkSize);
+            float viewerDstFromBound = Mathf.Sqrt(bounds.SqrDistance(viewerPos));
 
-            if (!chunkDictionary.ContainsKey(coord))
+            if (!chunkDictionary.ContainsKey(coord) && viewerDstFromBound <= maxViewDst)
             {
                 var chunk = new TerrainChunk(coord, chunkSize, transform, terrainDensityData, assetSpawnData, terrainTextureData,
                                             marchingCubesComputeShader, terrainDensityComputeShader,
-                                            terrainNoiseComputeShader, caveNoiseComputeShader,
+                                            terrainNoiseComputeShader,
                                             terraformComputeShader,
                                             terrainMaterial, waterMaterial, initialLoadComplete);
                 chunkDictionary.Add(coord, chunk);
@@ -479,7 +479,7 @@ public class ChunkGenNetwork : NetworkBehaviour
         public MeshRenderer meshRenderer;
         public TerrainChunk(Vector3Int chunkCoord, int chunkSize, Transform parent, TerrainDensityData terrainDensityData, AssetSpawnData assetSpawnData, TerrainTextureData terrainTextureData,
                             ComputeShader marchingCubesComputeShader, ComputeShader terrainDensityComputeShader, ComputeShader terrainNoiseComputeShader,
-                            ComputeShader caveNoiseComputeShader, ComputeShader terraformComputeShader,
+                            ComputeShader terraformComputeShader,
                             Material terrainMaterial, Material waterMaterial, bool initialLoadComplete)
         {
             chunkPos = chunkCoord * chunkSize;
@@ -508,7 +508,6 @@ public class ChunkGenNetwork : NetworkBehaviour
             marchingCubes.marchingCubesComputeShader = marchingCubesComputeShader;
             marchingCubes.terrainDensityComputeShader = terrainDensityComputeShader;
             marchingCubes.terrainNoiseComputeShader = terrainNoiseComputeShader;
-            marchingCubes.caveNoiseComputeShader = caveNoiseComputeShader;
             marchingCubes.terraformComputeShader = terraformComputeShader;
             marchingCubes.terrainDensityData = terrainDensityData;
             marchingCubes.terrainMaterial = terrainMaterial;

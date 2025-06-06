@@ -16859,7 +16859,7 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 1838274978}
   _networkObjectCache: {fileID: 0}
   maxWorldYChunks: 16
-  maxViewDst: 100
+  maxViewDst: 150
   viewer: {fileID: 1588582780}
   updateDistanceThreshold: 5
   chunkSize: 0
@@ -16882,7 +16882,6 @@ MonoBehaviour:
   marchingCubesComputeShader: {fileID: 7200000, guid: d2f49f4c36241c7468a0705fa73f69a5, type: 3}
   terrainDensityComputeShader: {fileID: 7200000, guid: 1caae6b81357a864095f47aab860122c, type: 3}
   terrainNoiseComputeShader: {fileID: 7200000, guid: 93b6fb759617148499ec115b8092bb44, type: 3}
-  caveNoiseComputeShader: {fileID: 7200000, guid: 133c41b8a159bf341895db834619e8be, type: 3}
   terraformComputeShader: {fileID: 7200000, guid: e41356404106d3e4487dd76d300e0a73, type: 3}
   terrainMaterial: {fileID: 2100000, guid: d644a1ee14ca32a44b080e9c6de5ed62, type: 2}
   waterMaterial: {fileID: 2100000, guid: 804af839dce47f748a2151ac2e3113a9, type: 2}
