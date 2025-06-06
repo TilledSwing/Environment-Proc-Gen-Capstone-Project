@@ -295,19 +295,32 @@ public class ChunkGenNetwork : NetworkBehaviour
     {
         isLoadingReadbacks = true;
 
-        int readbackBatchCounter = 0;
-        while (pendingReadbacks.Count > 0)
+        // int readbackBatchCounter = 0;
+
+        List<AsyncGPUReadbackRequest> activeRequests = new List<AsyncGPUReadbackRequest>();
+
+        while (pendingReadbacks.Count > 0 || activeRequests.Count > 0)
         {
-            ReadbackRequest pendingReadback = pendingReadbacks.Dequeue();
-
-            AsyncGPUReadback.Request(pendingReadback.buffer, pendingReadback.readbackRequest);
-
-            readbackBatchCounter++;
-
-            if (readbackBatchCounter % 2 == 0)
-            {
-                yield return new WaitForEndOfFrame();
+            for (int i = 0; i < activeRequests.Count; i++) {
+                if (activeRequests[i].done) {
+                    activeRequests.RemoveAt(i);
+                }
             }
+
+            while (activeRequests.Count <= 2 && pendingReadbacks.Count > 0) {
+                ReadbackRequest pendingReadback = pendingReadbacks.Dequeue();
+
+                activeRequests.Add(AsyncGPUReadback.Request(pendingReadback.buffer, pendingReadback.readbackRequest));
+            }
+
+            yield return null;
+
+            // readbackBatchCounter++;
+
+            // if (readbackBatchCounter % 2 == 0)
+            // {
+            //     yield return new WaitForEndOfFrame();
+            // }
         }
 
         isLoadingReadbacks = false;
@@ -565,22 +578,22 @@ public class ChunkGenNetwork : NetworkBehaviour
                 }
             }
             if (assetSpawner.assetsSet)
+            {
+                for (int i = 0; i < assetSpawner.spawnedAssets.Count; i++)
                 {
-                    for (int i = 0; i < assetSpawner.spawnedAssets.Count; i++)
+                    foreach (Asset asset in assetSpawner.spawnedAssets[i])
                     {
-                        foreach (Asset asset in assetSpawner.spawnedAssets[i])
+                        if (asset.meshRenderer != null)
                         {
-                            if (asset.meshRenderer != null)
-                            {
-                                asset.meshRenderer.enabled = visible;
-                            }
-                            if (asset.meshCollider != null)
-                            {
-                                asset.meshCollider.enabled = visible;
-                            }
+                            asset.meshRenderer.enabled = visible;
+                        }
+                        if (asset.meshCollider != null)
+                        {
+                            asset.meshCollider.enabled = visible;
                         }
                     }
                 }
+            }
         }
         /// <summary>
         /// Check chunk visibility
