@@ -46,7 +46,8 @@ public class ChunkGenNetwork : NetworkBehaviour
     // Chunk Variables
     public Dictionary<Vector3, TerrainChunk> chunkDictionary = new();
     public List<TerrainChunk> chunksVisibleLastUpdate = new();
-    private Queue<Vector3Int> chunkLoadQueue = new();
+    private PriorityQueue<Vector3Int> chunkLoadQueue = new();
+    public float queueUpdateDistanceThreshold = 15f;
     private bool isLoadingChunks = false;
     public bool initialLoadComplete = false;
     // Lighting Blocker
@@ -221,7 +222,18 @@ public class ChunkGenNetwork : NetworkBehaviour
                         {
                             if (!chunkLoadQueue.Contains(viewedChunkCoord))
                             {
-                                chunkLoadQueue.Enqueue(viewedChunkCoord);
+                                Vector3 chunkCenter = (viewedChunkCoord * chunkSize) + Vector3.one * chunkSize * 0.5f;
+                                Vector3 toChunk = (chunkCenter - viewerPos).normalized;
+
+                                Vector3 movementVector = viewerPos - lastUpdateViewerPos;
+                                Vector3 movementDir = movementVector.sqrMagnitude > 0.01f ? movementVector.normalized : Camera.main.transform.forward;
+
+                                float angle = Vector3.Angle(movementDir, toChunk);
+                                if (angle > 60f) continue;
+
+                                Bounds bounds = new Bounds((viewedChunkCoord * chunkSize) + (new Vector3(0.5f, 0.5f, 0.5f) * chunkSize), Vector3.one * chunkSize);
+                                float viewerDstFromBound = Mathf.Sqrt(bounds.SqrDistance(viewerPos));
+                                chunkLoadQueue.Enqueue(viewedChunkCoord, viewerDstFromBound);
                             }
                         }
                     }
@@ -240,10 +252,10 @@ public class ChunkGenNetwork : NetworkBehaviour
         {
             StartCoroutine(LoadReadbacksOverTime());
         }
-        if (!isLoadingMeshes)
-        {
-            StartCoroutine(LoadMeshesOverTime());
-        }
+        // if (!isLoadingMeshes)
+        // {
+        //     StartCoroutine(LoadMeshesOverTime());
+        // }
         if (!isLoadingAssetInstantiations)
         {
             StartCoroutine(LoadAssetInstantiationsOverTime());
@@ -255,11 +267,28 @@ public class ChunkGenNetwork : NetworkBehaviour
     /// <returns>yield return</returns>
     private IEnumerator LoadChunksOverTime()
     {
+        Vector3 startViewerPos = viewerPos;
         isLoadingChunks = true;
 
         int chunkBatchCounter = 0;
+
         while (chunkLoadQueue.Count > 0)
         {
+            // if (Vector3.Distance(startViewerPos, viewerPos) >= queueUpdateDistanceThreshold)
+            // {
+            //     List<Vector3Int> oldChunkCoords = new();
+            //     while (chunkLoadQueue.Count > 0)
+            //     {
+            //         oldChunkCoords.Add(chunkLoadQueue.Dequeue());
+            //     }
+            //     foreach (Vector3Int chunkCoord in oldChunkCoords)
+            //     {
+            //         Bounds chunkBounds = new Bounds((chunkCoord * chunkSize) + (new Vector3(0.5f, 0.5f, 0.5f) * chunkSize), Vector3.one * chunkSize);
+            //         float chunkViewerDstFromBound = Mathf.Sqrt(chunkBounds.SqrDistance(viewerPos));
+            //         chunkLoadQueue.Enqueue(chunkCoord, chunkViewerDstFromBound);
+            //     }
+            //     startViewerPos = viewerPos;
+            // }
             Vector3Int coord = chunkLoadQueue.Dequeue();
             Bounds bounds = new Bounds((coord * chunkSize) + (new Vector3(0.5f, 0.5f, 0.5f) * chunkSize), Vector3.one * chunkSize);
             float viewerDstFromBound = Mathf.Sqrt(bounds.SqrDistance(viewerPos));
@@ -279,7 +308,7 @@ public class ChunkGenNetwork : NetworkBehaviour
                 chunkBatchCounter++;
             }
 
-            if (chunkBatchCounter % 2 == 0)
+            if (chunkBatchCounter % 4 == 0)
             {
                 yield return new WaitForEndOfFrame();
             }
