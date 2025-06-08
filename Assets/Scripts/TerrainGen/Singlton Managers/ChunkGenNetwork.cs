@@ -47,6 +47,9 @@ public class ChunkGenNetwork : NetworkBehaviour
     public Dictionary<Vector3, TerrainChunk> chunkDictionary = new();
     public List<TerrainChunk> chunksVisibleLastUpdate = new();
     private PriorityQueue<Vector3Int> chunkLoadQueue = new();
+    private HashSet<Vector3Int> chunkLoadSet = new();
+    public Queue<Action> chunkVisibilityQueue = new();
+    private bool isLoadingChunkVisibility = false;
     public float queueUpdateDistanceThreshold = 15f;
     private bool isLoadingChunks = false;
     public bool initialLoadComplete = false;
@@ -193,12 +196,12 @@ public class ChunkGenNetwork : NetworkBehaviour
                         }
                     }
 
-                    if (chunkDictionary.ContainsKey(viewedChunkCoord))
+                    if (chunkDictionary.TryGetValue(viewedChunkCoord, out TerrainChunk dictChunk))
                     {
-                        chunkDictionary[viewedChunkCoord].UpdateChunk(maxViewDst, terrainDensityData.width);
-                        if (chunkDictionary[viewedChunkCoord].IsVisible())
+                        dictChunk.UpdateChunk(maxViewDst, terrainDensityData.width);
+                        if (dictChunk.IsVisible())
                         {
-                            chunksVisibleLastUpdate.Add(chunkDictionary[viewedChunkCoord]);
+                            chunksVisibleLastUpdate.Add(dictChunk);
                         }
                     }
                     else
@@ -220,7 +223,7 @@ public class ChunkGenNetwork : NetworkBehaviour
                         }
                         else
                         {
-                            if (!chunkLoadQueue.Contains(viewedChunkCoord))
+                            if (!chunkLoadSet.Contains(viewedChunkCoord))
                             {
                                 Vector3 chunkCenter = (viewedChunkCoord * chunkSize) + Vector3.one * chunkSize * 0.5f;
                                 Vector3 toChunk = (chunkCenter - viewerPos).normalized;
@@ -232,8 +235,9 @@ public class ChunkGenNetwork : NetworkBehaviour
                                 if (angle > 60f) continue;
 
                                 Bounds bounds = new Bounds((viewedChunkCoord * chunkSize) + (new Vector3(0.5f, 0.5f, 0.5f) * chunkSize), Vector3.one * chunkSize);
-                                float viewerDstFromBound = Mathf.Sqrt(bounds.SqrDistance(viewerPos));
+                                float viewerDstFromBound = bounds.SqrDistance(viewerPos);
                                 chunkLoadQueue.Enqueue(viewedChunkCoord, viewerDstFromBound);
+                                chunkLoadSet.Add(viewedChunkCoord);
                             }
                         }
                     }
@@ -248,6 +252,10 @@ public class ChunkGenNetwork : NetworkBehaviour
         {
             StartCoroutine(LoadChunksOverTime());
         }
+        // if (!isLoadingChunkVisibility)
+        // {
+        //     StartCoroutine(LoadChunkVisibilityOverTime());
+        // }
         if (!isLoadingReadbacks)
         {
             StartCoroutine(LoadReadbacksOverTime());
@@ -274,26 +282,27 @@ public class ChunkGenNetwork : NetworkBehaviour
 
         while (chunkLoadQueue.Count > 0)
         {
-            // if (Vector3.Distance(startViewerPos, viewerPos) >= queueUpdateDistanceThreshold)
-            // {
-            //     List<Vector3Int> oldChunkCoords = new();
-            //     while (chunkLoadQueue.Count > 0)
-            //     {
-            //         oldChunkCoords.Add(chunkLoadQueue.Dequeue());
-            //     }
-            //     foreach (Vector3Int chunkCoord in oldChunkCoords)
-            //     {
-            //         Bounds chunkBounds = new Bounds((chunkCoord * chunkSize) + (new Vector3(0.5f, 0.5f, 0.5f) * chunkSize), Vector3.one * chunkSize);
-            //         float chunkViewerDstFromBound = Mathf.Sqrt(chunkBounds.SqrDistance(viewerPos));
-            //         chunkLoadQueue.Enqueue(chunkCoord, chunkViewerDstFromBound);
-            //     }
-            //     startViewerPos = viewerPos;
-            // }
+            if (Vector3.Distance(startViewerPos, viewerPos) >= queueUpdateDistanceThreshold)
+            {
+                List<Vector3Int> oldChunkCoords = new();
+                while (chunkLoadQueue.Count > 0)
+                {
+                    oldChunkCoords.Add(chunkLoadQueue.Dequeue());
+                }
+                foreach (Vector3Int chunkCoord in oldChunkCoords)
+                {
+                    Bounds chunkBounds = new Bounds((chunkCoord * chunkSize) + (new Vector3(0.5f, 0.5f, 0.5f) * chunkSize), Vector3.one * chunkSize);
+                    float chunkViewerDstFromBound = chunkBounds.SqrDistance(viewerPos);
+                    chunkLoadQueue.Enqueue(chunkCoord, chunkViewerDstFromBound);
+                }
+                startViewerPos = viewerPos;
+            }
             Vector3Int coord = chunkLoadQueue.Dequeue();
+            chunkLoadSet.Remove(coord);
             Bounds bounds = new Bounds((coord * chunkSize) + (new Vector3(0.5f, 0.5f, 0.5f) * chunkSize), Vector3.one * chunkSize);
-            float viewerDstFromBound = Mathf.Sqrt(bounds.SqrDistance(viewerPos));
+            float viewerDstFromBound = bounds.SqrDistance(viewerPos);
 
-            if (!chunkDictionary.ContainsKey(coord) && viewerDstFromBound <= maxViewDst)
+            if (!chunkDictionary.TryGetValue(coord, out TerrainChunk dictChunk) && viewerDstFromBound <= (maxViewDst * maxViewDst))
             {
                 var chunk = new TerrainChunk(coord, chunkSize, transform, terrainDensityData, assetSpawnData, terrainTextureData,
                                             marchingCubesComputeShader, terrainDensityComputeShader,
@@ -317,6 +326,29 @@ public class ChunkGenNetwork : NetworkBehaviour
         isLoadingChunks = false;
     }
     /// <summary>
+    /// Coroutine for loading chunks visibility asynchronously
+    /// </summary>
+    /// <returns>yield return</returns>
+    private IEnumerator LoadChunkVisibilityOverTime()
+    {
+        isLoadingChunkVisibility = true;
+
+        int chunkVisibilityBatchCounter = 0;
+        while (chunkVisibilityQueue.Count > 0)
+        {
+            chunkVisibilityQueue.Dequeue()?.Invoke();
+
+            chunkVisibilityBatchCounter++;
+
+            if (chunkVisibilityBatchCounter % 10 == 0)
+            {
+                yield return new WaitForEndOfFrame();
+            }
+        }
+
+        isLoadingChunkVisibility = false;
+    }
+    /// <summary>
     /// Coroutine for loading gpu readbacks asynchronously
     /// </summary>
     /// <returns>yield return</returns>
@@ -330,13 +362,16 @@ public class ChunkGenNetwork : NetworkBehaviour
 
         while (pendingReadbacks.Count > 0 || activeRequests.Count > 0)
         {
-            for (int i = 0; i < activeRequests.Count; i++) {
-                if (activeRequests[i].done) {
+            for (int i = 0; i < activeRequests.Count; i++)
+            {
+                if (activeRequests[i].done)
+                {
                     activeRequests.RemoveAt(i);
                 }
             }
 
-            while (activeRequests.Count <= 2 && pendingReadbacks.Count > 0) {
+            while (activeRequests.Count <= 2 && pendingReadbacks.Count > 0)
+            {
                 ReadbackRequest pendingReadback = pendingReadbacks.Dequeue();
 
                 activeRequests.Add(AsyncGPUReadback.Request(pendingReadback.buffer, pendingReadback.readbackRequest));
@@ -542,7 +577,7 @@ public class ChunkGenNetwork : NetworkBehaviour
             marchingCubes.terrainMaterial = terrainMaterial;
             marchingCubes.waterMaterial = waterMaterial;
             marchingCubes.initialLoadComplete = initialLoadComplete;
-            // float viewerDstFromBound = Mathf.Sqrt(bounds.SqrDistance(viewerPos));
+            // float viewerDstFromBound = bounds.SqrDistance(viewerPos);
             // if (viewerDstFromBound <= chunkSize * 2) marchingCubes.currentLOD = LOD.LOD1;
             // else if (viewerDstFromBound <= chunkSize * 4) marchingCubes.currentLOD = LOD.LOD2;
             // else if (viewerDstFromBound <= chunkSize * 6) marchingCubes.currentLOD = LOD.LOD3;
@@ -573,12 +608,12 @@ public class ChunkGenNetwork : NetworkBehaviour
         /// <param name="chunkSize">The chunk size</param>
         public void UpdateChunk(float maxViewDst, int chunkSize)
         {
-            float viewerDstFromBound = Mathf.Sqrt(bounds.SqrDistance(viewerPos));
+            float viewerDstFromBound = bounds.SqrDistance(viewerPos);
             // if (viewerDstFromBound <= chunkSize * 2) marchingCubes.UpdateMesh(LOD.LOD1);
             // else if (viewerDstFromBound <= chunkSize * 4) marchingCubes.UpdateMesh(LOD.LOD2);
             // else if (viewerDstFromBound <= chunkSize * 6) marchingCubes.UpdateMesh(LOD.LOD3);
             // else if (viewerDstFromBound <= chunkSize * 8) marchingCubes.UpdateMesh(LOD.LOD6);
-            bool visible = viewerDstFromBound <= maxViewDst;
+            bool visible = viewerDstFromBound <= (maxViewDst * maxViewDst);
             SetVisible(visible);
         }
         /// <summary>
@@ -587,22 +622,19 @@ public class ChunkGenNetwork : NetworkBehaviour
         /// <param name="visible">Whether the chunk is visible</param>
         public void SetVisible(bool visible)
         {
-            if (meshRenderer != null)
+            if (meshRenderer != null && meshRenderer.enabled != visible)
             {
-                if (meshRenderer.enabled != visible)
+                meshRenderer.enabled = visible;
+                if (meshCollider != null && meshCollider.enabled != visible)
                 {
-                    meshRenderer.enabled = visible;
                     meshCollider.enabled = visible;
                 }
             }
             if (Instance.terrainDensityData.waterLevel > chunkPos.y && Instance.terrainDensityData.waterLevel < Mathf.RoundToInt(chunkPos.y + Instance.terrainDensityData.waterLevel))
             {
-                if (waterGen.meshRenderer != null)
+                if (waterGen.meshRenderer != null && waterGen.meshRenderer.enabled != visible)
                 {
-                    if (waterGen.meshRenderer.enabled != visible)
-                    {
-                        waterGen.meshRenderer.enabled = visible;
-                    }
+                    waterGen.meshRenderer.enabled = visible;
                 }
             }
             if (assetSpawner.assetsSet)
@@ -611,13 +643,13 @@ public class ChunkGenNetwork : NetworkBehaviour
                 {
                     foreach (Asset asset in assetSpawner.spawnedAssets[i])
                     {
-                        if (asset.meshRenderer != null)
+                        if (asset.meshRenderer != null && asset.meshRenderer.enabled != visible)
                         {
                             asset.meshRenderer.enabled = visible;
-                        }
-                        if (asset.meshCollider != null)
-                        {
-                            asset.meshCollider.enabled = visible;
+                            if (asset.meshCollider != null && asset.meshCollider.enabled != visible)
+                            {
+                                asset.meshCollider.enabled = visible;
+                            }
                         }
                     }
                 }

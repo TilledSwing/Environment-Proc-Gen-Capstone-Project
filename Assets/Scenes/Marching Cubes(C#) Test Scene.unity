@@ -16859,7 +16859,7 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 1838274978}
   _networkObjectCache: {fileID: 0}
   maxWorldYChunks: 16
-  maxViewDst: 150
+  maxViewDst: 120
   viewer: {fileID: 1588582780}
   updateDistanceThreshold: 5
   chunkSize: 0
