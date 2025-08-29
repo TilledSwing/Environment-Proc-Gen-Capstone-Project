@@ -1,11 +1,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using FishNet.Object;
 using FishNet.Serializing.Helping;
 using Unity.Collections;
 using Unity.Mathematics;
 using Unity.VisualScripting;
+using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -44,7 +46,7 @@ public class ChunkGenNetwork : NetworkBehaviour
     public Material terrainMaterial;
     public Material waterMaterial;
     // Chunk Variables
-    public Dictionary<Vector3, TerrainChunk> chunkDictionary = new();
+    public Dictionary<Vector3Int, TerrainChunk> chunkDictionary = new();
     public List<TerrainChunk> chunksVisibleLastUpdate = new();
     private PriorityQueue<Vector3Int> chunkLoadQueue = new();
     private HashSet<Vector3Int> chunkLoadSet = new();
@@ -155,6 +157,9 @@ public class ChunkGenNetwork : NetworkBehaviour
         {
             chunksVisibleLastUpdate[i].SetVisible(false);
         }
+
+       
+
         chunksVisibleLastUpdate.Clear();
 
         int currentChunkCoordX = Mathf.RoundToInt(viewerPos.x / chunkSize);
@@ -184,7 +189,8 @@ public class ChunkGenNetwork : NetworkBehaviour
                 {
                     Vector3Int viewedChunkCoord = new Vector3Int(currentChunkCoordX + xOffset, currentChunkCoordY + yOffset, currentChunkCoordZ + zOffset);
 
-                    if (math.abs(viewedChunkCoord.y) > maxWorldYChunks) {
+                    if (math.abs(viewedChunkCoord.y) > maxWorldYChunks)
+                    {
                         continue;
                     }
 
@@ -215,7 +221,6 @@ public class ChunkGenNetwork : NetworkBehaviour
 
                             chunkDictionary.Add(viewedChunkCoord, chunk);
                             chunk.UpdateChunk(maxViewDst, terrainDensityData.width);
-
                             if (chunk.IsVisible())
                             {
                                 chunksVisibleLastUpdate.Add(chunk);
@@ -267,6 +272,26 @@ public class ChunkGenNetwork : NetworkBehaviour
         if (!isLoadingAssetInstantiations)
         {
             StartCoroutine(LoadAssetInstantiationsOverTime());
+        }
+        if (initialLoadComplete)
+        {
+            List<Vector3Int> chunkRemoval = new();
+            foreach (KeyValuePair<Vector3Int, TerrainChunk> kvp in chunkDictionary)
+            {
+                float viewerDstFromBound = kvp.Value.bounds.SqrDistance(viewerPos);
+                bool visible = viewerDstFromBound <= (maxViewDst * maxViewDst);
+                if (!visible)
+                {
+                    chunkRemoval.Add(kvp.Key);
+                    kvp.Value.assetSpawner.assetSpawnData.assets.Remove(kvp.Value.assetSpawner.chunkPos);
+                    GameObject.Destroy(kvp.Value.assetSpawner.gameObject);
+                }
+            }
+
+            foreach (Vector3Int pos in chunkRemoval)
+            {
+                chunkDictionary.Remove(pos);
+            }
         }
     }
     /// <summary>
@@ -524,6 +549,8 @@ public class ChunkGenNetwork : NetworkBehaviour
             terrainMaterial.SetInt("_LayerCount", biomeTextureConfig.biomeTextures.Length);
             terrainMaterial.SetFloat("_LowestStartHeight", lowestStartHeight);
             terrainMaterial.SetFloat("_GreatestEndHeight", greatestEndHeight);
+            
+
         }
     }
     /// <summary>
@@ -541,6 +568,7 @@ public class ChunkGenNetwork : NetworkBehaviour
         public MeshCollider meshCollider;
         public MeshFilter meshFilter;
         public MeshRenderer meshRenderer;
+        public bool chunkModified;
         public TerrainChunk(Vector3Int chunkCoord, int chunkSize, Transform parent, TerrainDensityData terrainDensityData, AssetSpawnData assetSpawnData, TerrainTextureData terrainTextureData,
                             ComputeShader marchingCubesComputeShader, ComputeShader terrainDensityComputeShader, ComputeShader terrainNoiseComputeShader,
                             ComputeShader terraformComputeShader,
@@ -577,6 +605,7 @@ public class ChunkGenNetwork : NetworkBehaviour
             marchingCubes.terrainMaterial = terrainMaterial;
             marchingCubes.waterMaterial = waterMaterial;
             marchingCubes.initialLoadComplete = initialLoadComplete;
+            chunkModified = false;
             // float viewerDstFromBound = bounds.SqrDistance(viewerPos);
             // if (viewerDstFromBound <= chunkSize * 2) marchingCubes.currentLOD = LOD.LOD1;
             // else if (viewerDstFromBound <= chunkSize * 4) marchingCubes.currentLOD = LOD.LOD2;
@@ -600,6 +629,7 @@ public class ChunkGenNetwork : NetworkBehaviour
             }
             chunk.transform.SetParent(parent);
             SetVisible(false);
+            
         }
         /// <summary>
         /// Update the visibility of the chunk
@@ -649,12 +679,16 @@ public class ChunkGenNetwork : NetworkBehaviour
                             if (asset.meshCollider != null && asset.meshCollider.enabled != visible)
                             {
                                 asset.meshCollider.enabled = visible;
+
                             }
                         }
                     }
                 }
             }
+
         }
+
+
         /// <summary>
         /// Check chunk visibility
         /// </summary>
@@ -663,6 +697,11 @@ public class ChunkGenNetwork : NetworkBehaviour
         {
             // return chunk.activeSelf;
             return meshRenderer.enabled;
+        }
+
+        public void deleteAssets()
+        {
+            assetSpawner.ClearAssets();
         }
     }
 }
