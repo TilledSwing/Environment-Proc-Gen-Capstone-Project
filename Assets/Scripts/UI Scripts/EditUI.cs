@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 public class EditUI : MonoBehaviour
 {
-    public MarchingCubes mc;
+    public ComputeMarchingCubes mc;
     public TerrainDensityDataOld tdd;
     public Slider slider;
     public Toggle toggle;
