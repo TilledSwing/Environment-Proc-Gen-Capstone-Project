@@ -5,9 +5,10 @@ Shader "Custom/FogShader"
     // because the output color is predefined in the fragment shader code.
     Properties
     { 
-        _FogColor("Fog Color", Color) = (1,1,1,1)
-        fogDensity("Fog Density", Float) = 0
-        fogOffset("Fog Density", Float) = 0
+        _FogColor("Fog Color", Color) = (0,1,1,1)
+        _FogDensity("Fog Density", Float) = 0.4
+        _FogOffset("Fog Offset", Float) = 20
+        // _MainTex("Texture", 2D) = "black" {}
     }
 
     // The SubShader block containing the Shader code.
@@ -16,7 +17,6 @@ Shader "Custom/FogShader"
         // SubShader Tags define when and under which conditions a SubShader block or
         // a pass is executed.
         Tags { "RenderType" = "Opaque" "RenderPipeline" = "UniversalPipeline" }
-        LOD 200
 
         Pass
         {
@@ -26,24 +26,18 @@ Shader "Custom/FogShader"
             #pragma vertex vert
             // This line defines the name of the fragment shader.
             #pragma fragment frag
-            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
-            #pragma multi_compile _ _ADDITIONAL_LIGHT_SHADOWS
 
             // The Core.hlsl file contains definitions of frequently used HLSL
             // macros and functions, and also contains #include references to other
             // HLSL files (for example, Common.hlsl, SpaceTransforms.hlsl, etc.).
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderVariablesFunctions.hlsl"
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
 
             // The structure definition defines which variables it contains.
             // This example uses the Attributes structure as an input structure in
             // the vertex shader.
             struct Attributes
             {
-                // The positionOS variable contains the vertex positions in object
-                // space.
+                // The positionOS variable contains the vertex positions in object space.
                 float4 positionOS : POSITION;
                 float2 uv : TEXCOORD0;
             };
@@ -59,13 +53,18 @@ Shader "Custom/FogShader"
             // structure. The type of the vert function must match the type (struct)
             // that it returns.
 
-            CBUFFER_START(UnityPerMaterial)
-                float4 _FogColor;
-                float fogDensity;
-                float fogOffset;
-            CBUFFER_END
-            TEXTURE2D(_BlitTexture);
-            SAMPLER(sampler_BlitTexture);
+            float4 _FogColor;
+            float _FogDensity;
+            float _FogOffset;
+
+            // TEXTURE2D(_BlitTexture);
+            // SAMPLER(sampler_BlitTexture); 
+
+            TEXTURE2D(_MainTex);
+            SAMPLER(sampler_MainTex);
+
+            TEXTURE2D_X(_CameraDepthTexture);
+            SAMPLER(sampler_CameraDepthTexture);
 
             Varyings vert(Attributes IN)
             {
@@ -79,8 +78,18 @@ Shader "Custom/FogShader"
             float4 frag(Varyings IN) : SV_Target
             {
                 float2 uv = IN.uv;
-                float4 col = SAMPLE_TEXTURE2D(_BlitTexture, sampler_BlitTexture, uv);
-                return col;
+                // float4 color = SAMPLE_TEXTURE2D(_BlitTexture, sampler_BlitTexture, uv);
+                float4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv);
+                // float4 color = cameraColorTexture + (cameraColorTexture * _FogColor);
+
+                float cameraDepth = LinearEyeDepth(SAMPLE_TEXTURE2D_X(_CameraDepthTexture, sampler_CameraDepthTexture, uv).r, _ZBufferParams);
+                float cameraFarPlane = _ProjectionParams.z;
+                float depth = max(0, (cameraDepth * cameraFarPlane) - _FogOffset);
+                float depthDensity = (depth * _FogDensity);
+                float fogFactor = saturate(exp2(depthDensity * -depthDensity));
+
+                color = lerp(_FogColor, color, fogFactor);
+                return color;
             }
             ENDHLSL
         }

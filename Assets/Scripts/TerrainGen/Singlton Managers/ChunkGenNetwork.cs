@@ -12,6 +12,8 @@ using UnityEngine.Rendering;
 public class ChunkGenNetwork : NetworkBehaviour
 {
     public static ChunkGenNetwork Instance;
+    public Material fogMat;
+    public Color fogColor = new Color(160f, 196f, 233f, 1f);
     // Viewer Settings
     public int maxWorldYChunks = 10;
     public float maxViewDst = 100;
@@ -48,7 +50,8 @@ public class ChunkGenNetwork : NetworkBehaviour
     public List<TerrainChunk> chunksVisibleLastUpdate = new();
     private PriorityQueue<Vector3Int> chunkLoadQueue = new();
     private HashSet<Vector3Int> chunkLoadSet = new();
-    public Queue<Action> chunkVisibilityQueue = new();
+    public Queue<TerrainChunk> chunkHideQueue = new();
+    public Queue<TerrainChunk> chunkShowQueue = new();
     private bool isLoadingChunkVisibility = false;
     public float queueUpdateDistanceThreshold = 15f;
     private bool isLoadingChunks = false;
@@ -112,6 +115,8 @@ public class ChunkGenNetwork : NetworkBehaviour
             noiseGenerator.noiseSeed = UnityEngine.Random.Range(0, 100000);
             noiseGenerator.domainWarpSeed = UnityEngine.Random.Range(0, 100000);
         }
+        fogMat.SetFloat("_fogOffset", maxViewDst - 20f);
+        fogMat.SetColor("_fogColor", fogColor);
         // terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 100000);
         // terrainDensityData.caveNoiseSeed = UnityEngine.Random.Range(0, 100000);
         // terrainDensityData.domainWarpSeed = UnityEngine.Random.Range(0, 100000);
@@ -124,17 +129,12 @@ public class ChunkGenNetwork : NetworkBehaviour
     {
         base.OnStartClient();
         viewer = GameObject.Find("Player(Clone)").transform;
-        GameObject localChunkManager = GameObject.Find("LocalChunkManager");
-        if (localChunkManager)
-        {
-            if (localChunkManager.activeSelf) localChunkManager.SetActive(false);
-        }
     }
 
     void Update()
     {
         // Position updates
-        viewerPos = new Vector3(viewer.position.x, viewer.position.y, viewer.position.z);
+        viewerPos = viewer.position;
         lightingBlocker.transform.position = new Vector3(viewerPos.x, 0, viewerPos.z);
         // Update chunks
         if ((viewerPos - lastUpdateViewerPos).sqrMagnitude > updateDistanceThreshold * updateDistanceThreshold && initialLoadComplete)
@@ -142,7 +142,8 @@ public class ChunkGenNetwork : NetworkBehaviour
             UpdateVisibleChunks();
             lastUpdateViewerPos = viewerPos;
         }
-        else if (!initialLoadComplete) {
+        else if (!initialLoadComplete)
+        {
             UpdateVisibleChunks();
         }
     }
@@ -153,6 +154,7 @@ public class ChunkGenNetwork : NetworkBehaviour
     {
         for (int i = 0; i < chunksVisibleLastUpdate.Count; i++)
         {
+            // chunkHideQueue.Enqueue(chunksVisibleLastUpdate[i]);
             chunksVisibleLastUpdate[i].SetVisible(false);
         }
         chunksVisibleLastUpdate.Clear();
@@ -202,7 +204,12 @@ public class ChunkGenNetwork : NetworkBehaviour
                         if (dictChunk.IsVisible())
                         {
                             chunksVisibleLastUpdate.Add(dictChunk);
+                            // chunkShowQueue.Enqueue(dictChunk);
                         }
+                        // else
+                        // {
+                        //     chunkHideQueue.Enqueue(dictChunk);
+                        // }
                     }
                     else
                     {
@@ -219,7 +226,12 @@ public class ChunkGenNetwork : NetworkBehaviour
                             if (chunk.IsVisible())
                             {
                                 chunksVisibleLastUpdate.Add(chunk);
+                                // chunkShowQueue.Enqueue(chunk);
                             }
+                            // else
+                            // {
+                            //     chunkHideQueue.Enqueue(dictChunk);
+                            // }
                         }
                         else
                         {
@@ -310,10 +322,16 @@ public class ChunkGenNetwork : NetworkBehaviour
                                             terraformComputeShader,
                                             terrainMaterial, waterMaterial, initialLoadComplete);
                 chunkDictionary.Add(coord, chunk);
+                chunk.UpdateChunk(maxViewDst, chunkSize);
                 if (chunk.IsVisible())
                 {
                     chunksVisibleLastUpdate.Add(chunk);
+                    // chunkShowQueue.Enqueue(chunk);
                 }
+                // else
+                // {
+                //     chunkHideQueue.Enqueue(chunk);
+                // }
                 chunkBatchCounter++;
             }
 
@@ -333,17 +351,24 @@ public class ChunkGenNetwork : NetworkBehaviour
     {
         isLoadingChunkVisibility = true;
 
-        int chunkVisibilityBatchCounter = 0;
-        while (chunkVisibilityQueue.Count > 0)
+        int maxPerFrame = 8;
+        while (chunkHideQueue.Count > 0 || chunkShowQueue.Count > 0)
         {
-            chunkVisibilityQueue.Dequeue()?.Invoke();
-
-            chunkVisibilityBatchCounter++;
-
-            if (chunkVisibilityBatchCounter % 10 == 0)
+            int processedChunks = 0;
+            while (processedChunks <= maxPerFrame && chunkHideQueue.Count > 0)
             {
-                yield return new WaitForEndOfFrame();
+                TerrainChunk chunk = chunkHideQueue.Dequeue();
+                chunk.SetVisible(false);
+                processedChunks++;
             }
+            while (processedChunks <= maxPerFrame && chunkShowQueue.Count > 0)
+            {
+                TerrainChunk chunk = chunkShowQueue.Dequeue();
+                chunk.SetVisible(true);
+                processedChunks++;
+            }
+
+            yield return null;
         }
 
         isLoadingChunkVisibility = false;
@@ -356,9 +381,7 @@ public class ChunkGenNetwork : NetworkBehaviour
     {
         isLoadingReadbacks = true;
 
-        // int readbackBatchCounter = 0;
-
-        List<AsyncGPUReadbackRequest> activeRequests = new List<AsyncGPUReadbackRequest>();
+        List<AsyncGPUReadbackRequest> activeRequests = ListPoolManager<AsyncGPUReadbackRequest>.Get();
 
         while (pendingReadbacks.Count > 0 || activeRequests.Count > 0)
         {
@@ -378,14 +401,9 @@ public class ChunkGenNetwork : NetworkBehaviour
             }
 
             yield return null;
-
-            // readbackBatchCounter++;
-
-            // if (readbackBatchCounter % 2 == 0)
-            // {
-            //     yield return new WaitForEndOfFrame();
-            // }
         }
+
+        ListPoolManager<AsyncGPUReadbackRequest>.Return(activeRequests);
 
         isLoadingReadbacks = false;
     }
@@ -541,6 +559,7 @@ public class ChunkGenNetwork : NetworkBehaviour
         public MeshCollider meshCollider;
         public MeshFilter meshFilter;
         public MeshRenderer meshRenderer;
+        public bool visible = false;
         public TerrainChunk(Vector3Int chunkCoord, int chunkSize, Transform parent, TerrainDensityData terrainDensityData, AssetSpawnData assetSpawnData, TerrainTextureData terrainTextureData,
                             ComputeShader marchingCubesComputeShader, ComputeShader terrainDensityComputeShader, ComputeShader terrainNoiseComputeShader,
                             ComputeShader terraformComputeShader,
@@ -599,6 +618,7 @@ public class ChunkGenNetwork : NetworkBehaviour
                 marchingCubes.waterGen = waterGen;
             }
             chunk.transform.SetParent(parent);
+            // Instance.chunkHideQueue.Enqueue(this);
             SetVisible(false);
         }
         /// <summary>
@@ -614,6 +634,7 @@ public class ChunkGenNetwork : NetworkBehaviour
             // else if (viewerDstFromBound <= chunkSize * 6) marchingCubes.UpdateMesh(LOD.LOD3);
             // else if (viewerDstFromBound <= chunkSize * 8) marchingCubes.UpdateMesh(LOD.LOD6);
             bool visible = viewerDstFromBound <= (maxViewDst * maxViewDst);
+            // this.visible = visible;
             SetVisible(visible);
         }
         /// <summary>
@@ -663,6 +684,7 @@ public class ChunkGenNetwork : NetworkBehaviour
         {
             // return chunk.activeSelf;
             return meshRenderer.enabled;
+            // return visible;
         }
     }
 }
