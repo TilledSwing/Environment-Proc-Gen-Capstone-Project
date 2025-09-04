@@ -8,13 +8,17 @@ using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 public class ChunkGenNetwork : NetworkBehaviour
 {
     public static ChunkGenNetwork Instance;
+    // Fog Render Feature Stuff
     public Material fogMat;
     public Color fogColor = new Color(160f, 196f, 233f, 1f);
     public Color darkFogColor;
+    public UniversalRendererData rendererData;
+    private FogRenderPassFeature fogRenderPassFeature;
     // Viewer Settings
     public int maxWorldYChunks = 10;
     public float maxViewDst = 100;
@@ -98,13 +102,10 @@ public class ChunkGenNetwork : NetworkBehaviour
     void Awake()
     {
         if (Instance == null)
-        {
             Instance = this;
-        }
         else
-        {
             Destroy(gameObject);
-        }
+
         chunkSize = terrainDensityData.width;
         chunksVisible = Mathf.RoundToInt(maxViewDst / chunkSize);
         lightingBlockerRenderer = lightingBlocker.GetComponent<MeshRenderer>();
@@ -116,12 +117,21 @@ public class ChunkGenNetwork : NetworkBehaviour
             noiseGenerator.noiseSeed = UnityEngine.Random.Range(0, 100000);
             noiseGenerator.domainWarpSeed = UnityEngine.Random.Range(0, 100000);
         }
+        // Fog Shader Inits
+        fogRenderPassFeature = rendererData.rendererFeatures.Find(f => f is FogRenderPassFeature) as FogRenderPassFeature;
         fogMat.SetFloat("_fogOffset", maxViewDst - 20f);
         fogMat.SetColor("_fogColor", fogColor);
         // terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 100000);
         // terrainDensityData.caveNoiseSeed = UnityEngine.Random.Range(0, 100000);
         // terrainDensityData.domainWarpSeed = UnityEngine.Random.Range(0, 100000);
         // terrainDensityData.caveDomainWarpSeed = UnityEngine.Random.Range(0, 100000);
+    }
+    public void SetFogActive(bool active)
+    {
+        if (fogRenderPassFeature != null)
+        {
+            fogRenderPassFeature.SetActive(active);
+        }
     }
     /// <summary>
     /// Sets the player to the new viewer for chunk generation and disables the local chunk generator
@@ -130,6 +140,7 @@ public class ChunkGenNetwork : NetworkBehaviour
     {
         base.OnStartClient();
         viewer = GameObject.Find("Player(Clone)").transform;
+        SetFogActive(true);
     }
 
     void Update()
@@ -497,6 +508,7 @@ public class ChunkGenNetwork : NetworkBehaviour
     {
         assetSpawnData.assets.Clear();
         chunkDictionary.Clear();
+        fogRenderPassFeature.SetActive(false);
     }
 
     void TextureSetup()

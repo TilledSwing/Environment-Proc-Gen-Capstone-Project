@@ -5,7 +5,8 @@ using UnityEngine.Rendering.RenderGraphModule;
 using UnityEngine.Rendering.RenderGraphModule.Util;
 
 public class FogRenderPassFeature : ScriptableRendererFeature
-{    class FogRenderPass : ScriptableRenderPass
+{
+    class FogRenderPass : ScriptableRenderPass
     {
         const string m_PassName = "FogRenderPass";
         Material m_BlitMaterial;
@@ -81,5 +82,10 @@ public class FogRenderPassFeature : ScriptableRendererFeature
         }
         m_ScriptablePass.Setup(material);
         renderer.EnqueuePass(m_ScriptablePass);
+    }
+
+    public void SetFeatureActive(bool active)
+    {
+        SetActive(active);
     }
 }
