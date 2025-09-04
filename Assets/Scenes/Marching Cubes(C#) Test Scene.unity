@@ -16815,6 +16815,7 @@ MonoBehaviour:
   _networkObjectCache: {fileID: 0}
   fogMat: {fileID: 2100000, guid: b78a36d964d317b498aa1107a6978473, type: 2}
   fogColor: {r: 0.627451, g: 0.76862746, b: 0.9137255, a: 1}
+  darkFogColor: {r: 0.09656463, g: 0.11338556, b: 0.13207549, a: 1}
   maxWorldYChunks: 16
   maxViewDst: 120
   viewer: {fileID: 1588582780}
