@@ -30,7 +30,7 @@ public class ChunkGenNetwork : NetworkBehaviour
     public int chunksVisible;
     public bool useFixedMapSize;
     public int mapSize;
-    public int resolution = 2;
+    public int resolution;
     public LODData[] lodData =
     {
         new LODData { lod = LOD.LOD1, resolution = 1 },

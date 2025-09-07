@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 3717549939882377902}
   - component: {fileID: 304195749237345547}
   - component: {fileID: 2584027310787738049}
+  - component: {fileID: 549183689590003357}
   m_Layer: 0
   m_Name: Mushroom
   m_TagString: Untagged
@@ -64,7 +65,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 9940a44f75d42d5439c1afca630133d8, type: 2}
+  - {fileID: 2100000, guid: 44bae5e0dc5424a4c946aa9b82745f6f, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -86,3 +87,16 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &549183689590003357
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4097346942072690708}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e9180964817afd4692ae416e65cc634, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  material: {fileID: 0}

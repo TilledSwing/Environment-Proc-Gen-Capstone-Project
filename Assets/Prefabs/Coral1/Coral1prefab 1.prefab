@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: -6843855365146184253}
   - component: {fileID: 5788586368114598886}
   - component: {fileID: 3138667110062595451}
+  - component: {fileID: -2961175827680814890}
   m_Layer: 0
   m_Name: Coral1prefab 1
   m_TagString: Untagged
@@ -79,7 +80,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: e57de5d2e835daf4d97dbb470b8dac6e, type: 2}
+  - {fileID: 2100000, guid: e20da98969be4294d998594ed8be2228, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -109,3 +110,16 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7046172586671867047}
   m_Mesh: {fileID: -2432090755550338912, guid: 799bb32bfa0ba3540b75f673228cc739, type: 3}
+--- !u!114 &-2961175827680814890
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7046172586671867047}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e9180964817afd4692ae416e65cc634, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  material: {fileID: 0}

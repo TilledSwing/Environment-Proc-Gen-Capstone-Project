@@ -16843,7 +16843,7 @@ MonoBehaviour:
   terrainNoiseComputeShader: {fileID: 7200000, guid: 93b6fb759617148499ec115b8092bb44, type: 3}
   terraformComputeShader: {fileID: 7200000, guid: e41356404106d3e4487dd76d300e0a73, type: 3}
   terrainMaterial: {fileID: 2100000, guid: d644a1ee14ca32a44b080e9c6de5ed62, type: 2}
-  waterMaterial: {fileID: 2100000, guid: 804af839dce47f748a2151ac2e3113a9, type: 2}
+  waterMaterial: {fileID: 2100000, guid: ff70f747c02c6bd459e26da4a58059a1, type: 2}
   queueUpdateDistanceThreshold: 15
   initialLoadComplete: 0
   lightingBlocker: {fileID: 762416109}

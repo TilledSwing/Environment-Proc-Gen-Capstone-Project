@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 1804100535239143034}
   - component: {fileID: 3361559394759893471}
   - component: {fileID: 667200408155493653}
+  - component: {fileID: 4657048393590797600}
   m_Layer: 0
   m_Name: Plant_003
   m_TagString: Untagged
@@ -64,7 +65,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 307993dbe1d47b7459cd5f46b35c0e5b, type: 2}
+  - {fileID: 2100000, guid: 6eb7249e2b8841540a66c061476f5485, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -86,3 +87,16 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &4657048393590797600
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1315793589245392064}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e9180964817afd4692ae416e65cc634, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  material: {fileID: 0}
