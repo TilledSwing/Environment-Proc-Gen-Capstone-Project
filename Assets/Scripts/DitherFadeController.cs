@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class DitherFadeController : MonoBehaviour
 {
-    public Renderer renderer;
+    private Renderer renderer;
     private Material[] materials;
     private bool prevRendState;
     void Awake()
@@ -12,6 +12,7 @@ public class DitherFadeController : MonoBehaviour
         materials = renderer.materials;
         foreach (Material material in materials) {
             material.SetFloat("_fade", 1);
+            material.SetColor("_outlineColor", Color.black);
             StartCoroutine(FadeIn(material, 1f));
         }
         prevRendState = renderer.enabled;
@@ -29,8 +30,6 @@ public class DitherFadeController : MonoBehaviour
             }
             prevRendState = renderer.enabled;
         }
-        // material.SetFloat("_fade", 1);
-        // StartCoroutine(FadeIn(material, 1f));
     }
     IEnumerator FadeIn(Material mat, float duration) {
         float t = 0;

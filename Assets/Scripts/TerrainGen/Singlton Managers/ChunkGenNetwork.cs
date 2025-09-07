@@ -19,6 +19,9 @@ public class ChunkGenNetwork : NetworkBehaviour
     public Color darkFogColor;
     public UniversalRendererData rendererData;
     private FogRenderPassFeature fogRenderPassFeature;
+    // Objective Text Stuff
+    public GameObject objectiveHeader;
+    public GameObject objectiveCounterText;
     // Viewer Settings
     public int maxWorldYChunks = 10;
     public float maxViewDst = 100;
@@ -121,6 +124,7 @@ public class ChunkGenNetwork : NetworkBehaviour
         fogRenderPassFeature = rendererData.rendererFeatures.Find(f => f is FogRenderPassFeature) as FogRenderPassFeature;
         fogMat.SetFloat("_fogOffset", maxViewDst - 20f);
         fogMat.SetColor("_fogColor", fogColor);
+        
         // terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 100000);
         // terrainDensityData.caveNoiseSeed = UnityEngine.Random.Range(0, 100000);
         // terrainDensityData.domainWarpSeed = UnityEngine.Random.Range(0, 100000);
@@ -141,6 +145,8 @@ public class ChunkGenNetwork : NetworkBehaviour
         base.OnStartClient();
         viewer = GameObject.Find("Player(Clone)").transform;
         SetFogActive(true);
+        objectiveHeader.SetActive(true);
+        objectiveCounterText.SetActive(true);
     }
 
     void Update()
