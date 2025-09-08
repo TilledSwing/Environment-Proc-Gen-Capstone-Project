@@ -12,7 +12,8 @@ GameObject:
   - component: {fileID: 3361559394759893471}
   - component: {fileID: 667200408155493653}
   - component: {fileID: 4657048393590797600}
-  m_Layer: 0
+  - component: {fileID: 2665246131551453233}
+  m_Layer: 6
   m_Name: Plant_003
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -99,4 +100,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e9180964817afd4692ae416e65cc634, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  material: {fileID: 0}
+--- !u!64 &2665246131551453233
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1315793589245392064}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 1
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -1080926350215078362, guid: 3b6d300d1d4d6c0429cb28323bce2727, type: 3}

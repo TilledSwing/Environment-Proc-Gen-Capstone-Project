@@ -24,7 +24,6 @@ public class InteractController : MonoBehaviour
         playerCamera = Camera.main;
     }
 
-    // Update is called once per frame
     void Update()
     {
         Ray ray = playerCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));

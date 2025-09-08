@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 8123307348458495639}
   - component: {fileID: 9099067851841155058}
   - component: {fileID: 1424978231451595031}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Rock
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -122,4 +122,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e9180964817afd4692ae416e65cc634, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  material: {fileID: 0}

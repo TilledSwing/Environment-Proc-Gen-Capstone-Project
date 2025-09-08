@@ -125,6 +125,7 @@ GameObject:
   - component: {fileID: 1651371401710485035}
   - component: {fileID: -1469270153928637489}
   - component: {fileID: 2263669559389862659}
+  - component: {fileID: -7228457785996649697}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -360,6 +361,20 @@ MonoBehaviour:
   placeableObject: {fileID: 6785930050922385279, guid: b83240341c941d24f891e9b9d41da000, type: 3}
   rotationSensitivity: 1000
   placeableObjectMaterial: {fileID: 2100000, guid: 359131121b1a4314098add5d50690ed2, type: 2}
+--- !u!114 &-7228457785996649697
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3941859824757792008}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 10b15033df4894841b9670712c1e4e2e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bomb: {fileID: 2829416588567123249, guid: 237e98ccbbe3e3a4d920901ddf4c6728, type: 3}
+  throwForce: 20
 --- !u!1 &8935483582062294650
 GameObject:
   m_ObjectHideFlags: 0
