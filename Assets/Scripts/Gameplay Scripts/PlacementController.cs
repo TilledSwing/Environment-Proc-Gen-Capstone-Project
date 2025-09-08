@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlacementController : MonoBehaviour
 {
@@ -7,6 +8,7 @@ public class PlacementController : MonoBehaviour
     public float interactDst;
     public LayerMask terrainLayerMask;
     public GameObject placeableObject;
+    public float rotationSensitivity;
     private List<Material> originalMaterials = new();
     public Material placeableObjectMaterial;
     private List<Material> tempPlaceableObjectMaterialList = new();
@@ -15,6 +17,7 @@ public class PlacementController : MonoBehaviour
     private Material[] currentObjectMaterials;
     private bool placementMode = false;
     private bool lastRayState = false;
+    private float scrollRotation;
     void Awake()
     {
         playerCamera = Camera.main;
@@ -48,21 +51,22 @@ public class PlacementController : MonoBehaviour
                 else
                 {
                     currentObjectRef.transform.position = hit.point;
-                    currentObjectRef.transform.rotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
+                    Quaternion normalRotationAlignment = Quaternion.FromToRotation(Vector3.up, hit.normal);
+                    Vector2 scroll = Mouse.current.scroll.ReadValue();
+
+                    if (scroll.y != 0f)
+                    {
+                        scrollRotation += scroll.y * rotationSensitivity * Time.deltaTime;
+                    }
+
+                    currentObjectRef.transform.rotation = normalRotationAlignment * Quaternion.Euler(0f, scrollRotation, 0f);
                 }
                 if (Input.GetKeyDown(KeyCode.F))
                 {
-                    // // currentObjectRenderer = currentObjectRef.GetComponent<Renderer>();
-                    // // currentObjectMaterials = currentObjectRenderer.materials;
-                    // for (int i = 0; i < currentObjectMaterials.Length; i++)
-                    // {
-                    //     currentObjectMaterials[i] = originalMaterials[i];
-                    //     // material.SetFloat("_alpha", 1);
-                    //     // material.SetColor("_outlineColor", Color.black);
-                    // }
                     currentObjectRenderer.materials = originalMaterials.ToArray();
                     currentObjectRef.GetComponent<BoxCollider>().enabled = true;
                     currentObjectRef = null;
+                    scrollRotation = 0f;
                 }
             }
             else if (lastRayState)

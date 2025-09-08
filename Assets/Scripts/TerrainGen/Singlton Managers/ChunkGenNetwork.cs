@@ -643,6 +643,7 @@ public class ChunkGenNetwork : NetworkBehaviour
                 waterGen.chunkPos = chunkPos;
                 waterGen.marchingCubes = marchingCubes;
                 marchingCubes.waterGen = waterGen;
+                waterPlaneGenerator.AddComponent<DitherFadeController>();
             }
             chunk.transform.SetParent(parent);
             // Instance.chunkHideQueue.Enqueue(this);

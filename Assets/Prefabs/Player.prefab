@@ -358,6 +358,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   placeableObject: {fileID: 6785930050922385279, guid: b83240341c941d24f891e9b9d41da000, type: 3}
+  rotationSensitivity: 1000
   placeableObjectMaterial: {fileID: 2100000, guid: 359131121b1a4314098add5d50690ed2, type: 2}
 --- !u!1 &8935483582062294650
 GameObject:
