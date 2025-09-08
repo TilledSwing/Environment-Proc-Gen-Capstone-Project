@@ -124,6 +124,7 @@ GameObject:
   - component: {fileID: -2765541620985245343}
   - component: {fileID: 1651371401710485035}
   - component: {fileID: -1469270153928637489}
+  - component: {fileID: 2263669559389862659}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -335,12 +336,29 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   interactDst: 5
-  interactLayerkMask:
+  interactLayerMask:
     serializedVersion: 2
     m_Bits: 128
   interactHighlightColor: {r: 0.8666667, g: 0.84313726, b: 0.47058824, a: 0}
-  objectiveCounterText: {fileID: 0}
   objectiveGoal: 10
+--- !u!114 &2263669559389862659
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3941859824757792008}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1dd271e5e9b536a4cb7eef83c2ff8962, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  interactDst: 10
+  terrainLayerMask:
+    serializedVersion: 2
+    m_Bits: 8
+  placeableObject: {fileID: 6785930050922385279, guid: b83240341c941d24f891e9b9d41da000, type: 3}
+  placeableObjectMaterial: {fileID: 2100000, guid: 359131121b1a4314098add5d50690ed2, type: 2}
 --- !u!1 &8935483582062294650
 GameObject:
   m_ObjectHideFlags: 0

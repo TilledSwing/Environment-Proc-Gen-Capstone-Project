@@ -10,7 +10,7 @@ public class InteractController : MonoBehaviour
 {
     Camera playerCamera;
     public float interactDst;
-    public LayerMask interactLayerkMask;
+    public LayerMask interactLayerMask;
     public Color interactHighlightColor;
     private GameObject objectiveCounterText;
     public int objectiveGoal;
@@ -28,7 +28,7 @@ public class InteractController : MonoBehaviour
     void Update()
     {
         Ray ray = playerCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
-        if (Physics.Raycast(ray, out RaycastHit hit, interactDst, interactLayerkMask))
+        if (Physics.Raycast(ray, out RaycastHit hit, interactDst, interactLayerMask))
         {
             if (!lastRayState)
             {

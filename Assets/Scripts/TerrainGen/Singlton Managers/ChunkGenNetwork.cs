@@ -20,6 +20,7 @@ public class ChunkGenNetwork : NetworkBehaviour
     public UniversalRendererData rendererData;
     private FogRenderPassFeature fogRenderPassFeature;
     // Objective Text Stuff
+    public GameObject objectiveCanvas;
     public GameObject objectiveHeader;
     public GameObject objectiveCounterText;
     // Viewer Settings
@@ -145,8 +146,9 @@ public class ChunkGenNetwork : NetworkBehaviour
         base.OnStartClient();
         viewer = GameObject.Find("Player(Clone)").transform;
         SetFogActive(true);
-        objectiveHeader.SetActive(true);
-        objectiveCounterText.SetActive(true);
+        objectiveCanvas.SetActive(true);
+        // objectiveHeader.SetActive(true);
+        // objectiveCounterText.SetActive(true);
     }
 
     void Update()
