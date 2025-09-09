@@ -60,6 +60,11 @@ public class PlacementController : MonoBehaviour
                     }
 
                     currentObjectRef.transform.rotation = normalRotationAlignment * Quaternion.Euler(0f, scrollRotation, 0f);
+                    Component[] components = placeableObject.GetComponents<Component>();
+                    foreach (var c in components)
+                    {
+                        Debug.Log(c.GetType());
+                    }
                 }
                 if (Input.GetKeyDown(KeyCode.F))
                 {

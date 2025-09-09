@@ -9,7 +9,7 @@
     $response = [
         'success' => false,
         'message' => 'Initial state',
-        'terrainId' = -1,
+        'terrainId' => -1,
 
     ];
 
