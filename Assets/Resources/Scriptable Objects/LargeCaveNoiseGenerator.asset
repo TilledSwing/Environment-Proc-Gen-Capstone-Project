@@ -22,7 +22,7 @@ MonoBehaviour:
   noiseFractalType: 0
   selectedRotationType3D: 0
   rotationType3D: 0
-  noiseSeed: 484
+  noiseSeed: 95094
   noiseFractalOctaves: 5
   noiseFractalLacunarity: 2
   noiseFractalGain: 0.5
@@ -34,7 +34,7 @@ MonoBehaviour:
   selectedDomainWarpFractalType: 0
   domainWarpFractalType: 4
   domainWarpAmplitude: 50
-  domainWarpSeed: 59769
+  domainWarpSeed: 79016
   domainWarpFractalOctaves: 5
   domainWarpFractalLacunarity: 2
   domainWarpFractalGain: 0.5

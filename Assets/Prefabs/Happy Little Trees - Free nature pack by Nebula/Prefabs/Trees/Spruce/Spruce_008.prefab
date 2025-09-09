@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 6267521088948860659}
   - component: {fileID: 8151025427259851321}
   - component: {fileID: -8517201543288147328}
+  - component: {fileID: 8165985834788772028}
   m_Layer: 6
   m_Name: Spruce_008
   m_TagString: Untagged
@@ -65,8 +66,8 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: fe080ac4caa5ec54d901a1dd5b00c562, type: 2}
-  - {fileID: 2100000, guid: ab51724c1521095418b1fe0ec94c0b46, type: 2}
+  - {fileID: 2100000, guid: 7619376ca944d6849a94a94a057eb0f9, type: 2}
+  - {fileID: 2100000, guid: 4752a088780b9d94a87b6834afd1dcfb, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -110,3 +111,16 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -7722201907659181342, guid: 2f0d06460af8385498085d4e0b7f35d2, type: 3}
+--- !u!114 &8165985834788772028
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7646758127176492012}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e9180964817afd4692ae416e65cc634, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  material: {fileID: 0}

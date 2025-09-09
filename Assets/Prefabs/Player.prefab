@@ -18,7 +18,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2752622705633172173
 Transform:
   m_ObjectHideFlags: 0
@@ -123,6 +123,9 @@ GameObject:
   - component: {fileID: 3464545069803304171}
   - component: {fileID: -2765541620985245343}
   - component: {fileID: 1651371401710485035}
+  - component: {fileID: -1469270153928637489}
+  - component: {fileID: 2263669559389862659}
+  - component: {fileID: -7228457785996649697}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -321,6 +324,57 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   glowball: {fileID: 7838558389423337650, guid: e8786a3f3f8af3844a30c201669bca8e, type: 3}
   throwForce: 50
+--- !u!114 &-1469270153928637489
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3941859824757792008}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8129af4d8cacb74dbfcb68c7a9bf59c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  interactDst: 5
+  interactLayerMask:
+    serializedVersion: 2
+    m_Bits: 128
+  interactHighlightColor: {r: 0.8666667, g: 0.84313726, b: 0.47058824, a: 0}
+  objectiveGoal: 10
+--- !u!114 &2263669559389862659
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3941859824757792008}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1dd271e5e9b536a4cb7eef83c2ff8962, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  interactDst: 10
+  terrainLayerMask:
+    serializedVersion: 2
+    m_Bits: 8
+  placeableObject: {fileID: 6785930050922385279, guid: b83240341c941d24f891e9b9d41da000, type: 3}
+  rotationSensitivity: 1000
+  placeableObjectMaterial: {fileID: 2100000, guid: 359131121b1a4314098add5d50690ed2, type: 2}
+--- !u!114 &-7228457785996649697
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3941859824757792008}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 10b15033df4894841b9670712c1e4e2e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bomb: {fileID: 2829416588567123249, guid: 237e98ccbbe3e3a4d920901ddf4c6728, type: 3}
+  throwForce: 20
 --- !u!1 &8935483582062294650
 GameObject:
   m_ObjectHideFlags: 0
