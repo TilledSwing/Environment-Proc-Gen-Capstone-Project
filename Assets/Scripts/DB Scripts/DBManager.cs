@@ -5,6 +5,7 @@ using UnityEngine.Networking;
 using Unity.VisualScripting;
 using FishNet.Example.Authenticating;
 using System.Collections.Generic;
+using GameKit.Dependencies.Utilities;
 /// <summary>
 /// This class will act as a manager script that will facilitate all DB operations
 /// </summary>
@@ -43,13 +44,14 @@ public class DBManager : MonoBehaviour
     /// <summary>
     /// This starts the DB save of current terrain data
     /// </summary>
-    public void saveTerrainData(string tName){
+    public IEnumerator saveTerrainData(string tName){
         MarchingCubes mc = FindFirstObjectByType<MarchingCubes>();
-        StartCoroutine(SaveTerrainData(mc.terrainDensityData, tName));
-        Debug.Log("Got name:");
+        List<int> manualAssets = new();
+        yield return StartCoroutine(SaveTerrainData(mc.terrainDensityData, tName));
+        yield return StartCoroutine(SaveTerrainAssets(manualAssets, loadedTerrainId));
     }
 
-     /// <summary>
+    /// <summary>
     /// On Startup this method will call a php script that checks if the user exists in out system. If they do not we will add them into the 
     /// db to facilitate the loading and storing of terrains.
     /// </summary>
@@ -105,7 +107,11 @@ public class DBManager : MonoBehaviour
 
             //Log the results. This can be deleted later
             if (request.result == UnityWebRequest.Result.Success)
+            {
                 Debug.Log("Raw Response: " + request.downloadHandler.text);
+                PHPSaveTerrainResponse response = JsonUtility.FromJson<PHPSaveTerrainResponse>(request.downloadHandler.text);
+                loadedTerrainId = response.terrainId;
+            }
             else
                 Debug.Log("request failed: " + request.error + " response code: " + request.responseCode);
         }
@@ -119,7 +125,39 @@ public class DBManager : MonoBehaviour
     /// <param name="steamName"></param>
     /// <returns></returns>
      
-     IEnumerator VerifyRegisteredUser(ulong steamId, string steamName) //int seed, int width, int height, float noiseScale, float isolevel, bool lerp
+     IEnumerator SaveTerrainAssets(List<int> manualAssets, int terrainId) //int seed, int width, int height, float noiseScale, float isolevel, bool lerp
+    {
+         //Set up connection
+        string url = "http://localhost/sqlconnect/saveAssets.php";
+        WWWForm form = new();
+
+        form.AddField("TerrainId", terrainId);
+        
+
+        //Send web request
+        using (UnityWebRequest request = UnityWebRequest.Post(url, form))
+        {
+            // Set timeout at 10 seconds
+            request.timeout = 10;
+
+            yield return request.SendWebRequest();
+
+            //Log the results. This can be deleted later
+            if (request.result == UnityWebRequest.Result.Success)
+                Debug.Log("Raw Response: " + request.downloadHandler.text);
+            else
+                Debug.Log("request failed: " + request.error + " response code: " + request.responseCode);
+        }
+    }
+    /// <summary>
+    /// On Startup this method will call a php script that checks if the user exists in out system. If they do not we will add them into the 
+    /// db to facilitate the loading and storing of terrains.
+    /// </summary>
+    /// <param name="steamId"></param>
+    /// <param name="steamName"></param>
+    /// <returns></returns>
+
+    IEnumerator VerifyRegisteredUser(ulong steamId, string steamName) //int seed, int width, int height, float noiseScale, float isolevel, bool lerp
     {
         //Set up connection
         string url = "http://localhost/sqlconnect/validateUser.php";
@@ -300,6 +338,15 @@ public class DBManager : MonoBehaviour
         public bool success;
         public string message;
         public UserData[] data;
+    }
+
+     // Helper classes for JSON parsing of returned data
+    [System.Serializable]
+    public class PHPSaveTerrainResponse
+    {
+        public bool success;
+        public string message;
+        public int terrainId;
     }
 
     [System.Serializable]

@@ -19,7 +19,7 @@
         }
 
         //Terrain ID
-        $TerrainId = $conn->real_escape_string($_POST["NoiseDimensions"]);
+        $TerrainId = $conn->real_escape_string($_POST["TerrainId"]);
 
         $conn->begin_transaction();
         try{

@@ -273,6 +273,7 @@ public class ChunkGenNetwork : NetworkBehaviour
         {
             StartCoroutine(LoadAssetInstantiationsOverTime());
         }
+        
         if (initialLoadComplete)
         {
             List<Vector3Int> chunkRemoval = new();
