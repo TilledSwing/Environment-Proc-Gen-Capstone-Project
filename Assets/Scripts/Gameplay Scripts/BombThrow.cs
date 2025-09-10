@@ -1,4 +1,6 @@
+using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class BombThrow : MonoBehaviour
 {
@@ -11,6 +13,13 @@ public class BombThrow : MonoBehaviour
     }
     void Update()
     {
+        // Block input if in a chat message block. Ensures that typing words with certain letters or numbers won't trigger input events.
+        if (EventSystem.current.currentSelectedGameObject != null &&
+            EventSystem.current.currentSelectedGameObject.GetComponent<TMP_InputField>() != null)
+        {
+            return;
+        }
+
         if (Input.GetKeyDown(KeyCode.Q))
         {
             ThrowBomb();

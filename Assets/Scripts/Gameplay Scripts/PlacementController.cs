@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 public class PlacementController : MonoBehaviour
@@ -25,6 +27,13 @@ public class PlacementController : MonoBehaviour
 
     void Update()
     {
+        // Block input if in a chat message block. Ensures that typing words with certain letters or numbers won't trigger input events.
+        if (EventSystem.current.currentSelectedGameObject != null &&
+            EventSystem.current.currentSelectedGameObject.GetComponent<TMP_InputField>() != null)
+        {
+            return;
+        }
+
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             placementMode = !placementMode;

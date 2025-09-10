@@ -23,6 +23,9 @@ public class ChunkGenNetwork : NetworkBehaviour
     public GameObject objectiveCanvas;
     public GameObject objectiveHeader;
     public GameObject objectiveCounterText;
+    // Chat & Lobby
+    public GameObject chatContainer;
+    public GameObject lobbyContainer;
     // Viewer Settings
     public int maxWorldYChunks = 10;
     public float maxViewDst = 100;
@@ -147,6 +150,8 @@ public class ChunkGenNetwork : NetworkBehaviour
         viewer = GameObject.Find("Player(Clone)").transform;
         SetFogActive(true);
         objectiveCanvas.SetActive(true);
+        chatContainer.SetActive(true);
+        lobbyContainer.SetActive(true);
         // objectiveHeader.SetActive(true);
         // objectiveCounterText.SetActive(true);
     }

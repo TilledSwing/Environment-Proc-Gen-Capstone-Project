@@ -1,10 +1,11 @@
 using System;
 using System.Collections;
 using TMPro;
-using UnityEngine.UI;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class InteractController : MonoBehaviour
 {
@@ -26,6 +27,13 @@ public class InteractController : MonoBehaviour
 
     void Update()
     {
+        // Block input if in a chat message block. Ensures that typing words with certain letters or numbers won't trigger input events.
+        if (EventSystem.current.currentSelectedGameObject != null &&
+            EventSystem.current.currentSelectedGameObject.GetComponent<TMP_InputField>() != null)
+        {
+            return;
+        }
+
         Ray ray = playerCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
         if (Physics.Raycast(ray, out RaycastHit hit, interactDst, interactLayerMask))
         {
