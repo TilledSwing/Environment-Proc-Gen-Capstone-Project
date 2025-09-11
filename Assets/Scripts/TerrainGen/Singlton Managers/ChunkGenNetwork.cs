@@ -10,7 +10,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
-public class ChunkGenNetwork : NetworkBehaviour
+public class ChunkGenNetwork : MonoBehaviour
 {
     public static ChunkGenNetwork Instance;
     // Fog Render Feature Stuff
@@ -138,18 +138,6 @@ public class ChunkGenNetwork : NetworkBehaviour
             fogRenderPassFeature.SetActive(active);
         }
     }
-    /// <summary>
-    /// Sets the player to the new viewer for chunk generation and disables the local chunk generator
-    /// </summary>
-    public override void OnStartClient()
-    {
-        base.OnStartClient();
-        viewer = GameObject.Find("Player(Clone)").transform;
-        SetFogActive(true);
-        objectiveCanvas.SetActive(true);
-        // objectiveHeader.SetActive(true);
-        // objectiveCounterText.SetActive(true);
-    }
 
     void Update()
     {
@@ -242,7 +230,7 @@ public class ChunkGenNetwork : NetworkBehaviour
                         if (!initialLoadComplete)
                         {
                             // Generate immediately during first load
-                            TerrainChunk chunk = new TerrainChunk(viewedChunkCoord, chunkSize, transform, terrainDensityData, assetSpawnData, terrainTextureData,
+                            TerrainChunk chunk = new TerrainChunk(viewedChunkCoord, chunkSize, GameObject.Find("ChunkParent").transform, terrainDensityData, assetSpawnData, terrainTextureData,
                                                          marchingCubesComputeShader, terrainDensityComputeShader, terrainNoiseComputeShader, terraformComputeShader,
                                                          terrainMaterial, waterMaterial, initialLoadComplete);
 
@@ -342,7 +330,7 @@ public class ChunkGenNetwork : NetworkBehaviour
 
             if (!chunkDictionary.TryGetValue(coord, out TerrainChunk dictChunk) && viewerDstFromBound <= (maxViewDst * maxViewDst))
             {
-                var chunk = new TerrainChunk(coord, chunkSize, transform, terrainDensityData, assetSpawnData, terrainTextureData,
+                var chunk = new TerrainChunk(coord, chunkSize, GameObject.Find("ChunkParent").transform, terrainDensityData, assetSpawnData, terrainTextureData,
                                             marchingCubesComputeShader, terrainDensityComputeShader,
                                             terrainNoiseComputeShader,
                                             terraformComputeShader,
