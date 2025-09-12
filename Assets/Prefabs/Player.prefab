@@ -18,7 +18,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &2752622705633172173
 Transform:
   m_ObjectHideFlags: 0
@@ -28,7 +28,7 @@ Transform:
   m_GameObject: {fileID: 1020955608585904369}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.645, z: 0.344}
+  m_LocalPosition: {x: 0, y: -0.576, z: 0.384}
   m_LocalScale: {x: 0.8, y: 0.2, z: 0.3}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -357,6 +357,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1dd271e5e9b536a4cb7eef83c2ff8962, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _componentIndexCache: 255
+  _addedNetworkObject: {fileID: 1324032884783071196}
+  _networkObjectCache: {fileID: 0}
   interactDst: 10
   terrainLayerMask:
     serializedVersion: 2
@@ -377,6 +380,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10b15033df4894841b9670712c1e4e2e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _componentIndexCache: 255
+  _addedNetworkObject: {fileID: 1324032884783071196}
+  _networkObjectCache: {fileID: 0}
   bomb: {fileID: 2829416588567123249, guid: 237e98ccbbe3e3a4d920901ddf4c6728, type: 3}
   throwForce: 20
 --- !u!1 &8935483582062294650
