@@ -73,18 +73,18 @@ public class Terraforming : NetworkBehaviour
             GameObject hitChunk = hit.collider.gameObject;
             ComputeMarchingCubes hitMarchingCubes = hitChunk.GetComponent<ComputeMarchingCubes>();
             Vector3Int hitChunkPos = hitMarchingCubes.chunkPos;
-            TerraformServer(terraformCenter, hitChunkPos);
+            TerraformServer(terraformCenter, hitChunkPos, mode);
         }
     }
 
     [ServerRpc(RequireOwnership = false)]
-    public void TerraformServer(Vector3 terraformCenter, Vector3Int hitChunkPos)
+    public void TerraformServer(Vector3 terraformCenter, Vector3Int hitChunkPos, bool terraformMode)
     {
-        TerraformClient(terraformCenter, hitChunkPos);
+        TerraformClient(terraformCenter, hitChunkPos, terraformMode);
     }
 
     [ObserversRpc]
-    void TerraformClient(Vector3 terraformCenter, Vector3Int hitChunkPos)
+    void TerraformClient(Vector3 terraformCenter, Vector3Int hitChunkPos, bool terraformMode)
     {
         ChunkGenNetwork.TerrainChunk[] chunkAndNeighbors = ChunkGenNetwork.Instance.GetChunkAndNeighbors(new Vector3Int(Mathf.CeilToInt(hitChunkPos.x / terrainDensityData.width), Mathf.CeilToInt(hitChunkPos.y / terrainDensityData.width), Mathf.CeilToInt(hitChunkPos.z / terrainDensityData.width)));
         foreach (ChunkGenNetwork.TerrainChunk terrainChunk in chunkAndNeighbors)
@@ -110,7 +110,7 @@ public class Terraforming : NetworkBehaviour
                 marchingCubes.terraformComputeShader.SetVector("TerraformCenter", terraformCenter);
                 marchingCubes.terraformComputeShader.SetFloat("TerraformRadius", terraformRadius);
                 marchingCubes.terraformComputeShader.SetFloat("TerraformStrength", terraformStrength);
-                marchingCubes.terraformComputeShader.SetBool("TerraformMode", mode);
+                marchingCubes.terraformComputeShader.SetBool("TerraformMode", terraformMode);
                 marchingCubes.terraformComputeShader.SetInt("MaxWorldYChunks", ChunkGenNetwork.Instance.maxWorldYChunks);
 
                 marchingCubes.terraformComputeShader.Dispatch(terraformKernel, threadSizeX, threadSizeY, threadSizeZ);
