@@ -1,13 +1,18 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using FishNet.Object;
+using FishNet.Connection;
 
-public class PlacementController : MonoBehaviour
+public class PlacementController : NetworkBehaviour
 {
     Camera playerCamera;
     public float interactDst;
     public LayerMask terrainLayerMask;
     public GameObject placeableObject;
+    public GameObject placeableObjectNetwork;
     public float rotationSensitivity;
     private List<Material> originalMaterials = new();
     public Material placeableObjectMaterial;
@@ -18,13 +23,29 @@ public class PlacementController : MonoBehaviour
     private bool placementMode = false;
     private bool lastRayState = false;
     private float scrollRotation;
-    void Awake()
+    //void Awake()
+    //{
+    //    playerCamera = Camera.main;
+    //}
+
+    public override void OnStartClient()
     {
-        playerCamera = Camera.main;
+        base.OnStartClient();
+        if (!base.IsOwner)
+            this.enabled = false;
+        else
+            playerCamera = Camera.main;
     }
 
     void Update()
     {
+        // Block input if in a chat message block. Ensures that typing words with certain letters or numbers won't trigger input events.
+        if (EventSystem.current.currentSelectedGameObject != null &&
+            EventSystem.current.currentSelectedGameObject.GetComponent<TMP_InputField>() != null)
+        {
+            return;
+        }
+
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             placementMode = !placementMode;
@@ -68,10 +89,9 @@ public class PlacementController : MonoBehaviour
                 }
                 if (Input.GetKeyDown(KeyCode.F))
                 {
-                    currentObjectRenderer.materials = originalMaterials.ToArray();
-                    currentObjectRef.GetComponent<BoxCollider>().enabled = true;
+                    PlaceManualAsset(currentObjectRef.transform.position, currentObjectRef.transform.rotation);
+                    Destroy(currentObjectRef);
                     currentObjectRef = null;
-                    scrollRotation = 0f;
                 }
             }
             else if (lastRayState)
@@ -81,5 +101,15 @@ public class PlacementController : MonoBehaviour
                 currentObjectRef = null;
             }
         }
+    }
+
+    /// <summary>
+    /// The actual asset to place that gets synchronized over the network.
+    /// </summary>
+    [ServerRpc]
+    public void PlaceManualAsset(Vector3 placementCoords, Quaternion placementRotation)
+    {
+        GameObject assetToPlace = Instantiate(placeableObjectNetwork, placementCoords, placementRotation);
+        ServerManager.Spawn(assetToPlace);
     }
 }

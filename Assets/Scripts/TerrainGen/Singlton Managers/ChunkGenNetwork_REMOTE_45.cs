@@ -11,7 +11,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
-public class ChunkGenNetwork : MonoBehaviour
+public class ChunkGenNetwork : NetworkBehaviour
 {
     public static ChunkGenNetwork Instance;
     // Fog Render Feature Stuff
@@ -293,7 +293,7 @@ public class ChunkGenNetwork : MonoBehaviour
                         if (!initialLoadComplete)
                         {
                             // Generate immediately during first load
-                            TerrainChunk chunk = new TerrainChunk(viewedChunkCoord, chunkSize, GameObject.Find("ChunkParent").transform, terrainDensityData, assetSpawnData, terrainTextureData,
+                            TerrainChunk chunk = new TerrainChunk(viewedChunkCoord, chunkSize, transform, terrainDensityData, assetSpawnData, terrainTextureData,
                                                          marchingCubesComputeShader, terrainDensityComputeShader, terrainNoiseComputeShader, terraformComputeShader,
                                                          terrainMaterial, waterMaterial, initialLoadComplete);
 
@@ -393,7 +393,7 @@ public class ChunkGenNetwork : MonoBehaviour
 
             if (!chunkDictionary.TryGetValue(coord, out TerrainChunk dictChunk) && viewerDstFromBound <= (maxViewDst * maxViewDst))
             {
-                var chunk = new TerrainChunk(coord, chunkSize, GameObject.Find("ChunkParent").transform, terrainDensityData, assetSpawnData, terrainTextureData,
+                var chunk = new TerrainChunk(coord, chunkSize, transform, terrainDensityData, assetSpawnData, terrainTextureData,
                                             marchingCubesComputeShader, terrainDensityComputeShader,
                                             terrainNoiseComputeShader,
                                             terraformComputeShader,
@@ -730,7 +730,7 @@ public class ChunkGenNetwork : MonoBehaviour
                     meshCollider.enabled = visible;
                 }
             }
-            if (Instance.terrainDensityData.waterLevel > chunkPos.y && Instance.terrainDensityData.waterLevel < Mathf.RoundToInt(chunkPos.y + Instance.terrainDensityData.width))
+            if (Instance.terrainDensityData.waterLevel > chunkPos.y && Instance.terrainDensityData.waterLevel < Mathf.RoundToInt(chunkPos.y + Instance.terrainDensityData.waterLevel))
             {
                 if (waterGen.meshRenderer != null && waterGen.meshRenderer.enabled != visible)
                 {

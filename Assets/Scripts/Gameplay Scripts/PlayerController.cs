@@ -1,8 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using FishNet.Connection;
 using FishNet.Object;
+using System.Collections;
+using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
+using UnityEngine.EventSystems;
 
 // Template by Bobsi Unity - Youtube
 // Modified by Jacob Ormsby
@@ -37,6 +39,12 @@ public class PlayerController : NetworkBehaviour {
             playerCamera = Camera.main;
             playerCamera.transform.position = new Vector3(transform.position.x, transform.position.y + cameraYOffset, transform.position.z);
             playerCamera.transform.SetParent(transform);
+
+            Transform eye1 = transform.Find("Visor");
+            Transform eye2 = transform.Find("Visor (1)");
+
+            eye1.gameObject.SetActive(false);
+            eye2.gameObject.SetActive(false);
         }
         else {
             gameObject.GetComponent<PlayerController>().enabled = false;
@@ -56,6 +64,13 @@ public class PlayerController : NetworkBehaviour {
         // Only apply updates to local player / owner of script.
         if (!IsOwner)
             return;
+
+        // Block input if in a chat message block. Ensures that typing words with certain letters or numbers won't trigger input events.
+        if (EventSystem.current.currentSelectedGameObject != null &&
+            EventSystem.current.currentSelectedGameObject.GetComponent<TMP_InputField>() != null)
+        {
+            return;
+        }
 
         bool isRunning = false;
 

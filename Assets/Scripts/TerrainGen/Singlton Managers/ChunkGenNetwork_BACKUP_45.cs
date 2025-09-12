@@ -142,6 +142,8 @@ public class ChunkGenNetwork : MonoBehaviour
             fogRenderPassFeature.SetActive(active);
         }
     }
+<<<<<<< HEAD
+=======
     /// <summary>
     /// Sets the player to the new viewer for chunk generation and disables the local chunk generator
     /// </summary>
@@ -162,6 +164,7 @@ public class ChunkGenNetwork : MonoBehaviour
         // objectiveHeader.SetActive(true);
         // objectiveCounterText.SetActive(true);
     }
+>>>>>>> origin/Alpha_Networking
 
     [ServerRpc(RequireOwnership = false)]
     void ClientReady(NetworkConnection target)

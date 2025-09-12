@@ -2,8 +2,12 @@ using System;
 using JetBrains.Annotations;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using TMPro;
+using FishNet.Object;
+using FishNet.Connection;
 
-public class Terraforming : MonoBehaviour
+public class Terraforming : NetworkBehaviour
 {
     Camera playerCamera;
     public float terraformMaxDst = 20f;
@@ -12,16 +16,35 @@ public class Terraforming : MonoBehaviour
     bool mode = true;
     LayerMask terrainLayer;
     public TerrainDensityData terrainDensityData;
-    void Start()
+    //void Start()
+    //{
+    //    playerCamera = Camera.main;
+    //    terrainLayer = LayerMask.GetMask("Terrain Layer");
+    //    // terrainDensityData = Resources.Load<TerrainDensityData1>("TerrainDensityData1");
+    //    // chunkGen = FindFirstObjectByType<ChunkGenNetwork>();
+    //}
+
+    public override void OnStartClient()
     {
-        playerCamera = Camera.main;
-        terrainLayer = LayerMask.GetMask("Terrain Layer");
-        // terrainDensityData = Resources.Load<TerrainDensityData1>("TerrainDensityData1");
-        // chunkGen = FindFirstObjectByType<ChunkGenNetwork>();
+        base.OnStartClient();
+        if (!base.IsOwner)
+            this.enabled = false;
+        else
+        {
+            playerCamera = Camera.main;
+            terrainLayer = LayerMask.GetMask("Terrain Layer");
+        }
     }
 
     void Update()
     {
+        // Block input if in a chat message block. Ensures that typing words with certain letters or numbers won't trigger input events.
+        if (EventSystem.current.currentSelectedGameObject != null &&
+            EventSystem.current.currentSelectedGameObject.GetComponent<TMP_InputField>() != null)
+        {
+            return;
+        }
+
         if (Input.GetMouseButton(0))
         {
             mode = true;
@@ -50,37 +73,49 @@ public class Terraforming : MonoBehaviour
             GameObject hitChunk = hit.collider.gameObject;
             ComputeMarchingCubes hitMarchingCubes = hitChunk.GetComponent<ComputeMarchingCubes>();
             Vector3Int hitChunkPos = hitMarchingCubes.chunkPos;
-            ChunkGenNetwork.TerrainChunk[] chunkAndNeighbors = ChunkGenNetwork.Instance.GetChunkAndNeighbors(new Vector3Int(Mathf.CeilToInt(hitChunkPos.x / terrainDensityData.width), Mathf.CeilToInt(hitChunkPos.y / terrainDensityData.width), Mathf.CeilToInt(hitChunkPos.z / terrainDensityData.width)));
-            foreach (ChunkGenNetwork.TerrainChunk terrainChunk in chunkAndNeighbors)
+            TerraformServer(terraformCenter, hitChunkPos);
+        }
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void TerraformServer(Vector3 terraformCenter, Vector3Int hitChunkPos)
+    {
+        TerraformClient(terraformCenter, hitChunkPos);
+    }
+
+    [ObserversRpc]
+    void TerraformClient(Vector3 terraformCenter, Vector3Int hitChunkPos)
+    {
+        ChunkGenNetwork.TerrainChunk[] chunkAndNeighbors = ChunkGenNetwork.Instance.GetChunkAndNeighbors(new Vector3Int(Mathf.CeilToInt(hitChunkPos.x / terrainDensityData.width), Mathf.CeilToInt(hitChunkPos.y / terrainDensityData.width), Mathf.CeilToInt(hitChunkPos.z / terrainDensityData.width)));
+        foreach (ChunkGenNetwork.TerrainChunk terrainChunk in chunkAndNeighbors)
+        {
+            if (terrainChunk == null) continue;
+            if (Mathf.Sqrt(terrainChunk.bounds.SqrDistance(terraformCenter)) <= terraformRadius)
             {
-                if (terrainChunk == null) continue;
-                if (Mathf.Sqrt(terrainChunk.bounds.SqrDistance(terraformCenter)) <= terraformRadius)
-                {
-                    ComputeMarchingCubes marchingCubes = terrainChunk.marchingCubes;
-                    Vector3Int chunkPos = terrainChunk.chunkPos;
-                    Vector3Int radius = new Vector3Int(Mathf.CeilToInt(terraformRadius), Mathf.CeilToInt(terraformRadius), Mathf.CeilToInt(terraformRadius));
-                    Vector3Int start = Vector3Int.Max(Vector3Int.RoundToInt(terraformCenter) - radius - chunkPos, Vector3Int.zero);
-                    Vector3Int end = Vector3Int.Min(Vector3Int.RoundToInt(terraformCenter) + radius - chunkPos, new Vector3Int(Mathf.CeilToInt(terrainDensityData.width), Mathf.CeilToInt(terrainDensityData.width), Mathf.CeilToInt(terrainDensityData.width)));
+                ComputeMarchingCubes marchingCubes = terrainChunk.marchingCubes;
+                Vector3Int chunkPos = terrainChunk.chunkPos;
+                Vector3Int radius = new Vector3Int(Mathf.CeilToInt(terraformRadius), Mathf.CeilToInt(terraformRadius), Mathf.CeilToInt(terraformRadius));
+                Vector3Int start = Vector3Int.Max(Vector3Int.RoundToInt(terraformCenter) - radius - chunkPos, Vector3Int.zero);
+                Vector3Int end = Vector3Int.Min(Vector3Int.RoundToInt(terraformCenter) + radius - chunkPos, new Vector3Int(Mathf.CeilToInt(terrainDensityData.width), Mathf.CeilToInt(terrainDensityData.width), Mathf.CeilToInt(terrainDensityData.width)));
 
-                    int threadSizeX = Mathf.CeilToInt((end.x - start.x) + 1f);
-                    int threadSizeY = Mathf.CeilToInt((end.y - start.y) + 1f);
-                    int threadSizeZ = Mathf.CeilToInt((end.z - start.z) + 1f);
+                int threadSizeX = Mathf.CeilToInt((end.x - start.x) + 1f);
+                int threadSizeY = Mathf.CeilToInt((end.y - start.y) + 1f);
+                int threadSizeZ = Mathf.CeilToInt((end.z - start.z) + 1f);
 
-                    int terraformKernel = marchingCubes.terraformComputeShader.FindKernel("Terraform");
-                    marchingCubes.terraformComputeShader.SetBuffer(terraformKernel, "HeightsBuffer", marchingCubes.heightsBuffer);
-                    marchingCubes.terraformComputeShader.SetInt("ChunkSize", terrainDensityData.width);
-                    marchingCubes.terraformComputeShader.SetVector("ChunkPos", (Vector3)chunkPos);
-                    marchingCubes.terraformComputeShader.SetVector("TerraformOffset", (Vector3)start);
-                    marchingCubes.terraformComputeShader.SetVector("TerraformCenter", terraformCenter);
-                    marchingCubes.terraformComputeShader.SetFloat("TerraformRadius", terraformRadius);
-                    marchingCubes.terraformComputeShader.SetFloat("TerraformStrength", terraformStrength);
-                    marchingCubes.terraformComputeShader.SetBool("TerraformMode", mode);
-                    marchingCubes.terraformComputeShader.SetInt("MaxWorldYChunks", ChunkGenNetwork.Instance.maxWorldYChunks);
+                int terraformKernel = marchingCubes.terraformComputeShader.FindKernel("Terraform");
+                marchingCubes.terraformComputeShader.SetBuffer(terraformKernel, "HeightsBuffer", marchingCubes.heightsBuffer);
+                marchingCubes.terraformComputeShader.SetInt("ChunkSize", terrainDensityData.width);
+                marchingCubes.terraformComputeShader.SetVector("ChunkPos", (Vector3)chunkPos);
+                marchingCubes.terraformComputeShader.SetVector("TerraformOffset", (Vector3)start);
+                marchingCubes.terraformComputeShader.SetVector("TerraformCenter", terraformCenter);
+                marchingCubes.terraformComputeShader.SetFloat("TerraformRadius", terraformRadius);
+                marchingCubes.terraformComputeShader.SetFloat("TerraformStrength", terraformStrength);
+                marchingCubes.terraformComputeShader.SetBool("TerraformMode", mode);
+                marchingCubes.terraformComputeShader.SetInt("MaxWorldYChunks", ChunkGenNetwork.Instance.maxWorldYChunks);
 
-                    marchingCubes.terraformComputeShader.Dispatch(terraformKernel, threadSizeX, threadSizeY, threadSizeZ);
+                marchingCubes.terraformComputeShader.Dispatch(terraformKernel, threadSizeX, threadSizeY, threadSizeZ);
 
-                    marchingCubes.SyncMarchingCubes(marchingCubes.heightsBuffer, true);
-                }
+                marchingCubes.SyncMarchingCubes(marchingCubes.heightsBuffer, true);
             }
         }
     }

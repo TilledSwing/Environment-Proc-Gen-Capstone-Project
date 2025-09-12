@@ -1,29 +1,54 @@
+using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.Rendering;
+using FishNet.Object;
+using FishNet.Connection;
 
-public class GlowballThrow : MonoBehaviour
+public class GlowballThrow : NetworkBehaviour
 {
     Camera playerCamera;
     public GameObject glowball;
     public float throwForce = 20f;
-    void Start()
+
+    //void Start()
+    //{
+    //    playerCamera = Camera.main;
+    //}
+
+
+    public override void OnStartClient()
     {
-        playerCamera = Camera.main;
+        base.OnStartClient();
+        if (!base.IsOwner)
+            this.enabled = false;
+        else
+            playerCamera = Camera.main;
     }
+
     void Update()
     {
+        // Block input if in a chat message block. Ensures that typing words with certain letters or numbers won't trigger input events.
+        if (EventSystem.current.currentSelectedGameObject != null &&
+            EventSystem.current.currentSelectedGameObject.GetComponent<TMP_InputField>() != null)
+        {
+            return;
+        }
+
         if (Input.GetKeyDown(KeyCode.E))
         {
-            ThrowGlowball();
+            ThrowGlowball(playerCamera.transform.forward);
         }
     }
     /// <summary>
     /// Throw a glowball object from in front of the player in the direction they are looking
     /// </summary>
-    public void ThrowGlowball()
+    [ServerRpc]
+    public void ThrowGlowball(Vector3 lookdir)
     {
-        GameObject thrownBall = Instantiate(glowball, gameObject.transform.position + gameObject.transform.forward * 2f, Quaternion.identity);
+        GameObject thrownBall = Instantiate(glowball, transform.position + transform.forward * 2f, Quaternion.identity);
         Rigidbody ballRB = thrownBall.GetComponent<Rigidbody>();
-        ballRB.AddForce(playerCamera.transform.forward * throwForce, ForceMode.Impulse);
+        ballRB.AddForce(lookdir * throwForce, ForceMode.Impulse);
+        ServerManager.Spawn(thrownBall);
     }
 }

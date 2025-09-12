@@ -1,9 +1,8 @@
-using FishNet.Connection;
-using FishNet.Object;
-using FishNet.Serializing.Helping;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using FishNet.Object;
+using FishNet.Serializing.Helping;
 using Unity.Collections;
 using Unity.Mathematics;
 using Unity.VisualScripting;
@@ -11,7 +10,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
-public class ChunkGenNetwork : MonoBehaviour
+public class ChunkGenNetwork : NetworkBehaviour
 {
     public static ChunkGenNetwork Instance;
     // Fog Render Feature Stuff
@@ -24,9 +23,6 @@ public class ChunkGenNetwork : MonoBehaviour
     public GameObject objectiveCanvas;
     public GameObject objectiveHeader;
     public GameObject objectiveCounterText;
-    // Chat & Lobby
-    public GameObject chatContainer;
-    public GameObject lobbyContainer;
     // Viewer Settings
     public int maxWorldYChunks = 10;
     public float maxViewDst = 100;
@@ -148,58 +144,11 @@ public class ChunkGenNetwork : MonoBehaviour
     public override void OnStartClient()
     {
         base.OnStartClient();
-
-        // Only need to load in new data if not the server host.
-        if (!base.IsServerStarted)
-        {
-            ClientReady(LocalConnection);
-        }
         viewer = GameObject.Find("Player(Clone)").transform;
         SetFogActive(true);
         objectiveCanvas.SetActive(true);
-        chatContainer.SetActive(true);
-        lobbyContainer.SetActive(true);
         // objectiveHeader.SetActive(true);
         // objectiveCounterText.SetActive(true);
-    }
-
-    [ServerRpc(RequireOwnership = false)]
-    void ClientReady(NetworkConnection target)
-    {
-        UpdateClientMesh(target, SeedSerializer.SerializeTerrainDensity(terrainDensityData));
-    }
-
-
-    [TargetRpc]
-    void UpdateClientMesh(NetworkConnection conn, TerrainSettings settings)
-    {
-        terrainDensityData = SeedSerializer.DeserializeTerrainDensity(settings);
-
-        // Reset action and chunking to defaults (loading in from fresh)
-        // Chunk Variables
-        chunkDictionary = new();
-        chunksVisibleLastUpdate = new();
-        chunkLoadQueue = new();
-        chunkLoadSet = new();
-        chunkHideQueue = new();
-        chunkShowQueue = new();
-        isLoadingChunkVisibility = false;
-        // queueUpdateDistanceThreshold = 15f;
-        isLoadingChunks = false;
-        initialLoadComplete = false;
-        // Action Queues
-        hasPendingMeshInits = false;
-        pendingMeshInits = new();
-        isLoadingMeshes = false;
-        hasPendingReadbacks = false;
-        pendingReadbacks = new();
-        isLoadingReadbacks = false;
-        hasPendingAssetInstantiations = false;
-        pendingAssetInstantiations = new();
-        isLoadingAssetInstantiations = false;
-
-        chunkSize = terrainDensityData.width;
-        chunksVisible = Mathf.RoundToInt(maxViewDst / chunkSize);
     }
 
     void Update()
@@ -293,7 +242,7 @@ public class ChunkGenNetwork : MonoBehaviour
                         if (!initialLoadComplete)
                         {
                             // Generate immediately during first load
-                            TerrainChunk chunk = new TerrainChunk(viewedChunkCoord, chunkSize, GameObject.Find("ChunkParent").transform, terrainDensityData, assetSpawnData, terrainTextureData,
+                            TerrainChunk chunk = new TerrainChunk(viewedChunkCoord, chunkSize, transform, terrainDensityData, assetSpawnData, terrainTextureData,
                                                          marchingCubesComputeShader, terrainDensityComputeShader, terrainNoiseComputeShader, terraformComputeShader,
                                                          terrainMaterial, waterMaterial, initialLoadComplete);
 
@@ -393,7 +342,7 @@ public class ChunkGenNetwork : MonoBehaviour
 
             if (!chunkDictionary.TryGetValue(coord, out TerrainChunk dictChunk) && viewerDstFromBound <= (maxViewDst * maxViewDst))
             {
-                var chunk = new TerrainChunk(coord, chunkSize, GameObject.Find("ChunkParent").transform, terrainDensityData, assetSpawnData, terrainTextureData,
+                var chunk = new TerrainChunk(coord, chunkSize, transform, terrainDensityData, assetSpawnData, terrainTextureData,
                                             marchingCubesComputeShader, terrainDensityComputeShader,
                                             terrainNoiseComputeShader,
                                             terraformComputeShader,
@@ -730,7 +679,7 @@ public class ChunkGenNetwork : MonoBehaviour
                     meshCollider.enabled = visible;
                 }
             }
-            if (Instance.terrainDensityData.waterLevel > chunkPos.y && Instance.terrainDensityData.waterLevel < Mathf.RoundToInt(chunkPos.y + Instance.terrainDensityData.width))
+            if (Instance.terrainDensityData.waterLevel > chunkPos.y && Instance.terrainDensityData.waterLevel < Mathf.RoundToInt(chunkPos.y + Instance.terrainDensityData.waterLevel))
             {
                 if (waterGen.meshRenderer != null && waterGen.meshRenderer.enabled != visible)
                 {
