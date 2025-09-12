@@ -39,6 +39,12 @@ public class PlayerController : NetworkBehaviour {
             playerCamera = Camera.main;
             playerCamera.transform.position = new Vector3(transform.position.x, transform.position.y + cameraYOffset, transform.position.z);
             playerCamera.transform.SetParent(transform);
+
+            Transform eye1 = transform.Find("Visor");
+            Transform eye2 = transform.Find("Visor (1)");
+
+            eye1.gameObject.SetActive(false);
+            eye2.gameObject.SetActive(false);
         }
         else {
             gameObject.GetComponent<PlayerController>().enabled = false;
