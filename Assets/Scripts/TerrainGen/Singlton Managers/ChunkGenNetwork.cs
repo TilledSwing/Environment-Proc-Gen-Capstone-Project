@@ -1,5 +1,5 @@
-using FishNet.Connection;
-using FishNet.Object;
+//using FishNet.Connection;
+//using FishNet.Object;
 using FishNet.Serializing.Helping;
 using System;
 using System.Collections;
@@ -11,7 +11,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
-public class ChunkGenNetwork : NetworkBehaviour
+public class ChunkGenNetwork : MonoBehaviour
 {
     public static ChunkGenNetwork Instance;
     // Fog Render Feature Stuff
@@ -61,13 +61,13 @@ public class ChunkGenNetwork : NetworkBehaviour
     // Chunk Variables
     public Dictionary<Vector3, TerrainChunk> chunkDictionary = new();
     public List<TerrainChunk> chunksVisibleLastUpdate = new();
-    private PriorityQueue<Vector3Int> chunkLoadQueue = new();
-    private HashSet<Vector3Int> chunkLoadSet = new();
+    public PriorityQueue<Vector3Int> chunkLoadQueue = new();
+    public HashSet<Vector3Int> chunkLoadSet = new();
     public Queue<TerrainChunk> chunkHideQueue = new();
     public Queue<TerrainChunk> chunkShowQueue = new();
-    private bool isLoadingChunkVisibility = false;
+    public bool isLoadingChunkVisibility = false;
     public float queueUpdateDistanceThreshold = 15f;
-    private bool isLoadingChunks = false;
+    public bool isLoadingChunks = false;
     public bool initialLoadComplete = false;
     // Lighting Blocker
     public GameObject lightingBlocker;
@@ -75,13 +75,13 @@ public class ChunkGenNetwork : NetworkBehaviour
     // Action Queues
     public bool hasPendingMeshInits = false;
     public Queue<Action> pendingMeshInits = new();
-    private bool isLoadingMeshes = false;
+    public bool isLoadingMeshes = false;
     public bool hasPendingReadbacks = false;
     public Queue<ReadbackRequest> pendingReadbacks = new();
-    private bool isLoadingReadbacks = false;
+    public bool isLoadingReadbacks = false;
     public bool hasPendingAssetInstantiations = false;
     public Queue<Action> pendingAssetInstantiations = new();
-    private bool isLoadingAssetInstantiations = false;
+    public bool isLoadingAssetInstantiations = false;
     // Data structure pools
     public class ReadbackRequest
     {
@@ -142,65 +142,7 @@ public class ChunkGenNetwork : NetworkBehaviour
             fogRenderPassFeature.SetActive(active);
         }
     }
-    /// <summary>
-    /// Sets the player to the new viewer for chunk generation and disables the local chunk generator
-    /// </summary>
-    public override void OnStartClient()
-    {
-        base.OnStartClient();
 
-        // Only need to load in new data if not the server host.
-        if (!base.IsServerStarted)
-        {
-            ClientReady(LocalConnection);
-        }
-        viewer = GameObject.Find("Player(Clone)").transform;
-        SetFogActive(true);
-        objectiveCanvas.SetActive(true);
-        chatContainer.SetActive(true);
-        lobbyContainer.SetActive(true);
-        // objectiveHeader.SetActive(true);
-        // objectiveCounterText.SetActive(true);
-    }
-
-    [ServerRpc(RequireOwnership = false)]
-    void ClientReady(NetworkConnection target)
-    {
-        UpdateClientMesh(target, SeedSerializer.SerializeTerrainDensity(terrainDensityData));
-    }
-
-
-    [TargetRpc]
-    void UpdateClientMesh(NetworkConnection conn, TerrainSettings settings)
-    {
-        terrainDensityData = SeedSerializer.DeserializeTerrainDensity(settings);
-
-        // Reset action and chunking to defaults (loading in from fresh)
-        // Chunk Variables
-        chunkDictionary = new();
-        chunksVisibleLastUpdate = new();
-        chunkLoadQueue = new();
-        chunkLoadSet = new();
-        chunkHideQueue = new();
-        chunkShowQueue = new();
-        isLoadingChunkVisibility = false;
-        // queueUpdateDistanceThreshold = 15f;
-        isLoadingChunks = false;
-        initialLoadComplete = false;
-        // Action Queues
-        hasPendingMeshInits = false;
-        pendingMeshInits = new();
-        isLoadingMeshes = false;
-        hasPendingReadbacks = false;
-        pendingReadbacks = new();
-        isLoadingReadbacks = false;
-        hasPendingAssetInstantiations = false;
-        pendingAssetInstantiations = new();
-        isLoadingAssetInstantiations = false;
-
-        chunkSize = terrainDensityData.width;
-        chunksVisible = Mathf.RoundToInt(maxViewDst / chunkSize);
-    }
     public void UpdateFromDB(TerrainSettings settings)
     {
         terrainDensityData = SeedSerializer.DeserializeTerrainDensity(settings);
