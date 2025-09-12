@@ -667,7 +667,7 @@ public class ChunkGenNetwork : MonoBehaviour
                     meshCollider.enabled = visible;
                 }
             }
-            if (Instance.terrainDensityData.waterLevel > chunkPos.y && Instance.terrainDensityData.waterLevel < Mathf.RoundToInt(chunkPos.y + Instance.terrainDensityData.waterLevel))
+            if (Instance.terrainDensityData.waterLevel > chunkPos.y && Instance.terrainDensityData.waterLevel < Mathf.RoundToInt(chunkPos.y + Instance.terrainDensityData.width))
             {
                 if (waterGen.meshRenderer != null && waterGen.meshRenderer.enabled != visible)
                 {

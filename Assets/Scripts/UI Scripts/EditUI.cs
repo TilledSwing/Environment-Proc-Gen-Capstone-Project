@@ -4,10 +4,8 @@ using UnityEngine.UI;
 public class EditUI : MonoBehaviour
 {
     public ChunkGenNetwork cgn;
-    public ChunkGenNetwork.TerrainChunk mc;
     public TerrainDensityData tdd;
     public NoiseGenerator ng;
-    public ChunkGenNetwork.LOD lod;
     public Slider slider;
     public Toggle toggle;
     public TMP_InputField input;
@@ -17,7 +15,6 @@ public class EditUI : MonoBehaviour
     /// </summary>
     void Start()
     {
-        tdd = cgn.terrainDensityData;
         UpdateSettings();
     }
 
@@ -35,13 +32,30 @@ public class EditUI : MonoBehaviour
         }
     }
 
+    public void Reload()
+    {
+        cgn.chunkDictionary = new();
+        cgn.chunksVisibleLastUpdate = new();
+        cgn.chunkHideQueue = new();
+        cgn.chunkShowQueue = new();
+        cgn.initialLoadComplete = false;
+        cgn.hasPendingMeshInits = false;
+        cgn.pendingMeshInits = new();
+        cgn.hasPendingReadbacks = false;
+        cgn.pendingReadbacks = new();
+        cgn.hasPendingAssetInstantiations = false;
+        cgn.pendingAssetInstantiations = new();
+        cgn.chunkSize = tdd.width;
+        cgn.chunksVisible = Mathf.RoundToInt(cgn.maxViewDst / cgn.chunkSize);
+    }
+
     /// <summary>
     /// Updates the mesh only when a UI slider is released
     /// </summary>
     public void OnDeselect()
     {
         Debug.Log("deselected slider");
-        mc.marchingCubes.Regen();
+        Reload();
     }
 
     /// <summary>
@@ -151,7 +165,8 @@ public class EditUI : MonoBehaviour
         tdd.lerp = true;
         tdd.terracing = false;
         tdd.terraceHeight = 2;
-        mc.marchingCubes.Regen();
+        Reload();
+        UpdateSettings();
     }
 
     /// <summary>
@@ -162,19 +177,19 @@ public class EditUI : MonoBehaviour
     {
         tdd.lerp = marked;
         Debug.Log("toggle changed");
-        mc.marchingCubes.Regen();
+        Reload();
     }
     public void OnTerraceToggleChanged(bool marked)
     {
         tdd.terracing = marked;
         Debug.Log("toggle changed");
-        mc.marchingCubes.Regen();
+        Reload();
     }
     public void OnDWToggleChanged(bool marked)
     {
         ng.domainWarpToggle = marked;
         Debug.Log("toggle changed");
-        mc.marchingCubes.Regen();
+        Reload();
     }
 
     /// <summary>
@@ -185,13 +200,13 @@ public class EditUI : MonoBehaviour
     {
         ng.noiseSeed = System.Convert.ToInt32(seed);
         Debug.Log("seed changed");
-        mc.marchingCubes.Regen();
+        Reload();
     }
     public void OnDWSeedChanged(string seed)
     {
         ng.domainWarpSeed = System.Convert.ToInt32(seed);
         Debug.Log("seed changed");
-        mc.marchingCubes.Regen();
+        Reload();
     }
 
     /// <summary>
