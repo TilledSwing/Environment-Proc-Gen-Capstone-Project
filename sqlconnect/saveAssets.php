@@ -31,13 +31,12 @@
             
             if (isset($_POST["Assets"])) {
 
-                $assets = json_decode($_POST["Assets"], true);
-                
+                $assetsJson = json_decode($_POST["Assets"], true);
+                $assets = isset($assetsJson["data"]) ? $assetsJson["data"] : $assetsJson;
                 if(is_array($assets)){
-                    $insertAsset = $conn->prepare("INSERT INTO ManualAssets (TerrainId, AssetId, xPos, yPos, zPos) VALUES (?,?,?,?,?) 
-                                                ON DUPLICATE KEY UPDATE TerrainId = LAST_INSERT_ID(TerrainId)");
+                    $insertAsset = $conn->prepare("INSERT INTO ManualAssets (TerrainId, AssetId, xPos, yPos, zPos) VALUES (?,?,?,?,?)");
 
-                    foreach($manAsset as $assets){
+                    foreach($assets as $manAsset){
                         $assetId = $manAsset["AssetId"];
                         $xPos = $manAsset["xPos"];
                         $yPos = $manAsset["yPos"];

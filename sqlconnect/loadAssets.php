@@ -34,7 +34,7 @@
             
             while ($row = $terrainAssets->fetch_assoc()) {
                 $response["data"][] = [
-                    "AssetId" => (string)$row["AssetId"],
+                    "AssetId" => (int)$row["AssetId"],
                     "xPos" => (float)$row["xPos"],
                     "yPos" => (float)$row["yPos"],
                     "zPos" => (float)$row["zPos"],
