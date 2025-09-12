@@ -1,7 +1,10 @@
+using FishNet.Connection;
+using FishNet.Example.ColliderRollbacks;
+using FishNet.Object;
 using System.Collections;
 using UnityEngine;
 
-public class BombLogic : MonoBehaviour
+public class BombLogic : NetworkBehaviour
 {
     public float maxAirTime = 6f;
     public float explosionDelay = 3f;
@@ -15,6 +18,14 @@ public class BombLogic : MonoBehaviour
     {
         creationTime = Time.time;
     }
+
+    //public override void OnStartClient()
+    //{
+    //    base.OnStartClient();
+    //    if (!base.IsOwner)
+    //        this.enabled = false;
+    //}
+
     void Update()
     {
         if (!hit)
@@ -48,20 +59,34 @@ public class BombLogic : MonoBehaviour
             float currentTime = Mathf.Clamp01(t / explosionDelay);
             if (currentTime >= 1)
             {
-                BombTerraform();
+                //Debug.LogWarning("DelayedExplosion Called");
+                Vector3 terraformCenter = gameObject.transform.position;
+                Vector3Int hitChunkPos = new Vector3Int(Mathf.FloorToInt(terraformCenter.x / terrainDensityData.width), Mathf.FloorToInt(terraformCenter.y / terrainDensityData.width), Mathf.FloorToInt(terraformCenter.z / terrainDensityData.width));
+                BombTerraformServer(terraformCenter, hitChunkPos);
+
+                //Debug.LogWarning("DelayedExplosion Called 2");
                 Collider[] colliders = Physics.OverlapSphere(gameObject.transform.position, explosionRadius, assetLayer);
                 foreach (Collider collider in colliders) {
                     Destroy(collider.gameObject);
                 }
-                Destroy(gameObject);
+                // Destroy(gameObject);
             }
             yield return null;
         }
     }
-    void BombTerraform()
+
+    [ServerRpc(RequireOwnership = false)]
+    public void BombTerraformServer(Vector3 terraformCenter, Vector3Int hitChunkPos)
     {
-        Vector3 terraformCenter = gameObject.transform.position;
-        Vector3Int hitChunkPos = new Vector3Int(Mathf.FloorToInt(terraformCenter.x / terrainDensityData.width), Mathf.FloorToInt(terraformCenter.y / terrainDensityData.width), Mathf.FloorToInt(terraformCenter.z / terrainDensityData.width));
+        Debug.LogWarning("BombTerraformServer called");
+        BombTerraform(terraformCenter, hitChunkPos);
+        ServerManager.Despawn(gameObject);
+    }
+
+    [ObserversRpc]
+    void BombTerraform(Vector3 terraformCenter, Vector3Int hitChunkPos)
+    {
+        Debug.LogWarning("BombTerraform called");
         ChunkGenNetwork.TerrainChunk[] chunkAndNeighbors = ChunkGenNetwork.Instance.GetChunkAndNeighbors(hitChunkPos);
         foreach (ChunkGenNetwork.TerrainChunk terrainChunk in chunkAndNeighbors)
         {
