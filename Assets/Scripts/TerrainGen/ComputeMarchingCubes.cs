@@ -266,9 +266,7 @@ public class ComputeMarchingCubes : MonoBehaviour
 
                 if (terrainDensityData.waterLevel > chunkPos.y && terrainDensityData.waterLevel < Mathf.RoundToInt(chunkPos.y + terrainDensityData.width))
                 {
-                    // if (hasWater) {
                     waterGen.UpdateMesh();
-                    // }
                 }
 
                 if (vertexCount > 0)
@@ -320,12 +318,13 @@ public class ComputeMarchingCubes : MonoBehaviour
 
         if (terrainDensityData.waterLevel > chunkPos.y && terrainDensityData.waterLevel < Mathf.RoundToInt(chunkPos.y + terrainDensityData.width))
         {
-            // if (hasWater) {
-                waterGen.UpdateMesh();
-            // }
+            waterGen.UpdateMesh();
         }
 
         SetMeshValuesPerformant(vertexCount, vertexArray, terraforming);
+        // ChunkGenNetwork.Instance.pendingMeshInits.Enqueue(() =>
+        //     SetMeshValuesPerformant(vertexCount, vertexArray, terraforming)
+        // );
     }
     /// <summary>
     /// Sets up a mesh given a vertex array and count using lower level api for better performance

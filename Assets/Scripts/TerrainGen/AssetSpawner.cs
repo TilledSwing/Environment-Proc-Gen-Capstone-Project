@@ -306,7 +306,7 @@ public class SpawnableAsset
 {
     public GameObject asset;
     public ComputeMarchingCubes.Vertex[] spawnPoints;
-    public List<Asset> spawnedAssets = new List<Asset>();
+    public List<Asset> spawnedAssets = new();
     public bool rotateToFaceNormal;
     public float spawnProbability;
     public bool useMinSlope;

@@ -14,20 +14,22 @@ Shader "Custom/TerrainTextureShader"
 
     // The SubShader block containing the Shader code.
     SubShader
-    {
-        // SubShader Tags define when and under which conditions a SubShader block or
-        // a pass is executed.
-        Tags { "RenderType" = "Opaque" "RenderPipeline" = "UniversalPipeline" "Lightmode" = "UniversalForward" }
-        LOD 200
-
+    { 
         Pass
         {
+            // SubShader Tags define when and under which conditions a SubShader block or
+            // a pass is executed.
+            Tags { "RenderType" = "Opaque" "Queue"="Geometry" "RenderPipeline" = "UniversalPipeline" "Lightmode" = "UniversalForward" }
+            LOD 200
+            ZWrite On
+            ZTest LEqual    
             // The HLSL code block. Unity SRP uses the HLSL language.
             HLSLPROGRAM
             // This line defines the name of the vertex shader.
             #pragma vertex vert
             // This line defines the name of the fragment shader.
             #pragma fragment frag
+            #pragma multi_compile_fog
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
             #pragma multi_compile _ _ADDITIONAL_LIGHT_SHADOWS
             #pragma multi_compile _ _FORWARD_PLUS
@@ -47,8 +49,7 @@ Shader "Custom/TerrainTextureShader"
             // the vertex shader.
             struct Attributes
             {
-                // The positionOS variable contains the vertex positions in object
-                // space.
+                // The positionOS variable contains the vertex positions in object space.
                 float4 positionOS : POSITION;
                 float3 normalOS : NORMAL;
             };
@@ -59,6 +60,7 @@ Shader "Custom/TerrainTextureShader"
                 float4 positionHCS : SV_POSITION;
                 float3 worldPos : TEXCOORD0;
                 float3 worldNormal : TEXCOORD1;
+                float fogFactor : TEXCOORD2;
                 float4 shadowCoord : TEXCOORD3;
             };
 
@@ -90,6 +92,7 @@ Shader "Custom/TerrainTextureShader"
                 Varyings OUT;
                 float3 worldPos = TransformObjectToWorld(IN.positionOS.xyz);
                 OUT.positionHCS = TransformWorldToHClip(worldPos);
+                OUT.fogFactor = ComputeFogFactor(OUT.positionHCS.z);
                 OUT.worldPos = worldPos;
                 OUT.worldNormal = TransformObjectToWorldNormal(IN.normalOS);
 
@@ -183,10 +186,14 @@ Shader "Custom/TerrainTextureShader"
                 float shadowBoost = 1.0 - shadowAttenuation;
                 finalTexture += albedo.rgb * ambientStrength * shadowBoost;
 
+                finalTexture = MixFog(finalTexture, IN.fogFactor);
+
                 return float4(finalTexture, 1.0);
             }
             ENDHLSL
         }
         UsePass "Universal Render Pipeline/Lit/ShadowCaster"
+        UsePass "Universal Render Pipeline/Lit/DepthOnly"
+        UsePass "Universal Render Pipeline/Lit/DepthNormals"
     }
 }

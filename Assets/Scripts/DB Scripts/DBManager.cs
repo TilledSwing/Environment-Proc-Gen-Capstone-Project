@@ -5,6 +5,7 @@ using UnityEngine.Networking;
 using Unity.VisualScripting;
 using FishNet.Example.Authenticating;
 using System.Collections.Generic;
+using GameKit.Dependencies.Utilities;
 /// <summary>
 /// This class will act as a manager script that will facilitate all DB operations
 /// </summary>
@@ -34,32 +35,33 @@ public class DBManager : MonoBehaviour
     /// <summary>
     /// Starts the DB process to save a created terrain
     /// </summary>
-    public void retreiveTerrainData()
+    public IEnumerator retreiveTerrainData()
     {
-        StartCoroutine(LoadTerrainData());
+        yield return StartCoroutine(LoadTerrainData());
+        yield return StartCoroutine(LoadTerrainAsset(loadedTerrainId));
     }
 
 
     /// <summary>
     /// This starts the DB save of current terrain data
     /// </summary>
-    public void saveTerrainData(string tName){
+    public IEnumerator saveTerrainData(string tName)
+    {
         MarchingCubes mc = FindFirstObjectByType<MarchingCubes>();
-        StartCoroutine(SaveTerrainData(mc.terrainDensityData, tName));
-        Debug.Log("Got name:");
+        yield return StartCoroutine(SaveTerrainData(mc.terrainDensityData, tName));
+        yield return StartCoroutine(SaveTerrainAssets(ManualAssetIdentification.PlacedAssets, loadedTerrainId));
     }
 
-     /// <summary>
-    /// On Startup this method will call a php script that checks if the user exists in out system. If they do not we will add them into the 
-    /// db to facilitate the loading and storing of terrains.
+    /// <summary>
+    /// Once a user selects save, this is called to save the users terrain in the database. 
     /// </summary>
     /// <param name="steamId"></param>
     /// <param name="steamName"></param>
     /// <returns></returns>
-     
-     IEnumerator SaveTerrainData(TerrainDensityDataOld terrainDensityData, string terrainName) //int seed, int width, int height, float noiseScale, float isolevel, bool lerp
+
+    IEnumerator SaveTerrainData(TerrainDensityDataOld terrainDensityData, string terrainName) //int seed, int width, int height, float noiseScale, float isolevel, bool lerp
     {
-         //Set up connection
+        //Set up connection
         string url = "http://localhost/sqlconnect/saveTerrain.php";
         WWWForm form = new();
 
@@ -100,7 +102,51 @@ public class DBManager : MonoBehaviour
         {
             // Set timeout at 10 seconds
             request.timeout = 10;
-            
+
+            yield return request.SendWebRequest();
+
+            //Log the results. This can be deleted later
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                Debug.Log("Raw Response: " + request.downloadHandler.text);
+                PHPSaveTerrainResponse response = JsonUtility.FromJson<PHPSaveTerrainResponse>(request.downloadHandler.text);
+                loadedTerrainId = response.terrainId;
+            }
+            else
+                Debug.Log("request failed: " + request.error + " response code: " + request.responseCode);
+        }
+    }
+
+    /// <summary>
+    /// Once a terrain is saved this is called to save all of the manually placed assets. 
+    /// </summary>
+    /// <param name="steamId"></param>
+    /// <param name="steamName"></param>
+    /// <returns></returns>
+
+    IEnumerator SaveTerrainAssets(List<ManualAssetIdentification> manualAssets, int terrainId) //int seed, int width, int height, float noiseScale, float isolevel, bool lerp
+    {
+        //Set up connection
+        string url = "http://localhost/sqlconnect/saveAssets.php";
+        WWWForm form = new();
+
+        form.AddField("TerrainId", terrainId);
+
+        ManualAssetJSONList assets = new();
+        assets.data = new();
+        foreach (ManualAssetIdentification placedAsset in manualAssets)
+        {
+            assets.data.Add(new ManualAssetJSON(placedAsset));
+        }
+
+        form.AddField("Assets", JsonUtility.ToJson(assets));
+
+        //Send web request
+        using (UnityWebRequest request = UnityWebRequest.Post(url, form))
+        {
+            // Set timeout at 10 seconds
+            request.timeout = 10;
+
             yield return request.SendWebRequest();
 
             //Log the results. This can be deleted later
@@ -110,7 +156,6 @@ public class DBManager : MonoBehaviour
                 Debug.Log("request failed: " + request.error + " response code: " + request.responseCode);
         }
     }
-
     /// <summary>
     /// On Startup this method will call a php script that checks if the user exists in out system. If they do not we will add them into the 
     /// db to facilitate the loading and storing of terrains.
@@ -118,8 +163,8 @@ public class DBManager : MonoBehaviour
     /// <param name="steamId"></param>
     /// <param name="steamName"></param>
     /// <returns></returns>
-     
-     IEnumerator VerifyRegisteredUser(ulong steamId, string steamName) //int seed, int width, int height, float noiseScale, float isolevel, bool lerp
+
+    IEnumerator VerifyRegisteredUser(ulong steamId, string steamName) //int seed, int width, int height, float noiseScale, float isolevel, bool lerp
     {
         //Set up connection
         string url = "http://localhost/sqlconnect/validateUser.php";
@@ -226,12 +271,12 @@ public class DBManager : MonoBehaviour
                     // Parse the JSON response
                     PHPTerrainDataResponse response = JsonUtility.FromJson<PHPTerrainDataResponse>(request.downloadHandler.text);
                     if (response.success)
-                    {    
+                    {
                         TerrainData data = response.data[0];
-                        MarchingCubes mc = GameObject.FindFirstObjectByType<MarchingCubes>(); 
+                        MarchingCubes mc = GameObject.FindFirstObjectByType<MarchingCubes>();
 
                         //Set noise settings
-                        FastNoiseLite.NoiseType noiseType = (FastNoiseLite.NoiseType)Enum.Parse(typeof(FastNoiseLite.NoiseType), data.NoiseTypes.Replace(" ", "")); 
+                        FastNoiseLite.NoiseType noiseType = (FastNoiseLite.NoiseType)Enum.Parse(typeof(FastNoiseLite.NoiseType), data.NoiseTypes.Replace(" ", ""));
                         mc.terrainDensityData.noiseType = noiseType;
                         mc.terrainDensityData.selectedNoiseType = Array.IndexOf(mc.terrainDensityData.noiseTypeOptions, noiseType);
                         TerrainDensityDataOld.NoiseDimension dimension = (TerrainDensityDataOld.NoiseDimension)Enum.Parse(typeof(TerrainDensityDataOld.NoiseDimension), data.NoiseDimensions.Replace(" ", ""));
@@ -247,10 +292,10 @@ public class DBManager : MonoBehaviour
                         mc.terrainDensityData.noiseFrequency = data.NoiseFrequency;
 
                         //Domain warp settings
-                        FastNoiseLite.DomainWarpType domainWarp = (FastNoiseLite.DomainWarpType)Enum.Parse(typeof(FastNoiseLite.DomainWarpType), data.WarpType); 
+                        FastNoiseLite.DomainWarpType domainWarp = (FastNoiseLite.DomainWarpType)Enum.Parse(typeof(FastNoiseLite.DomainWarpType), data.WarpType);
                         mc.terrainDensityData.domainWarpType = domainWarp;
                         mc.terrainDensityData.selectedDomainWarpType = Array.IndexOf(mc.terrainDensityData.domainWarpTypeOptions, domainWarp);
-                        FastNoiseLite.FractalType WarpfractalType = (FastNoiseLite.FractalType)Enum.Parse(typeof(FastNoiseLite.FractalType), data.WarpFractalTypes.Replace(" ", "")); 
+                        FastNoiseLite.FractalType WarpfractalType = (FastNoiseLite.FractalType)Enum.Parse(typeof(FastNoiseLite.FractalType), data.WarpFractalTypes.Replace(" ", ""));
                         mc.terrainDensityData.domainWarpFractalType = WarpfractalType;
                         mc.terrainDensityData.selectedDomainWarpFractalType = Array.IndexOf(mc.terrainDensityData.domainWarpFractalTypeOptions, WarpfractalType);
                         mc.terrainDensityData.domainWarpAmplitude = data.WarpAmplitude;
@@ -262,7 +307,7 @@ public class DBManager : MonoBehaviour
                         mc.terrainDensityData.domainWarpToggle = data.DomainWarp;
 
                         //Fractal Settings
-                        FastNoiseLite.FractalType fractalType = (FastNoiseLite.FractalType)Enum.Parse(typeof(FastNoiseLite.FractalType), data.FractalTypes.Replace(" ", "")); 
+                        FastNoiseLite.FractalType fractalType = (FastNoiseLite.FractalType)Enum.Parse(typeof(FastNoiseLite.FractalType), data.FractalTypes.Replace(" ", ""));
                         mc.terrainDensityData.noiseFractalType = fractalType;
                         mc.terrainDensityData.selectedNoiseFractalType = Array.IndexOf(mc.terrainDensityData.noiseFractalTypeOptions, fractalType);
                         mc.terrainDensityData.noiseFractalOctaves = data.FractalOctaves;
@@ -272,7 +317,7 @@ public class DBManager : MonoBehaviour
 
                         //Update mesh with new values
                         mc.UpdateMesh();
-                      
+
                     }
                     else
                     {
@@ -293,6 +338,61 @@ public class DBManager : MonoBehaviour
         }
     }
 
+ IEnumerator LoadTerrainAsset(int loadedTerrainId)
+    {
+        Debug.Log($"Loading terrain {loadedTerrainId}");
+        string url = "http://localhost/sqlconnect/loadTerrainData.php";
+        WWWForm form = new();
+
+        //Need to pass the SteamId and steamId to the php to determine if the user exists, or if we need to add them to the db
+        form.AddField("terrainId", loadedTerrainId);
+        using (UnityWebRequest request = UnityWebRequest.Post(url, form))
+        {
+            // Set timeout (in seconds)
+            request.timeout = 10;
+
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                try
+                {
+                    // Parse the JSON response
+                    ManualAssetJSONList response = JsonUtility.FromJson<ManualAssetJSONList>(request.downloadHandler.text);
+                    if (response.sucess && response.data != null)
+                    {
+                        foreach (ManualAssetJSON mas in response.data)
+                        {
+                            if (!Enum.TryParse<ManualAssetId>(mas.AssetId, out ManualAssetId assetId))
+                            {
+                                Debug.LogWarning("Unknown asset: " + mas.AssetId);
+                            }
+                            GameObject obj = ManualAssetTracker.Create(assetId);
+                            obj.transform.position = new Vector3(mas.xPos, mas.yPos, mas.zPos);
+                            obj.transform.rotation = Quaternion.identity;
+                            if (obj.GetComponent<Rigidbody>() == null)
+                                obj.AddComponent<Rigidbody>();
+                        }
+
+                    }
+                    else
+                    {
+                        Debug.LogError("PHP Error: " + response.message);
+                    }
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogError("JSON Parse Error: " + e.Message);
+                    Debug.Log("Raw Response: " + request.downloadHandler.text);
+                }
+            }
+            else
+            {
+                Debug.LogError("Request Failed: " + request.error);
+                Debug.LogError("Response Code: " + request.responseCode);
+            }
+        }
+    }
     // Helper classes for JSON parsing of returned data
     [System.Serializable]
     public class PHPResponse
@@ -300,6 +400,15 @@ public class DBManager : MonoBehaviour
         public bool success;
         public string message;
         public UserData[] data;
+    }
+
+    // Helper classes for JSON parsing of returned data
+    [System.Serializable]
+    public class PHPSaveTerrainResponse
+    {
+        public bool success;
+        public string message;
+        public int terrainId;
     }
 
     [System.Serializable]
@@ -346,9 +455,9 @@ public class DBManager : MonoBehaviour
         public float IsoLevel;
         public bool Lerp;
         public float NoiseFrequency;
-        
+
         // DomainWarpSettings 
-        public string WarpType; 
+        public string WarpType;
         public string WarpFractalTypes;
         public float WarpAmplitude;
         public int WarpSeed;
@@ -357,13 +466,37 @@ public class DBManager : MonoBehaviour
         public float WarpFractalLacunarity;
         public float WarpFractalGain;
         public bool DomainWarp;
-        
+
         // FractalSettings 
         public string FractalTypes;
         public int FractalOctaves;
         public float FractalLacunarity;
         public float FractalGain;
         public float FractalWeightedStrength;
+    }
+
+    [System.Serializable]
+    public class ManualAssetJSON
+    {
+        public string AssetId;
+        public float xPos;
+        public float yPos;
+        public float zPos;
+
+        public ManualAssetJSON(ManualAssetIdentification asset)
+        {
+            AssetId = asset.Id.ToString();
+            xPos = asset.xCord;
+            yPos = asset.yCord;
+            zPos = asset.zCord;
+        }
+    }
+    [System.Serializable]
+    public class ManualAssetJSONList
+    {
+        public bool sucess;
+        public string message;
+        public List<ManualAssetJSON> data;
     }
 }
 

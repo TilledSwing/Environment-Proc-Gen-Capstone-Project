@@ -9,6 +9,8 @@
     $response = [
         'success' => false,
         'message' => 'Initial state',
+        'terrainId' => -1,
+
     ];
 
     try{
@@ -87,6 +89,7 @@
             $conn->commit();
             $response['success'] = true;
             $response['message'] = "Sucessfully Saved Terrain";
+            $response['terrainId'] = $terrainId;
             
         } catch(Exception $e){
             $conn->rollback();

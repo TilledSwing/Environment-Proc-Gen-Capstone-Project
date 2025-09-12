@@ -1,0 +1,85 @@
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.InputSystem;
+
+public class PlacementController : MonoBehaviour
+{
+    Camera playerCamera;
+    public float interactDst;
+    public LayerMask terrainLayerMask;
+    public GameObject placeableObject;
+    public float rotationSensitivity;
+    private List<Material> originalMaterials = new();
+    public Material placeableObjectMaterial;
+    private List<Material> tempPlaceableObjectMaterialList = new();
+    private GameObject currentObjectRef;
+    private Renderer currentObjectRenderer;
+    private Material[] currentObjectMaterials;
+    private bool placementMode = false;
+    private bool lastRayState = false;
+    private float scrollRotation;
+    void Awake()
+    {
+        playerCamera = Camera.main;
+    }
+
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            placementMode = !placementMode;
+            Destroy(currentObjectRef);
+        }
+        if (placementMode)
+        {
+            Ray ray = playerCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
+            if (Physics.Raycast(ray, out RaycastHit hit, interactDst, terrainLayerMask))
+            {
+                lastRayState = true;
+                if (currentObjectRef == null)
+                {
+                    currentObjectRef = Instantiate(placeableObject, hit.point, Quaternion.FromToRotation(Vector3.up, hit.normal));
+                    currentObjectRenderer = currentObjectRef.GetComponent<Renderer>();
+                    currentObjectMaterials = currentObjectRenderer.materials;
+                    for (int i = 0; i < currentObjectMaterials.Length; i++)
+                    {
+                        originalMaterials.Add(currentObjectMaterials[i]);
+                        tempPlaceableObjectMaterialList.Add(placeableObjectMaterial);
+                    }
+                    currentObjectRenderer.materials = tempPlaceableObjectMaterialList.ToArray();
+                }
+                else
+                {
+                    currentObjectRef.transform.position = hit.point;
+                    Quaternion normalRotationAlignment = Quaternion.FromToRotation(Vector3.up, hit.normal);
+                    Vector2 scroll = Mouse.current.scroll.ReadValue();
+
+                    if (scroll.y != 0f)
+                    {
+                        scrollRotation += scroll.y * rotationSensitivity * Time.deltaTime;
+                    }
+
+                    currentObjectRef.transform.rotation = normalRotationAlignment * Quaternion.Euler(0f, scrollRotation, 0f);
+                    Component[] components = placeableObject.GetComponents<Component>();
+                    foreach (var c in components)
+                    {
+                        Debug.Log(c.GetType());
+                    }
+                }
+                if (Input.GetKeyDown(KeyCode.F))
+                {
+                    currentObjectRenderer.materials = originalMaterials.ToArray();
+                    currentObjectRef.GetComponent<BoxCollider>().enabled = true;
+                    currentObjectRef = null;
+                    scrollRotation = 0f;
+                }
+            }
+            else if (lastRayState)
+            {
+                lastRayState = false;
+                Destroy(currentObjectRef);
+                currentObjectRef = null;
+            }
+        }
+    }
+}

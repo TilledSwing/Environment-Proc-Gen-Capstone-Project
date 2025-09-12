@@ -28,13 +28,15 @@ public class GlowballLogic : MonoBehaviour
     /// <param name="collision"></param>
     void OnCollisionEnter(Collision collision)
     {
+        if (hit) return;
         Rigidbody rb = gameObject.GetComponent<Rigidbody>();
         rb.linearVelocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
         rb.useGravity = false;
         rb.constraints = RigidbodyConstraints.FreezeAll;
+        ManualAssetIdentification asset = new ManualAssetIdentification(ManualAssetId.GlowBall, transform.position.x, transform.position.y, transform.position.z);
         gameObject.transform.SetParent(collision.gameObject.transform);
         hit = true;
-        // Debug.Log("Hit " + collision.gameObject.name);
+        //Debug.Log("Hit " + collision.gameObject.name);
     }
 }
