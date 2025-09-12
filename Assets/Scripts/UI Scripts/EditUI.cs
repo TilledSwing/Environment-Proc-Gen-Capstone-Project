@@ -3,8 +3,11 @@ using UnityEngine;
 using UnityEngine.UI;
 public class EditUI : MonoBehaviour
 {
-    public ComputeMarchingCubes mc;
-    public TerrainDensityDataOld tdd;
+    public ChunkGenNetwork cgn;
+    public ChunkGenNetwork.TerrainChunk mc;
+    public TerrainDensityData tdd;
+    public NoiseGenerator ng;
+    public ChunkGenNetwork.LOD lod;
     public Slider slider;
     public Toggle toggle;
     public TMP_InputField input;
@@ -14,8 +17,8 @@ public class EditUI : MonoBehaviour
     /// </summary>
     void Start()
     {
+        tdd = cgn.terrainDensityData;
         UpdateSettings();
-
     }
 
     void Update()
@@ -24,10 +27,10 @@ public class EditUI : MonoBehaviour
         switch(input.name)
         {
             case "NoiseSeedInput":
-                input.text = tdd.noiseSeed.ToString();
+                input.text = ng.noiseSeed.ToString();
                 break;
             case "DWSeedInput":
-                input.text = tdd.domainWarpSeed.ToString();
+                input.text = ng.domainWarpSeed.ToString();
                 break;     
         }
     }
@@ -38,7 +41,7 @@ public class EditUI : MonoBehaviour
     public void OnDeselect()
     {
         Debug.Log("deselected slider");
-        mc.UpdateMesh();
+        mc.marchingCubes.Regen();
     }
 
     /// <summary>
@@ -57,10 +60,7 @@ public class EditUI : MonoBehaviour
                 toggle.isOn = tdd.terracing;
                 break;
             case "DWToggle":
-                toggle.isOn = tdd.domainWarpToggle;
-                break;
-            case "VisualizeToggle":
-                toggle.isOn = tdd.polygonizationVisualization;
+                toggle.isOn = ng.domainWarpToggle;
                 break;
         }
 
@@ -71,57 +71,87 @@ public class EditUI : MonoBehaviour
                 slider.value = tdd.height;
                 break;
             case "FrequencySlider":
-                slider.value = tdd.noiseFrequency;
+                slider.value = ng.noiseFrequency;
                 break;
             case "NoiseScaleSlider":
-                slider.value = tdd.noiseScale;
+                slider.value = ng.noiseScale;
                 break;
             case "IsoSlider":
                 slider.value = tdd.isolevel;
                 break;
             case "JitterSlider":
-                slider.value = tdd.cellularJitter;
+                slider.value = ng.cellularJitter;
                 break;
             case "WaterSlider":
                 slider.value = tdd.waterLevel;
                 break;
             case "FOctavesSlider":
-                slider.value = tdd.noiseFractalOctaves;
+                slider.value = ng.noiseFractalOctaves;
                 break;
             case "FLacunaritySlider":
-                slider.value = tdd.noiseFractalLacunarity;
+                slider.value = ng.noiseFractalLacunarity;
                 break;
             case "FGainSlider":
-                slider.value = tdd.noiseFractalGain;
+                slider.value = ng.noiseFractalGain;
                 break;
             case "FStrengthSlider":
-                slider.value = tdd.fractalWeightedStrength;
+                slider.value = ng.fractalWeightedStrength;
                 break;
             case "TerraceSlider":
                 slider.value = tdd.terraceHeight;
                 break;
             case "DWOctavesSlider":
-                slider.value = tdd.domainWarpFractalOctaves;
+                slider.value = ng.domainWarpFractalOctaves;
                 break;
             case "DWLacunaritySlider":
-                slider.value = tdd.domainWarpFractalLacunarity;
+                slider.value = ng.domainWarpFractalLacunarity;
                 break;
             case "DWGainSlider":
-                slider.value = tdd.domainWarpFractalGain;
+                slider.value = ng.domainWarpFractalGain;
                 break;
             case "DWFrequencySlider":
-                slider.value = tdd.domainWarpFrequency;
+                slider.value = ng.domainWarpFrequency;
                 break;
             case "DWAmpSlider":
-                slider.value = tdd.domainWarpAmplitude;
+                slider.value = ng.domainWarpAmplitude;
                 break;
         }
     }
 
     public void ResetButton()
     {
-        tdd.ResetToDefault();
-        mc.GenerateTerrainData();
+        // Noise and Fractal Settings
+        ng.noiseDimension = NoiseGenerator.fnl_noise_dimension._3D;
+        ng.noiseType = NoiseGenerator.fnl_noise_type.OpenSimplex2;
+        ng.noiseFractalType = NoiseGenerator.fnl_fractal_type.FBm;
+        ng.noiseFractalOctaves = 5;
+        ng.noiseFractalLacunarity = 2;
+        ng.noiseFractalGain = 0.5f;
+        ng.fractalWeightedStrength = 0;
+        ng.noiseFrequency = 0.01f;
+        // Domain Warp Values
+        ng.domainWarpToggle = false;
+        ng.domainWarpType = NoiseGenerator.fnl_domain_warp_type.OpenSimplex2;
+        ng.domainWarpFractalType = NoiseGenerator.fnl_domain_warp_fractal_type.None;
+        ng.domainWarpAmplitude = 1;
+        ng.domainWarpFractalOctaves = 5;
+        ng.domainWarpFractalLacunarity = 2;
+        ng.domainWarpFractalGain = 0.5f;
+        ng.domainWarpFrequency = 0.01f;
+        // Cellular(Voronoi) Values
+        ng.cellularDistanceFunction = NoiseGenerator.fnl_cellular_distance_func.EuclideanSq;
+        ng.cellularReturnType = NoiseGenerator.fnl_cellular_return_type.Distance;
+        ng.cellularJitter = 1;
+        // Terrain Values
+        ng.width = 24;
+        tdd.height = 100;
+        ng.noiseScale = 0.6f;
+        tdd.isolevel = 0.5f;
+        tdd.waterLevel = 35;
+        tdd.lerp = true;
+        tdd.terracing = false;
+        tdd.terraceHeight = 2;
+        mc.marchingCubes.Regen();
     }
 
     /// <summary>
@@ -132,25 +162,19 @@ public class EditUI : MonoBehaviour
     {
         tdd.lerp = marked;
         Debug.Log("toggle changed");
-        mc.UpdateMesh();
+        mc.marchingCubes.Regen();
     }
     public void OnTerraceToggleChanged(bool marked)
     {
         tdd.terracing = marked;
         Debug.Log("toggle changed");
-        mc.UpdateMesh();
+        mc.marchingCubes.Regen();
     }
     public void OnDWToggleChanged(bool marked)
     {
-        tdd.domainWarpToggle = marked;
+        ng.domainWarpToggle = marked;
         Debug.Log("toggle changed");
-        mc.UpdateMesh();
-    }
-    public void OnVisualizeChanged(bool marked)
-    {
-        tdd.polygonizationVisualization = marked;
-        Debug.Log("toggle changed");
-        mc.UpdateMesh();
+        mc.marchingCubes.Regen();
     }
 
     /// <summary>
@@ -159,15 +183,15 @@ public class EditUI : MonoBehaviour
     /// <param name="seed">The int seed entered</param>
     public void OnNoiseSeedChanged(string seed)
     {
-        tdd.noiseSeed = System.Convert.ToInt32(seed);
+        ng.noiseSeed = System.Convert.ToInt32(seed);
         Debug.Log("seed changed");
-        mc.UpdateMesh();
+        mc.marchingCubes.Regen();
     }
     public void OnDWSeedChanged(string seed)
     {
-        tdd.domainWarpSeed = System.Convert.ToInt32(seed);
+        ng.domainWarpSeed = System.Convert.ToInt32(seed);
         Debug.Log("seed changed");
-        mc.UpdateMesh();
+        mc.marchingCubes.Regen();
     }
 
     /// <summary>
@@ -180,11 +204,11 @@ public class EditUI : MonoBehaviour
     }
     public void OnNFreqChanged(float value) 
     {
-        tdd.noiseFrequency = value;
+        ng.noiseFrequency = value;
     }
     public void OnNScaleChanged(float value) 
     {
-        tdd.noiseScale = value;
+        ng.noiseScale = value;
     }
     public void OnIsoChanged(float value) 
     {
@@ -192,7 +216,7 @@ public class EditUI : MonoBehaviour
     }
     public void OnJitterChanged(float value) 
     {
-        tdd.cellularJitter = value;
+        ng.cellularJitter = value;
     }
     public void OnWaterChanged(float value) 
     {
@@ -200,19 +224,19 @@ public class EditUI : MonoBehaviour
     }
     public void OnFOctavesChanged(float value) 
     {
-        tdd.noiseFractalOctaves = (int)value;
+        ng.noiseFractalOctaves = (int)value;
     }
     public void OnFLacunarityChanged(float value) 
     {
-        tdd.noiseFractalLacunarity = value;
+        ng.noiseFractalLacunarity = value;
     }
     public void OnFGainChanged(float value) 
     {
-        tdd.noiseFractalGain = value;
+        ng.noiseFractalGain = value;
     }
     public void OnFStrengthChanged(float value) 
     {
-        tdd.fractalWeightedStrength = value;
+        ng.fractalWeightedStrength = value;
     }
     public void OnTerraceChanged(float value) 
     {
@@ -220,22 +244,22 @@ public class EditUI : MonoBehaviour
     }
     public void OnDWOctavesChanged(float value) 
     {
-        tdd.domainWarpFractalOctaves = (int)value;
+        ng.domainWarpFractalOctaves = (int)value;
     }
     public void OnDWLacunarityChanged(float value) 
     {
-        tdd.domainWarpFractalLacunarity = value;
+        ng.domainWarpFractalLacunarity = value;
     }
     public void OnDWGainChanged(float value) 
     {
-        tdd.domainWarpFractalGain = value;
+        ng.domainWarpFractalGain = value;
     }
     public void OnDWFrequencyChanged(float value) 
     {
-        tdd.domainWarpFrequency = value;
+        ng.domainWarpFrequency = value;
     }
     public void OnDWAmplitudeChanged(float value) 
     {
-        tdd.domainWarpAmplitude = value;
+        ng.domainWarpAmplitude = value;
     }
 }
