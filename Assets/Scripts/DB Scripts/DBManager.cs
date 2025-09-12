@@ -311,6 +311,7 @@ public class DBManager : MonoBehaviour
                             if (obj.GetComponent<Rigidbody>() == null)
                                 obj.AddComponent<Rigidbody>();
                             ManualAssetIdentification asset = new(assetId, mas.xPos, mas.yPos, mas.zPos);
+                            Instantiate(obj, gameObject.transform.position, Quaternion.identity);
                         }
                     }
                     else
