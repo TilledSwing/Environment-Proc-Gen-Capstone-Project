@@ -64,32 +64,32 @@ public class DBManager : MonoBehaviour
         WWWForm form = new();
 
         ChunkGenNetwork abc = FindFirstObjectByType<ChunkGenNetwork>();
-        TerrainSettings settings = SeedSerializer.SerializeTerrainDensity(abc.terrainDensityData);
-        string json = JsonUtility.ToJson(settings);
+        // TerrainSettings settings = SeedSerializer.SerializeTerrainDensity(abc.terrainDensityData);
+        // string json = JsonUtility.ToJson(settings);
 
-        form.AddField("TerrainSettings", json);
-        form.AddField("SteamId", SteamValidation.steamID.ToString());
-        form.AddField("TerrainName", terrainName);
+        // form.AddField("TerrainSettings", json);
+        // form.AddField("SteamId", SteamValidation.steamID.ToString());
+        // form.AddField("TerrainName", terrainName);
 
-        //Send web request
-        using (UnityWebRequest request = UnityWebRequest.Post(url, form))
-        {
-            // Set timeout at 10 seconds
-            request.timeout = 10;
+        // //Send web request
+        // using (UnityWebRequest request = UnityWebRequest.Post(url, form))
+        // {
+        //     // Set timeout at 10 seconds
+        //     request.timeout = 10;
 
-            yield return request.SendWebRequest();
+        //     yield return request.SendWebRequest();
 
-            //Log the results. This can be deleted later
-            if (request.result == UnityWebRequest.Result.Success)
-            {
-                Debug.Log("Raw Response: " + request.downloadHandler.text);
-                PHPSaveTerrainResponse response = JsonUtility.FromJson<PHPSaveTerrainResponse>(request.downloadHandler.text);
-                loadedTerrainId = response.terrainId;
-            }
-            else
-                Debug.Log("request failed: " + request.error + " response code: " + request.responseCode);
+        //     //Log the results. This can be deleted later
+        //     if (request.result == UnityWebRequest.Result.Success)
+        //     {
+        //         Debug.Log("Raw Response: " + request.downloadHandler.text);
+        //         PHPSaveTerrainResponse response = JsonUtility.FromJson<PHPSaveTerrainResponse>(request.downloadHandler.text);
+        //         loadedTerrainId = response.terrainId;
+        //     }
+        //     else
+        //         Debug.Log("request failed: " + request.error + " response code: " + request.responseCode);
 
-        }
+        // }
         yield return StartCoroutine(SaveTerrainAssets(ManualAssetIdentification.PlacedAssets, loadedTerrainId));
     }
 
@@ -251,7 +251,7 @@ public class DBManager : MonoBehaviour
                     if (response.success)
                     {
                         ChunkGenNetwork cg = FindFirstObjectByType<ChunkGenNetwork>();
-                        cg.UpdateClientMesh(response.data);
+                        //cg.UpdateClientMesh(response.data);
                     }
                     else
                     {
@@ -378,7 +378,7 @@ public class DBManager : MonoBehaviour
     {
         public bool success;
         public string message;
-        public TerrainSettings data;
+       // public TerrainSettings data;
     }
 
     [System.Serializable]
