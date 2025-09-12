@@ -174,8 +174,7 @@ public class EditUI : MonoBehaviour
         tdd.lerp = true;
         tdd.terracing = false;
         tdd.terraceHeight = 2;
-        
-        asd.ResetSpawnPoints();
+
         Reload();
         UpdateSettings();
     }
