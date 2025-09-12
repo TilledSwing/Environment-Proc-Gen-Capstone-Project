@@ -11,7 +11,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
-public class ChunkGenNetwork : MonoBehaviour
+public class ChunkGenNetwork : NetworkBehaviour
 {
     public static ChunkGenNetwork Instance;
     // Fog Render Feature Stuff
