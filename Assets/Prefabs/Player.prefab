@@ -322,6 +322,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3f58f7da9a7b6a438b6083c621aefe9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _componentIndexCache: 255
+  _addedNetworkObject: {fileID: 1324032884783071196}
+  _networkObjectCache: {fileID: 0}
   glowball: {fileID: 7838558389423337650, guid: e8786a3f3f8af3844a30c201669bca8e, type: 3}
   throwForce: 50
 --- !u!114 &-1469270153928637489
@@ -359,6 +362,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   placeableObject: {fileID: 6785930050922385279, guid: b83240341c941d24f891e9b9d41da000, type: 3}
+  placeableObjectNetwork: {fileID: 6785930050922385279, guid: 5d7a50f71f54e974a998c2f58586959e, type: 3}
   rotationSensitivity: 1000
   placeableObjectMaterial: {fileID: 2100000, guid: 359131121b1a4314098add5d50690ed2, type: 2}
 --- !u!114 &-7228457785996649697
