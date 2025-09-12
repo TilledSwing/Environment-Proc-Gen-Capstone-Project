@@ -201,7 +201,36 @@ public class ChunkGenNetwork : NetworkBehaviour
         chunkSize = terrainDensityData.width;
         chunksVisible = Mathf.RoundToInt(maxViewDst / chunkSize);
     }
+    public void UpdateFromDB(TerrainSettings settings)
+    {
+        terrainDensityData = SeedSerializer.DeserializeTerrainDensity(settings);
 
+        // Reset action and chunking to defaults (loading in from fresh)
+        // Chunk Variables
+        chunkDictionary = new();
+        chunksVisibleLastUpdate = new();
+        chunkLoadQueue = new();
+        chunkLoadSet = new();
+        chunkHideQueue = new();
+        chunkShowQueue = new();
+        isLoadingChunkVisibility = false;
+        // queueUpdateDistanceThreshold = 15f;
+        isLoadingChunks = false;
+        initialLoadComplete = false;
+        // Action Queues
+        hasPendingMeshInits = false;
+        pendingMeshInits = new();
+        isLoadingMeshes = false;
+        hasPendingReadbacks = false;
+        pendingReadbacks = new();
+        isLoadingReadbacks = false;
+        hasPendingAssetInstantiations = false;
+        pendingAssetInstantiations = new();
+        isLoadingAssetInstantiations = false;
+
+        chunkSize = terrainDensityData.width;
+        chunksVisible = Mathf.RoundToInt(maxViewDst / chunkSize);
+    }
     void Update()
     {
         // Position updates
