@@ -6,6 +6,7 @@ public class EditUI : MonoBehaviour
     public ChunkGenNetwork cgn;
     public TerrainDensityData tdd;
     public NoiseGenerator ng;
+    public AssetSpawnData asd;
     public Slider slider;
     public Toggle toggle;
     public TMP_InputField input;
@@ -34,6 +35,13 @@ public class EditUI : MonoBehaviour
 
     public void Reload()
     {
+        GameObject chunk = GameObject.Find("ChunkParent");
+
+        while (chunk.transform.childCount > 0)
+        {
+            DestroyImmediate(chunk.transform.GetChild(0).gameObject);
+        }
+
         cgn.chunkDictionary = new();
         cgn.chunksVisibleLastUpdate = new();
         cgn.chunkHideQueue = new();
@@ -43,10 +51,9 @@ public class EditUI : MonoBehaviour
         cgn.pendingMeshInits = new();
         cgn.hasPendingReadbacks = false;
         cgn.pendingReadbacks = new();
-        cgn.hasPendingAssetInstantiations = false;
-        cgn.pendingAssetInstantiations = new();
         cgn.chunkSize = tdd.width;
         cgn.chunksVisible = Mathf.RoundToInt(cgn.maxViewDst / cgn.chunkSize);
+        cgn.UpdateVisibleChunks();
     }
 
     /// <summary>
@@ -143,6 +150,7 @@ public class EditUI : MonoBehaviour
         ng.noiseFractalGain = 0.5f;
         ng.fractalWeightedStrength = 0;
         ng.noiseFrequency = 0.01f;
+        ng.noiseSeed = Random.Range(0, 100000);
         // Domain Warp Values
         ng.domainWarpToggle = false;
         ng.domainWarpType = NoiseGenerator.fnl_domain_warp_type.OpenSimplex2;
@@ -152,6 +160,7 @@ public class EditUI : MonoBehaviour
         ng.domainWarpFractalLacunarity = 2;
         ng.domainWarpFractalGain = 0.5f;
         ng.domainWarpFrequency = 0.01f;
+        ng.domainWarpSeed = Random.Range(0, 100000);
         // Cellular(Voronoi) Values
         ng.cellularDistanceFunction = NoiseGenerator.fnl_cellular_distance_func.EuclideanSq;
         ng.cellularReturnType = NoiseGenerator.fnl_cellular_return_type.Distance;
@@ -165,6 +174,8 @@ public class EditUI : MonoBehaviour
         tdd.lerp = true;
         tdd.terracing = false;
         tdd.terraceHeight = 2;
+        
+        asd.ResetSpawnPoints();
         Reload();
         UpdateSettings();
     }

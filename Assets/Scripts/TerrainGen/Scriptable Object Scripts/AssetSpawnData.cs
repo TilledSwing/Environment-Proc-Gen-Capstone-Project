@@ -9,7 +9,8 @@ public class AssetSpawnData : ScriptableObject
     public Dictionary<Vector3Int, List<SpawnableAsset>> assets = new Dictionary<Vector3Int, List<SpawnableAsset>>();
 
     public void ResetSpawnPoints() {
-        for(int i = 0; i < spawnableAssets.Count; i++) {
+        for (int i = 0; i < spawnableAssets.Count; i++)
+        {
             spawnableAssets[i].spawnedAssets.Clear();
         }
     }
