@@ -156,7 +156,6 @@ public class ChunkGenNetwork : MonoBehaviour
         chunkHideQueue = new();
         chunkShowQueue = new();
         isLoadingChunkVisibility = false;
-        // queueUpdateDistanceThreshold = 15f;
         isLoadingChunks = false;
         initialLoadComplete = false;
         // Action Queues
@@ -169,9 +168,6 @@ public class ChunkGenNetwork : MonoBehaviour
         hasPendingAssetInstantiations = false;
         pendingAssetInstantiations = new();
         isLoadingAssetInstantiations = false;
-
-        chunkSize = terrainDensityData.width;
-        chunksVisible = Mathf.RoundToInt(maxViewDst / chunkSize);
     }
     void Update()
     {
@@ -180,7 +176,7 @@ public class ChunkGenNetwork : MonoBehaviour
         lightingBlocker.transform.position = new Vector3(viewerPos.x, 0, viewerPos.z);
 
         // Darker fog at lower world heights
-        float depthFactor = Mathf.Clamp01(-viewerPos.y * 0.01f); 
+        float depthFactor = Mathf.Clamp01(-viewerPos.y * 0.01f);
         Color currentFog = Color.Lerp(fogColor, darkFogColor, depthFactor);
         fogMat.SetColor("_fogColor", currentFog);
 
@@ -193,6 +189,9 @@ public class ChunkGenNetwork : MonoBehaviour
         else if (!initialLoadComplete)
         {
             UpdateVisibleChunks();
+        }
+        else if (!isLoadingAssetInstantiations && pendingAssetInstantiations.Count > 0) {
+            StartCoroutine(LoadAssetInstantiationsOverTime());
         }
     }
     /// <summary>
@@ -326,6 +325,7 @@ public class ChunkGenNetwork : MonoBehaviour
         // }
         if (!isLoadingAssetInstantiations)
         {
+            // Debug.Log("Spawning");
             StartCoroutine(LoadAssetInstantiationsOverTime());
         }
     }

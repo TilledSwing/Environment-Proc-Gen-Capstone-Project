@@ -12,6 +12,7 @@ public class AssetSpawnData : ScriptableObject
         for (int i = 0; i < spawnableAssets.Count; i++)
         {
             spawnableAssets[i].spawnedAssets.Clear();
+            assets.Clear();
         }
     }
 }

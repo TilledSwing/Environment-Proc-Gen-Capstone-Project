@@ -17,7 +17,7 @@ public class InteractController : MonoBehaviour
     public int objectiveGoal;
     private int objectiveCounter = 0;
     private bool lastRayState = false;
-    Renderer renderer;
+    Renderer meshRenderer;
     Material[] materials;
     
     void Awake()
@@ -40,8 +40,8 @@ public class InteractController : MonoBehaviour
             if (!lastRayState)
             {
                 lastRayState = true;
-                renderer = hit.collider.gameObject.GetComponent<Renderer>();
-                materials = renderer.materials;
+                meshRenderer = hit.collider.gameObject.GetComponent<Renderer>();
+                materials = meshRenderer.materials;
                 foreach (Material material in materials)
                 {
                     StartCoroutine(FadeInHightlight(material, 0.15f));

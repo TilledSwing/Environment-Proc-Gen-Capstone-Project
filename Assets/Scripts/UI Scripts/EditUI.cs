@@ -3,7 +3,6 @@ using UnityEngine;
 using UnityEngine.UI;
 public class EditUI : MonoBehaviour
 {
-    public ChunkGenNetwork cgn;
     public TerrainDensityData tdd;
     public NoiseGenerator ng;
     public AssetSpawnData asd;
@@ -42,18 +41,29 @@ public class EditUI : MonoBehaviour
             DestroyImmediate(chunk.transform.GetChild(0).gameObject);
         }
 
-        cgn.chunkDictionary = new();
-        cgn.chunksVisibleLastUpdate = new();
-        cgn.chunkHideQueue = new();
-        cgn.chunkShowQueue = new();
-        cgn.initialLoadComplete = false;
-        cgn.hasPendingMeshInits = false;
-        cgn.pendingMeshInits = new();
-        cgn.hasPendingReadbacks = false;
-        cgn.pendingReadbacks = new();
-        cgn.chunkSize = tdd.width;
-        cgn.chunksVisible = Mathf.RoundToInt(cgn.maxViewDst / cgn.chunkSize);
-        cgn.UpdateVisibleChunks();
+        ChunkGenNetwork.Instance.chunkDictionary = new();
+        ChunkGenNetwork.Instance.chunksVisibleLastUpdate = new();
+        ChunkGenNetwork.Instance.chunkLoadQueue = new();
+        ChunkGenNetwork.Instance.chunkLoadSet = new();
+        ChunkGenNetwork.Instance.chunkHideQueue = new();
+        ChunkGenNetwork.Instance.chunkShowQueue = new();
+        ChunkGenNetwork.Instance.isLoadingChunkVisibility = false;
+        // queueUpdateDistanceThreshold = 15f;
+        ChunkGenNetwork.Instance.isLoadingChunks = false;
+        // Action Queues
+        ChunkGenNetwork.Instance.hasPendingMeshInits = false;
+        ChunkGenNetwork.Instance.pendingMeshInits = new();
+        ChunkGenNetwork.Instance.isLoadingMeshes = false;
+        ChunkGenNetwork.Instance.hasPendingReadbacks = false;
+        ChunkGenNetwork.Instance.pendingReadbacks = new();
+        ChunkGenNetwork.Instance.isLoadingReadbacks = false;
+        ChunkGenNetwork.Instance.hasPendingAssetInstantiations = false;
+        ChunkGenNetwork.Instance.pendingAssetInstantiations = new();
+        ChunkGenNetwork.Instance.isLoadingAssetInstantiations = false;
+
+        ChunkGenNetwork.Instance.assetSpawnData.ResetSpawnPoints();
+        ChunkGenNetwork.Instance.initialLoadComplete = false;
+        ChunkGenNetwork.Instance.UpdateVisibleChunks();
     }
 
     /// <summary>

@@ -103,7 +103,6 @@ public class AssetSpawner : MonoBehaviour
 
             spawnPoints[i] = assetPoints;
         }
-        // Debug.Log(spawnPoints.Count);
 
         AssetSpawnFiltersNativeArrayPoolManager.Instance.ReturnNativeArray("AssetSpawnFiltersArray", assetSpawnFilters);
         VertexNativeArrayPoolManager.Instance.ReturnNativeArray("VertexArray", flatSpawnPoints);
@@ -344,6 +343,5 @@ public class Asset
         this.obj = obj;
         this.meshRenderer = meshRenderer;
         this.meshCollider = meshCollider;
-        // Debug.Log(meshRenderer);
     }
 }
