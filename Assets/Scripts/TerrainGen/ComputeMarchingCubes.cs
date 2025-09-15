@@ -394,10 +394,17 @@ public class ComputeMarchingCubes : MonoBehaviour
             }
         // }
     }
-    // Releases height buffers when the application is closed
-    void OnApplicationQuit()
+    // Releases height buffers when the application is closed/stopped
+    void OnDestroy()
     {
-        if (heightsBuffer != null)
+        if (heightsBuffer != null && heightsBuffer.IsValid())
+        {
+            heightsBuffer.Release();
+        }
+    }
+    void OnDisable()
+    {
+        if (heightsBuffer != null && heightsBuffer.IsValid())
         {
             heightsBuffer.Release();
         }

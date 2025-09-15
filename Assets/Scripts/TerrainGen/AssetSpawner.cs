@@ -44,10 +44,24 @@ public class AssetSpawner : MonoBehaviour
             AssetSpawnHandler();
         }
     }
+    private void OnDisable()
+    {
+        if (chunkVertices != null) {
+            chunkVertices.Dispose();
+        }
+    }
+
+    // private void OnDestroy()
+    // {
+    //     if (chunkVertices != null) {
+    //         chunkVertices.Dispose();
+    //     }
+    // }
     /// <summary>
     /// Initizalize all the data structures
     /// </summary>
-    private void InitializeData() {
+    private void InitializeData()
+    {
         spawnPoints?.Clear();
         acceptedSpawnPoints?.Clear();
         spawnedAssets?.Clear();
@@ -55,7 +69,8 @@ public class AssetSpawner : MonoBehaviour
         acceptedSpawnPoints = new List<List<ComputeMarchingCubes.Vertex>>(assetSpawnData.spawnableAssets.Count);
         spawnedAssets = new List<List<Asset>>(assetSpawnData.spawnableAssets.Count);
         assetSpawnData.assets.Add(chunkPos, assetSpawnData.spawnableAssets);
-        for (int i = 0; i < assetSpawnData.spawnableAssets.Count; i++) {
+        for (int i = 0; i < assetSpawnData.spawnableAssets.Count; i++)
+        {
             spawnPoints.Add(new List<ComputeMarchingCubes.Vertex>());
             acceptedSpawnPoints.Add(new List<ComputeMarchingCubes.Vertex>());
             spawnedAssets.Add(new List<Asset>());
@@ -106,7 +121,7 @@ public class AssetSpawner : MonoBehaviour
 
         AssetSpawnFiltersNativeArrayPoolManager.Instance.ReturnNativeArray("AssetSpawnFiltersArray", assetSpawnFilters);
         VertexNativeArrayPoolManager.Instance.ReturnNativeArray("VertexArray", flatSpawnPoints);
-        chunkVertices.Dispose();
+        // chunkVertices.Dispose();
 
         for (int i = 0; i < assetSpawnData.spawnableAssets.Count; i++)
         {

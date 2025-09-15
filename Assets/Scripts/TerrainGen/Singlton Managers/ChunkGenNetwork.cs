@@ -190,7 +190,16 @@ public class ChunkGenNetwork : MonoBehaviour
         {
             UpdateVisibleChunks();
         }
-        else if (!isLoadingAssetInstantiations && pendingAssetInstantiations.Count > 0) {
+        // if (!isLoadingChunks && chunkLoadQueue.Count > 0)
+        // {
+        //     StartCoroutine(LoadChunksOverTime());
+        // }
+        // if (!isLoadingReadbacks && pendingReadbacks.Count > 0)
+        // {
+        //     StartCoroutine(LoadReadbacksOverTime());
+        // }
+        if (!isLoadingAssetInstantiations && pendingAssetInstantiations.Count > 0)
+        {
             StartCoroutine(LoadAssetInstantiationsOverTime());
         }
     }
