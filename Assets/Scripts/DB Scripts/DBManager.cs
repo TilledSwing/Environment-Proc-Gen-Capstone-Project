@@ -250,6 +250,12 @@ public class DBManager : MonoBehaviour
                     PHPTerrainDataResponse response = JsonUtility.FromJson<PHPTerrainDataResponse>(request.downloadHandler.text);
                     if (response.success)
                     {
+                        GameObject chunk = GameObject.Find("ChunkParent");
+
+                        while (chunk.transform.childCount > 0)
+                        {
+                            DestroyImmediate(chunk.transform.GetChild(0).gameObject);
+                        }
                         ChunkGenNetwork cg = FindFirstObjectByType<ChunkGenNetwork>();
                         cg.UpdateFromDB(response.data);
                     }
