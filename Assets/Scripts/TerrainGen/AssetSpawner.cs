@@ -50,13 +50,6 @@ public class AssetSpawner : MonoBehaviour
             chunkVertices.Dispose();
         }
     }
-
-    // private void OnDestroy()
-    // {
-    //     if (chunkVertices != null) {
-    //         chunkVertices.Dispose();
-    //     }
-    // }
     /// <summary>
     /// Initizalize all the data structures
     /// </summary>
