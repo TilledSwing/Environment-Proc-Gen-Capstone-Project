@@ -32,10 +32,13 @@ public class EditUI : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Reloads the terrain and the assets.
+    /// </summary>
     public void Reload()
     {
+        // destroys all children
         GameObject chunk = GameObject.Find("ChunkParent");
-
         while (chunk.transform.childCount > 0)
         {
             DestroyImmediate(chunk.transform.GetChild(0).gameObject);
@@ -48,7 +51,6 @@ public class EditUI : MonoBehaviour
         ChunkGenNetwork.Instance.chunkHideQueue = new();
         ChunkGenNetwork.Instance.chunkShowQueue = new();
         ChunkGenNetwork.Instance.isLoadingChunkVisibility = false;
-        // queueUpdateDistanceThreshold = 15f;
         ChunkGenNetwork.Instance.isLoadingChunks = false;
         // Action Queues
         ChunkGenNetwork.Instance.hasPendingMeshInits = false;
@@ -76,7 +78,8 @@ public class EditUI : MonoBehaviour
     }
 
     /// <summary>
-    /// Method updates the settings when the terrain is generated/regenerated to reflect the proper values.
+    /// Method updates the settings when the terrain is generated/regenerated to reflect the proper
+    /// values.
     /// </summary>
     public void UpdateSettings()
     {
@@ -149,6 +152,9 @@ public class EditUI : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Resets the terrain modifiers and randomizes the seeds.
+    /// </summary>
     public void ResetButton()
     {
         // Noise and Fractal Settings
@@ -187,6 +193,15 @@ public class EditUI : MonoBehaviour
 
         Reload();
         UpdateSettings();
+    }
+
+    /// <summary>
+    /// Launches Explore mode solo.
+    /// </summary>
+    public void ExploreSoloButton()
+    {
+        ChunkGenNetwork.Instance.viewer = GameObject.Find("Player(Clone)").transform;
+        ChunkGenNetwork.Instance.SetFogActive(true);
     }
 
     /// <summary>
