@@ -47,6 +47,7 @@ public class ChunkGenNetwork : MonoBehaviour
         new LODData { lod = LOD.LOD6, resolution = 6 }
     };
     // Scriptable Object References
+    public GenerationConfiguration generationConfiguration;
     public TerrainDensityData terrainDensityData;
     public AssetSpawnData assetSpawnData;
     public TerrainTextureData terrainTextureData;
@@ -114,6 +115,9 @@ public class ChunkGenNetwork : MonoBehaviour
         else
             Destroy(gameObject);
 
+        // terrainDensityData = generationConfiguration.terrainConfigs[1].terrainDensityData;
+        // terrainTextureData = generationConfiguration.terrainConfigs[1].terrainTextureData;
+        // assetSpawnData = generationConfiguration.terrainConfigs[1].assetSpawnData;
         chunkSize = terrainDensityData.width;
         chunksVisible = Mathf.RoundToInt(maxViewDst / chunkSize);
         lightingBlockerRenderer = lightingBlocker.GetComponent<MeshRenderer>();
@@ -191,7 +195,7 @@ public class ChunkGenNetwork : MonoBehaviour
             UpdateVisibleChunks();
         }
         // if (!isLoadingChunks && chunkLoadQueue.Count > 0)
-        // {
+        // {a
         //     StartCoroutine(LoadChunksOverTime());
         // }
         // if (!isLoadingReadbacks && pendingReadbacks.Count > 0)
@@ -547,7 +551,9 @@ public class ChunkGenNetwork : MonoBehaviour
     {
         assetSpawnData.assets.Clear();
         chunkDictionary.Clear();
-        fogRenderPassFeature.SetActive(false);
+        if (fogRenderPassFeature != null) {
+            fogRenderPassFeature.SetActive(false);
+        }
     }
 
     void TextureSetup()
