@@ -14,8 +14,6 @@ public class ComputeMarchingCubes : MonoBehaviour
     public ComputeShader terrainDensityComputeShader;
     public ComputeShader terrainNoiseComputeShader;
     public ComputeShader terraformComputeShader;
-    public Material terrainMaterial;
-    public Material waterMaterial;
     public MeshFilter meshFilter;
     public MeshCollider meshCollider;
     // public List<Vector3> vertices = new List<Vector3>();
@@ -27,9 +25,6 @@ public class ComputeMarchingCubes : MonoBehaviour
     public Vector3Int chunkPos;
     public ComputeBuffer heightsBuffer;
     public bool initialLoadComplete = false;
-    public bool hasWater = false;
-    public bool waterProcessed = false;
-    public bool isUnderground = false;
     public ChunkGenNetwork.LOD currentLOD;
     public Mesh lod1Mesh;
     public Mesh lod2Mesh;
@@ -52,7 +47,6 @@ public class ComputeMarchingCubes : MonoBehaviour
     {
         SetTerrainSettings();
         GenerateMesh();
-        // StartCoroutine(GenerateMesh());
     }
     public void Regen()
     {

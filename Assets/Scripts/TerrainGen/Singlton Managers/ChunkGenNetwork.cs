@@ -118,6 +118,7 @@ public class ChunkGenNetwork : MonoBehaviour
         // terrainDensityData = generationConfiguration.terrainConfigs[1].terrainDensityData;
         // terrainTextureData = generationConfiguration.terrainConfigs[1].terrainTextureData;
         // assetSpawnData = generationConfiguration.terrainConfigs[1].assetSpawnData;
+
         chunkSize = terrainDensityData.width;
         chunksVisible = Mathf.RoundToInt(maxViewDst / chunkSize);
         lightingBlockerRenderer = lightingBlocker.GetComponent<MeshRenderer>();
@@ -133,11 +134,6 @@ public class ChunkGenNetwork : MonoBehaviour
         fogRenderPassFeature = rendererData.rendererFeatures.Find(f => f is FogRenderPassFeature) as FogRenderPassFeature;
         fogMat.SetFloat("_fogOffset", maxViewDst - 20f);
         fogMat.SetColor("_fogColor", fogColor);
-        
-        // terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 100000);
-        // terrainDensityData.caveNoiseSeed = UnityEngine.Random.Range(0, 100000);
-        // terrainDensityData.domainWarpSeed = UnityEngine.Random.Range(0, 100000);
-        // terrainDensityData.caveDomainWarpSeed = UnityEngine.Random.Range(0, 100000);
     }
     public void SetFogActive(bool active)
     {
@@ -657,8 +653,6 @@ public class ChunkGenNetwork : MonoBehaviour
             marchingCubes.terrainNoiseComputeShader = terrainNoiseComputeShader;
             marchingCubes.terraformComputeShader = terraformComputeShader;
             marchingCubes.terrainDensityData = terrainDensityData;
-            marchingCubes.terrainMaterial = terrainMaterial;
-            marchingCubes.waterMaterial = waterMaterial;
             marchingCubes.initialLoadComplete = initialLoadComplete;
             // float viewerDstFromBound = bounds.SqrDistance(viewerPos);
             // if (viewerDstFromBound <= chunkSize * 2) marchingCubes.currentLOD = LOD.LOD1;

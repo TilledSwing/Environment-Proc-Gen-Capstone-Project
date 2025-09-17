@@ -9368,37 +9368,11 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 2396365540523414319, guid: 3276d5b86d88c9a41b43734653414877, type: 3}
   m_PrefabInstance: {fileID: 1001195306}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &911561946 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 7443408887813606051, guid: 0b650fca685f2eb41a86538aa883e4c1, type: 3}
-  m_PrefabInstance: {fileID: 955067429}
-  m_PrefabAsset: {fileID: 0}
 --- !u!224 &911561947 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 9003991886153488766, guid: 3276d5b86d88c9a41b43734653414877, type: 3}
   m_PrefabInstance: {fileID: 1001195306}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &911561952
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 911561946}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6f48f002b825cbd45a19bd96d90f9edb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _stopSocketsOnThread: 1
-  _dontRoute: 0
-  _unreliableMtu: 1023
-  _ipv4BindAddress: 
-  _enableIpv6: 1
-  _ipv6BindAddress: 
-  _port: 7770
-  _maximumClients: 4095
-  _clientAddress: 172.24.237.78
 --- !u!1 &920832983
 GameObject:
   m_ObjectHideFlags: 0
@@ -10311,9 +10285,6 @@ PrefabInstance:
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 7443408887813606051, guid: 0b650fca685f2eb41a86538aa883e4c1, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 911561952}
     - targetCorrespondingSourceObject: {fileID: 5478332171605761799, guid: 0b650fca685f2eb41a86538aa883e4c1, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1010821723}
@@ -16271,7 +16242,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85d7070574d34d743b11ebe05b4cbe4c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  terrainDensityData: {fileID: 11400000, guid: 864756879a48256409eb8ae5f9a04619, type: 2}
+  terrainDensityData: {fileID: 0}
   waterPlaneGenerator: {fileID: 0}
   chunkPos: {x: 0, y: 0, z: 0}
 --- !u!114 &1627581237
