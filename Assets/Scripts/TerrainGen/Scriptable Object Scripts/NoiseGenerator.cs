@@ -4,6 +4,7 @@ using UnityEngine;
 public class NoiseGenerator : ScriptableObject
 {
     public bool activated;
+    public AnimationCurve valueCurve;
     public NoiseGeneratorType noiseGeneratorType;
     // Noise and Fractal Settings
     public int selectedNoiseDimension = 1;
@@ -40,7 +41,7 @@ public class NoiseGenerator : ScriptableObject
     public float cellularJitter = 1;
     // Terrain Values
     public float noiseScale = 0.6f;
-    public int width = 24;
+    // public int width = 24;
     public enum NoiseGeneratorType
     {
         BaseGenerator = 0,

@@ -13,6 +13,84 @@ MonoBehaviour:
   m_Name: ContinentalnessNoiseGenerator
   m_EditorClassIdentifier: 
   activated: 1
+  valueCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0.98821616
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.034779716
+      value: 0.03076101
+      inSlope: 0.005138879
+      outSlope: 0.005138879
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.26423606
+      value: 0.007812457
+      inSlope: -0.014885351
+      outSlope: -0.014885351
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 1
+    - serializedVersion: 3
+      time: 0.39508975
+      value: 0.42374176
+      inSlope: 0.73226905
+      outSlope: 0.73226905
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.477696
+      value: 0.52607524
+      inSlope: 0.06623006
+      outSlope: 0.06623006
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.8129089
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.6006446
+      value: 0.8677771
+      inSlope: 0.60316545
+      outSlope: 0.60316545
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.7340583
+      value: 0.9733231
+      inSlope: 0.1646495
+      outSlope: 0.1646495
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.22099161
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   noiseGeneratorType: 3
   selectedNoiseDimension: 1
   noiseDimension: 0
@@ -22,7 +100,7 @@ MonoBehaviour:
   noiseFractalType: 1
   selectedRotationType3D: 0
   rotationType3D: 0
-  noiseSeed: 40689
+  noiseSeed: 39118
   noiseFractalOctaves: 5
   noiseFractalLacunarity: 2
   noiseFractalGain: 0.5
@@ -34,7 +112,7 @@ MonoBehaviour:
   selectedDomainWarpFractalType: 0
   domainWarpFractalType: 0
   domainWarpAmplitude: 1
-  domainWarpSeed: 41483
+  domainWarpSeed: 39559
   domainWarpFractalOctaves: 5
   domainWarpFractalLacunarity: 2
   domainWarpFractalGain: 0.5
@@ -45,4 +123,10 @@ MonoBehaviour:
   cellularReturnType: 1
   cellularJitter: 1
   noiseScale: 0.5
-  width: 24
+  noiseTypeOptions: 000000000100000002000000030000000400000005000000
+  rotationType3DOptions: 000000000100000002000000
+  noiseFractalTypeOptions: 00000000010000000200000003000000
+  domainWarpTypeOptions: 000000000100000002000000
+  domainWarpFractalTypeOptions: 000000000400000005000000
+  cellularDistanceFunctionOptions: 00000000010000000200000003000000
+  cellularReturnTypeOptions: 00000000010000000200000003000000040000000500000006000000

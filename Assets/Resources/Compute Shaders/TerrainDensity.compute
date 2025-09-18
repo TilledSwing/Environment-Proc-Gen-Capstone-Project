@@ -3,21 +3,37 @@
 #include "/FastNoiseLite.hlsl"
 
 RWStructuredBuffer<float> HeightsBuffer;
+// Base Noise
 StructuredBuffer<float> BaseNoiseBuffer;
+Texture2D<float> BaseCurveTexture;
+// Large Cave Noise
 StructuredBuffer<float> LargeCaveNoiseBuffer;
 bool LargeCaveNoiseActivated;
+Texture2D<float> LargeCaveCurveTexture;
+// Cave Detail Noise
 StructuredBuffer<float> CaveDetailNoiseBuffer;
 bool CaveDetailNoiseActivated = false;
+Texture2D<float> CaveDetailCurveTexture;
+// Continentalness Noise
 StructuredBuffer<float> ContinentalnessNoiseBuffer;
 bool ContinentalnessNoiseActivated = false;
+Texture2D<float> ContinentalnessCurveTexture;
+// Temperature Noise
 StructuredBuffer<float> TemperatureNoiseBuffer;
 bool TemperatureNoiseActivated = false;
+Texture2D<float> TemperatureCurveTexture;
+// Humidity Noise
 StructuredBuffer<float> HumidityNoiseBuffer;
 bool HumidityNoiseActivated = false;
+Texture2D<float> HumidityNoiseCurveTexture;
+// Peaks And Valleys Noise
 StructuredBuffer<float> PeaksAndValleysNoiseBuffer;
 bool PeaksAndValleysNoiseActivated = false;
+Texture2D<float> PeaksAndValleysCurveTexture;
+// Erosion Noise
 StructuredBuffer<float> ErosionNoiseBuffer;
 bool ErosionNoiseActivated = false;
+Texture2D<float> ErosionCurveTexture;
 // Terrain Values
 int height;
 bool terracing;
@@ -32,6 +48,11 @@ int MaxWorldYChunks;
 int FlattenIndex(float3 id, int size) {
     return id.x * (size + 1) * (size + 1) + id.y * (size + 1) + id.z;
 }
+SamplerState samplerLinearClamp
+{
+    Filter = MIN_MAG_MIP_LINEAR;
+    AddressU = Clamp;
+};
 // Compute total density of terrain use provided noise data
 [numthreads(4,4,4)]
 void TerrainDensity (uint3 id : SV_DispatchThreadID)
@@ -50,7 +71,9 @@ void TerrainDensity (uint3 id : SV_DispatchThreadID)
     // float peaksAndValleysNoise = (PeaksAndValleysNoiseActivated ? PeaksAndValleysNoiseBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)] : 0);
 
     // Continentalness
-    float adjustedBaseTerrainHeight = (ContinentalnessNoiseActivated ? baseTerrainHeight * ((continentalnessNoise + 1.5) * 0.5) : baseTerrainHeight);
+    // float adjustedBaseTerrainHeight = (ContinentalnessNoiseActivated ? baseTerrainHeight * ((continentalnessNoise + 1.5) * 0.5) : baseTerrainHeight);
+    // float adjustedBaseTerrainHeight = (ContinentalnessNoiseActivated ? baseTerrainHeight * (lerp(0.25, 1.25, (continentalnessNoise+1)/2)) : baseTerrainHeight);
+    float adjustedBaseTerrainHeight = (ContinentalnessNoiseActivated ? baseTerrainHeight * (lerp(0.25, 1.1, ContinentalnessCurveTexture.SampleLevel(samplerLinearClamp, (continentalnessNoise+1)/2, 0))) : baseTerrainHeight);
     // Erosion
     // adjustedBaseTerrainHeight *= (ErosionNoiseActivated ? lerp(0.3, 1.0, ((erosionNoise * -1) + 1) / 2) : 1);
 

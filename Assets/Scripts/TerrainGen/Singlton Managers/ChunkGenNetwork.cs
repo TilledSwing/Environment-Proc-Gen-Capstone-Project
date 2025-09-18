@@ -39,6 +39,7 @@ public class ChunkGenNetwork : MonoBehaviour
     public bool useFixedMapSize;
     public int mapSize;
     public int resolution;
+    public int maxYChunksVisible;
     public LODData[] lodData =
     {
         new LODData { lod = LOD.LOD1, resolution = 1 },
@@ -240,9 +241,13 @@ public class ChunkGenNetwork : MonoBehaviour
             {
                 for (int zOffset = -chunksVisible; zOffset <= chunksVisible; zOffset++)
                 {
+                    if (math.abs(yOffset) > maxYChunksVisible) {
+                        continue;
+                    }
                     Vector3Int viewedChunkCoord = new Vector3Int(currentChunkCoordX + xOffset, currentChunkCoordY + yOffset, currentChunkCoordZ + zOffset);
 
-                    if (math.abs(viewedChunkCoord.y) > maxWorldYChunks) {
+                    if (math.abs(viewedChunkCoord.y) > maxWorldYChunks)
+                    {
                         continue;
                     }
 

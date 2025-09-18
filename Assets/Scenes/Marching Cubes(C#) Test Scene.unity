@@ -776,7 +776,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 255650636}
   m_Direction: 0
   m_MinValue: 50
-  m_MaxValue: 120
+  m_MaxValue: 500
   m_WholeNumbers: 1
   m_Value: 80
   m_OnValueChanged:
@@ -18108,14 +18108,15 @@ MonoBehaviour:
   chatContainer: {fileID: 898901602}
   lobbyContainer: {fileID: 194610414}
   maxWorldYChunks: 16
-  maxViewDst: 120
+  maxViewDst: 160
   viewer: {fileID: 1588582780}
-  updateDistanceThreshold: 5
+  updateDistanceThreshold: 10
   chunkSize: 0
   chunksVisible: 0
   useFixedMapSize: 0
   mapSize: 11
   resolution: 1
+  maxYChunksVisible: 5
   lodData:
   - lod: 1
     resolution: 1
