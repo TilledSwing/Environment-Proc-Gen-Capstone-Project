@@ -17,10 +17,11 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 3664ee8f9e24c0d4fb4c5dc15c4a5033, type: 2}
   - {fileID: 11400000, guid: 19b6a04f14e6131419918c7e8c2a68b4, type: 2}
   - {fileID: 11400000, guid: 2a0e823b81394b3419bc9b3488900bc9, type: 2}
-  width: 24
-  height: 105
+  - {fileID: 11400000, guid: 23cc7aa1afbfa174a8a3507746be9f10, type: 2}
+  width: 32
+  height: 65
   isolevel: 0.5
-  waterLevel: 30
+  waterLevel: 33
   lerp: 1
   terracing: 0
   terraceHeight: 2

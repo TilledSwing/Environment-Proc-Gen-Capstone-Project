@@ -17,34 +17,11 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 8b48f37d82b57414a9b10e2e22659108, type: 2}
   - {fileID: 11400000, guid: ba042f300ebfc12449574e9980101924, type: 2}
   - {fileID: 11400000, guid: 6c79ac92c203a2949969a902faee120e, type: 2}
+  - {fileID: 11400000, guid: 3f2cdb4d1242061499f4422dd41cec60, type: 2}
   width: 32
-  height: 100
+  height: 180
   isolevel: 0.5
-  waterLevel: 25
+  waterLevel: 35
   lerp: 1
   terracing: 0
   terraceHeight: 2
-  densityCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 2
-      outSlope: 2
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4

@@ -5,6 +5,7 @@
 RWStructuredBuffer<float> HeightsBuffer;
 // Base Noise
 StructuredBuffer<float> BaseNoiseBuffer;
+bool BaseNoiseActivated;
 Texture2D<float> BaseCurveTexture;
 // Large Cave Noise
 StructuredBuffer<float> LargeCaveNoiseBuffer;
@@ -64,27 +65,33 @@ void TerrainDensity (uint3 id : SV_DispatchThreadID)
 
     // Activation checks don't actually work yet cause hlsl is weird
     float terrainNoise = BaseNoiseBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)];
-    float baseTerrainHeight = (terrainNoise+1)/2;
+    float baseTerrainHeight = lerp(0.4, 1, (terrainNoise+1)/2);
     float largeCaveNoise = (LargeCaveNoiseActivated ? LargeCaveNoiseBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)] : 0);
     float continentalnessNoise = (ContinentalnessNoiseActivated ? ContinentalnessNoiseBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)] : 0);
-    // float erosionNoise = (ErosionNoiseActivated ? ErosionNoiseBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)] : 0);
-    // float peaksAndValleysNoise = (PeaksAndValleysNoiseActivated ? PeaksAndValleysNoiseBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)] : 0);
+    float erosionNoise = (ErosionNoiseActivated ? ErosionNoiseBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)] : 0);
+    float peaksAndValleysNoise = (PeaksAndValleysNoiseActivated ? PeaksAndValleysNoiseBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)] : 0);
 
     // Continentalness
-    // float adjustedBaseTerrainHeight = (ContinentalnessNoiseActivated ? baseTerrainHeight * ((continentalnessNoise + 1.5) * 0.5) : baseTerrainHeight);
-    // float adjustedBaseTerrainHeight = (ContinentalnessNoiseActivated ? baseTerrainHeight * (lerp(0.25, 1.25, (continentalnessNoise+1)/2)) : baseTerrainHeight);
-    float adjustedBaseTerrainHeight = (ContinentalnessNoiseActivated ? baseTerrainHeight * (lerp(0.25, 1.1, ContinentalnessCurveTexture.SampleLevel(samplerLinearClamp, (continentalnessNoise+1)/2, 0))) : baseTerrainHeight);
+    float adjustedBaseTerrainHeight;
+    if(BaseNoiseActivated) {
+        adjustedBaseTerrainHeight = (ContinentalnessNoiseActivated ? baseTerrainHeight * (lerp(0.2, 1.1, ContinentalnessCurveTexture.SampleLevel(samplerLinearClamp, (continentalnessNoise+1)/2, 0))) : baseTerrainHeight);
+    }
+    else {
+        adjustedBaseTerrainHeight = ContinentalnessCurveTexture.SampleLevel(samplerLinearClamp, (continentalnessNoise+1)/2, 0);
+    }
+    // float adjustedBaseTerrainHeight = (ContinentalnessNoiseActivated ? baseTerrainHeight * (lerp(0.2, 1.1, ContinentalnessCurveTexture.SampleLevel(samplerLinearClamp, (continentalnessNoise+1)/2, 0))) : baseTerrainHeight);
+    // float adjustedBaseTerrainHeight = ContinentalnessCurveTexture.SampleLevel(samplerLinearClamp, (continentalnessNoise+1)/2, 0);
     // Erosion
-    // adjustedBaseTerrainHeight *= (ErosionNoiseActivated ? lerp(0.3, 1.0, ((erosionNoise * -1) + 1) / 2) : 1);
+    adjustedBaseTerrainHeight *= ErosionNoiseActivated ? ErosionCurveTexture.SampleLevel(samplerLinearClamp, (erosionNoise+1)/2, 0) : 1;
+    adjustedBaseTerrainHeight *= PeaksAndValleysNoiseActivated ? PeaksAndValleysCurveTexture.SampleLevel(samplerLinearClamp, (peaksAndValleysNoise+1)/2, 0) : 1;
 
     // Cave Carve Calculation
-    float caveCarve = smoothstep(-0.4, 0.0, largeCaveNoise);
-    caveCarve = 1.0 - caveCarve;
+    float caveCarve = 1.0 - smoothstep(-0.4, 0.0, largeCaveNoise);
     // Terrain Density Calculation
     float currentHeight = ((height * adjustedBaseTerrainHeight) + (terracing ? (id.y%terraceHeight) : 0));
     float terrainDensity = currentHeight - (ChunkPos.y + id.y);
     // Cave Fade
-    float surfaceFade = saturate((terrainDensity) / 60.0);
+    float surfaceFade = saturate((terrainDensity) / 180.0);
     float caveFade = saturate((terrainDensity - ChunkSize) / 70.0);
     float finalDensity = LargeCaveNoiseActivated ? terrainDensity + ((ChunkPos.y + id.y) * caveFade) - (caveCarve * height * surfaceFade) : terrainDensity;
     // World Depth Fade

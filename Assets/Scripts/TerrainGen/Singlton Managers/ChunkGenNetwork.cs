@@ -116,6 +116,8 @@ public class ChunkGenNetwork : MonoBehaviour
         else
             Destroy(gameObject);
 
+        // Uncomment to see desert preset
+        
         // terrainDensityData = generationConfiguration.terrainConfigs[1].terrainDensityData;
         // terrainTextureData = generationConfiguration.terrainConfigs[1].terrainTextureData;
         // assetSpawnData = generationConfiguration.terrainConfigs[1].assetSpawnData;
@@ -550,7 +552,7 @@ public class ChunkGenNetwork : MonoBehaviour
     /// </summary>
     void OnApplicationQuit()
     {
-        assetSpawnData.assets.Clear();
+        assetSpawnData.ResetSpawnPoints();
         chunkDictionary.Clear();
         if (fogRenderPassFeature != null) {
             fogRenderPassFeature.SetActive(false);

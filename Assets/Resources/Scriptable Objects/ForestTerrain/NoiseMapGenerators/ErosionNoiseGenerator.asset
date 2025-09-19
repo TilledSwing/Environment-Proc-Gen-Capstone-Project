@@ -13,6 +13,111 @@ MonoBehaviour:
   m_Name: ErosionNoiseGenerator
   m_EditorClassIdentifier: 
   activated: 1
+  valueCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0.9999954
+      inSlope: -2.505778
+      outSlope: -2.505778
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.045629732
+      value: 0.8856574
+      inSlope: -0.26168317
+      outSlope: -0.26168317
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 1
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.2192924
+      value: 0.71408236
+      inSlope: -0.18192002
+      outSlope: -0.18192002
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.5818566
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.25133985
+      value: 0.7850245
+      inSlope: 0.15058513
+      outSlope: 0.15058513
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.39349937
+    - serializedVersion: 3
+      time: 0.40038326
+      value: 0.4608275
+      inSlope: -0.26625603
+      outSlope: -0.26625603
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.42360678
+    - serializedVersion: 3
+      time: 0.67103565
+      value: 0.40823618
+      inSlope: 0.06498269
+      outSlope: 0.06498269
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.43196684
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.71271735
+      value: 0.62597376
+      inSlope: 0.3554269
+      outSlope: 0.3554269
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 1
+      outWeight: 1
+    - serializedVersion: 3
+      time: 0.7715876
+      value: 0.631514
+      inSlope: -0.07823533
+      outSlope: -0.07823533
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 1
+      outWeight: 1
+    - serializedVersion: 3
+      time: 0.8032696
+      value: 0.42308688
+      inSlope: -0.38691455
+      outSlope: -0.38691455
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.52436024
+    - serializedVersion: 3
+      time: 0.9297069
+      value: 0.40737453
+      inSlope: 0.00624158
+      outSlope: 0.00624158
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.6406984
+      outWeight: 0.9528524
+    - serializedVersion: 3
+      time: 1.0034814
+      value: 0.37620854
+      inSlope: -0.33149886
+      outSlope: -0.33149886
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.6879929
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   noiseGeneratorType: 7
   selectedNoiseDimension: 1
   noiseDimension: 0
@@ -22,19 +127,19 @@ MonoBehaviour:
   noiseFractalType: 1
   selectedRotationType3D: 0
   rotationType3D: 0
-  noiseSeed: 32941
+  noiseSeed: 27607
   noiseFractalOctaves: 3
   noiseFractalLacunarity: 2
   noiseFractalGain: 0.5
-  fractalWeightedStrength: 1
-  noiseFrequency: 0.005
+  fractalWeightedStrength: 0
+  noiseFrequency: 0.002
   domainWarpToggle: 0
   selectedDomainWarpType: 0
   domainWarpType: 0
   selectedDomainWarpFractalType: 0
   domainWarpFractalType: 4
   domainWarpAmplitude: 30
-  domainWarpSeed: 80184
+  domainWarpSeed: 37157
   domainWarpFractalOctaves: 5
   domainWarpFractalLacunarity: 2
   domainWarpFractalGain: 0.5
@@ -44,5 +149,11 @@ MonoBehaviour:
   selectedCellularReturnType: 1
   cellularReturnType: 1
   cellularJitter: 1
-  noiseScale: 1
-  width: 24
+  noiseScale: 0.3
+  noiseTypeOptions: 000000000100000002000000030000000400000005000000
+  rotationType3DOptions: 000000000100000002000000
+  noiseFractalTypeOptions: 00000000010000000200000003000000
+  domainWarpTypeOptions: 000000000100000002000000
+  domainWarpFractalTypeOptions: 000000000400000005000000
+  cellularDistanceFunctionOptions: 00000000010000000200000003000000
+  cellularReturnTypeOptions: 00000000010000000200000003000000040000000500000006000000
