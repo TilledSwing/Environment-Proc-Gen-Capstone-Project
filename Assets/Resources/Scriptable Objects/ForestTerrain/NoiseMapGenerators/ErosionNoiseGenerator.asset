@@ -35,8 +35,8 @@ MonoBehaviour:
       inWeight: 1
       outWeight: 0.33333334
     - serializedVersion: 3
-      time: 0.2192924
-      value: 0.71408236
+      time: 0.19348587
+      value: 0.7187033
       inSlope: -0.18192002
       outSlope: -0.18192002
       tangentMode: 0
@@ -44,7 +44,7 @@ MonoBehaviour:
       inWeight: 0.5818566
       outWeight: 0.33333334
     - serializedVersion: 3
-      time: 0.25133985
+      time: 0.2572952
       value: 0.7850245
       inSlope: 0.15058513
       outSlope: 0.15058513
@@ -54,7 +54,7 @@ MonoBehaviour:
       outWeight: 0.39349937
     - serializedVersion: 3
       time: 0.40038326
-      value: 0.4608275
+      value: 0.3804539
       inSlope: -0.26625603
       outSlope: -0.26625603
       tangentMode: 0
@@ -63,7 +63,7 @@ MonoBehaviour:
       outWeight: 0.42360678
     - serializedVersion: 3
       time: 0.67103565
-      value: 0.40823618
+      value: 0.3278626
       inSlope: 0.06498269
       outSlope: 0.06498269
       tangentMode: 0
@@ -72,7 +72,7 @@ MonoBehaviour:
       outWeight: 0.33333334
     - serializedVersion: 3
       time: 0.71271735
-      value: 0.62597376
+      value: 0.47688836
       inSlope: 0.3554269
       outSlope: 0.3554269
       tangentMode: 0
@@ -81,7 +81,7 @@ MonoBehaviour:
       outWeight: 1
     - serializedVersion: 3
       time: 0.7715876
-      value: 0.631514
+      value: 0.4824286
       inSlope: -0.07823533
       outSlope: -0.07823533
       tangentMode: 0
@@ -90,7 +90,7 @@ MonoBehaviour:
       outWeight: 1
     - serializedVersion: 3
       time: 0.8032696
-      value: 0.42308688
+      value: 0.3427133
       inSlope: -0.38691455
       outSlope: -0.38691455
       tangentMode: 0
@@ -99,7 +99,7 @@ MonoBehaviour:
       outWeight: 0.52436024
     - serializedVersion: 3
       time: 0.9297069
-      value: 0.40737453
+      value: 0.32700095
       inSlope: 0.00624158
       outSlope: 0.00624158
       tangentMode: 0
@@ -108,7 +108,7 @@ MonoBehaviour:
       outWeight: 0.9528524
     - serializedVersion: 3
       time: 1.0034814
-      value: 0.37620854
+      value: 0.29583496
       inSlope: -0.33149886
       outSlope: -0.33149886
       tangentMode: 0
@@ -127,7 +127,7 @@ MonoBehaviour:
   noiseFractalType: 1
   selectedRotationType3D: 0
   rotationType3D: 0
-  noiseSeed: 27607
+  noiseSeed: 93666
   noiseFractalOctaves: 3
   noiseFractalLacunarity: 2
   noiseFractalGain: 0.5
@@ -139,7 +139,7 @@ MonoBehaviour:
   selectedDomainWarpFractalType: 0
   domainWarpFractalType: 4
   domainWarpAmplitude: 30
-  domainWarpSeed: 37157
+  domainWarpSeed: 12317
   domainWarpFractalOctaves: 5
   domainWarpFractalLacunarity: 2
   domainWarpFractalGain: 0.5

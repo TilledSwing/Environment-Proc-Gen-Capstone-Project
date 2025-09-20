@@ -26,14 +26,14 @@ MonoBehaviour:
       inWeight: 0
       outWeight: 0
     - serializedVersion: 3
-      time: 0.034779716
-      value: 0.03076101
-      inSlope: 0.005138879
-      outSlope: 0.005138879
+      time: 0.059300818
+      value: 0.058180794
+      inSlope: -0.41934142
+      outSlope: -0.41934142
       tangentMode: 0
       weightedMode: 0
       inWeight: 0.33333334
-      outWeight: 0.33333334
+      outWeight: 0.65697676
     - serializedVersion: 3
       time: 0.21169668
       value: 0.031213092
@@ -44,8 +44,8 @@ MonoBehaviour:
       inWeight: 0.33333334
       outWeight: 1
     - serializedVersion: 3
-      time: 0.34255037
-      value: 0.4471424
+      time: 0.318032
+      value: 0.49286118
       inSlope: 0.73226905
       outSlope: 0.73226905
       tangentMode: 0
@@ -53,8 +53,8 @@ MonoBehaviour:
       inWeight: 0.33333334
       outWeight: 0.33333334
     - serializedVersion: 3
-      time: 0.42515662
-      value: 0.5494759
+      time: 0.40063825
+      value: 0.5951947
       inSlope: 0.06623006
       outSlope: 0.06623006
       tangentMode: 0
@@ -62,8 +62,8 @@ MonoBehaviour:
       inWeight: 0.8129089
       outWeight: 0.33333334
     - serializedVersion: 3
-      time: 0.54810524
-      value: 0.8911778
+      time: 0.5183329
+      value: 0.8888918
       inSlope: 0.60316545
       outSlope: 0.60316545
       tangentMode: 0
@@ -100,7 +100,7 @@ MonoBehaviour:
   noiseFractalType: 1
   selectedRotationType3D: 0
   rotationType3D: 0
-  noiseSeed: 78450
+  noiseSeed: 32200
   noiseFractalOctaves: 4
   noiseFractalLacunarity: 2
   noiseFractalGain: 0.5
@@ -112,7 +112,7 @@ MonoBehaviour:
   selectedDomainWarpFractalType: 0
   domainWarpFractalType: 0
   domainWarpAmplitude: 1
-  domainWarpSeed: 27927
+  domainWarpSeed: 66974
   domainWarpFractalOctaves: 5
   domainWarpFractalLacunarity: 2
   domainWarpFractalGain: 0.5
@@ -122,7 +122,7 @@ MonoBehaviour:
   selectedCellularReturnType: 1
   cellularReturnType: 1
   cellularJitter: 1
-  noiseScale: 0.4
+  noiseScale: 0.3
   noiseTypeOptions: 000000000100000002000000030000000400000005000000
   rotationType3DOptions: 000000000100000002000000
   noiseFractalTypeOptions: 00000000010000000200000003000000

@@ -74,7 +74,7 @@ void TerrainDensity (uint3 id : SV_DispatchThreadID)
     // Continentalness
     float adjustedBaseTerrainHeight;
     if(BaseNoiseActivated) {
-        adjustedBaseTerrainHeight = (ContinentalnessNoiseActivated ? baseTerrainHeight * (lerp(0.2, 1.1, ContinentalnessCurveTexture.SampleLevel(samplerLinearClamp, (continentalnessNoise+1)/2, 0))) : baseTerrainHeight);
+        adjustedBaseTerrainHeight = (ContinentalnessNoiseActivated ? baseTerrainHeight * (ContinentalnessCurveTexture.SampleLevel(samplerLinearClamp, (continentalnessNoise+1)/2, 0)) : baseTerrainHeight);
     }
     else {
         adjustedBaseTerrainHeight = ContinentalnessCurveTexture.SampleLevel(samplerLinearClamp, (continentalnessNoise+1)/2, 0);

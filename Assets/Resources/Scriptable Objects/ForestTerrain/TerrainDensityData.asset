@@ -19,9 +19,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 6c79ac92c203a2949969a902faee120e, type: 2}
   - {fileID: 11400000, guid: 3f2cdb4d1242061499f4422dd41cec60, type: 2}
   width: 32
-  height: 180
+  height: 200
   isolevel: 0.5
-  waterLevel: 35
+  waterLevel: 30
   lerp: 1
   terracing: 0
   terraceHeight: 2
