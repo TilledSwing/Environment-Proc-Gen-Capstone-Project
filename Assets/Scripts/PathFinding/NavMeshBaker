@@ -1,0 +1,12 @@
+using UnityEngine.AI;
+
+public class RuntimeNavMeshBaker : MonoBehaviour
+{
+    public NavMeshSurface surface;
+
+    void Start()
+    {
+        Debug.Log("Building the nav mesh");
+        surface.BuildNavMesh();  // builds the navmesh at runtime
+    }
+}

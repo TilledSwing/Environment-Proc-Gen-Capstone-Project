@@ -52,6 +52,7 @@ public class ComputeMarchingCubes : MonoBehaviour
     {
         SetTerrainSettings();
         GenerateMesh();
+        initialLoadComplete = true;
         // StartCoroutine(GenerateMesh());
     }
     public void Regen()

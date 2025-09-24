@@ -4,10 +4,12 @@ using FishNet.Serializing.Helping;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.AI.Navigation;
 using Unity.Collections;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
@@ -233,7 +235,8 @@ public class ChunkGenNetwork : MonoBehaviour
                 {
                     Vector3Int viewedChunkCoord = new Vector3Int(currentChunkCoordX + xOffset, currentChunkCoordY + yOffset, currentChunkCoordZ + zOffset);
 
-                    if (math.abs(viewedChunkCoord.y) > maxWorldYChunks) {
+                    if (math.abs(viewedChunkCoord.y) > maxWorldYChunks)
+                    {
                         continue;
                     }
 
@@ -327,6 +330,16 @@ public class ChunkGenNetwork : MonoBehaviour
         {
             // Debug.Log("Spawning");
             StartCoroutine(LoadAssetInstantiationsOverTime());
+        }
+        if (initialLoadComplete)
+        {
+            foreach (KeyValuePair<Vector3, TerrainChunk> ch in chunkDictionary)
+            {
+                if (ch.Value.navMeshSurface.navMeshData == null && ch.Value.marchingCubes.initialLoadComplete)
+                {
+                    ch.Value.navMeshSurface.BuildNavMesh();
+                }
+            }
         }
     }
     /// <summary>
@@ -609,6 +622,8 @@ public class ChunkGenNetwork : MonoBehaviour
         public MeshFilter meshFilter;
         public MeshRenderer meshRenderer;
         public bool visible = false;
+
+        public NavMeshSurface navMeshSurface;
         public TerrainChunk(Vector3Int chunkCoord, int chunkSize, Transform parent, TerrainDensityData terrainDensityData, AssetSpawnData assetSpawnData, TerrainTextureData terrainTextureData,
                             ComputeShader marchingCubesComputeShader, ComputeShader terrainDensityComputeShader, ComputeShader terrainNoiseComputeShader,
                             ComputeShader terraformComputeShader,
@@ -668,7 +683,11 @@ public class ChunkGenNetwork : MonoBehaviour
                 waterPlaneGenerator.AddComponent<DitherFadeController>();
             }
             chunk.transform.SetParent(parent);
-            // Instance.chunkHideQueue.Enqueue(this);
+            Instance.chunkHideQueue.Enqueue(this);
+            navMeshSurface = chunk.AddComponent<NavMeshSurface>();
+            navMeshSurface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
+            navMeshSurface.collectObjects = CollectObjects.Children;
+         
             SetVisible(false);
         }
         /// <summary>
@@ -725,6 +744,22 @@ public class ChunkGenNetwork : MonoBehaviour
                     }
                 }
             }
+            // if (marchingCubes.initialLoadComplete)
+            // {
+            //     navMeshSurface = chunk.AddComponent<NavMeshSurface>();
+            //     navMeshSurface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
+            //     navMeshSurface.collectObjects = CollectObjects.Children;
+            //     navMeshSurface.overrideVoxelSize = true;
+            //     navMeshSurface.voxelSize = 0.1f; // smaller = more detailed mesh
+
+                
+            //     // Set max slope dynamically
+            //     var settings = NavMesh.GetSettingsByID(navMeshSurface.agentTypeID);
+            //     settings.agentSlope = 60f; // allow steeper terrain
+
+            //     navMeshSurface.BuildNavMesh();
+            //     Debug.Log("Creating the nav mesh");
+            //     }
         }
         /// <summary>
         /// Check chunk visibility
