@@ -38,6 +38,8 @@ public class GlowballThrow : NetworkBehaviour
         if (Input.GetKeyDown(KeyCode.E))
         {
             ThrowGlowball(playerCamera.transform.forward);
+            Debug.LogWarning(PlayerController.instance.waterLevel);
+            Debug.LogWarning(ChunkGenNetwork.Instance.terrainDensityData.waterLevel);
         }
     }
     /// <summary>

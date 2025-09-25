@@ -1,6 +1,8 @@
 using FishNet.Object;
 using FishNet.Connection;
 using UnityEngine;
+using FishNet;
+using System.Collections;
 
 public class NetworkManager : NetworkBehaviour
 {
@@ -22,6 +24,7 @@ public class NetworkManager : NetworkBehaviour
         ChunkGenNetwork.Instance.objectiveCanvas.SetActive(true);
         ChunkGenNetwork.Instance.chatContainer.SetActive(true);
         ChunkGenNetwork.Instance.lobbyContainer.SetActive(true);
+        PlayerController.instance.waterLevel = ChunkGenNetwork.Instance.terrainDensityData.waterLevel;
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -34,7 +37,8 @@ public class NetworkManager : NetworkBehaviour
     [TargetRpc]
     void UpdateClientMesh(NetworkConnection conn, TerrainSettings settings)
     {
-        ChunkGenNetwork.Instance.terrainDensityData = SeedSerializer.DeserializeTerrainDensity(settings);
+        TerrainDensityData terrainDensityDataNew = SeedSerializer.DeserializeTerrainDensity(settings);
+        ChunkGenNetwork.Instance.terrainDensityData = terrainDensityDataNew;
 
         // Reset action and chunking to defaults (loading in from fresh)
         // Chunk Variables
@@ -61,5 +65,7 @@ public class NetworkManager : NetworkBehaviour
 
         ChunkGenNetwork.Instance.chunkSize = ChunkGenNetwork.Instance.terrainDensityData.width;
         ChunkGenNetwork.Instance.chunksVisible = Mathf.RoundToInt(ChunkGenNetwork.Instance.maxViewDst / ChunkGenNetwork.Instance.chunkSize);
+
+        PlayerController.instance.waterLevel = terrainDensityDataNew.waterLevel;
     }
 }
