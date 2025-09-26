@@ -85,6 +85,8 @@ public class ChunkGenNetwork : MonoBehaviour
     public Queue<Action> pendingAssetInstantiations = new();
     public bool isLoadingAssetInstantiations = false;
     // Data structure pools
+    public bool navMeshCreated = false;
+    public NavMeshSurface navMeshSurface;
     public class ReadbackRequest
     {
         public ComputeBuffer buffer;
@@ -333,14 +335,33 @@ public class ChunkGenNetwork : MonoBehaviour
         }
         if (initialLoadComplete)
         {
-            foreach (KeyValuePair<Vector3, TerrainChunk> ch in chunkDictionary)
-            {
-                if (ch.Value.navMeshSurface.navMeshData == null && ch.Value.marchingCubes.initialLoadComplete)
-                {
-                    ch.Value.navMeshSurface.BuildNavMesh();
-                }
-            }
+            navMeshSurface = gameObject.AddComponent<NavMeshSurface>();
+            navMeshSurface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
+            navMeshSurface.BuildNavMesh();
         }
+        // if (initialLoadComplete)
+        // {
+        //     Debug.Log("Finished Loading and making mesh");
+        //     if (!navMeshCreated)
+        //     {
+        //         navMeshSurface = gameObject.AddComponent<NavMeshSurface>();
+        //         navMeshSurface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
+        //         navMeshSurface.BuildNavMesh();
+        //         navMeshCreated = true;
+        //         navMeshNeedsRebuild = false;
+        //     }
+        //     if(navMeshCreated && navMeshSurface.navMeshData == null)
+        //     {
+        //         navMeshSurface.BuildNavMesh();
+        //         navMeshNeedsRebuild = false;
+        //     }
+        //     if (navMeshNeedsRebuild)
+        //     {
+        //         navMeshSurface.BuildNavMesh();
+        //         navMeshNeedsRebuild = false;
+        //     }
+            
+        // }
     }
     /// <summary>
     /// Coroutine for loading chunks asynchronously
@@ -684,10 +705,7 @@ public class ChunkGenNetwork : MonoBehaviour
             }
             chunk.transform.SetParent(parent);
             Instance.chunkHideQueue.Enqueue(this);
-            navMeshSurface = chunk.AddComponent<NavMeshSurface>();
-            navMeshSurface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
-            navMeshSurface.collectObjects = CollectObjects.Children;
-         
+                   
             SetVisible(false);
         }
         /// <summary>
