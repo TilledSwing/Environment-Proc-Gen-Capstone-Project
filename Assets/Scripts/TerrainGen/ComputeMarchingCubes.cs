@@ -371,7 +371,8 @@ public class ComputeMarchingCubes : MonoBehaviour
         }
 
         Mesh mesh = new Mesh();
-        Mesh.ApplyAndDisposeWritableMeshData(meshDataArray, mesh, MeshUpdateFlags.Default);
+        // Mesh.ApplyAndDisposeWritableMeshData(meshDataArray, mesh, MeshUpdateFlags.Default);
+        Mesh.ApplyAndDisposeWritableMeshData(meshDataArray, mesh, MeshUpdateFlags.DontRecalculateBounds | MeshUpdateFlags.DontValidateIndices);
         // mesh.bounds = new Bounds(chunkPos + (new Vector3(0.5f, 0.5f, 0.5f) * terrainDensityData.width), Vector3.one * terrainDensityData.width);
 
         // if (lodData.lod == ChunkGenNetwork.LOD.LOD1)
@@ -385,14 +386,14 @@ public class ComputeMarchingCubes : MonoBehaviour
 
         // if (lodData.lod == currentLOD)
         // {
-            meshFilter.mesh = mesh;
-            meshCollider.sharedMesh = mesh;
-            mesh.bounds = new Bounds(chunkPos + (new Vector3(0.5f, 0.5f, 0.5f) * terrainDensityData.width), Vector3.one * terrainDensityData.width);
+        meshFilter.mesh = mesh;
+        meshCollider.sharedMesh = mesh;
+        mesh.bounds = new Bounds(chunkPos + (new Vector3(0.5f, 0.5f, 0.5f) * terrainDensityData.width), Vector3.one * terrainDensityData.width);
 
-            if (!terraforming)
-            {
-                assetSpawner.SpawnAssets();
-            }
+        if (!terraforming)
+        {
+            //assetSpawner.SpawnAssets();
+        }
         // }
     }
     // Releases height buffers when the application is closed

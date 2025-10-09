@@ -6,17 +6,49 @@ using FishNet.Object;
 using FishNet.Connection;
 using TMPro;
 using UnityEngine.EventSystems;
+using FishNet.Managing.Object;
+using UnityEditor.Build.Pipeline;
+using GameKit.Dependencies.Utilities;
 public class EnemySpawner : NetworkBehaviour
 {
     Camera playerCamera;
+    GameObject enemy;
+    GameObject enemyPrefab;
 
     public override void OnStartClient()
     {
-        base.OnStartClient();
-        if (!base.IsOwner)
-            this.enabled = false;
-        else
-            playerCamera = Camera.main;
+        playerCamera = Camera.main;
+        loadPrefab();
+        // base.OnStartClient();
+        // if (!base.IsOwner)
+        //     this.enabled = false;
+        // else
+        // {
+        //     playerCamera = Camera.main;
+        //     loadPrefab();
+        // }
+    }
+
+    void loadPrefab()
+    {
+        string prefabAdress = "Assets/Same Gev Dudios/Sci-Fi Robots Bundle/Prefabs/Catherine.prefab";
+        Debug.Log("Entering load prefab method");
+        Addressables.LoadAssetAsync<GameObject>(prefabAdress).Completed += handle =>
+        {
+            if (handle.Status != AsyncOperationStatus.Succeeded)
+            {
+                Debug.Log("Failed to load the desired pre-fab");
+                return;
+            }
+            Debug.Log($"The results of the prefab load is: {handle.Status.ToString()}");
+            enemyPrefab = handle.Result;
+
+            // var prefabId = prefabAdress.GetStableHashU16();
+            // SinglePrefabObjects sp = (SinglePrefabObjects)NetworkManager.GetPrefabObjects<SinglePrefabObjects>(prefabId, true);
+            // sp.AddObject(enemyPrefab);
+        };
+
+        return;
     }
 
     void Update()
@@ -25,39 +57,36 @@ public class EnemySpawner : NetworkBehaviour
         if (EventSystem.current.currentSelectedGameObject != null &&
             EventSystem.current.currentSelectedGameObject.GetComponent<TMP_InputField>() != null)
         {
+            Debug.Log("exiting the loop before keycode");
             return;
         }
 
-        if (Input.GetKeyDown(KeyCode.L))
+        if (Input.GetKeyDown(KeyCode.L) && enemyPrefab != null)
         {
-            Debug.Log("Spawning Enemy");
-            SpawnEnemy("Assets/Same Gev Dudios/Sci-Fi Robots Bundle/Prefabs/Catherine.prefab", playerCamera.transform.forward);
+            SpawnEnemy(playerCamera.transform.forward);
         }
     }
-    public async void SpawnEnemy(string enemyKey, Vector3 position)
+    public void SpawnEnemy(Vector3 position)
     {
         Debug.Log("Spawning Enemy from handler");
         // Load the prefab dynamically by address
-        AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(enemyKey);
-        GameObject enemyPrefab = await handle.Task;
-
-        if (enemyPrefab == null)
-        {
-            Debug.LogError($"Enemy with key {enemyKey} not found!");
-            return;
-        }
-
+        float spawnDist = 2f;
+        Vector3 spawnPos = playerCamera.transform.position + playerCamera.transform.forward * spawnDist;
         // Instantiate the enemy
-        GameObject enemy = Instantiate(enemyPrefab, position, Quaternion.identity);
-
-        // Optional: network spawn
-        ServerManager.Spawn(enemy);
-
-        // Snap to NavMesh if it has a NavMeshAgent
-        NavMeshAgent agent = enemy.GetComponent<NavMeshAgent>();
-        if (agent != null && NavMesh.SamplePosition(position, out NavMeshHit hit, 2f, NavMesh.AllAreas))
+        NavMeshHit navHit;
+        if (NavMesh.SamplePosition(spawnPos, out navHit, 5f, NavMesh.AllAreas))
         {
-            agent.Warp(hit.position);
+            spawnPos = navHit.position;
+            enemy = Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
+            ServerManager.Spawn(enemy);
+
+            var ai = enemy.GetComponent<EnemyAIMovement>();
+            if (ai != null)
+            {
+                ai.BeginWandering();
+            }
         }
+        
+
     }
 }

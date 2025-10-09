@@ -86,6 +86,7 @@ public class ChunkGenNetwork : MonoBehaviour
     public bool isLoadingAssetInstantiations = false;
     // Data structure pools
     public bool navMeshCreated = false;
+    public bool allChunksGenerated = false;
     public NavMeshSurface navMeshSurface;
     public class ReadbackRequest
     {
@@ -133,7 +134,8 @@ public class ChunkGenNetwork : MonoBehaviour
         fogRenderPassFeature = rendererData.rendererFeatures.Find(f => f is FogRenderPassFeature) as FogRenderPassFeature;
         fogMat.SetFloat("_fogOffset", maxViewDst - 20f);
         fogMat.SetColor("_fogColor", fogColor);
-        
+        navMeshSurface = gameObject.AddComponent<NavMeshSurface>();
+        navMeshSurface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
         // terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 100000);
         // terrainDensityData.caveNoiseSeed = UnityEngine.Random.Range(0, 100000);
         // terrainDensityData.domainWarpSeed = UnityEngine.Random.Range(0, 100000);
@@ -194,8 +196,35 @@ public class ChunkGenNetwork : MonoBehaviour
         {
             UpdateVisibleChunks();
         }
-        else if (!isLoadingAssetInstantiations && pendingAssetInstantiations.Count > 0) {
+        else if (!isLoadingAssetInstantiations && pendingAssetInstantiations.Count > 0)
+        {
             StartCoroutine(LoadAssetInstantiationsOverTime());
+        }
+        
+        if (initialLoadComplete && !hasPendingMeshInits && !isLoadingMeshes && !hasPendingAssetInstantiations &&
+            !isLoadingAssetInstantiations && !hasPendingReadbacks && !isLoadingReadbacks && !isLoadingChunks)
+        {
+            bool allChunksReady = true;
+
+            foreach (KeyValuePair<Vector3, TerrainChunk> entry in chunkDictionary)
+            {
+                if (entry.Value.marchingCubes == null ||
+                    entry.Value.marchingCubes.meshFilter == null ||
+                    entry.Value.marchingCubes.meshFilter.mesh == null ||
+                    entry.Value.marchingCubes.initialLoadComplete == false)
+                {
+                    allChunksReady = false;
+                    break; // stop checking, at least one isn’t done
+                }
+            }
+
+            if (allChunksReady && !navMeshCreated)
+            {
+                Debug.Log("All chunks have been generated, making nav mesh");
+                navMeshSurface.BuildNavMesh();
+                navMeshCreated = true;
+            }
+
         }
     }
     /// <summary>
@@ -271,7 +300,7 @@ public class ChunkGenNetwork : MonoBehaviour
                             TerrainChunk chunk = new TerrainChunk(viewedChunkCoord, chunkSize, GameObject.Find("ChunkParent").transform, terrainDensityData, assetSpawnData, terrainTextureData,
                                                          marchingCubesComputeShader, terrainDensityComputeShader, terrainNoiseComputeShader, terraformComputeShader,
                                                          terrainMaterial, waterMaterial, initialLoadComplete);
-
+                            navMeshCreated = false;
                             chunkDictionary.Add(viewedChunkCoord, chunk);
                             chunk.UpdateChunk(maxViewDst, terrainDensityData.width);
 
@@ -333,35 +362,6 @@ public class ChunkGenNetwork : MonoBehaviour
             // Debug.Log("Spawning");
             StartCoroutine(LoadAssetInstantiationsOverTime());
         }
-        if (initialLoadComplete)
-        {
-            navMeshSurface = gameObject.AddComponent<NavMeshSurface>();
-            navMeshSurface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
-            navMeshSurface.BuildNavMesh();
-        }
-        // if (initialLoadComplete)
-        // {
-        //     Debug.Log("Finished Loading and making mesh");
-        //     if (!navMeshCreated)
-        //     {
-        //         navMeshSurface = gameObject.AddComponent<NavMeshSurface>();
-        //         navMeshSurface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
-        //         navMeshSurface.BuildNavMesh();
-        //         navMeshCreated = true;
-        //         navMeshNeedsRebuild = false;
-        //     }
-        //     if(navMeshCreated && navMeshSurface.navMeshData == null)
-        //     {
-        //         navMeshSurface.BuildNavMesh();
-        //         navMeshNeedsRebuild = false;
-        //     }
-        //     if (navMeshNeedsRebuild)
-        //     {
-        //         navMeshSurface.BuildNavMesh();
-        //         navMeshNeedsRebuild = false;
-        //     }
-            
-        // }
     }
     /// <summary>
     /// Coroutine for loading chunks asynchronously
@@ -404,6 +404,7 @@ public class ChunkGenNetwork : MonoBehaviour
                                             terraformComputeShader,
                                             terrainMaterial, waterMaterial, initialLoadComplete);
                 chunkDictionary.Add(coord, chunk);
+                navMeshCreated = false;
                 chunk.UpdateChunk(maxViewDst, chunkSize);
                 if (chunk.IsVisible())
                 {
