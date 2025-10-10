@@ -11,10 +11,14 @@ Texture2D<float> BaseCurveTexture;
 StructuredBuffer<float> LargeCaveNoiseBuffer;
 bool LargeCaveNoiseActivated;
 Texture2D<float> LargeCaveCurveTexture;
-// Cave Detail Noise
-StructuredBuffer<float> CaveDetailNoiseBuffer;
-bool CaveDetailNoiseActivated = false;
-Texture2D<float> CaveDetailCurveTexture;
+// Cave Detail 1 Noise
+StructuredBuffer<float> CaveDetail1NoiseBuffer;
+bool CaveDetail1NoiseActivated = false;
+Texture2D<float> CaveDetail1CurveTexture;
+// Cave Detail 2 Noise
+StructuredBuffer<float> CaveDetail2NoiseBuffer;
+bool CaveDetail2NoiseActivated = false;
+Texture2D<float> CaveDetail2CurveTexture;
 // Continentalness Noise
 StructuredBuffer<float> ContinentalnessNoiseBuffer;
 bool ContinentalnessNoiseActivated = false;
@@ -67,6 +71,8 @@ void TerrainDensity (uint3 id : SV_DispatchThreadID)
     float terrainNoise = BaseNoiseBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)];
     float baseTerrainHeight = lerp(0.4, 1, (terrainNoise+1)/2);
     float largeCaveNoise = (LargeCaveNoiseActivated ? LargeCaveNoiseBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)] : 0);
+    float caveDetail1Noise = (CaveDetail1NoiseActivated ? CaveDetail1NoiseBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)] : 0);
+    float caveDetail2Noise = (CaveDetail2NoiseActivated ? CaveDetail2NoiseBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)] : 0);
     float continentalnessNoise = (ContinentalnessNoiseActivated ? ContinentalnessNoiseBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)] : 0);
     float erosionNoise = (ErosionNoiseActivated ? ErosionNoiseBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)] : 0);
     float peaksAndValleysNoise = (PeaksAndValleysNoiseActivated ? PeaksAndValleysNoiseBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)] : 0);
@@ -87,11 +93,12 @@ void TerrainDensity (uint3 id : SV_DispatchThreadID)
 
     // Cave Carve Calculation
     float caveCarve = 1.0 - smoothstep(-0.4, 0.0, largeCaveNoise);
+    // float smallCaveCarve =  1.0 + smoothstep(0.0, 0.2, caveDetail1Noise * caveDetail1Noise + caveDetail2Noise * caveDetail2Noise);
     // Terrain Density Calculation
     float currentHeight = ((height * adjustedBaseTerrainHeight) + (terracing ? (id.y%terraceHeight) : 0));
     float terrainDensity = currentHeight - (ChunkPos.y + id.y);
     // Cave Fade
-    float surfaceFade = saturate((terrainDensity) / 180.0);
+    float surfaceFade = saturate((terrainDensity) / 60.0);
     float caveFade = saturate((terrainDensity - ChunkSize) / 70.0);
     float finalDensity = LargeCaveNoiseActivated ? terrainDensity + ((ChunkPos.y + id.y) * caveFade) - (caveCarve * height * surfaceFade) : terrainDensity;
     // World Depth Fade

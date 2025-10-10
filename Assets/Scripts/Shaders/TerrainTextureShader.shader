@@ -67,7 +67,7 @@ Shader "Custom/TerrainTextureShader"
             // The vertex shader definition with properties defined in the Varyings
             // structure. The type of the vert function must match the type (struct)
             // that it returns.
-            #define MAX_TEXTURES 10
+            #define MAX_TEXTURES 20
             CBUFFER_START(UnityPerMaterial)
                 float _Scale;
                 int _LayerCount;
@@ -132,11 +132,50 @@ Shader "Custom/TerrainTextureShader"
                 if(height < _LowestStartHeight) height = _LowestStartHeight;
                 if(height > _GreatestEndHeight) height = _GreatestEndHeight;
 
-                [unroll]
+                // [unroll]
+                // for(int i = 0; i < _LayerCount; i++) {
+                //     float heightWeight = smoothstep(_HeightStartsArray[i], _HeightEndsArray[i], height) * (i != _LayerCount - 1 ? (1 - smoothstep(_HeightStartsArray[i+1], _HeightEndsArray[i+1], height)) : 1);
+                //     float slopeWeight = smoothstep(_SlopeStartsArray[i], _SlopeEndsArray[i], slope) * (i != _LayerCount - 1 ? (1 - smoothstep(_SlopeStartsArray[i+1], _SlopeEndsArray[i+1], slope)) : 1);
+                //     float weight = 0;
+                //     if(_UseHeightsArray[i] == 1 || _UseSlopesArray[i] == 1) {
+                //         if(_UseHeightsArray[i] == 1 && _UseSlopesArray[i] == 1) {
+                //             weight = heightWeight * slopeWeight;
+                //         }
+                //         else if(_UseHeightsArray[i] == 1) {
+                //             weight = heightWeight;
+                //         }
+                //         else {
+                //             weight = slopeWeight;
+                //         }
+                //     }
+
+                //     if(weight > 0.001) {
+                //         float4 triplanarSample = TriplanarSample(_TextureArray, sampler_TextureArray, IN.worldPos, normal, _Scale, i);
+                //         albedo += triplanarSample * weight;
+                //         totalWeight += weight;
+                //     }
+                // }
                 for(int i = 0; i < _LayerCount; i++) {
-                    float heightWeight = smoothstep(_HeightStartsArray[i], _HeightEndsArray[i], height) * (i != _LayerCount - 1 ? (1 - smoothstep(_HeightStartsArray[i+1], _HeightEndsArray[i+1], height)) : 1);
-                    float slopeWeight = smoothstep(_SlopeStartsArray[i], _SlopeEndsArray[i], slope) * (i != _LayerCount - 1 ? (1 - smoothstep(_SlopeStartsArray[i+1], _SlopeEndsArray[i+1], slope)) : 1);
-                    float weight = (_UseHeightsArray[i] == 1 ? heightWeight : 1) * (_UseSlopesArray[i] == 1 ? slopeWeight : 1);
+                    float heightMid = 0.5 * (_HeightStartsArray[i] + _HeightEndsArray[i]);
+                    float heightHalfWidth = 0.5 * abs(_HeightEndsArray[i] - _HeightStartsArray[i]);
+                    float heightWeight = 1 - abs(height - heightMid) / heightHalfWidth;
+
+                    float slopeMid = 0.5 * (_SlopeStartsArray[i] + _SlopeEndsArray[i]);
+                    float slopeHalfWidth = 0.5 * abs(_SlopeEndsArray[i] - _SlopeStartsArray[i]);
+                    float slopeWeight = 1 - abs(slope - slopeMid) / slopeHalfWidth;
+
+                    float weight = 0;
+                    if(_UseHeightsArray[i] == 1 || _UseSlopesArray[i] == 1) {
+                        if(_UseHeightsArray[i] == 1 && _UseSlopesArray[i] == 1) {
+                            weight = saturate(heightWeight) * saturate(slopeWeight);
+                        }
+                        else if(_UseHeightsArray[i] == 1) {
+                            weight = saturate(heightWeight);
+                        }
+                        else {
+                            weight = saturate(slopeWeight);
+                        }
+                    }
 
                     if(weight > 0.001) {
                         float4 triplanarSample = TriplanarSample(_TextureArray, sampler_TextureArray, IN.worldPos, normal, _Scale, i);

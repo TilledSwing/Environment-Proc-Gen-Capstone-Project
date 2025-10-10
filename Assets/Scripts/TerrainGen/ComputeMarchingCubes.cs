@@ -2,7 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using Unity.Burst;
 using Unity.Collections;
+using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -143,7 +145,7 @@ public class ComputeMarchingCubes : MonoBehaviour
         int densityKernel = terrainDensityComputeShader.FindKernel("TerrainDensity");
 
         List<ComputeBuffer> noiseBuffers = new();
-        
+
         foreach (NoiseGenerator noiseGenerator in terrainDensityData.noiseGenerators)
         {
             // if (!noiseGenerator.activated) continue;
@@ -163,11 +165,17 @@ public class ComputeMarchingCubes : MonoBehaviour
                 terrainDensityComputeShader.SetBuffer(densityKernel, "LargeCaveNoiseBuffer", noiseBuffer);
                 terrainDensityComputeShader.SetTexture(densityKernel, "LargeCaveCurveTexture", SplineCurveFunctions.CurveToTexture(noiseGenerator.valueCurve));
             }
-            if (noiseGenerator.noiseGeneratorType == NoiseGenerator.NoiseGeneratorType.CaveDetailGenerator)
+            if (noiseGenerator.noiseGeneratorType == NoiseGenerator.NoiseGeneratorType.CaveDetail1Generator)
             {
-                terrainDensityComputeShader.SetBool("CaveDetailNoiseActivated", noiseGenerator.activated);
-                terrainDensityComputeShader.SetBuffer(densityKernel, "CaveDetailNoiseBuffer", noiseBuffer);
-                terrainDensityComputeShader.SetTexture(densityKernel, "CaveDetailCurveTexture", SplineCurveFunctions.CurveToTexture(noiseGenerator.valueCurve));
+                terrainDensityComputeShader.SetBool("CaveDetail1NoiseActivated", noiseGenerator.activated);
+                terrainDensityComputeShader.SetBuffer(densityKernel, "CaveDetail1NoiseBuffer", noiseBuffer);
+                terrainDensityComputeShader.SetTexture(densityKernel, "CaveDetail1CurveTexture", SplineCurveFunctions.CurveToTexture(noiseGenerator.valueCurve));
+            }
+            if (noiseGenerator.noiseGeneratorType == NoiseGenerator.NoiseGeneratorType.CaveDetail2Generator)
+            {
+                terrainDensityComputeShader.SetBool("CaveDetail2NoiseActivated", noiseGenerator.activated);
+                terrainDensityComputeShader.SetBuffer(densityKernel, "CaveDetail2NoiseBuffer", noiseBuffer);
+                terrainDensityComputeShader.SetTexture(densityKernel, "CaveDetail2CurveTexture", SplineCurveFunctions.CurveToTexture(noiseGenerator.valueCurve));
             }
             if (noiseGenerator.noiseGeneratorType == NoiseGenerator.NoiseGeneratorType.ContinentalnessGenerator)
             {
@@ -207,7 +215,8 @@ public class ComputeMarchingCubes : MonoBehaviour
         terrainDensityComputeShader.SetBuffer(densityKernel, "HeightsBuffer", heightsBuffer);
         terrainDensityComputeShader.Dispatch(densityKernel, Mathf.CeilToInt(terrainDensityData.width / 4f) + 1, Mathf.CeilToInt(terrainDensityData.width / 4f) + 1, Mathf.CeilToInt(terrainDensityData.width / 4f) + 1);
 
-        foreach (ComputeBuffer noiseBuffer in noiseBuffers) {
+        foreach (ComputeBuffer noiseBuffer in noiseBuffers)
+        {
             ComputeBufferPoolManager.Instance.ReturnComputeBuffer("NoiseBuffer", noiseBuffer);
         }
 
@@ -387,14 +396,14 @@ public class ComputeMarchingCubes : MonoBehaviour
 
         // if (lodData.lod == currentLOD)
         // {
-            meshFilter.mesh = mesh;
-            meshCollider.sharedMesh = mesh;
-            mesh.bounds = new Bounds(chunkPos + (new Vector3(0.5f, 0.5f, 0.5f) * terrainDensityData.width), Vector3.one * terrainDensityData.width);
+        meshFilter.mesh = mesh;
+        meshCollider.sharedMesh = mesh;
+        mesh.bounds = new Bounds(chunkPos + (new Vector3(0.5f, 0.5f, 0.5f) * terrainDensityData.width), Vector3.one * terrainDensityData.width);
 
-            if (!terraforming)
-            {
-                assetSpawner.SpawnAssets();
-            }
+        if (!terraforming)
+        {
+            assetSpawner.SpawnAssets();
+        }
         // }
     }
     // Releases height buffers when the application is closed/stopped
@@ -420,7 +429,49 @@ public class ComputeMarchingCubes : MonoBehaviour
         if (terrainDensityData == null || gameObject.GetComponent<MeshRenderer>().enabled == false) return; // still not found
         Gizmos.DrawWireCube(chunkPos + (new Vector3(0.5f, 0.5f, 0.5f) * terrainDensityData.width), Vector3.one * terrainDensityData.width);
     }
-    
+
+    void Marchingcubes()
+    {
+        int marchingKernel = marchingCubesComputeShader.FindKernel("MarchingCubes");
+
+        marchingCubesComputeShader.SetBuffer(marchingKernel, "HeightsBuffer", heightsBuffer);
+        ComputeBuffer vertexBuffer = ComputeBufferPoolManager.Instance.GetComputeBuffer("VertexBuffer", terrainDensityData.width * terrainDensityData.width * terrainDensityData.width, sizeof(float) * 18, ComputeBufferType.Append);
+        marchingCubesComputeShader.SetBuffer(marchingKernel, "VertexBuffer", vertexBuffer);
+
+        marchingCubesComputeShader.SetInt("ChunkSize", terrainDensityData.width);
+        marchingCubesComputeShader.SetVector("ChunkPos", (Vector3)chunkPos);
+        marchingCubesComputeShader.SetFloat("isolevel", terrainDensityData.isolevel);
+        marchingCubesComputeShader.SetBool("lerpToggle", terrainDensityData.lerp);
+        marchingCubesComputeShader.SetInt("Resolution", ChunkGenNetwork.Instance.resolution);
+
+        vertexBuffer.SetCounterValue(0);
+        marchingCubesComputeShader.Dispatch(marchingKernel, Mathf.CeilToInt(terrainDensityData.width / ChunkGenNetwork.Instance.resolution / 4f), Mathf.CeilToInt(terrainDensityData.width / ChunkGenNetwork.Instance.resolution / 4f), Mathf.CeilToInt(terrainDensityData.width / ChunkGenNetwork.Instance.resolution / 4f));
+
+        ComputeBuffer vertexCountBuffer = ComputeBufferPoolManager.Instance.GetComputeBuffer("VertexCountBuffer", 1, sizeof(int), ComputeBufferType.Raw);
+        ComputeBuffer.CopyCount(vertexBuffer, vertexCountBuffer, 0);
+
+
+    }
+
+    [BurstCompile]
+    private struct MarchingCubesJob : IJobParallelFor
+    {
+        public NativeArray<Vertex> vertexArray;
+        [ReadOnly] public NativeArray<float> heightsArray;
+        public int chunkSize;
+        public int3 chunkPos;
+        public float isolevel;
+        public bool lerpToggle;
+        public int Resolution;
+        public void Execute(int index)
+        {
+
+        }
+
+        // int FlattenIndex(float3 id, int size) {
+        //     return id.x * (size + 1) * (size + 1) + id.y * (size + 1) + id.z;
+        // }
+    }
     // Old mesh setup code saved for reference
 
     // public void SetMeshValues(int vertexCount, Triangle[] vertexArray, bool terraforming)

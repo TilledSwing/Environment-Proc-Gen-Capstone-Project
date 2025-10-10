@@ -44,3 +44,5 @@ MonoBehaviour:
       slopeRange:
         slopeStart: 0
         slopeEnd: 0
+  textureFormat: 4
+  maxTextureSize: 1024

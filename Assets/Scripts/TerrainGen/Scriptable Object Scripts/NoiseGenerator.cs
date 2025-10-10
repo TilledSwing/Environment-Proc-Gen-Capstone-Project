@@ -46,12 +46,13 @@ public class NoiseGenerator : ScriptableObject
     {
         BaseGenerator = 0,
         LargeCaveGenerator = 1,
-        CaveDetailGenerator = 2,
-        ContinentalnessGenerator = 3,
-        TemperatureMapGenerator = 4,
-        HumidityMapGenerator = 5,
-        PeaksAndValleysMapGenerator = 6,
-        ErosionMapGenerator = 7
+        CaveDetail1Generator = 2,
+        CaveDetail2Generator = 3,
+        ContinentalnessGenerator = 4,
+        TemperatureMapGenerator = 5,
+        HumidityMapGenerator = 6,
+        PeaksAndValleysMapGenerator = 7,
+        ErosionMapGenerator = 8
     }
     public enum fnl_noise_dimension
     {

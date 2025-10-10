@@ -10,30 +10,37 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 706a95b2ea676fc44a907f69e74100cb, type: 3}
-  m_Name: CaveDetailNoiseGenerator
+  m_Name: CaveDetail2NoiseGenerator
   m_EditorClassIdentifier: 
-  noiseGeneratorType: 2
+  activated: 1
+  valueCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  noiseGeneratorType: 3
   selectedNoiseDimension: 1
   noiseDimension: 1
   selectedNoiseType: 0
   noiseType: 0
   selectedNoiseFractalType: 1
-  noiseFractalType: 1
+  noiseFractalType: 0
   selectedRotationType3D: 0
   rotationType3D: 0
-  noiseSeed: 0
+  noiseSeed: 18963
   noiseFractalOctaves: 5
   noiseFractalLacunarity: 2
   noiseFractalGain: 0.5
   fractalWeightedStrength: 0
-  noiseFrequency: 0.02
+  noiseFrequency: 0.004
   domainWarpToggle: 1
   selectedDomainWarpType: 0
   domainWarpType: 0
   selectedDomainWarpFractalType: 0
   domainWarpFractalType: 0
   domainWarpAmplitude: 50
-  domainWarpSeed: 0
+  domainWarpSeed: 72909
   domainWarpFractalOctaves: 5
   domainWarpFractalLacunarity: 2
   domainWarpFractalGain: 0.5
@@ -44,4 +51,10 @@ MonoBehaviour:
   cellularReturnType: 1
   cellularJitter: 1
   noiseScale: 1
-  width: 24
+  noiseTypeOptions: 000000000100000002000000030000000400000005000000
+  rotationType3DOptions: 000000000100000002000000
+  noiseFractalTypeOptions: 00000000010000000200000003000000
+  domainWarpTypeOptions: 000000000100000002000000
+  domainWarpFractalTypeOptions: 000000000400000005000000
+  cellularDistanceFunctionOptions: 00000000010000000200000003000000
+  cellularReturnTypeOptions: 00000000010000000200000003000000040000000500000006000000

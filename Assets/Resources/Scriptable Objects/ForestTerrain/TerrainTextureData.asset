@@ -15,13 +15,13 @@ MonoBehaviour:
   biomeTextureConfigs:
   - biomeName: Generic Biome
     textureScale: 0.2
-    MAX_TEXTURE_LAYERS: 10
+    MAX_TEXTURE_LAYERS: 20
     biomeTextures:
     - texture: {fileID: 2800000, guid: b4a372abad8966048a3a8e57feedcc63, type: 3}
       useHeightRange: 1
       heightRange:
-        heightStart: -245
-        heightEnd: -235
+        heightStart: -500
+        heightEnd: -230
       useSlopeRange: 0
       slopeRange:
         slopeStart: 0
@@ -39,7 +39,7 @@ MonoBehaviour:
       useHeightRange: 1
       heightRange:
         heightStart: -15
-        heightEnd: 15
+        heightEnd: 25
       useSlopeRange: 0
       slopeRange:
         slopeStart: 0
@@ -79,4 +79,6 @@ MonoBehaviour:
       useSlopeRange: 0
       slopeRange:
         slopeStart: 0
-        slopeEnd: 0
+        slopeEnd: 360
+  textureFormat: 4
+  maxTextureSize: 1024

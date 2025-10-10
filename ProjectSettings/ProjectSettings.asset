@@ -819,6 +819,7 @@ PlayerSettings:
   webWasm2023: 0
   scriptingDefineSymbols:
     Standalone: STEAMWORKS_NET;FISHNET;FISHNET_V4
+    WebGL: STEAMWORKS_NET
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:

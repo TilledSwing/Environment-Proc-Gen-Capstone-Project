@@ -10,6 +10,8 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using UnityEngine.UI;
+using UnityEngine.UI.Extensions;
 
 public class ChunkGenNetwork : MonoBehaviour
 {
@@ -60,6 +62,17 @@ public class ChunkGenNetwork : MonoBehaviour
     // Material References
     public Material terrainMaterial;
     public Material waterMaterial;
+    // Texture Arrays
+    public Texture2DArray textureArray;
+    public float[] useHeights;
+    public float[] heightStarts;
+    public float[] heightEnds;
+    public float[] useSlopes;
+    public float[] slopeStarts;
+    public float[] slopeEnds;
+    // Texture Window Stuff
+    public GameObject textureWindow;
+    public GameObject textureSettingsTab;
     // Chunk Variables
     public Dictionary<Vector3, TerrainChunk> chunkDictionary = new();
     public List<TerrainChunk> chunksVisibleLastUpdate = new();
@@ -128,11 +141,11 @@ public class ChunkGenNetwork : MonoBehaviour
         lightingBlockerRenderer.enabled = false;
         TextureSetup();
         // Set seeds
-        foreach (NoiseGenerator noiseGenerator in terrainDensityData.noiseGenerators)
-        {
-            noiseGenerator.noiseSeed = UnityEngine.Random.Range(0, 100000);
-            noiseGenerator.domainWarpSeed = UnityEngine.Random.Range(0, 100000);
-        }
+        // foreach (NoiseGenerator noiseGenerator in terrainDensityData.noiseGenerators)
+        // {
+        //     noiseGenerator.noiseSeed = UnityEngine.Random.Range(0, 100000);
+        //     noiseGenerator.domainWarpSeed = UnityEngine.Random.Range(0, 100000);
+        // }
         // Fog Shader Inits
         fogRenderPassFeature = rendererData.rendererFeatures.Find(f => f is FogRenderPassFeature) as FogRenderPassFeature;
         fogMat.SetFloat("_fogOffset", maxViewDst - 20f);
@@ -178,14 +191,14 @@ public class ChunkGenNetwork : MonoBehaviour
         viewerPos = viewer.position;
         lightingBlocker.transform.position = new Vector3(viewerPos.x, 0, viewerPos.z);
 
-        // Darker fog at lower world heights
-        float depthFactor = Mathf.Clamp01(-viewerPos.y * 0.01f);
-        Color currentFog = Color.Lerp(fogColor, darkFogColor, depthFactor);
-        fogMat.SetColor("_fogColor", currentFog);
-
         // Update chunks
         if ((viewerPos - lastUpdateViewerPos).sqrMagnitude > updateDistanceThreshold * updateDistanceThreshold && initialLoadComplete)
         {
+            // Darker fog at lower world heights
+            float depthFactor = Mathf.Clamp01(-viewerPos.y * 0.01f);
+            Color currentFog = Color.Lerp(fogColor, darkFogColor, depthFactor);
+            fogMat.SetColor("_fogColor", currentFog);
+
             UpdateVisibleChunks();
             lastUpdateViewerPos = viewerPos;
         }
@@ -561,27 +574,27 @@ public class ChunkGenNetwork : MonoBehaviour
 
     void TextureSetup()
     {
-        foreach (TerrainTextureData.BiomeTextureConfigs biomeTextureConfig in terrainTextureData.biomeTextureConfigs)
+        foreach (BiomeTextureConfigs biomeTextureConfig in terrainTextureData.biomeTextureConfigs)
         {
             float textureScale = biomeTextureConfig.textureScale;
             int textureWidth = biomeTextureConfig.biomeTextures[0].texture.width;
             int textureHeight = biomeTextureConfig.biomeTextures[0].texture.height;
-            int textureCount = biomeTextureConfig.biomeTextures.Length;
+            int textureCount = biomeTextureConfig.MAX_TEXTURE_LAYERS;
             TextureFormat textureFormat = biomeTextureConfig.biomeTextures[0].texture.format;
-            Texture2DArray textureArray = new(textureWidth, textureHeight, textureCount, textureFormat, true, false);
+            textureArray = new(textureWidth, textureHeight, textureCount, textureFormat, true, false);
             textureArray.wrapMode = TextureWrapMode.Repeat;
             textureArray.filterMode = FilterMode.Bilinear;
-            float[] useHeights = new float[biomeTextureConfig.MAX_TEXTURE_LAYERS];
-            float[] heightStarts = new float[biomeTextureConfig.MAX_TEXTURE_LAYERS];
-            float[] heightEnds = new float[biomeTextureConfig.MAX_TEXTURE_LAYERS];
-            float[] useSlopes = new float[biomeTextureConfig.MAX_TEXTURE_LAYERS];
-            float[] slopeStarts = new float[biomeTextureConfig.MAX_TEXTURE_LAYERS];
-            float[] slopeEnds = new float[biomeTextureConfig.MAX_TEXTURE_LAYERS];
+            useHeights = new float[biomeTextureConfig.MAX_TEXTURE_LAYERS];
+            heightStarts = new float[biomeTextureConfig.MAX_TEXTURE_LAYERS];
+            heightEnds = new float[biomeTextureConfig.MAX_TEXTURE_LAYERS];
+            useSlopes = new float[biomeTextureConfig.MAX_TEXTURE_LAYERS];
+            slopeStarts = new float[biomeTextureConfig.MAX_TEXTURE_LAYERS];
+            slopeEnds = new float[biomeTextureConfig.MAX_TEXTURE_LAYERS];
 
             float lowestStartHeight = float.MaxValue;
             float greatestEndHeight = float.MinValue;
 
-            for (int i = 0; i < biomeTextureConfig.biomeTextures.Length; i++)
+            for (int i = 0; i < biomeTextureConfig.biomeTextures.Count; i++)
             {
                 Graphics.CopyTexture(biomeTextureConfig.biomeTextures[i].texture, 0, textureArray, i);
                 useHeights[i] = biomeTextureConfig.biomeTextures[i].useHeightRange ? 1 : 0;
@@ -596,6 +609,26 @@ public class ChunkGenNetwork : MonoBehaviour
 
                 if (heightEnds[i] > greatestEndHeight)
                     greatestEndHeight = heightEnds[i] - 1;
+                // Initializing texture settings window to currently applied textures
+                GameObject texSettingsTab = Instantiate(textureSettingsTab, textureWindow.transform);
+
+                RawImage texturePreview = texSettingsTab.GetComponentInChildren<RawImage>();
+                texturePreview.texture = biomeTextureConfig.biomeTextures[i].texture;
+
+                Toggle[] toggles = texSettingsTab.GetComponentsInChildren<Toggle>();
+                MinMaxSlider[] sliders = texSettingsTab.GetComponentsInChildren<MinMaxSlider>();
+
+                Toggle heightToggle = toggles[0];
+                heightToggle.isOn = biomeTextureConfig.biomeTextures[i].useHeightRange;
+
+                MinMaxSlider heightRangeSlider = sliders[0];
+                heightRangeSlider.SetValues(biomeTextureConfig.biomeTextures[i].heightRange.heightStart, biomeTextureConfig.biomeTextures[i].heightRange.heightEnd, -maxWorldYChunks * terrainDensityData.width, maxWorldYChunks * terrainDensityData.width);
+
+                Toggle slopeToggle = toggles[1];
+                slopeToggle.isOn = biomeTextureConfig.biomeTextures[i].useSlopeRange;
+
+                MinMaxSlider slopeRangeSlider = sliders[1];
+                slopeRangeSlider.SetValues(biomeTextureConfig.biomeTextures[i].slopeRange.slopeStart, biomeTextureConfig.biomeTextures[i].slopeRange.slopeEnd, 0, 360);
             }
             // textureArray.Apply(false);
             terrainMaterial.SetFloat("_Scale", textureScale);
@@ -606,7 +639,7 @@ public class ChunkGenNetwork : MonoBehaviour
             terrainMaterial.SetFloatArray("_UseSlopesArray", useSlopes);
             terrainMaterial.SetFloatArray("_SlopeStartsArray", slopeStarts);
             terrainMaterial.SetFloatArray("_SlopeEndsArray", slopeEnds);
-            terrainMaterial.SetInt("_LayerCount", biomeTextureConfig.biomeTextures.Length);
+            terrainMaterial.SetInt("_LayerCount", biomeTextureConfig.biomeTextures.Count);
             terrainMaterial.SetFloat("_LowestStartHeight", lowestStartHeight);
             terrainMaterial.SetFloat("_GreatestEndHeight", greatestEndHeight);
         }

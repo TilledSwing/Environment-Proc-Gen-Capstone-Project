@@ -118,7 +118,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  noiseGeneratorType: 7
+  noiseGeneratorType: 8
   selectedNoiseDimension: 1
   noiseDimension: 0
   selectedNoiseType: 0
@@ -127,7 +127,7 @@ MonoBehaviour:
   noiseFractalType: 1
   selectedRotationType3D: 0
   rotationType3D: 0
-  noiseSeed: 93666
+  noiseSeed: 30705
   noiseFractalOctaves: 3
   noiseFractalLacunarity: 2
   noiseFractalGain: 0.5
@@ -139,7 +139,7 @@ MonoBehaviour:
   selectedDomainWarpFractalType: 0
   domainWarpFractalType: 4
   domainWarpAmplitude: 30
-  domainWarpSeed: 12317
+  domainWarpSeed: 62666
   domainWarpFractalOctaves: 5
   domainWarpFractalLacunarity: 2
   domainWarpFractalGain: 0.5

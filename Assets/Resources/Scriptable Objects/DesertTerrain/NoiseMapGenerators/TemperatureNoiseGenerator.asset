@@ -12,7 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 706a95b2ea676fc44a907f69e74100cb, type: 3}
   m_Name: TemperatureNoiseGenerator
   m_EditorClassIdentifier: 
-  noiseGeneratorType: 4
+  activated: 0
+  valueCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  noiseGeneratorType: 5
   selectedNoiseDimension: 1
   noiseDimension: 0
   selectedNoiseType: 0
@@ -44,4 +51,10 @@ MonoBehaviour:
   cellularReturnType: 1
   cellularJitter: 1
   noiseScale: 0.6
-  width: 24
+  noiseTypeOptions: 000000000100000002000000030000000400000005000000
+  rotationType3DOptions: 000000000100000002000000
+  noiseFractalTypeOptions: 00000000010000000200000003000000
+  domainWarpTypeOptions: 000000000100000002000000
+  domainWarpFractalTypeOptions: 000000000400000005000000
+  cellularDistanceFunctionOptions: 00000000010000000200000003000000
+  cellularReturnTypeOptions: 00000000010000000200000003000000040000000500000006000000

@@ -18,7 +18,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ba042f300ebfc12449574e9980101924, type: 2}
   - {fileID: 11400000, guid: 6c79ac92c203a2949969a902faee120e, type: 2}
   - {fileID: 11400000, guid: 3f2cdb4d1242061499f4422dd41cec60, type: 2}
-  width: 32
+  - {fileID: 11400000, guid: 83ad745993e8f654cbcc357070908a3f, type: 2}
+  - {fileID: 11400000, guid: 0ee869af2d2cd334cba5a43c734a878f, type: 2}
+  width: 24
   height: 200
   isolevel: 0.5
   waterLevel: 30

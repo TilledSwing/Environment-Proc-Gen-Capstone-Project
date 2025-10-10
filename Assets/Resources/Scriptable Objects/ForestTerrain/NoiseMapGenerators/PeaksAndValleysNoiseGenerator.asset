@@ -63,9 +63,9 @@ MonoBehaviour:
       outWeight: 1
     - serializedVersion: 3
       time: 0.50422484
-      value: 0.12377037
-      inSlope: 1.1517088
-      outSlope: 1.1517088
+      value: 0.1257235
+      inSlope: 2.119672
+      outSlope: 2.119672
       tangentMode: 0
       weightedMode: 0
       inWeight: 0.33333334
@@ -73,8 +73,8 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 0.5159701
       value: 0.19823927
-      inSlope: 2.5037525
-      outSlope: 2.5037525
+      inSlope: 6.8233304
+      outSlope: 6.8233304
       tangentMode: 0
       weightedMode: 0
       inWeight: 0.40332422
@@ -82,12 +82,12 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 0.53537333
       value: 0.44233742
-      inSlope: 1.4130553
-      outSlope: 1.4130553
+      inSlope: 4.5406904
+      outSlope: 4.5406904
       tangentMode: 0
       weightedMode: 0
       inWeight: 0.33333334
-      outWeight: 1
+      outWeight: 0.46792078
     - serializedVersion: 3
       time: 0.60073847
       value: 0.7276756
@@ -127,7 +127,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  noiseGeneratorType: 6
+  noiseGeneratorType: 7
   selectedNoiseDimension: 1
   noiseDimension: 0
   selectedNoiseType: 0
@@ -136,7 +136,7 @@ MonoBehaviour:
   noiseFractalType: 1
   selectedRotationType3D: 0
   rotationType3D: 0
-  noiseSeed: 41747
+  noiseSeed: 89614
   noiseFractalOctaves: 3
   noiseFractalLacunarity: 2
   noiseFractalGain: 0.5
@@ -148,7 +148,7 @@ MonoBehaviour:
   selectedDomainWarpFractalType: 0
   domainWarpFractalType: 0
   domainWarpAmplitude: 1
-  domainWarpSeed: 95977
+  domainWarpSeed: 11226
   domainWarpFractalOctaves: 5
   domainWarpFractalLacunarity: 2
   domainWarpFractalGain: 0.5

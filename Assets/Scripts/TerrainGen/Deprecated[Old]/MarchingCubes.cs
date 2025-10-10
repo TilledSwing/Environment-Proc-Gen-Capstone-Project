@@ -135,7 +135,7 @@ public class MarchingCubes : MonoBehaviour
             largeCaveDomainWarp = domainWarpGenerator;
             largeCaveNoiseScale = noiseGenerator.noiseScale;
         }
-        if (noiseGenerator.noiseGeneratorType == NoiseGenerator.NoiseGeneratorType.CaveDetailGenerator)
+        if (noiseGenerator.noiseGeneratorType == NoiseGenerator.NoiseGeneratorType.CaveDetail1Generator)
         {
             caveDetailNoiseGenerator = generator;
             caveDetailDomainWarp = domainWarpGenerator;

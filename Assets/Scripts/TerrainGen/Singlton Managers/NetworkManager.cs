@@ -19,7 +19,7 @@ public class NetworkManager : NetworkBehaviour
 
         ChunkGenNetwork.Instance.viewer = GameObject.Find("Player(Clone)").transform;
         ChunkGenNetwork.Instance.SetFogActive(true);
-        ChunkGenNetwork.Instance.objectiveCanvas.SetActive(true);
+        // ChunkGenNetwork.Instance.objectiveCanvas.SetActive(true);
         ChunkGenNetwork.Instance.chatContainer.SetActive(true);
         ChunkGenNetwork.Instance.lobbyContainer.SetActive(true);
     }
