@@ -86,8 +86,9 @@ public class ChunkGenNetwork : MonoBehaviour
     public bool isLoadingAssetInstantiations = false;
     // Data structure pools
     public bool navMeshCreated = false;
+    public bool navMeshNeedsUpdate = false;
+    private GlobalNavMeshUpdater navMeshUpdater;
     public bool allChunksGenerated = false;
-    public NavMeshSurface navMeshSurface;
     public class ReadbackRequest
     {
         public ComputeBuffer buffer;
@@ -134,8 +135,8 @@ public class ChunkGenNetwork : MonoBehaviour
         fogRenderPassFeature = rendererData.rendererFeatures.Find(f => f is FogRenderPassFeature) as FogRenderPassFeature;
         fogMat.SetFloat("_fogOffset", maxViewDst - 20f);
         fogMat.SetColor("_fogColor", fogColor);
-        navMeshSurface = gameObject.AddComponent<NavMeshSurface>();
-        navMeshSurface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
+        navMeshUpdater = FindFirstObjectByType<GlobalNavMeshUpdater>();
+
         // terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 100000);
         // terrainDensityData.caveNoiseSeed = UnityEngine.Random.Range(0, 100000);
         // terrainDensityData.domainWarpSeed = UnityEngine.Random.Range(0, 100000);
@@ -177,6 +178,10 @@ public class ChunkGenNetwork : MonoBehaviour
     }
     void Update()
     {
+        if (navMeshUpdater == null)
+        {
+            navMeshUpdater = FindFirstObjectByType<GlobalNavMeshUpdater>();
+        }
         // Position updates
         viewerPos = viewer.position;
         lightingBlocker.transform.position = new Vector3(viewerPos.x, 0, viewerPos.z);
@@ -200,31 +205,44 @@ public class ChunkGenNetwork : MonoBehaviour
         {
             StartCoroutine(LoadAssetInstantiationsOverTime());
         }
-        
-        if (initialLoadComplete && !hasPendingMeshInits && !isLoadingMeshes && !hasPendingAssetInstantiations &&
-            !isLoadingAssetInstantiations && !hasPendingReadbacks && !isLoadingReadbacks && !isLoadingChunks)
+        if (navMeshNeedsUpdate || !navMeshCreated)
         {
-            bool allChunksReady = true;
 
-            foreach (KeyValuePair<Vector3, TerrainChunk> entry in chunkDictionary)
+            if (initialLoadComplete && !hasPendingMeshInits && !isLoadingMeshes && !hasPendingAssetInstantiations &&
+                !isLoadingAssetInstantiations && !hasPendingReadbacks && !isLoadingReadbacks && !isLoadingChunks && navMeshUpdater != null)
             {
-                if (entry.Value.marchingCubes == null ||
-                    entry.Value.marchingCubes.meshFilter == null ||
-                    entry.Value.marchingCubes.meshFilter.mesh == null ||
-                    entry.Value.marchingCubes.initialLoadComplete == false)
+                bool allChunksReady = true;
+                foreach (KeyValuePair<Vector3, TerrainChunk> entry in chunkDictionary)
                 {
-                    allChunksReady = false;
-                    break; // stop checking, at least one isn’t done
+                    var chunk = entry.Value;
+                    if (chunk.marchingCubes == null ||
+                        chunk.marchingCubes.meshFilter == null ||
+                        chunk.marchingCubes.meshFilter.mesh == null ||
+                        chunk.marchingCubes.initialLoadComplete == false ||
+                        chunk.marchingCubes.meshFilter.mesh == null)
+                    {
+                        allChunksReady = false;
+                        break; // stop checking, at least one isn’t done
+                    }
                 }
-            }
+                if (allChunksReady && navMeshNeedsUpdate && navMeshCreated)
+                {
+                    Debug.Log("Updating nav mesh");
+                    Bounds updatedRegion = CalculateLoadedChunkBounds(); // explained below
+                    StartCoroutine(navMeshUpdater.RebuildNavMeshAsync(updatedRegion, chunkDictionary));
+                    navMeshNeedsUpdate = false;
+                    return;
+                }
 
-            if (allChunksReady && !navMeshCreated)
-            {
-                Debug.Log("All chunks have been generated, making nav mesh");
-                navMeshSurface.BuildNavMesh();
-                navMeshCreated = true;
-            }
+                if (allChunksReady && !navMeshCreated)
+                {
+                    Debug.Log("All chunks have been generated, making nav mesh");
+                    Bounds updatedRegion = CalculateLoadedChunkBounds(); // explained below
+                    StartCoroutine(navMeshUpdater.RebuildNavMeshAsync(updatedRegion, chunkDictionary));
+                    navMeshCreated = true;
+                }
 
+            }
         }
     }
     /// <summary>
@@ -300,7 +318,7 @@ public class ChunkGenNetwork : MonoBehaviour
                             TerrainChunk chunk = new TerrainChunk(viewedChunkCoord, chunkSize, GameObject.Find("ChunkParent").transform, terrainDensityData, assetSpawnData, terrainTextureData,
                                                          marchingCubesComputeShader, terrainDensityComputeShader, terrainNoiseComputeShader, terraformComputeShader,
                                                          terrainMaterial, waterMaterial, initialLoadComplete);
-                            navMeshCreated = false;
+                            navMeshNeedsUpdate = true;
                             chunkDictionary.Add(viewedChunkCoord, chunk);
                             chunk.UpdateChunk(maxViewDst, terrainDensityData.width);
 
@@ -404,7 +422,7 @@ public class ChunkGenNetwork : MonoBehaviour
                                             terraformComputeShader,
                                             terrainMaterial, waterMaterial, initialLoadComplete);
                 chunkDictionary.Add(coord, chunk);
-                navMeshCreated = false;
+                navMeshNeedsUpdate = true;
                 chunk.UpdateChunk(maxViewDst, chunkSize);
                 if (chunk.IsVisible())
                 {
@@ -507,7 +525,7 @@ public class ChunkGenNetwork : MonoBehaviour
 
             // if (meshBatchCounter % 2 == 0)
             // {
-                yield return new WaitForEndOfFrame();
+            yield return new WaitForEndOfFrame();
             // }
         }
 
@@ -575,7 +593,32 @@ public class ChunkGenNetwork : MonoBehaviour
         chunkDictionary.Clear();
         fogRenderPassFeature.SetActive(false);
     }
+    Bounds CalculateLoadedChunkBounds()
+    {
+        bool initialized = false;
+        Bounds total = new Bounds();
 
+        foreach (var kvp in chunkDictionary)
+        {
+            TerrainChunk chunk = kvp.Value;
+            if (chunk?.marchingCubes?.meshFilter?.mesh == null) continue;
+
+            Renderer r = chunk.marchingCubes.meshFilter.GetComponent<Renderer>();
+            if (r == null) continue;
+
+            if (!initialized)
+            {
+                total = r.bounds;
+                initialized = true;
+            }
+            else
+            {
+                total.Encapsulate(r.bounds);
+            }
+        }
+
+        return total;
+    }
     void TextureSetup()
     {
         foreach (TerrainTextureData.BiomeTextureConfigs biomeTextureConfig in terrainTextureData.biomeTextureConfigs)
@@ -706,7 +749,7 @@ public class ChunkGenNetwork : MonoBehaviour
             }
             chunk.transform.SetParent(parent);
             Instance.chunkHideQueue.Enqueue(this);
-                   
+
             SetVisible(false);
         }
         /// <summary>
@@ -763,22 +806,7 @@ public class ChunkGenNetwork : MonoBehaviour
                     }
                 }
             }
-            // if (marchingCubes.initialLoadComplete)
-            // {
-            //     navMeshSurface = chunk.AddComponent<NavMeshSurface>();
-            //     navMeshSurface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
-            //     navMeshSurface.collectObjects = CollectObjects.Children;
-            //     navMeshSurface.overrideVoxelSize = true;
-            //     navMeshSurface.voxelSize = 0.1f; // smaller = more detailed mesh
 
-                
-            //     // Set max slope dynamically
-            //     var settings = NavMesh.GetSettingsByID(navMeshSurface.agentTypeID);
-            //     settings.agentSlope = 60f; // allow steeper terrain
-
-            //     navMeshSurface.BuildNavMesh();
-            //     Debug.Log("Creating the nav mesh");
-            //     }
         }
         /// <summary>
         /// Check chunk visibility
@@ -792,3 +820,7 @@ public class ChunkGenNetwork : MonoBehaviour
         }
     }
 }
+
+
+
+

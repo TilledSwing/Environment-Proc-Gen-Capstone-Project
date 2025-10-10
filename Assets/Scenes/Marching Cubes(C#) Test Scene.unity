@@ -18181,6 +18181,7 @@ GameObject:
   - component: {fileID: 1838274977}
   - component: {fileID: 1838274976}
   - component: {fileID: 1838274979}
+  - component: {fileID: 1838274980}
   m_Layer: 0
   m_Name: NetworkChunkManager
   m_TagString: Untagged
@@ -18248,8 +18249,8 @@ MonoBehaviour:
   hasPendingAssetInstantiations: 0
   isLoadingAssetInstantiations: 0
   navMeshCreated: 0
+  navMeshNeedsUpdate: 0
   allChunksGenerated: 0
-  navMeshSurface: {fileID: 0}
 --- !u!4 &1838274977
 Transform:
   m_ObjectHideFlags: 0
@@ -18282,6 +18283,19 @@ MonoBehaviour:
   - {fileID: 1412412059}
   - {fileID: 2062257702}
   - {fileID: 1838910251}
+--- !u!114 &1838274980
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1838274975}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 824ae9696e7161a429d9625587ec266e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  navMeshSurface: {fileID: 0}
 --- !u!1 &1838910247 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4054564025817941334, guid: 4718757af3964764998de4140e2427ac, type: 3}
