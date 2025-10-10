@@ -89,6 +89,10 @@ public class ChunkGenNetwork : MonoBehaviour
     public bool navMeshNeedsUpdate = false;
     private GlobalNavMeshUpdater navMeshUpdater;
     public bool allChunksGenerated = false;
+    private const float navMeshUpdateTime = 5f;
+    private float navMeshGentimer = navMeshUpdateTime;
+
+
     public class ReadbackRequest
     {
         public ComputeBuffer buffer;
@@ -205,6 +209,17 @@ public class ChunkGenNetwork : MonoBehaviour
         {
             StartCoroutine(LoadAssetInstantiationsOverTime());
         }
+
+        navMeshGentimer += Time.deltaTime;
+        if (navMeshGentimer >= navMeshUpdateTime)
+        {
+            updateNavMesh();
+        }
+        
+    }
+
+    public void updateNavMesh()
+    {
         if (navMeshNeedsUpdate || !navMeshCreated)
         {
 
@@ -231,7 +246,7 @@ public class ChunkGenNetwork : MonoBehaviour
                     Bounds updatedRegion = CalculateLoadedChunkBounds(); // explained below
                     StartCoroutine(navMeshUpdater.RebuildNavMeshAsync(updatedRegion, chunkDictionary));
                     navMeshNeedsUpdate = false;
-                    return;
+                    navMeshGentimer = 0f;
                 }
 
                 if (allChunksReady && !navMeshCreated)
@@ -240,8 +255,9 @@ public class ChunkGenNetwork : MonoBehaviour
                     Bounds updatedRegion = CalculateLoadedChunkBounds(); // explained below
                     StartCoroutine(navMeshUpdater.RebuildNavMeshAsync(updatedRegion, chunkDictionary));
                     navMeshCreated = true;
+                    navMeshNeedsUpdate = false;
+                    navMeshGentimer = 0f;
                 }
-
             }
         }
     }
