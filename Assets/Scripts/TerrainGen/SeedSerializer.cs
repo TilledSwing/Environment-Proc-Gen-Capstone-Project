@@ -61,7 +61,6 @@ public struct NoiseGeneratorSettings
     public float cellularJitter;
     // Terrain Values
     public float noiseScale;
-    public int width;
 }
 
 public static class SeedSerializer
@@ -129,7 +128,6 @@ public static class SeedSerializer
             cellularJitter = settings.cellularJitter,
             // Terrain Values
             noiseScale = settings.noiseScale,
-            // width = settings.width
         };
     }
 
@@ -198,7 +196,6 @@ public static class SeedSerializer
         deserializedNoise.cellularJitter = settings.cellularJitter;
         // Terrain Values
         deserializedNoise.noiseScale = settings.noiseScale;
-        // deserializedNoise.width = settings.width;
 
         return deserializedNoise;
     }
