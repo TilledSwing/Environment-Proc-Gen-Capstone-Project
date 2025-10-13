@@ -43,6 +43,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e0308b7739546ab48bd90632b943b010
+    m_Address: Assets/Stylized3DMonster/Monster04/Prefab/Monster04_01.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ed4137f40b25dc043971914560098d30
     m_Address: Assets/Same Gev Dudios/Sci-Fi Robots Bundle/Prefabs/Catherine.prefab
     m_ReadOnly: 0

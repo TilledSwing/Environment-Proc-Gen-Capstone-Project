@@ -392,7 +392,7 @@ public class ComputeMarchingCubes : MonoBehaviour
 
         if (!terraforming)
         {
-            //assetSpawner.SpawnAssets();
+            assetSpawner.SpawnAssets();
         }
         // }
     }

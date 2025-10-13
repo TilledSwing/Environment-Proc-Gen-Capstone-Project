@@ -20,6 +20,7 @@ public class GlobalNavMeshUpdater : MonoBehaviour
                 navMeshSurface = gameObject.AddComponent<NavMeshSurface>();
             }
         }
+        navMeshSurface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
     }
     public IEnumerator RebuildNavMeshAsync(Bounds updateRegion, Dictionary<Vector3, ChunkGenNetwork.TerrainChunk> chunkDictionary)
     {
@@ -55,7 +56,6 @@ public class GlobalNavMeshUpdater : MonoBehaviour
             NavMesh.AddNavMeshData(navMeshSurface.navMeshData);
         }
 
-        // 3️⃣ Start async build just for the updated region
         var settings = navMeshSurface.GetBuildSettings();
         currentOp = NavMeshBuilder.UpdateNavMeshDataAsync(
             navMeshSurface.navMeshData,
@@ -68,6 +68,6 @@ public class GlobalNavMeshUpdater : MonoBehaviour
             yield return null;
 
         isBuilding = false;
-        Debug.Log($"✅ NavMesh async update done for region {updateRegion.center}");
+        Debug.Log($"NavMesh async update done for region {updateRegion.center}");
     }
 }

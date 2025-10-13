@@ -3,35 +3,33 @@ using UnityEngine.AI;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using FishNet.Object;
-using FishNet.Connection;
 using TMPro;
 using UnityEngine.EventSystems;
-using FishNet.Managing.Object;
-using UnityEditor.Build.Pipeline;
-using GameKit.Dependencies.Utilities;
+
 public class EnemySpawner : NetworkBehaviour
 {
-    Camera playerCamera;
-    GameObject enemy;
-    GameObject enemyPrefab;
+    [SerializeField] private GameObject enemy;
+    [SerializeField] private GameObject enemyPrefab;
+
+    private string prefabAdress = "Assets/Stylized3DMonster/Monster04/Prefab/Monster04_01.prefab";
+    private Camera playerCamera;
 
     public override void OnStartClient()
     {
-        playerCamera = Camera.main;
-        loadPrefab();
-        // base.OnStartClient();
-        // if (!base.IsOwner)
-        //     this.enabled = false;
-        // else
-        // {
-        //     playerCamera = Camera.main;
-        //     loadPrefab();
-        // }
+        Debug.Log("SpawnerIsActive");
+        base.OnStartClient();
+        if (IsClientStarted)
+        {
+            playerCamera = Camera.main;
+        }
+        if (IsServerStarted)
+        {
+            loadPrefab();
+        }
     }
 
     void loadPrefab()
     {
-        string prefabAdress = "Assets/Same Gev Dudios/Sci-Fi Robots Bundle/Prefabs/Catherine.prefab";
         Debug.Log("Entering load prefab method");
         Addressables.LoadAssetAsync<GameObject>(prefabAdress).Completed += handle =>
         {
@@ -42,10 +40,6 @@ public class EnemySpawner : NetworkBehaviour
             }
             Debug.Log($"The results of the prefab load is: {handle.Status.ToString()}");
             enemyPrefab = handle.Result;
-
-            // var prefabId = prefabAdress.GetStableHashU16();
-            // SinglePrefabObjects sp = (SinglePrefabObjects)NetworkManager.GetPrefabObjects<SinglePrefabObjects>(prefabId, true);
-            // sp.AddObject(enemyPrefab);
         };
 
         return;
@@ -61,13 +55,27 @@ public class EnemySpawner : NetworkBehaviour
             return;
         }
 
-        if (Input.GetKeyDown(KeyCode.L) && enemyPrefab != null)
-        {
-            SpawnEnemy(playerCamera.transform.forward);
-        }
+        if (IsServerOnlyStarted && Input.GetKeyDown(KeyCode.L))
+            SpawnEnemy();
+        else if (IsClientStarted && Input.GetKeyDown(KeyCode.L))
+            RequestSpawnEnemy();
     }
-    public void SpawnEnemy(Vector3 position)
+
+
+    [Server]
+    public void SpawnEnemy()
     {
+        if (enemyPrefab == null)
+        {
+            Debug.LogWarning("The server failed to load the enemy prefab");
+            return;
+        }
+        if (playerCamera == null)
+        {
+            Debug.LogWarning("Didn't get the player camera on start");
+            return;
+        }
+
         Debug.Log("Spawning Enemy from handler");
         // Load the prefab dynamically by address
         float spawnDist = 2f;
@@ -79,14 +87,12 @@ public class EnemySpawner : NetworkBehaviour
             spawnPos = navHit.position;
             enemy = Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
             ServerManager.Spawn(enemy);
-
-            var ai = enemy.GetComponent<EnemyAIMovement>();
-            if (ai != null)
-            {
-                ai.BeginWandering();
-            }
         }
-        
+    }
 
+    [ServerRpc(RequireOwnership = false)]
+    private void RequestSpawnEnemy()
+    {
+        SpawnEnemy();
     }
 }
