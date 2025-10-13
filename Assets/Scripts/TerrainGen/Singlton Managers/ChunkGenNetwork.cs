@@ -190,15 +190,14 @@ public class ChunkGenNetwork : MonoBehaviour
         // Position updates
         viewerPos = viewer.position;
         lightingBlocker.transform.position = new Vector3(viewerPos.x, 0, viewerPos.z);
+        // Darker fog at lower world heights
+        float depthFactor = Mathf.Clamp01(-viewerPos.y * 0.01f);
+        Color currentFog = Color.Lerp(fogColor, darkFogColor, depthFactor);
+        fogMat.SetColor("_fogColor", currentFog);
 
         // Update chunks
         if ((viewerPos - lastUpdateViewerPos).sqrMagnitude > updateDistanceThreshold * updateDistanceThreshold && initialLoadComplete)
         {
-            // Darker fog at lower world heights
-            float depthFactor = Mathf.Clamp01(-viewerPos.y * 0.01f);
-            Color currentFog = Color.Lerp(fogColor, darkFogColor, depthFactor);
-            fogMat.SetColor("_fogColor", currentFog);
-
             UpdateVisibleChunks();
             lastUpdateViewerPos = viewerPos;
         }

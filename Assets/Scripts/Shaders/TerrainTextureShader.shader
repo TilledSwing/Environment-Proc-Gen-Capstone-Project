@@ -201,17 +201,6 @@ Shader "Custom/TerrainTextureShader"
 
                 // Calculate diffuse lighting
                 float NdotL = max(0, dot(normal, mainLight.direction));
-                float3 mainLightColor = mainLight.color.rgb * NdotL * shadowAttenuation;
-                finalTexture += albedo.rgb * mainLightColor;
-
-                uint maxVisibleLights = 50;
-                UNITY_LOOP for (uint i = 0; i < maxVisibleLights; i++)
-                {
-                    Light light = GetAdditionalLight(i, IN.worldPos);
-                    float3 lightDir = normalize(light.direction);
-                    float NdotLAdd = max(0, dot(normal, lightDir));
-                    finalTexture += albedo.rgb * light.color.rgb * NdotLAdd * pow(light.distanceAttenuation, 0.6);
-                }
 
                 // Optional ambient light (from Unity's shading environment)
                 // Brighter ambient for surface areas
@@ -223,7 +212,19 @@ Shader "Custom/TerrainTextureShader"
                 float ambientStrength = lerp(caveAmbient, surfaceAmbient, saturate((IN.worldPos.y - caveThreshold) * 0.02));
 
                 float shadowBoost = 1.0 - shadowAttenuation;
-                finalTexture += albedo.rgb * ambientStrength * shadowBoost;
+                finalTexture += albedo.rgb * mainLight.color.rgb * ambientStrength * shadowBoost;
+
+                float3 mainLightColor = albedo.rgb * mainLight.color.rgb * NdotL * shadowAttenuation;
+                finalTexture += mainLightColor;
+
+                uint maxVisibleLights = 50;
+                UNITY_LOOP for (uint i = 0; i < maxVisibleLights; i++)
+                {
+                    Light light = GetAdditionalLight(i, IN.worldPos);
+                    float3 lightDir = normalize(light.direction);
+                    float NdotLAdd = max(0, dot(normal, lightDir));
+                    finalTexture += albedo.rgb * light.color.rgb * NdotLAdd * pow(light.distanceAttenuation, 0.6);
+                }
 
                 finalTexture = MixFog(finalTexture, IN.fogFactor);
 

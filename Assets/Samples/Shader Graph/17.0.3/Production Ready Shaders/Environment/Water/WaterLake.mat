@@ -160,6 +160,8 @@ Material:
     - _ZTestGBuffer: 4
     - _ZTestTransparent: 4
     - _ZWrite: 1
+    - _ditherScale: 0.3
+    - _fade: 0.5
     m_Colors:
     - _Color: {r: 0.61089355, g: 0.7412812, b: 0.9056604, a: 0}
     - _DepthColor: {r: 0.14328942, g: 0.19209889, b: 0.26415092, a: 0}
