@@ -51,7 +51,6 @@ public class NetworkManager : NetworkBehaviour
         ChunkGenNetwork.Instance.isLoadingChunkVisibility = false;
         // queueUpdateDistanceThreshold = 15f;
         ChunkGenNetwork.Instance.isLoadingChunks = false;
-        ChunkGenNetwork.Instance.initialLoadComplete = false;
         // Action Queues
         ChunkGenNetwork.Instance.hasPendingMeshInits = false;
         ChunkGenNetwork.Instance.pendingMeshInits = new();
@@ -67,5 +66,9 @@ public class NetworkManager : NetworkBehaviour
         ChunkGenNetwork.Instance.chunksVisible = Mathf.RoundToInt(ChunkGenNetwork.Instance.maxViewDst / ChunkGenNetwork.Instance.chunkSize);
 
         PlayerController.instance.waterLevel = terrainDensityDataNew.waterLevel;
+
+        ChunkGenNetwork.Instance.assetSpawnData.ResetSpawnPoints();
+        ChunkGenNetwork.Instance.initialLoadComplete = false;
+        ChunkGenNetwork.Instance.UpdateVisibleChunks();
     }
 }
