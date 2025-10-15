@@ -161,63 +161,90 @@ public class ComputeMarchingCubes : MonoBehaviour
             {
                 terrainDensityComputeShader.SetBool("BaseNoiseActivated", noiseGenerator.activated);
                 terrainDensityComputeShader.SetBuffer(densityKernel, "BaseNoiseBuffer", noiseBuffer);
-                terrainDensityComputeShader.SetTexture(densityKernel, "BaseCurveTexture", SplineCurveFunctions.ArrayToTexture(SplineCurveFunctions.CurveToArray(noiseGenerator.valueCurve)));
+                if (noiseGenerator.remoteTexture == null)
+                    terrainDensityComputeShader.SetTexture(densityKernel, "BaseCurveTexture", SplineCurveFunctions.ArrayToTexture(SplineCurveFunctions.CurveToArray(noiseGenerator.valueCurve)));
+                else
+                    terrainDensityComputeShader.SetTexture(densityKernel, "BaseCurveTexture", noiseGenerator.remoteTexture);
                 // terrainDensityComputeShader.SetBuffer(densityKernel, "BaseCurveArray", noiseCurveBuffer);
             }
             if (noiseGenerator.noiseGeneratorType == NoiseGenerator.NoiseGeneratorType.LargeCaveGenerator)
             {
                 terrainDensityComputeShader.SetBool("LargeCaveNoiseActivated", noiseGenerator.activated);
                 terrainDensityComputeShader.SetBuffer(densityKernel, "LargeCaveNoiseBuffer", noiseBuffer);
-                terrainDensityComputeShader.SetTexture(densityKernel, "LargeCaveCurveTexture", SplineCurveFunctions.ArrayToTexture(SplineCurveFunctions.CurveToArray(noiseGenerator.valueCurve)));
+                if (noiseGenerator.remoteTexture == null)
+                    terrainDensityComputeShader.SetTexture(densityKernel, "LargeCaveCurveTexture", SplineCurveFunctions.ArrayToTexture(SplineCurveFunctions.CurveToArray(noiseGenerator.valueCurve)));
+                else
+                    terrainDensityComputeShader.SetTexture(densityKernel, "LargeCaveCurveTexture", noiseGenerator.remoteTexture);
                 // terrainDensityComputeShader.SetBuffer(densityKernel, "LargeCaveCurveArray", noiseCurveBuffer);
             }
             if (noiseGenerator.noiseGeneratorType == NoiseGenerator.NoiseGeneratorType.CaveDetail1Generator)
             {
                 terrainDensityComputeShader.SetBool("CaveDetail1NoiseActivated", noiseGenerator.activated);
                 terrainDensityComputeShader.SetBuffer(densityKernel, "CaveDetail1NoiseBuffer", noiseBuffer);
-                terrainDensityComputeShader.SetTexture(densityKernel, "CaveDetail1CurveTexture", SplineCurveFunctions.ArrayToTexture(SplineCurveFunctions.CurveToArray(noiseGenerator.valueCurve)));
+                if (noiseGenerator.remoteTexture == null)
+                    terrainDensityComputeShader.SetTexture(densityKernel, "CaveDetail1CurveTexture", SplineCurveFunctions.ArrayToTexture(SplineCurveFunctions.CurveToArray(noiseGenerator.valueCurve)));
+                else
+                    terrainDensityComputeShader.SetTexture(densityKernel, "CaveDetail1CurveTexture", noiseGenerator.remoteTexture);
                 // terrainDensityComputeShader.SetBuffer(densityKernel, "CaveDetail1CurveArray", noiseCurveBuffer);
             }
             if (noiseGenerator.noiseGeneratorType == NoiseGenerator.NoiseGeneratorType.CaveDetail2Generator)
             {
                 terrainDensityComputeShader.SetBool("CaveDetail2NoiseActivated", noiseGenerator.activated);
                 terrainDensityComputeShader.SetBuffer(densityKernel, "CaveDetail2NoiseBuffer", noiseBuffer);
-                terrainDensityComputeShader.SetTexture(densityKernel, "CaveDetail2CurveTexture", SplineCurveFunctions.ArrayToTexture(SplineCurveFunctions.CurveToArray(noiseGenerator.valueCurve)));
+                if (noiseGenerator.remoteTexture == null)
+                    terrainDensityComputeShader.SetTexture(densityKernel, "CaveDetail2CurveTexture", SplineCurveFunctions.ArrayToTexture(SplineCurveFunctions.CurveToArray(noiseGenerator.valueCurve)));
+                else
+                    terrainDensityComputeShader.SetTexture(densityKernel, "CaveDetail2CurveTexture", noiseGenerator.remoteTexture);
                 // terrainDensityComputeShader.SetBuffer(densityKernel, "CaveDetail2CurveArray", noiseCurveBuffer);
             }
             if (noiseGenerator.noiseGeneratorType == NoiseGenerator.NoiseGeneratorType.ContinentalnessGenerator)
             {
                 terrainDensityComputeShader.SetBool("ContinentalnessNoiseActivated", noiseGenerator.activated);
                 terrainDensityComputeShader.SetBuffer(densityKernel, "ContinentalnessNoiseBuffer", noiseBuffer);
-                terrainDensityComputeShader.SetTexture(densityKernel, "ContinentalnessCurveTexture", SplineCurveFunctions.ArrayToTexture(SplineCurveFunctions.CurveToArray(noiseGenerator.valueCurve)));
+                if (noiseGenerator.remoteTexture == null)
+                    terrainDensityComputeShader.SetTexture(densityKernel, "ContinentalnessCurveTexture", SplineCurveFunctions.ArrayToTexture(SplineCurveFunctions.CurveToArray(noiseGenerator.valueCurve)));
+                else
+                    terrainDensityComputeShader.SetTexture(densityKernel, "ContinentalnessCurveTexture", noiseGenerator.remoteTexture);
                 // terrainDensityComputeShader.SetBuffer(densityKernel, "ContinentalnessCurveArray", noiseCurveBuffer);
             }
             if (noiseGenerator.noiseGeneratorType == NoiseGenerator.NoiseGeneratorType.TemperatureMapGenerator)
             {
                 terrainDensityComputeShader.SetBool("TemperatureNoiseActivated", noiseGenerator.activated);
                 terrainDensityComputeShader.SetBuffer(densityKernel, "TemperatureNoiseBuffer", noiseBuffer);
-                terrainDensityComputeShader.SetTexture(densityKernel, "TemperatureCurveTexture", SplineCurveFunctions.ArrayToTexture(SplineCurveFunctions.CurveToArray(noiseGenerator.valueCurve)));
+                if (noiseGenerator.remoteTexture == null)
+                    terrainDensityComputeShader.SetTexture(densityKernel, "TemperatureCurveTexture", SplineCurveFunctions.ArrayToTexture(SplineCurveFunctions.CurveToArray(noiseGenerator.valueCurve)));
+                else
+                    terrainDensityComputeShader.SetTexture(densityKernel, "TemperatureCurveTexture", noiseGenerator.remoteTexture);
                 // terrainDensityComputeShader.SetBuffer(densityKernel, "TemperatureCurveArray", noiseCurveBuffer);
             }
             if (noiseGenerator.noiseGeneratorType == NoiseGenerator.NoiseGeneratorType.HumidityMapGenerator)
             {
                 terrainDensityComputeShader.SetBool("HumidityNoiseActivated", noiseGenerator.activated);
                 terrainDensityComputeShader.SetBuffer(densityKernel, "HumidityNoiseBuffer", noiseBuffer);
-                terrainDensityComputeShader.SetTexture(densityKernel, "HumidityCurveTexture", SplineCurveFunctions.ArrayToTexture(SplineCurveFunctions.CurveToArray(noiseGenerator.valueCurve)));
+                if (noiseGenerator.remoteTexture == null)
+                    terrainDensityComputeShader.SetTexture(densityKernel, "HumidityCurveTexture", SplineCurveFunctions.ArrayToTexture(SplineCurveFunctions.CurveToArray(noiseGenerator.valueCurve)));
+                else
+                    terrainDensityComputeShader.SetTexture(densityKernel, "HumidityCurveTexture", noiseGenerator.remoteTexture);
                 // terrainDensityComputeShader.SetBuffer(densityKernel, "HumidityCurveArray", noiseCurveBuffer);
             }
             if (noiseGenerator.noiseGeneratorType == NoiseGenerator.NoiseGeneratorType.PeaksAndValleysMapGenerator)
             {
                 terrainDensityComputeShader.SetBool("PeaksAndValleysNoiseActivated", noiseGenerator.activated);
                 terrainDensityComputeShader.SetBuffer(densityKernel, "PeaksAndValleysNoiseBuffer", noiseBuffer);
-                terrainDensityComputeShader.SetTexture(densityKernel, "PeaksAndValleysCurveTexture", SplineCurveFunctions.ArrayToTexture(SplineCurveFunctions.CurveToArray(noiseGenerator.valueCurve)));
+                if (noiseGenerator.remoteTexture == null)
+                    terrainDensityComputeShader.SetTexture(densityKernel, "PeaksAndValleysCurveTexture", SplineCurveFunctions.ArrayToTexture(SplineCurveFunctions.CurveToArray(noiseGenerator.valueCurve)));
+                else
+                    terrainDensityComputeShader.SetTexture(densityKernel, "PeaksAndValleysCurveTexture", noiseGenerator.remoteTexture);
                 // terrainDensityComputeShader.SetBuffer(densityKernel, "PeaksAndValleysCurveArray", noiseCurveBuffer);
             }
             if (noiseGenerator.noiseGeneratorType == NoiseGenerator.NoiseGeneratorType.ErosionMapGenerator)
             {
                 terrainDensityComputeShader.SetBool("ErosionNoiseActivated", noiseGenerator.activated);
                 terrainDensityComputeShader.SetBuffer(densityKernel, "ErosionNoiseBuffer", noiseBuffer);
-                terrainDensityComputeShader.SetTexture(densityKernel, "ErosionCurveTexture", SplineCurveFunctions.ArrayToTexture(SplineCurveFunctions.CurveToArray(noiseGenerator.valueCurve)));
+                if (noiseGenerator.remoteTexture == null)
+                    terrainDensityComputeShader.SetTexture(densityKernel, "ErosionCurveTexture", SplineCurveFunctions.ArrayToTexture(SplineCurveFunctions.CurveToArray(noiseGenerator.valueCurve)));
+                else
+                    terrainDensityComputeShader.SetTexture(densityKernel, "ErosionCurveTexture", noiseGenerator.remoteTexture);
                 // terrainDensityComputeShader.SetBuffer(densityKernel, "ErosionCurveArray", noiseCurveBuffer);
             }
             noiseBuffers.Add(noiseBuffer);

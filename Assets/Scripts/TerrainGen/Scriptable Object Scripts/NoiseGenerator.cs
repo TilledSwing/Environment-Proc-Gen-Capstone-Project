@@ -42,6 +42,9 @@ public class NoiseGenerator : ScriptableObject
     // Terrain Values
     public float noiseScale = 0.6f;
     // public int width = 24;
+    // Remote Given Data
+    public Texture2D remoteTexture = null;
+
     public enum NoiseGeneratorType
     {
         BaseGenerator = 0,
