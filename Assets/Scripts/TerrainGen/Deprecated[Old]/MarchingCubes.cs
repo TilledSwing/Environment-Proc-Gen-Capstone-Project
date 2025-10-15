@@ -79,7 +79,7 @@ public class MarchingCubes : MonoBehaviour
             SetNoiseSetting(noiseGenerator);
         }
         // SetHeights();
-        MarchCubes();
+        // MarchCubes();
     }
 
     /// <summary>
@@ -211,70 +211,70 @@ public class MarchingCubes : MonoBehaviour
     //     }
     // }
 
-    /// <summary>
-    /// Marches through every cube in a given chunk
-    /// </summary>
-    public void MarchCubes() {
-        vertices.Clear();
-        triangles.Clear();
+    // /// <summary>
+    // /// Marches through every cube in a given chunk
+    // /// </summary>
+    // public void MarchCubes() {
+    //     vertices.Clear();
+    //     triangles.Clear();
 
-        for(int x = 0; x < terrainDensityData.width; x++) {
-            for(int y = 0; y < terrainDensityData.width; y++) {
-                for(int z = 0; z < terrainDensityData.width; z++) {
-                    float[] cubeVertices = new float[8];
-                    for(int i = 0; i < 8; i++) {
-                        Vector3Int vertex = new Vector3Int(x,y,z) + MarchingCubesTables.vertexOffsetTable[i];
-                        cubeVertices[i] = heights[vertex.x,vertex.y,vertex.z];
-                    }
+    //     for(int x = 0; x < terrainDensityData.width; x++) {
+    //         for(int y = 0; y < terrainDensityData.width; y++) {
+    //             for(int z = 0; z < terrainDensityData.width; z++) {
+    //                 float[] cubeVertices = new float[8];
+    //                 for(int i = 0; i < 8; i++) {
+    //                     Vector3Int vertex = new Vector3Int(x,y,z) + MarchingCubesTables.vertexOffsetTable[i];
+    //                     cubeVertices[i] = heights[vertex.x,vertex.y,vertex.z];
+    //                 }
 
-                    MarchCube(new Vector3(chunkPos.x + x,chunkPos.y + y,chunkPos.z + z), cubeVertices);
-                }
-            }
-        }
-        SetupMesh();
-    }
+    //                 MarchCube(new Vector3(chunkPos.x + x,chunkPos.y + y,chunkPos.z + z), cubeVertices);
+    //             }
+    //         }
+    //     }
+    //     SetupMesh();
+    // }
 
-    /// <summary>
-    /// Polygonizes for a single given cube.
-    /// </summary>
-    /// <param name="cubePosition"> The world space position of the cube within the chunk </param>
-    /// <param name="cubeVertices"> The values of the vertices for the given cube to be marched which will be used to get the configuration </param>
-    public void MarchCube(Vector3 cubePosition, float[] cubeVertices) {
-        int configurationIndex = GetCubeConfiguration(cubeVertices);
+    // /// <summary>
+    // /// Polygonizes for a single given cube.
+    // /// </summary>
+    // /// <param name="cubePosition"> The world space position of the cube within the chunk </param>
+    // /// <param name="cubeVertices"> The values of the vertices for the given cube to be marched which will be used to get the configuration </param>
+    // public void MarchCube(Vector3 cubePosition, float[] cubeVertices) {
+    //     int configurationIndex = GetCubeConfiguration(cubeVertices);
 
-        if(configurationIndex == 0 || configurationIndex == 255) {
-            return ;
-        }
+    //     if(configurationIndex == 0 || configurationIndex == 255) {
+    //         return ;
+    //     }
 
-        int edgeIndex = 0;
+    //     int edgeIndex = 0;
 
-        for(int tri = 0; tri < 5; tri++) {
-            for(int vert = 0; vert < 3; vert++) {
-                int edgeValue = MarchingCubesTables.triangleTable[configurationIndex, edgeIndex];
+    //     for(int tri = 0; tri < 5; tri++) {
+    //         for(int vert = 0; vert < 3; vert++) {
+    //             int edgeValue = MarchingCubesTables.triangleTable[configurationIndex, edgeIndex];
 
-                if(edgeValue == -1) {
-                    return ;
-                }
+    //             if(edgeValue == -1) {
+    //                 return ;
+    //             }
 
-                Vector3 edgeV1 = cubePosition + MarchingCubesTables.vertexOffsetTable[MarchingCubesTables.edgeIndexTable[edgeValue, 0]];
-                Vector3 edgeV2 = cubePosition + MarchingCubesTables.vertexOffsetTable[MarchingCubesTables.edgeIndexTable[edgeValue, 1]];
+    //             Vector3 edgeV1 = cubePosition + MarchingCubesTables.vertexOffsetTable[MarchingCubesTables.edgeIndexTable[edgeValue, 0]];
+    //             Vector3 edgeV2 = cubePosition + MarchingCubesTables.vertexOffsetTable[MarchingCubesTables.edgeIndexTable[edgeValue, 1]];
 
-                Vector3 vertex;
-                if(terrainDensityData.lerp) {
-                    vertex = Vector3.Lerp(edgeV1, edgeV2, 
-                    (terrainDensityData.isolevel - cubeVertices[MarchingCubesTables.edgeIndexTable[edgeValue, 0]]) / (cubeVertices[MarchingCubesTables.edgeIndexTable[edgeValue, 1]] - cubeVertices[MarchingCubesTables.edgeIndexTable[edgeValue, 0]]));
-                }
-                else {
-                    vertex = (edgeV1 + edgeV2) / 2;
-                }
+    //             Vector3 vertex;
+    //             if(terrainDensityData.lerp) {
+    //                 vertex = Vector3.Lerp(edgeV1, edgeV2, 
+    //                 (terrainDensityData.isolevel - cubeVertices[MarchingCubesTables.edgeIndexTable[edgeValue, 0]]) / (cubeVertices[MarchingCubesTables.edgeIndexTable[edgeValue, 1]] - cubeVertices[MarchingCubesTables.edgeIndexTable[edgeValue, 0]]));
+    //             }
+    //             else {
+    //                 vertex = (edgeV1 + edgeV2) / 2;
+    //             }
 
-                vertices.Add(vertex);
-                triangles.Add(vertices.Count - 1);
+    //             vertices.Add(vertex);
+    //             triangles.Add(vertices.Count - 1);
 
-                edgeIndex++;
-            }
-        }
-    }
+    //             edgeIndex++;
+    //         }
+    //     }
+    // }
 
     /// <summary>
     /// Retrieve the configuration index based on a cube's vertice's values

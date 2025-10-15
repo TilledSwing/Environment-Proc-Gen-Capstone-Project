@@ -17468,7 +17468,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   fogMat: {fileID: 2100000, guid: b78a36d964d317b498aa1107a6978473, type: 2}
-  fogColor: {r: 0.08250267, g: 0.120700195, b: 0.16981131, a: 1}
+  fogColor: {r: 0.102794595, g: 0.15040942, b: 0.20754719, a: 1}
   darkFogColor: {r: 0.050980393, g: 0.05882353, b: 0.06666667, a: 1}
   rendererData: {fileID: 11400000, guid: f288ae1f4751b564a96ac7587541f7a2, type: 2}
   objectiveCanvas: {fileID: 0}
@@ -17477,7 +17477,7 @@ MonoBehaviour:
   chatContainer: {fileID: 898901602}
   lobbyContainer: {fileID: 194610414}
   maxWorldYChunks: 16
-  maxViewDst: 120
+  maxViewDst: 144
   viewer: {fileID: 1588582780}
   updateDistanceThreshold: 12
   chunkSize: 0
@@ -17485,7 +17485,7 @@ MonoBehaviour:
   useFixedMapSize: 0
   mapSize: 11
   resolution: 1
-  maxYChunksVisible: 5
+  maxYChunksVisible: 8
   lodData:
   - lod: 1
     resolution: 1
