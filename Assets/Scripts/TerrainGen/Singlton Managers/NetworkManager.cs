@@ -23,6 +23,9 @@ public class NetworkManager : NetworkBehaviour
         ChunkGenNetwork.Instance.chatContainer.SetActive(true);
         ChunkGenNetwork.Instance.lobbyContainer.SetActive(true);
         PlayerController.instance.waterLevel = ChunkGenNetwork.Instance.terrainDensityData.waterLevel;
+
+        GameObject.Find("NetworkManager/NetworkHudCanvas/Logo").SetActive(false);
+        GameObject.Find("NetworkManager/NetworkHudCanvas/RemoteJoinTextBox").SetActive(false);
     }
 
     [ServerRpc(RequireOwnership = false)]
