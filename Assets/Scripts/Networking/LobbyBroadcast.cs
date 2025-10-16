@@ -10,15 +10,19 @@ using System.Linq;
 
 public class LobbyBroadcast : MonoBehaviour
 {
+    public static LobbyBroadcast instance;
+
     public Transform lobbyHolder;
     public GameObject msgElement;
-    private Dictionary<NetworkConnection, string> connectedPlayers;
+    public TMP_InputField nameField;
+    public Dictionary<NetworkConnection, string> connectedPlayers;
 
     /// <summary>
     /// Setup event handlers and the local field. 
     /// </summary>
     private void OnEnable()
     {
+        instance = this;
         connectedPlayers = new Dictionary<NetworkConnection, string>();
         InstanceFinder.ServerManager.OnRemoteConnectionState += OnRemoteClient;
         InstanceFinder.ClientManager.RegisterBroadcast<PlayerList>(OnPlayerListReceived);
@@ -44,7 +48,16 @@ public class LobbyBroadcast : MonoBehaviour
     {
         if (args.ConnectionState == RemoteConnectionState.Started)
         {
-            connectedPlayers.Add(conn, conn.ClientId.ToString());
+            string playerName = nameField.text.Trim();
+            if (string.IsNullOrEmpty(playerName))
+                playerName = "Anonymous";
+
+            if (conn.ClientId.ToString() == "0")
+                connectedPlayers.Add(conn, playerName + " (Host)");
+            else
+                connectedPlayers.Add(conn, playerName);
+
+
             string[] curPlayerList = connectedPlayers.Values.ToArray();
 
             PlayerList playerList = new PlayerList() { connectedPlayers = curPlayerList};
@@ -92,7 +105,8 @@ public class LobbyBroadcast : MonoBehaviour
             GameObject lobbyMessage = Instantiate(msgElement, lobbyHolder);
 
             // Player 0 is always the server host.
-            lobbyMessage.GetComponent<TextMeshProUGUI>().text = player == "0" ? "Player: Server Host" : "Player: Client " + player;
+            lobbyMessage.GetComponent<TextMeshProUGUI>().text = player;
+                //== "0" ? "Player: Server Host" : "Player: Client " + player;
         }
     }
 

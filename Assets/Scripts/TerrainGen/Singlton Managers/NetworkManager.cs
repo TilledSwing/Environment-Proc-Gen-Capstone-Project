@@ -26,6 +26,7 @@ public class NetworkManager : NetworkBehaviour
 
         GameObject.Find("NetworkManager/NetworkHudCanvas/Logo").SetActive(false);
         GameObject.Find("NetworkManager/NetworkHudCanvas/RemoteJoinTextBox").SetActive(false);
+        GameObject.Find("NetworkManager/NetworkHudCanvas/NameTextBox").SetActive(false);
     }
 
     [ServerRpc(RequireOwnership = false)]

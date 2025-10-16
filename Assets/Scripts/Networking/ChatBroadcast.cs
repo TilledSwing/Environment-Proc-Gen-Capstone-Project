@@ -11,6 +11,7 @@ public class ChatBroadcast : MonoBehaviour
     public Transform chatHolder;
     public GameObject msgElement;
     public TMP_InputField playerMsg;
+    public TMP_InputField nameField;
 
 
     /// <summary>
@@ -57,22 +58,28 @@ public class ChatBroadcast : MonoBehaviour
 
         Message msg = new Message()
         {
-            username = "Server Host",
+            username = "Anonymous",
             message = playerMsg.text
         };
 
         playerMsg.text = "";
 
+        var conn = InstanceFinder.ClientManager.Connection;
+        msg.username = LobbyBroadcast.instance.connectedPlayers[conn];
+        InstanceFinder.ServerManager.Broadcast<Message>(msg);
+
         // Distinguishes if the server host or the remote client sent the message.
         // Remote Client 1, 2, 3... ordered by when they joined.
-        if (InstanceFinder.IsServerStarted)
-            InstanceFinder.ServerManager.Broadcast<Message>(msg);
-        else if (InstanceFinder.IsClientStarted)
-        {
-            var conn = InstanceFinder.ClientManager.Connection;
-            msg.username = "Client " + conn.ClientId.ToString();
-            InstanceFinder.ClientManager.Broadcast<Message>(msg);
-        }
+        //if (InstanceFinder.IsServerStarted)
+        //{
+        //msg.username = LobbyBroadcast.instance.connectedPlayers[conn]
+        //    InstanceFinder.ServerManager.Broadcast<Message>(msg);
+        //}
+        //else if (InstanceFinder.IsClientStarted)
+        //{
+        //    msg.username = "Client " + conn.ClientId.ToString();
+        //    InstanceFinder.ClientManager.Broadcast<Message>(msg);
+        //}
 
     }
 
