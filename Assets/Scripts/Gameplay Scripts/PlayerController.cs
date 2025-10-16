@@ -49,9 +49,11 @@ public class PlayerController : NetworkBehaviour
 
             Transform eye1 = transform.Find("Visor");
             Transform eye2 = transform.Find("Visor (1)");
+            //transform.Find("GameTag").GetComponent<TextMeshPro>().text = LobbyBroadcast.instance.connectedPlayers[LocalConnection];
 
             eye1.gameObject.SetActive(false);
             eye2.gameObject.SetActive(false);
+            //transform.Find("GameTag").gameObject.SetActive(false);
 
             instance = this;
         }

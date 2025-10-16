@@ -1,12 +1,15 @@
-using UnityEngine;
-using TMPro;
 using FishNet;
 using FishNet.Broadcast;
 using FishNet.Connection;
 using FishNet.Transporting;
-using System.Collections.Generic;
+using NUnit.Framework;
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
+using TMPro;
+using UnityEngine;
+using static LobbyBroadcast;
 
 public class LobbyBroadcast : MonoBehaviour
 {
@@ -15,7 +18,7 @@ public class LobbyBroadcast : MonoBehaviour
     public Transform lobbyHolder;
     public GameObject msgElement;
     public TMP_InputField nameField;
-    public Dictionary<NetworkConnection, string> connectedPlayers;
+    public Dictionary<int, string> connectedPlayers;
 
     /// <summary>
     /// Setup event handlers and the local field. 
@@ -23,9 +26,11 @@ public class LobbyBroadcast : MonoBehaviour
     private void OnEnable()
     {
         instance = this;
-        connectedPlayers = new Dictionary<NetworkConnection, string>();
-        InstanceFinder.ServerManager.OnRemoteConnectionState += OnRemoteClient;
+        connectedPlayers = new Dictionary<int, string>();
+        InstanceFinder.ClientManager.OnClientConnectionState += OnClientConnectionState;
+        InstanceFinder.ServerManager.OnRemoteConnectionState += OnRemoteClientLeave;
         InstanceFinder.ClientManager.RegisterBroadcast<PlayerList>(OnPlayerListReceived);
+        InstanceFinder.ServerManager.RegisterBroadcast<PlayerName>(OnRemoteJoin);
     }
 
     /// <summary>
@@ -34,7 +39,40 @@ public class LobbyBroadcast : MonoBehaviour
     private void OnDisable()
     {
         InstanceFinder.ClientManager.UnregisterBroadcast<PlayerList>(OnPlayerListReceived);
-        InstanceFinder.ServerManager.OnRemoteConnectionState -= OnRemoteClient;
+        InstanceFinder.ServerManager.UnregisterBroadcast<PlayerName>(OnRemoteJoin);
+        InstanceFinder.ServerManager.OnRemoteConnectionState -= OnRemoteClientLeave;
+        InstanceFinder.ClientManager.OnClientConnectionState -= OnClientConnectionState;
+    }
+
+    private void OnClientConnectionState(ClientConnectionStateArgs args)
+    {
+        if (args.ConnectionState == LocalConnectionState.Started)
+        {
+            string initialPlayerName = nameField.text.Trim();
+            if (string.IsNullOrEmpty(initialPlayerName))
+                initialPlayerName = "Anonymous";
+
+            PlayerName playerName = new PlayerName() { connectedPlayer = initialPlayerName };
+            InstanceFinder.ClientManager.Broadcast<PlayerName>(playerName);
+        }
+    }
+
+    private void OnRemoteJoin(NetworkConnection connection, PlayerName name, Channel channel)
+    {
+        if (connection.ClientId.ToString() == "0")
+            connectedPlayers.Add(connection.ClientId, name.connectedPlayer + " (Host)");
+        else
+            connectedPlayers.Add(connection.ClientId, name.connectedPlayer);
+
+
+        string[] curPlayerList = connectedPlayers.Values.ToArray();
+
+        PlayerList playerList = new PlayerList() { connectedPlayers = curPlayerList };
+
+        // Send to the new client with a small delay to ensure handler is registered
+        StartCoroutine(DelayedPlayerBroadcast(playerList));
+
+        //InstanceFinder.ServerManager.Broadcast<PlayerList>(playerList);
     }
 
     /// <summary>
@@ -44,32 +82,11 @@ public class LobbyBroadcast : MonoBehaviour
     /// </summary>
     /// <param name="conn">The remote connection.</param>
     /// <param name="args">Parameters that come with the connection.</param>
-    private void OnRemoteClient(NetworkConnection conn, RemoteConnectionStateArgs args)
+    private void OnRemoteClientLeave(NetworkConnection conn, RemoteConnectionStateArgs args)
     {
-        if (args.ConnectionState == RemoteConnectionState.Started)
+        if (args.ConnectionState == RemoteConnectionState.Stopped)
         {
-            string playerName = nameField.text.Trim();
-            if (string.IsNullOrEmpty(playerName))
-                playerName = "Anonymous";
-
-            if (conn.ClientId.ToString() == "0")
-                connectedPlayers.Add(conn, playerName + " (Host)");
-            else
-                connectedPlayers.Add(conn, playerName);
-
-
-            string[] curPlayerList = connectedPlayers.Values.ToArray();
-
-            PlayerList playerList = new PlayerList() { connectedPlayers = curPlayerList};
-
-            // Send to the new client with a small delay to ensure handler is registered
-            StartCoroutine(DelayedPlayerBroadcast(playerList));
-
-            //InstanceFinder.ServerManager.Broadcast<PlayerList>(playerList);
-        }
-        else if (args.ConnectionState == RemoteConnectionState.Stopped)
-        {
-            connectedPlayers.Remove(conn);
+            connectedPlayers.Remove(conn.ClientId);
             string[] curPlayerList = connectedPlayers.Values.ToArray();
 
             PlayerList playerList = new PlayerList() { connectedPlayers = curPlayerList };
@@ -116,5 +133,13 @@ public class LobbyBroadcast : MonoBehaviour
     public struct PlayerList : IBroadcast
     {
         public string[] connectedPlayers;
+    }
+
+    /// <summary>
+    /// Defines a PlayerList struct which contains the names of all currently connected players.
+    /// </summary>
+    public struct PlayerName : IBroadcast
+    {
+        public string connectedPlayer;
     }
 }

@@ -6317,6 +6317,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 1487134460041811981, guid: 18892845e1f590743b1df434c0d00ccb, type: 3}
+      propertyPath: nameField
+      value: 
+      objectReference: {fileID: 904453927}
+    - target: {fileID: 1487134460041811981, guid: 18892845e1f590743b1df434c0d00ccb, type: 3}
       propertyPath: lobbyHolder
       value: 
       objectReference: {fileID: 1354567613}
@@ -11434,7 +11438,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4393252310584637057, guid: 0b650fca685f2eb41a86538aa883e4c1, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7443408887813606049, guid: 0b650fca685f2eb41a86538aa883e4c1, type: 3}
       propertyPath: m_LocalPosition.x
@@ -21014,6 +21018,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5845289608682742990, guid: bf4797e0ffe36bc4a8c5fed7159dcf68, type: 3}
+      propertyPath: nameField
+      value: 
+      objectReference: {fileID: 904453927}
     - target: {fileID: 5845289608682742990, guid: bf4797e0ffe36bc4a8c5fed7159dcf68, type: 3}
       propertyPath: playerMsg
       value: 
