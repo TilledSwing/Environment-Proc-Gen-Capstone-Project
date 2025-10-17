@@ -29,6 +29,7 @@ public class ChunkGenNetwork : MonoBehaviour
     // Chat & Lobby
     public GameObject chatContainer;
     public GameObject lobbyContainer;
+    public GameObject flashlight;
     // Viewer Settings
     public int maxWorldYChunks = 10;
     public float maxViewDst = 100;

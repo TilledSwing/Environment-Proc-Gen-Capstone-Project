@@ -22,6 +22,8 @@ public class NetworkManager : NetworkBehaviour
         // ChunkGenNetwork.Instance.objectiveCanvas.SetActive(true);
         ChunkGenNetwork.Instance.chatContainer.SetActive(true);
         ChunkGenNetwork.Instance.lobbyContainer.SetActive(true);
+
+        ChunkGenNetwork.Instance.flashlight.SetActive(true);
     }
 
     [ServerRpc(RequireOwnership = false)]

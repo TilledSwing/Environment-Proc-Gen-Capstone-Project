@@ -12,6 +12,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using Unity.Collections.LowLevel.Unsafe;
 using System.Threading;
+using UnityEngine.UI;
 
 public class ComputeMarchingCubes : MonoBehaviour
 {
@@ -29,8 +30,10 @@ public class ComputeMarchingCubes : MonoBehaviour
     public AssetSpawner assetSpawner;
     public Vector3Int chunkPos;
     public ComputeBuffer heightsBuffer;
+    public ComputeBuffer vertexBuffer;
     public float[] heightsArray;
     public bool initialLoadComplete = false;
+    public bool rendering = false;
     public ChunkGenNetwork.LOD currentLOD;
     public Mesh lod1Mesh;
     public Mesh lod2Mesh;
@@ -54,6 +57,13 @@ public class ComputeMarchingCubes : MonoBehaviour
         SetTerrainSettings();
         GenerateMesh();
     }
+    // void Update()
+    // {
+    //     if(rendering)
+    //     {
+    //         Graphics.DrawProceduralIndirect(ChunkGenNetwork.Instance.terrainMaterial, new Bounds(chunkPos + (new Vector3(0.5f, 0.5f, 0.5f) * terrainDensityData.width), Vector3.one * terrainDensityData.width), MeshTopology.Triangles, vertexBuffer);
+    //     }
+    // }
     public void Regen()
     {
         SetTerrainSettings();
@@ -133,6 +143,7 @@ public class ComputeMarchingCubes : MonoBehaviour
     public void GenerateMesh()
     {
         SetHeights();
+        // SyncMarchingCubes(heightsBuffer, false);
     }
     public void UpdateMesh(ChunkGenNetwork.LOD lod)
     {
@@ -153,7 +164,6 @@ public class ComputeMarchingCubes : MonoBehaviour
         int densityKernel = terrainDensityComputeShader.FindKernel("TerrainDensity");
 
         List<ComputeBuffer> noiseBuffers = new();
-        // List<ComputeBuffer> noiseCurveBuffers = new();
 
         foreach (NoiseGenerator noiseGenerator in terrainDensityData.noiseGenerators)
         {
@@ -235,7 +245,7 @@ public class ComputeMarchingCubes : MonoBehaviour
             heightsArray = new float[size];
             heightsBuffer.GetData(heightsArray, 0, 0, size);
 
-            heightsBuffer.Dispose();
+            // heightsBuffer.Dispose();
 
             MarchingCubesJobHandler(heightsArray, false);
         }
@@ -251,7 +261,7 @@ public class ComputeMarchingCubes : MonoBehaviour
 
                 heightsArray = new float[(terrainDensityData.width + 1) * (terrainDensityData.width + 1) * (terrainDensityData.width + 1)];
                 NativeArray<float> rawData = dataRequest.GetData<float>();
-                heightsBuffer.Dispose();
+                // heightsBuffer.Dispose();
 
                 for (int i = 0; i < size; i++)
                 {
@@ -343,7 +353,7 @@ public class ComputeMarchingCubes : MonoBehaviour
         int marchingKernel = marchingCubesComputeShader.FindKernel("MarchingCubes");
 
         marchingCubesComputeShader.SetBuffer(marchingKernel, "HeightsBuffer", heightsBuffer);
-        ComputeBuffer vertexBuffer = ComputeBufferPoolManager.Instance.GetComputeBuffer("VertexBuffer", terrainDensityData.width * terrainDensityData.width * terrainDensityData.width, sizeof(float) * 18, ComputeBufferType.Append);
+        vertexBuffer = ComputeBufferPoolManager.Instance.GetComputeBuffer("VertexBuffer", terrainDensityData.width * terrainDensityData.width * terrainDensityData.width, sizeof(float) * 18, ComputeBufferType.Append);
         marchingCubesComputeShader.SetBuffer(marchingKernel, "VertexBuffer", vertexBuffer);
 
         marchingCubesComputeShader.SetInt("ChunkSize", terrainDensityData.width);
@@ -355,6 +365,9 @@ public class ComputeMarchingCubes : MonoBehaviour
         vertexBuffer.SetCounterValue(0);
         marchingCubesComputeShader.Dispatch(marchingKernel, Mathf.CeilToInt(terrainDensityData.width / ChunkGenNetwork.Instance.resolution / 4f), Mathf.CeilToInt(terrainDensityData.width / ChunkGenNetwork.Instance.resolution / 4f), Mathf.CeilToInt(terrainDensityData.width / ChunkGenNetwork.Instance.resolution / 4f));
 
+        // ChunkGenNetwork.Instance.terrainMaterial.SetBuffer("_Triangles", vertexBuffer);
+        // Graphics.DrawProceduralIndirect(ChunkGenNetwork.Instance.terrainMaterial, new Bounds(chunkPos + (new Vector3(0.5f, 0.5f, 0.5f) * terrainDensityData.width), Vector3.one * terrainDensityData.width), MeshTopology.Triangles, vertexBuffer);
+        // rendering = true;
         ComputeBuffer vertexCountBuffer = ComputeBufferPoolManager.Instance.GetComputeBuffer("VertexCountBuffer", 1, sizeof(int), ComputeBufferType.Raw);
         ComputeBuffer.CopyCount(vertexBuffer, vertexCountBuffer, 0);
 
