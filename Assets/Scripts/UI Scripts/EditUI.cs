@@ -17,7 +17,6 @@ public class EditUI : MonoBehaviour
     void Start()
     {
         UpdateSettings();
-
     }
 
     void Update()
@@ -31,14 +30,6 @@ public class EditUI : MonoBehaviour
             case "DWSeedInput":
                 input.text = ng.domainWarpSeed.ToString();
                 break;
-        }
-        
-        // controls editor camera movement
-        Vector3 p = GetBaseInput();
-        if (p.sqrMagnitude > 0){
-            p = p * 200.0f;
-            p = p * Time.deltaTime;
-            transform.Translate(p);
         }
     }
 
@@ -323,29 +314,4 @@ public class EditUI : MonoBehaviour
         ng.domainWarpAmplitude = value;
     }
     
-    /// <summary>
-    /// Adapted from https://gist.github.com/gunderson/d7f096bd07874f31671306318019d996
-    /// </summary>
-    /// <returns></returns>
-    private Vector3 GetBaseInput()
-    {
-        Vector3 p_Velocity = new Vector3();
-        if (Input.GetKey(KeyCode.W))
-        {
-            p_Velocity += new Vector3(0, 0, 1);
-        }
-        if (Input.GetKey(KeyCode.S))
-        {
-            p_Velocity += new Vector3(0, 0, -1);
-        }
-        if (Input.GetKey(KeyCode.A))
-        {
-            p_Velocity += new Vector3(-1, 0, 0);
-        }
-        if (Input.GetKey(KeyCode.D))
-        {
-            p_Velocity += new Vector3(1, 0, 0);
-        }
-        return p_Velocity;
-    }
 }
