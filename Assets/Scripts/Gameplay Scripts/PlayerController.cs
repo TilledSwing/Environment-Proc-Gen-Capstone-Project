@@ -51,7 +51,8 @@ public class PlayerController : NetworkBehaviour {
         }
     }
 
-    void Start() {
+    void Start()
+    {
         characterController = GetComponent<CharacterController>();
 
         // Lock cursor

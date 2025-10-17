@@ -129,7 +129,7 @@ public static class SeedSerializer
             cellularJitter = settings.cellularJitter,
             // Terrain Values
             noiseScale = settings.noiseScale,
-            width = settings.width
+            // width = settings.width
         };
     }
 
@@ -198,7 +198,7 @@ public static class SeedSerializer
         deserializedNoise.cellularJitter = settings.cellularJitter;
         // Terrain Values
         deserializedNoise.noiseScale = settings.noiseScale;
-        deserializedNoise.width = settings.width;
+        // deserializedNoise.width = settings.width;
 
         return deserializedNoise;
     }

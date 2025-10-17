@@ -183,7 +183,7 @@ public class EditUI : MonoBehaviour
         ng.cellularReturnType = NoiseGenerator.fnl_cellular_return_type.Distance;
         ng.cellularJitter = 1;
         // Terrain Values
-        ng.width = 24;
+        // ng.width = 24;
         tdd.height = 100;
         ng.noiseScale = 0.6f;
         tdd.isolevel = 0.5f;

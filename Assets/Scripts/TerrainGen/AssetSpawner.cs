@@ -92,7 +92,7 @@ public class AssetSpawner : MonoBehaviour
             maxAttempts = maxAttempts
         };
 
-        JobHandle spawnPointsHandler = spawnPointsJob.Schedule(totalIterations, 24);
+        JobHandle spawnPointsHandler = spawnPointsJob.Schedule(totalIterations, terrainDensityData.width);
         spawnPointsHandler.Complete();
 
         for (int i = 0; i < assetSpawnData.spawnableAssets.Count; i++)

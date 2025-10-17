@@ -4,6 +4,7 @@ using UnityEngine;
 public class NoiseGenerator : ScriptableObject
 {
     public bool activated;
+    public AnimationCurve valueCurve;
     public NoiseGeneratorType noiseGeneratorType;
     // Noise and Fractal Settings
     public int selectedNoiseDimension = 1;
@@ -40,23 +41,26 @@ public class NoiseGenerator : ScriptableObject
     public float cellularJitter = 1;
     // Terrain Values
     public float noiseScale = 0.6f;
-    public int width = 24;
+    // public int width = 24;
     public enum NoiseGeneratorType
     {
         BaseGenerator = 0,
         LargeCaveGenerator = 1,
-        CaveDetailGenerator = 2,
-        ContinentalnessGenerator = 3,
-        TemperatureMapGenerator = 4,
-        HumidityMapGenerator = 5,
-        PeaksAndValleysMapGenerator = 6,
-        ErosionMapGenerator = 7
+        CaveDetail1Generator = 2,
+        CaveDetail2Generator = 3,
+        ContinentalnessGenerator = 4,
+        TemperatureMapGenerator = 5,
+        HumidityMapGenerator = 6,
+        PeaksAndValleysMapGenerator = 7,
+        ErosionMapGenerator = 8
     }
-    public enum fnl_noise_dimension {
+    public enum fnl_noise_dimension
+    {
         _2D = 0,
         _3D = 1
     }
-    public enum fnl_noise_type {
+    public enum fnl_noise_type
+    {
         OpenSimplex2 = 0,
         OpenSimplex2S = 1,
         Cellular = 2,
@@ -64,36 +68,42 @@ public class NoiseGenerator : ScriptableObject
         ValueCubic = 4,
         Value = 5
     };
-    public enum fnl_rotation_type_3d {
+    public enum fnl_rotation_type_3d
+    {
         None = 0,
         ImproveXYPlanes = 1,
         ImproveXZPlanes = 2
     };
-    public enum fnl_fractal_type {
+    public enum fnl_fractal_type
+    {
         None = 0,
         FBm = 1,
         Ridged = 2,
         PingPong = 3
     };
     // Domain Warp Values
-    public enum fnl_domain_warp_type {
+    public enum fnl_domain_warp_type
+    {
         OpenSimplex2 = 0,
         OpenSimplex2Reduced = 1,
         BasicGrid = 2
     };
-    public enum fnl_domain_warp_fractal_type {
+    public enum fnl_domain_warp_fractal_type
+    {
         None = 0,
         DomainWarpProgressive = 4,
         DomainWarpIndependent = 5
     };
     // Cellular Values
-    public enum fnl_cellular_distance_func {
+    public enum fnl_cellular_distance_func
+    {
         Euclidean = 0,
         EuclideanSq = 1,
         Manhattan = 2,
         Hybrid = 3
     };
-    public enum fnl_cellular_return_type {
+    public enum fnl_cellular_return_type
+    {
         CellValue = 0,
         Distance = 1,
         Distance2 = 2,
@@ -102,4 +112,43 @@ public class NoiseGenerator : ScriptableObject
         Distance2Mul = 5,
         Distance2Div = 6
     };
+    // CPU Versions
+    public FastNoiseLite.NoiseType[] noiseTypeOptions = new FastNoiseLite.NoiseType[] {FastNoiseLite.NoiseType.OpenSimplex2,
+                                                                                       FastNoiseLite.NoiseType.OpenSimplex2S,
+                                                                                       FastNoiseLite.NoiseType.Cellular,
+                                                                                       FastNoiseLite.NoiseType.Perlin,
+                                                                                       FastNoiseLite.NoiseType.ValueCubic,
+                                                                                       FastNoiseLite.NoiseType.Value};
+
+    public FastNoiseLite.RotationType3D[] rotationType3DOptions = new FastNoiseLite.RotationType3D[] {FastNoiseLite.RotationType3D.None,
+                                                                                                      FastNoiseLite.RotationType3D.ImproveXYPlanes,
+                                                                                                      FastNoiseLite.RotationType3D.ImproveXZPlanes};
+
+    public FastNoiseLite.FractalType[] noiseFractalTypeOptions = new FastNoiseLite.FractalType[] {FastNoiseLite.FractalType.None,
+                                                                                                  FastNoiseLite.FractalType.FBm,
+                                                                                                  FastNoiseLite.FractalType.Ridged,
+                                                                                                  FastNoiseLite.FractalType.PingPong};
+
+    // Domain Warp Values
+    public FastNoiseLite.DomainWarpType[] domainWarpTypeOptions = new FastNoiseLite.DomainWarpType[] {FastNoiseLite.DomainWarpType.OpenSimplex2,
+                                                                                                      FastNoiseLite.DomainWarpType.OpenSimplex2Reduced,
+                                                                                                      FastNoiseLite.DomainWarpType.BasicGrid};
+
+    public FastNoiseLite.FractalType[] domainWarpFractalTypeOptions = new FastNoiseLite.FractalType[] {FastNoiseLite.FractalType.None,
+                                                                                                       FastNoiseLite.FractalType.DomainWarpProgressive,
+                                                                                                       FastNoiseLite.FractalType.DomainWarpIndependent};
+
+    // Cellular Values
+    public FastNoiseLite.CellularDistanceFunction[] cellularDistanceFunctionOptions = new FastNoiseLite.CellularDistanceFunction[] {FastNoiseLite.CellularDistanceFunction.Euclidean,
+                                                                                                                                    FastNoiseLite.CellularDistanceFunction.EuclideanSq,
+                                                                                                                                    FastNoiseLite.CellularDistanceFunction.Manhattan,
+                                                                                                                                    FastNoiseLite.CellularDistanceFunction.Hybrid};
+
+    public FastNoiseLite.CellularReturnType[] cellularReturnTypeOptions = new FastNoiseLite.CellularReturnType[] {FastNoiseLite.CellularReturnType.CellValue,
+                                                                                                                  FastNoiseLite.CellularReturnType.Distance,
+                                                                                                                  FastNoiseLite.CellularReturnType.Distance2,
+                                                                                                                  FastNoiseLite.CellularReturnType.Distance2Add,
+                                                                                                                  FastNoiseLite.CellularReturnType.Distance2Sub,
+                                                                                                                  FastNoiseLite.CellularReturnType.Distance2Mul,
+                                                                                                                  FastNoiseLite.CellularReturnType.Distance2Div};
 }
