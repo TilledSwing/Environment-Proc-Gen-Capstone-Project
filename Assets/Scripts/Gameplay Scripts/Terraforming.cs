@@ -74,6 +74,8 @@ public class Terraforming : NetworkBehaviour
             ComputeMarchingCubes hitMarchingCubes = hitChunk.GetComponent<ComputeMarchingCubes>();
             Vector3Int hitChunkPos = hitMarchingCubes.chunkPos;
             TerraformServer(terraformCenter, hitChunkPos, mode);
+            ChunkGenNetwork cg = FindFirstObjectByType<ChunkGenNetwork>();
+            cg.navMeshNeedsUpdate = true;
         }
     }
 

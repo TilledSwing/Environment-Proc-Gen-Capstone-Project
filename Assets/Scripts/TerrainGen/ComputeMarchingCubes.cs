@@ -49,6 +49,8 @@ public class ComputeMarchingCubes : MonoBehaviour
     {
         SetTerrainSettings();
         GenerateMesh();
+        initialLoadComplete = true;
+        // StartCoroutine(GenerateMesh());
     }
     public void Regen()
     {
@@ -427,7 +429,8 @@ public class ComputeMarchingCubes : MonoBehaviour
         }
 
         Mesh mesh = new Mesh();
-        Mesh.ApplyAndDisposeWritableMeshData(meshDataArray, mesh, MeshUpdateFlags.Default);
+        // Mesh.ApplyAndDisposeWritableMeshData(meshDataArray, mesh, MeshUpdateFlags.Default);
+        Mesh.ApplyAndDisposeWritableMeshData(meshDataArray, mesh, MeshUpdateFlags.DontRecalculateBounds | MeshUpdateFlags.DontValidateIndices);
         // mesh.bounds = new Bounds(chunkPos + (new Vector3(0.5f, 0.5f, 0.5f) * terrainDensityData.width), Vector3.one * terrainDensityData.width);
 
         // if (lodData.lod == ChunkGenNetwork.LOD.LOD1)

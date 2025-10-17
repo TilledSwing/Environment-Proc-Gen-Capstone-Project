@@ -15,5 +15,6 @@ EditorBuildSettings:
     path: Assets/Scenes/Marching Cubes(C#) Test Scene.unity
     guid: 262d3c793c751c24794a593f2248c4dd
   m_configObjects:
+    com.unity.addressableassets: {fileID: 11400000, guid: ec24315c70ffede449e564249438d910, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0
