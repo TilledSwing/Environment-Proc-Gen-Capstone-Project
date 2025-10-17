@@ -43,7 +43,7 @@ public class AssetSpawner : MonoBehaviour
         // Debug.Log(vertexBufferLength);
         if (!assetSpawnData.assets.ContainsKey(chunkPos) && vertexBufferLength > 0)
         {
-            uint seed = Hash(chunkPos.x, chunkPos.y, chunkPos.z, terrainDensityData.noiseGenerators[0].noiseSeed); ;
+            uint seed = Hash(chunkPos.x, chunkPos.y, chunkPos.z, terrainDensityData.noiseGenerators[0].noiseSeed);
             Unity.Mathematics.Random rng = new(seed);
             InitializeData();
             CreateSpawnPointsJobHandler(rng);

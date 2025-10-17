@@ -49,7 +49,7 @@ public class InteractController : MonoBehaviour
             }
             if (Input.GetKeyDown(KeyCode.F))
             {
-                objectiveCounterText = GameObject.Find("ObjectiveCounter");
+                objectiveCounterText = GameObject.Find("Objective Counter");
                 TextMeshProUGUI text = objectiveCounterText.GetComponent<TextMeshProUGUI>();
                 if (objectiveCounter < objectiveGoal) {
                     text.text = ++objectiveCounter + "/" + objectiveGoal;

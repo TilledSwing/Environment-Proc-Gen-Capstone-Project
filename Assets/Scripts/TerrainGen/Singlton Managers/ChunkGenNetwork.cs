@@ -152,7 +152,7 @@ public class ChunkGenNetwork : MonoBehaviour
         chunksVisible = Mathf.RoundToInt(maxViewDst / chunkSize);
         lightingBlockerRenderer = lightingBlocker.GetComponent<MeshRenderer>();
         lightingBlockerRenderer.enabled = false;
-        lightChange.intensity = 25;
+        lightChange.intensity = 25f;
         TextureSetup();
         // Set seeds
         // foreach (NoiseGenerator noiseGenerator in terrainDensityData.noiseGenerators)
