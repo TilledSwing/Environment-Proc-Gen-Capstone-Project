@@ -74,17 +74,30 @@ public class Terraforming : NetworkBehaviour
             ComputeMarchingCubes hitMarchingCubes = hitChunk.GetComponent<ComputeMarchingCubes>();
             Vector3Int hitChunkPos = hitMarchingCubes.chunkPos;
             TerraformServer(terraformCenter, hitChunkPos, mode);
+            ChunkGenNetwork cg = FindFirstObjectByType<ChunkGenNetwork>();
+            cg.navMeshNeedsUpdate = true;
         }
     }
 
     [ServerRpc(RequireOwnership = false)]
     public void TerraformServer(Vector3 terraformCenter, Vector3Int hitChunkPos, bool terraformMode)
     {
+        PlayerController.instance.terraformCenters.Add(terraformCenter);
+        PlayerController.instance.hitChunkPositions.Add(hitChunkPos);
+        int terraformType = terraformMode == false ? 1 : 2;
+        PlayerController.instance.terraformTypes.Add(terraformType);
+
+        Debug.LogWarning(PlayerController.instance.terraformCenters.Count);
         TerraformClient(terraformCenter, hitChunkPos, terraformMode);
     }
 
     [ObserversRpc]
-    void TerraformClient(Vector3 terraformCenter, Vector3Int hitChunkPos, bool terraformMode)
+    public void TerraformClient(Vector3 terraformCenter, Vector3Int hitChunkPos, bool terraformMode)
+    {
+        TerraformClientLocal(terraformCenter, hitChunkPos, terraformMode);  
+    }
+
+    public void TerraformClientLocal(Vector3 terraformCenter, Vector3Int hitChunkPos, bool terraformMode)
     {
         ChunkGenNetwork.TerrainChunk[] chunkAndNeighbors = ChunkGenNetwork.Instance.GetChunkAndNeighbors(new Vector3Int(Mathf.CeilToInt(hitChunkPos.x / terrainDensityData.width), Mathf.CeilToInt(hitChunkPos.y / terrainDensityData.width), Mathf.CeilToInt(hitChunkPos.z / terrainDensityData.width)));
         foreach (ChunkGenNetwork.TerrainChunk terrainChunk in chunkAndNeighbors)

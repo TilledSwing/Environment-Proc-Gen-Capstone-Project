@@ -9,7 +9,10 @@ using UnityEngine.EventSystems;
 // Template by Bobsi Unity - Youtube
 // Modified by Jacob Ormsby
 
-public class PlayerController : NetworkBehaviour {
+public class PlayerController : NetworkBehaviour
+{
+    public static PlayerController instance;
+
     [Header("Base setup")]
     public float walkingSpeed = 7.5f;
     public float runningSpeed = 20f;
@@ -23,19 +26,27 @@ public class PlayerController : NetworkBehaviour {
     Vector3 moveDirection = Vector3.zero;
     float rotationX = 0;
 
+    public List<Vector3> terraformCenters;
+    public List<Vector3Int> hitChunkPositions;
+    public List<int> terraformTypes;
+
     [HideInInspector]
     public bool canMove = true;
+    public int waterLevel = 0;
 
     [SerializeField]
     private float cameraYOffset = 0.4f;
     private Camera playerCamera;
 
     private bool isFlightMode = false;
+    private bool isSubmerged = false;
 
 
-    public override void OnStartClient() {
+    public override void OnStartClient()
+    {
         base.OnStartClient();
-        if (base.IsOwner) {
+        if (base.IsOwner)
+        {
             playerCamera = Camera.main;
             playerCamera.transform.position = new Vector3(transform.position.x, transform.position.y + cameraYOffset, transform.position.z);
             playerCamera.transform.SetParent(transform);
@@ -45,8 +56,18 @@ public class PlayerController : NetworkBehaviour {
 
             eye1.gameObject.SetActive(false);
             eye2.gameObject.SetActive(false);
+
+            if (base.IsServerStarted)
+            {
+                terraformCenters = new List<Vector3>();
+                hitChunkPositions = new List<Vector3Int>();
+                terraformTypes = new List<int>();
+            }
+
+            instance = this;
         }
-        else {
+        else
+        {
             gameObject.GetComponent<PlayerController>().enabled = false;
         }
     }
@@ -60,7 +81,8 @@ public class PlayerController : NetworkBehaviour {
         Cursor.visible = false;
     }
 
-    void Update() {
+    void Update()
+    {
 
         // Only apply updates to local player / owner of script.
         if (!IsOwner)
@@ -77,10 +99,30 @@ public class PlayerController : NetworkBehaviour {
 
         // Press S to run
         isRunning = Input.GetKey(KeyCode.RightShift);
+        isSubmerged = transform.position.y < waterLevel;
 
+        if (isSubmerged)
+        {
+            gravity = 3.5f;
+            jumpSpeed = 3.5f;
+
+            if (!isFlightMode)
+            {
+                walkingSpeed = 3.5f;
+                runningSpeed = 5.0f;
+            }
+        }
+        else
+        {
+            gravity = 20.0f;
+            jumpSpeed = 8.0f;
+            walkingSpeed = 7.5f;
+            runningSpeed = 20f;
+        }
 
         // Goes from first person to a pseudo pause screen and vice versa on escape.
-        if (Input.GetKeyDown(KeyCode.Escape)) {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
             bool isCursorVisible = Cursor.visible;
             Cursor.visible = !isCursorVisible;
             Cursor.lockState = isCursorVisible ? CursorLockMode.Locked : CursorLockMode.None;
@@ -103,7 +145,7 @@ public class PlayerController : NetworkBehaviour {
 
         if (!isFlightMode)
         {
-            if (Input.GetButton("Jump") && canMove && characterController.isGrounded)
+            if (Input.GetButton("Jump") && canMove && (characterController.isGrounded || isSubmerged))
             {
                 moveDirection.y = jumpSpeed;
             }
@@ -114,9 +156,18 @@ public class PlayerController : NetworkBehaviour {
 
             if (!characterController.isGrounded)
             {
-                moveDirection.y -= gravity * Time.deltaTime;
+                if (isSubmerged)
+                {
+                    // Dampen speed to match water "gravity". Smooth corrections for gravity that is close.
+                    moveDirection.y = Mathf.Lerp(moveDirection.y, -gravity, Time.deltaTime * 3f);
+                }
+                else
+                {
+                    moveDirection.y -= gravity * Time.deltaTime;
+                }
             }
-        } else
+        }
+        else
         {
             moveDirection.y = 0f;
 
@@ -135,7 +186,8 @@ public class PlayerController : NetworkBehaviour {
         characterController.Move(moveDirection * Time.deltaTime);
 
         // Player and Camera rotation
-        if (canMove && playerCamera != null) {
+        if (canMove && playerCamera != null)
+        {
             rotationX += -Input.GetAxis("Mouse Y") * lookSpeed;
             rotationX = Mathf.Clamp(rotationX, -lookXLimit, lookXLimit);
             playerCamera.transform.localRotation = Quaternion.Euler(rotationX, 0, 0);
