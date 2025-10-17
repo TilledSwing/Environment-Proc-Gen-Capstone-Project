@@ -16,6 +16,7 @@ public class EditUI : MonoBehaviour
     void Start()
     {
         UpdateSettings();
+        
     }
 
     void Update()
