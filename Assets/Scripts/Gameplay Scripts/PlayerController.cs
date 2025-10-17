@@ -26,6 +26,10 @@ public class PlayerController : NetworkBehaviour
     Vector3 moveDirection = Vector3.zero;
     float rotationX = 0;
 
+    public List<Vector3> terraformCenters;
+    public List<Vector3Int> hitChunkPositions;
+    public List<int> terraformTypes;
+
     [HideInInspector]
     public bool canMove = true;
     public int waterLevel = 0;
@@ -52,6 +56,13 @@ public class PlayerController : NetworkBehaviour
 
             eye1.gameObject.SetActive(false);
             eye2.gameObject.SetActive(false);
+
+            if (base.IsServerStarted)
+            {
+                terraformCenters = new List<Vector3>();
+                hitChunkPositions = new List<Vector3Int>();
+                terraformTypes = new List<int>();
+            }
 
             instance = this;
         }

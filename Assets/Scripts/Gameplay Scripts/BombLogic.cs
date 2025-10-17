@@ -82,12 +82,22 @@ public class BombLogic : NetworkBehaviour
             ServerManager.Despawn(gameObject);
             return;
         }
+
+        PlayerController.instance.terraformCenters.Add(terraformCenter);
+        PlayerController.instance.hitChunkPositions.Add(hitChunkPos);
+        PlayerController.instance.terraformTypes.Add(0);
+
         BombTerraform(terraformCenter, hitChunkPos);
         ServerManager.Despawn(gameObject);
     }
 
     [ObserversRpc]
-    void BombTerraform(Vector3 terraformCenter, Vector3Int hitChunkPos)
+    public void BombTerraform(Vector3 terraformCenter, Vector3Int hitChunkPos)
+    {
+        BombTerraformLocal(terraformCenter, hitChunkPos);
+    }
+
+    public void BombTerraformLocal(Vector3 terraformCenter, Vector3Int hitChunkPos)
     {
         Debug.LogWarning("BombTerraform called");
         ChunkGenNetwork.TerrainChunk[] chunkAndNeighbors = ChunkGenNetwork.Instance.GetChunkAndNeighbors(hitChunkPos);

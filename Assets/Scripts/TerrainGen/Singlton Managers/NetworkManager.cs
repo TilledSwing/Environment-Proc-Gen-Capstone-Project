@@ -1,6 +1,10 @@
-using FishNet.Object;
+using FishNet;
 using FishNet.Connection;
+using FishNet.Object;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using static LobbyBroadcast;
 
 public class NetworkManager : NetworkBehaviour
 {
@@ -32,12 +36,16 @@ public class NetworkManager : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     void ClientReady(NetworkConnection target)
     {
-        UpdateClientMesh(target, SeedSerializer.SerializeTerrainDensity(ChunkGenNetwork.Instance.terrainDensityData));
+        UpdateClientMesh(target,
+                        SeedSerializer.SerializeTerrainDensity(ChunkGenNetwork.Instance.terrainDensityData),
+                        PlayerController.instance.terraformCenters,
+                        PlayerController.instance.hitChunkPositions,
+                        PlayerController.instance.terraformTypes);
     }
 
 
     [TargetRpc]
-    void UpdateClientMesh(NetworkConnection conn, TerrainSettings settings)
+    void UpdateClientMesh(NetworkConnection conn, TerrainSettings settings, List<Vector3> terraformCenters, List<Vector3Int> hitChunkPositions, List<int> terraformTypes)
     {
         GameObject chunk = GameObject.Find("ChunkParent");
 
@@ -80,5 +88,25 @@ public class NetworkManager : NetworkBehaviour
         ChunkGenNetwork.Instance.initialLoadComplete = false;
         ChunkGenNetwork.Instance.UpdateVisibleChunks();
 
+        //Debug.LogWarning(terraformCenters.Count);
+
+        if (terraformCenters.Count > 0)
+            StartCoroutine(ApplyTerraforms(terraformCenters, hitChunkPositions, terraformTypes));
+    }
+
+    private IEnumerator ApplyTerraforms(List<Vector3> terraformCenters, List<Vector3Int> hitChunkPositions, List<int> terraformTypes)
+    {
+        yield return new WaitForSeconds(0.5f);
+        GameObject player = PlayerController.instance.gameObject;
+        for (int i = 0; i < terraformCenters.Count; i++)
+        {
+            Debug.LogWarning("Inside Terraform Apply");
+            if (terraformTypes[i] == 0)
+                player.GetComponent<BombLogic>().BombTerraformLocal(terraformCenters[i], hitChunkPositions[i]);
+            else if (terraformTypes[i] == 1)
+                player.GetComponent<Terraforming>().TerraformClientLocal(terraformCenters[i], hitChunkPositions[i], false);
+            else
+                player.GetComponent<Terraforming>().TerraformClientLocal(terraformCenters[i], hitChunkPositions[i], true);
+        }
     }
 }
