@@ -32,6 +32,14 @@ public class EditUI : MonoBehaviour
                 input.text = ng.domainWarpSeed.ToString();
                 break;
         }
+        
+        // controls editor camera movement
+        Vector3 p = GetBaseInput();
+        if (p.sqrMagnitude > 0){
+            p = p * 200.0f;
+            p = p * Time.deltaTime;
+            transform.Translate(p);
+        }
     }
 
     /// <summary>
