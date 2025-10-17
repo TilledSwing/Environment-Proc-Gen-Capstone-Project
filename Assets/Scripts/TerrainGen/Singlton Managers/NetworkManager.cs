@@ -27,7 +27,7 @@ public class NetworkManager : NetworkBehaviour
         ChunkGenNetwork.Instance.chatContainer.SetActive(true);
         ChunkGenNetwork.Instance.lobbyContainer.SetActive(true);
 
-        ChunkGenNetwork.Instance.flashlight.SetActive(true);
+        //ChunkGenNetwork.Instance.flashlight.SetActive(true);
         PlayerController.instance.waterLevel = ChunkGenNetwork.Instance.terrainDensityData.waterLevel;
 
         GameObject.Find("NetworkManager/NetworkHudCanvas/Logo").SetActive(false);
