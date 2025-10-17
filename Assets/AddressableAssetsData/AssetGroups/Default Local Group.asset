@@ -15,41 +15,8 @@ MonoBehaviour:
   m_GroupName: Default Local Group
   m_GUID: 8e48f53c038a9a64e92b7be8b4c06274
   m_SerializeEntries:
-  - m_GUID: 371dce4e1cddc664dbe58267450ae1d8
-    m_Address: Assets/Same Gev Dudios/Sci-Fi Robots Bundle/Models/Catherine.fbx
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 5fb1b0bbc10596147a68bd7b0f8a9227
-    m_Address: Assets/Same Gev Dudios/Sci-Fi Robots Bundle/Textures/Catherine/Catherine
-      Emission.png
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 8a6d76e1bbe69eb4eaaf7d3ee5aa04d2
-    m_Address: Assets/Same Gev Dudios/Sci-Fi Robots Bundle/Textures/Catherine/Catherine
-      Metallic.png
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: b691ba6a97fcaf34f8502b726a4f3b9a
-    m_Address: Assets/Same Gev Dudios/Sci-Fi Robots Bundle/Textures/Catherine/Catherine
-      Base Color.png
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d9642228e7274194380a0c5530abee28
-    m_Address: Assets/Same Gev Dudios/Sci-Fi Robots Bundle/Materials/SRP/Catherine.mat
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e0308b7739546ab48bd90632b943b010
     m_Address: Assets/Stylized3DMonster/Monster04/Prefab/Monster04_01.prefab
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: ed4137f40b25dc043971914560098d30
-    m_Address: Assets/Same Gev Dudios/Sci-Fi Robots Bundle/Prefabs/Catherine.prefab
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

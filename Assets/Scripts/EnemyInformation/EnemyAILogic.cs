@@ -7,9 +7,9 @@ public class EnemyAILogic : NetworkBehaviour
 {
     private Transform target;
     private float attackRange = 2f;
-    private float wanderInterval = 5f;
-    private float wanderRadius = 20f;
-    private float minWanderDistance = 10f;
+    private float wanderInterval = 2f;
+    private float wanderRadius = 30f;
+    private float minWanderDistance = 15f;
     private float thinkRate = .2f;
     private NavMeshAgent agent;
     private EnemyAIMovement enemyMovement;
