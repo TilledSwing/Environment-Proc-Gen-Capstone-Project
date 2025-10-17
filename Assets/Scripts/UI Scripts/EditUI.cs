@@ -1,6 +1,7 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 public class EditUI : MonoBehaviour
 {
     public TerrainDensityData tdd;
@@ -16,20 +17,20 @@ public class EditUI : MonoBehaviour
     void Start()
     {
         UpdateSettings();
-        
+
     }
 
     void Update()
     {
         // setting inputs on update to make sure they're always correct
-        switch(input.name)
+        switch (input.name)
         {
             case "NoiseSeedInput":
                 input.text = ng.noiseSeed.ToString();
                 break;
             case "DWSeedInput":
                 input.text = ng.domainWarpSeed.ToString();
-                break;     
+                break;
         }
     }
 
@@ -86,7 +87,7 @@ public class EditUI : MonoBehaviour
     {
 
         // setting toggles
-        switch(toggle.name)
+        switch (toggle.name)
         {
             case "LERPToggle":
                 toggle.isOn = tdd.lerp;
@@ -100,7 +101,7 @@ public class EditUI : MonoBehaviour
         }
 
         // setting sliders
-        switch(slider.name)
+        switch (slider.name)
         {
             case "HeightSlider":
                 slider.value = tdd.height;
@@ -249,68 +250,94 @@ public class EditUI : MonoBehaviour
     /// Methods to change the different parameters of the TDD with the UI sliders
     /// </summary>
     /// <param name="value">Reading from OnValueChanged()</param>
-    public void OnHeightChanged(float value) 
+    public void OnHeightChanged(float value)
     {
         tdd.height = (int)value;
     }
-    public void OnNFreqChanged(float value) 
+    public void OnNFreqChanged(float value)
     {
         ng.noiseFrequency = value;
     }
-    public void OnNScaleChanged(float value) 
+    public void OnNScaleChanged(float value)
     {
         ng.noiseScale = value;
     }
-    public void OnIsoChanged(float value) 
+    public void OnIsoChanged(float value)
     {
         tdd.isolevel = value;
     }
-    public void OnJitterChanged(float value) 
+    public void OnJitterChanged(float value)
     {
         ng.cellularJitter = value;
     }
-    public void OnWaterChanged(float value) 
+    public void OnWaterChanged(float value)
     {
         tdd.waterLevel = (int)value;
     }
-    public void OnFOctavesChanged(float value) 
+    public void OnFOctavesChanged(float value)
     {
         ng.noiseFractalOctaves = (int)value;
     }
-    public void OnFLacunarityChanged(float value) 
+    public void OnFLacunarityChanged(float value)
     {
         ng.noiseFractalLacunarity = value;
     }
-    public void OnFGainChanged(float value) 
+    public void OnFGainChanged(float value)
     {
         ng.noiseFractalGain = value;
     }
-    public void OnFStrengthChanged(float value) 
+    public void OnFStrengthChanged(float value)
     {
         ng.fractalWeightedStrength = value;
     }
-    public void OnTerraceChanged(float value) 
+    public void OnTerraceChanged(float value)
     {
         tdd.terraceHeight = (int)value;
     }
-    public void OnDWOctavesChanged(float value) 
+    public void OnDWOctavesChanged(float value)
     {
         ng.domainWarpFractalOctaves = (int)value;
     }
-    public void OnDWLacunarityChanged(float value) 
+    public void OnDWLacunarityChanged(float value)
     {
         ng.domainWarpFractalLacunarity = value;
     }
-    public void OnDWGainChanged(float value) 
+    public void OnDWGainChanged(float value)
     {
         ng.domainWarpFractalGain = value;
     }
-    public void OnDWFrequencyChanged(float value) 
+    public void OnDWFrequencyChanged(float value)
     {
         ng.domainWarpFrequency = value;
     }
-    public void OnDWAmplitudeChanged(float value) 
+    public void OnDWAmplitudeChanged(float value)
     {
         ng.domainWarpAmplitude = value;
+    }
+    
+    /// <summary>
+    /// Adapted from https://gist.github.com/gunderson/d7f096bd07874f31671306318019d996
+    /// </summary>
+    /// <returns></returns>
+    private Vector3 GetBaseInput()
+    {
+        Vector3 p_Velocity = new Vector3();
+        if (Input.GetKey(KeyCode.W))
+        {
+            p_Velocity += new Vector3(0, 0, 1);
+        }
+        if (Input.GetKey(KeyCode.S))
+        {
+            p_Velocity += new Vector3(0, 0, -1);
+        }
+        if (Input.GetKey(KeyCode.A))
+        {
+            p_Velocity += new Vector3(-1, 0, 0);
+        }
+        if (Input.GetKey(KeyCode.D))
+        {
+            p_Velocity += new Vector3(1, 0, 0);
+        }
+        return p_Velocity;
     }
 }
