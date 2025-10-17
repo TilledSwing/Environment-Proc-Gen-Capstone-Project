@@ -11043,6 +11043,8 @@ MonoBehaviour:
   _componentIndexCache: 255
   _addedNetworkObject: {fileID: 928284566}
   _networkObjectCache: {fileID: 0}
+  enemy: {fileID: 0}
+  enemyPrefab: {fileID: 0}
 --- !u!4 &928284568
 Transform:
   m_ObjectHideFlags: 0
@@ -11088,7 +11090,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1281243543}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -11991,7 +11993,7 @@ MonoBehaviour:
   _ipv6BindAddress: 
   _port: 7770
   _maximumClients: 4095
-  _clientAddress: localhost
+  _clientAddress: 172.24.237.78
 --- !u!114 &998783343
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -24262,3 +24264,4 @@ SceneRoots:
   - {fileID: 753034284}
   - {fileID: 496046116}
   - {fileID: 928284568}
+  - {fileID: 929996430}
