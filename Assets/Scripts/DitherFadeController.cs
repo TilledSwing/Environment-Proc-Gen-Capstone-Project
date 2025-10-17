@@ -3,32 +3,32 @@ using UnityEngine;
 
 public class DitherFadeController : MonoBehaviour
 {
-    private Renderer renderer;
+    private Renderer meshRenderer;
     private Material[] materials;
     private bool prevRendState;
     void Awake()
     {
-        renderer = gameObject.GetComponent<Renderer>();
-        materials = renderer.materials;
+        meshRenderer = gameObject.GetComponent<Renderer>();
+        materials = meshRenderer.materials;
         foreach (Material material in materials) {
             material.SetFloat("_fade", 1);
             material.SetColor("_outlineColor", Color.black);
             StartCoroutine(FadeIn(material, 1f));
         }
-        prevRendState = renderer.enabled;
+        prevRendState = meshRenderer.enabled;
     }
     void Update()
     {
-        if (prevRendState != renderer.enabled)
+        if (prevRendState != meshRenderer.enabled)
         {
-            renderer = gameObject.GetComponent<Renderer>();
-            materials = renderer.materials;
+            meshRenderer = gameObject.GetComponent<Renderer>();
+            materials = meshRenderer.materials;
             foreach (Material material in materials)
             {
                 material.SetFloat("_fade", 1);
                 StartCoroutine(FadeIn(material, 1f));
             }
-            prevRendState = renderer.enabled;
+            prevRendState = meshRenderer.enabled;
         }
     }
     IEnumerator FadeIn(Material mat, float duration) {

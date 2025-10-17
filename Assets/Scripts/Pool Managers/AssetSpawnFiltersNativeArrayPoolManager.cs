@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Xml.Serialization;
 using Unity.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -43,11 +44,24 @@ public class AssetSpawnFiltersNativeArrayPoolManager : MonoBehaviour
 
     private void OnDestroy()
     {
+        ReleaseAllArrays();
+    }
+
+    private void OnDisbale()
+    {
+        ReleaseAllArrays();
+    }
+
+    private void ReleaseAllArrays()
+    {
         foreach (var keyValuePair in arrayPool)
         {
             foreach (NativeArray<AssetSpawner.AssetSpawnFilters> nativeArray in keyValuePair.Value)
             {
-                nativeArray.Dispose();
+                if (nativeArray != null)
+                {
+                    nativeArray.Dispose();
+                }
             }
         }
         arrayPool.Clear();

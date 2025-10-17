@@ -36,7 +36,7 @@ public class NoiseEditor : Editor
     private void OnEnable()
     {
         marchingCubes = (MarchingCubes)target; // Cast the target to your script type
-        terrainDensityData = marchingCubes.terrainDensityData;
+        // terrainDensityData = marchingCubes.terrainDensityData;
     }
 
     public override void OnInspectorGUI()

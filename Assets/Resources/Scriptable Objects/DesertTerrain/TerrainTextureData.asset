@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 997bd16a6ad91bd448818cd2210554b3, type: 3}
+  m_Name: TerrainTextureData
+  m_EditorClassIdentifier: 
+  biomeTextureConfigs:
+  - biomeName: Generic Biome
+    textureScale: 0.2
+    MAX_TEXTURE_LAYERS: 10
+    biomeTextures:
+    - texture: {fileID: 2800000, guid: b4a372abad8966048a3a8e57feedcc63, type: 3}
+      useHeightRange: 1
+      heightRange:
+        heightStart: -245
+        heightEnd: -235
+      useSlopeRange: 0
+      slopeRange:
+        slopeStart: 0
+        slopeEnd: 0
+    - texture: {fileID: 2800000, guid: 8cd2530c54be62c4c993bda2f7080993, type: 3}
+      useHeightRange: 1
+      heightRange:
+        heightStart: -240
+        heightEnd: 0
+      useSlopeRange: 0
+      slopeRange:
+        slopeStart: 0
+        slopeEnd: 0
+    - texture: {fileID: 2800000, guid: ac9569eb787e1af4ca584d15a29060d3, type: 3}
+      useHeightRange: 1
+      heightRange:
+        heightStart: -15
+        heightEnd: 15
+      useSlopeRange: 0
+      slopeRange:
+        slopeStart: 0
+        slopeEnd: 0
+  textureFormat: 4
+  maxTextureSize: 1024

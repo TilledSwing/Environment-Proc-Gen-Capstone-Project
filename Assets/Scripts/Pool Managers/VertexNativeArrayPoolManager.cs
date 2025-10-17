@@ -42,11 +42,24 @@ public class VertexNativeArrayPoolManager : MonoBehaviour
 
     private void OnDestroy()
     {
+        ReleaseAllArrays();
+    }
+    
+    private void OnDisable()
+    {
+        ReleaseAllArrays();
+    }
+
+    private void ReleaseAllArrays()
+    {
         foreach (var keyValuePair in arrayPool)
         {
             foreach (NativeArray<ComputeMarchingCubes.Vertex> nativeArray in keyValuePair.Value)
             {
-                nativeArray.Dispose();
+                if (nativeArray != null)
+                {
+                    nativeArray.Dispose();
+                }
             }
         }
         arrayPool.Clear();

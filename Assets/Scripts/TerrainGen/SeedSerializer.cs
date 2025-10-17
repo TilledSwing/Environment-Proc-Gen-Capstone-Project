@@ -25,6 +25,7 @@ public struct TerrainSettings
 public struct NoiseGeneratorSettings
 {
     public bool activated;
+    public float[] remoteTexture;
     public int noiseGeneratorType;
     // Noise and Fractal Settings
     public int selectedNoiseDimension;
@@ -61,7 +62,6 @@ public struct NoiseGeneratorSettings
     public float cellularJitter;
     // Terrain Values
     public float noiseScale;
-    public int width;
 }
 
 public static class SeedSerializer
@@ -93,6 +93,7 @@ public static class SeedSerializer
         return new NoiseGeneratorSettings
         {
             activated = settings.activated,
+            remoteTexture = SplineCurveFunctions.CurveToArray(settings.valueCurve),
             noiseGeneratorType = (int)settings.noiseGeneratorType,
             // Noise and Fractal Settings
             selectedNoiseDimension = settings.selectedNoiseDimension,
@@ -129,7 +130,6 @@ public static class SeedSerializer
             cellularJitter = settings.cellularJitter,
             // Terrain Values
             noiseScale = settings.noiseScale,
-            width = settings.width
         };
     }
 
@@ -162,6 +162,7 @@ public static class SeedSerializer
         var deserializedNoise = ScriptableObject.CreateInstance<NoiseGenerator>();
 
         deserializedNoise.activated = settings.activated;
+        deserializedNoise.remoteTexture = SplineCurveFunctions.ArrayToTexture(settings.remoteTexture);
         deserializedNoise.noiseGeneratorType = (NoiseGeneratorType)settings.noiseGeneratorType;
         // Noise and Fractal Settings
         deserializedNoise.selectedNoiseDimension = settings.selectedNoiseDimension;
@@ -198,7 +199,6 @@ public static class SeedSerializer
         deserializedNoise.cellularJitter = settings.cellularJitter;
         // Terrain Values
         deserializedNoise.noiseScale = settings.noiseScale;
-        deserializedNoise.width = settings.width;
 
         return deserializedNoise;
     }

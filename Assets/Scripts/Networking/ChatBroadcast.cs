@@ -11,6 +11,7 @@ public class ChatBroadcast : MonoBehaviour
     public Transform chatHolder;
     public GameObject msgElement;
     public TMP_InputField playerMsg;
+    public TMP_InputField nameField;
 
 
     /// <summary>
@@ -57,22 +58,24 @@ public class ChatBroadcast : MonoBehaviour
 
         Message msg = new Message()
         {
-            username = "Server Host",
             message = playerMsg.text
         };
 
         playerMsg.text = "";
+        InstanceFinder.ClientManager.Broadcast<Message>(msg);
 
         // Distinguishes if the server host or the remote client sent the message.
         // Remote Client 1, 2, 3... ordered by when they joined.
-        if (InstanceFinder.IsServerStarted)
-            InstanceFinder.ServerManager.Broadcast<Message>(msg);
-        else if (InstanceFinder.IsClientStarted)
-        {
-            var conn = InstanceFinder.ClientManager.Connection;
-            msg.username = "Client " + conn.ClientId.ToString();
-            InstanceFinder.ClientManager.Broadcast<Message>(msg);
-        }
+        //if (InstanceFinder.IsServerStarted)
+        //{
+        //msg.username = LobbyBroadcast.instance.connectedPlayers[conn]
+        //    InstanceFinder.ServerManager.Broadcast<Message>(msg);
+        //}
+        //else if (InstanceFinder.IsClientStarted)
+        //{
+        //    msg.username = "Client " + conn.ClientId.ToString();
+        //    InstanceFinder.ClientManager.Broadcast<Message>(msg);
+        //}
 
     }
 
@@ -85,7 +88,7 @@ public class ChatBroadcast : MonoBehaviour
     private void OnMessageReceived(Message message, Channel channel)
     {
         GameObject finalMessage = Instantiate(msgElement, chatHolder);
-        finalMessage.GetComponent<TextMeshProUGUI>().text = message.username + ": " + message.message;
+        finalMessage.GetComponent<TextMeshProUGUI>().text = message.message;
     }
 
     /// <summary>
@@ -93,11 +96,13 @@ public class ChatBroadcast : MonoBehaviour
     /// Broadcasts the message to all connected clients.
     /// </summary>
     /// <param name="connection"> The client sending the message (unused in this case). </param>
-    /// <param name="message"> The message that was sent. </param>
+    /// <param name="givenMessage"> The message that was sent. </param>
     /// <param name="channel"> The channel it was sent over (default Channel.Reliable which is like TCP) </param>
-    private void OnClientMessageReceived(NetworkConnection connection, Message message, Channel channel)
+    private void OnClientMessageReceived(NetworkConnection connection, Message givenMessage, Channel channel)
     {
-        InstanceFinder.ServerManager.Broadcast(message);
+        string toMessage = LobbyBroadcast.instance.connectedPlayers[connection.ClientId] + ": " + givenMessage.message;
+        Message updatedMessage = new Message { message = toMessage };
+        InstanceFinder.ServerManager.Broadcast(updatedMessage);
     }
 
     /// <summary>
@@ -105,7 +110,6 @@ public class ChatBroadcast : MonoBehaviour
     /// </summary>
     public struct Message : IBroadcast
     {
-        public string username;
         public string message;
     }
 }

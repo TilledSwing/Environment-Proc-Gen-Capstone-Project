@@ -13,44 +13,54 @@ public class MarchingCubes : MonoBehaviour
     private MeshFilter meshFilter;
     private MeshCollider meshCollider;
     private Renderer mat;
-    public TerrainDensityDataOld terrainDensityData;
+    public TerrainDensityData terrainDensityData;
     public GameObject waterPlaneGenerator;
-    private FastNoiseLite noiseGenerator = new FastNoiseLite();
-    private FastNoiseLite domainWarp = new FastNoiseLite();
-    private int cubesProcessed = 0;
-    private int width;
-    private int height;
-    private float noiseScale;
-    private float isolevel;
-    private bool lerp;
-    WaterPlaneGenerator waterGen;
+    // Base Noise
+    private FastNoiseLite baseNoiseGenerator = new FastNoiseLite();
+    private float[,,] baseNoise;
+    private FastNoiseLite baseNoiseDomainWarp = new FastNoiseLite();
+    private float baseNoiseScale;
+    // Large Cave
+    private FastNoiseLite largeCaveNoiseGenerator = new FastNoiseLite();
+    private float[,,] largeCaveNoise;
+    private FastNoiseLite largeCaveDomainWarp = new FastNoiseLite();
+    private float largeCaveNoiseScale;
+    // Cave Detail
+    private FastNoiseLite caveDetailNoiseGenerator = new FastNoiseLite();
+    private float[,,] caveDetailNoise;
+    private FastNoiseLite caveDetailDomainWarp = new FastNoiseLite();
+    private float caveDetailNoiseScale;
+    // Continentalness
+    private FastNoiseLite continentalnessNoiseGenerator = new FastNoiseLite();
+    private float[,,] continentalnessNoise;
+    private FastNoiseLite continentalnessDomainWarp = new FastNoiseLite();
+    private float continentalnessNoiseScale;
+    // Temperature
+    private FastNoiseLite temperatureNoiseGenerator = new FastNoiseLite();
+    private float[,,] temperatureNoise;
+    private FastNoiseLite temperatureDomainWarp = new FastNoiseLite();
+    private float temperatureNoiseScale;
+    // Humidity
+    private FastNoiseLite humidityNoiseGenerator = new FastNoiseLite();
+    private float[,,] humidityNoise;
+    private FastNoiseLite humidityDomainWarp = new FastNoiseLite();
+    private float humidityNoiseScale;
+    // Peaks and Valleys
+    private FastNoiseLite peaksAndValleysNoiseGenerator = new FastNoiseLite();
+    private float[,,] peaksAndValleysNoise;
+    private FastNoiseLite peaksAndValleysDomainWarp = new FastNoiseLite();
+    private float peaksAndValleysNoiseScale;
+    // Erosion 
+    private FastNoiseLite erosionNoiseGenerator = new FastNoiseLite();
+    private float[,,] erosionNoise;
+    private FastNoiseLite erosionDomainWarp = new FastNoiseLite();
+    private float erosionNoiseScale;
     private AssetSpawner assetSpawner;
     public Vector3Int chunkPos;
-
-    void Awake()
-    {
-        InitializeChunk();
-    }
 
     void Start()
     {
         GenerateTerrainData();
-    }
-
-    public void InitializeChunk() { 
-        gameObject.AddComponent<MeshRenderer>();
-        meshFilter = gameObject.AddComponent<MeshFilter>();
-        meshCollider = gameObject.AddComponent<MeshCollider>();
-        terrainDensityData = Resources.Load<TerrainDensityDataOld>("TerrainDensityData");
-        assetSpawner = gameObject.GetComponent<AssetSpawner>();
-        mat = GetComponent<Renderer>();
-        Material terrainMaterial = Resources.Load<Material>("Materials/TerrainTexture");
-        mat.sharedMaterial = terrainMaterial;
-        mat.sharedMaterial.SetFloat("_UnderwaterTexHeightEnd", terrainDensityData.waterLevel-15f);
-        mat.sharedMaterial.SetFloat("_Tex1HeightStart", terrainDensityData.waterLevel-18f);
-        waterPlaneGenerator = new GameObject("Water");
-        waterPlaneGenerator.transform.SetParent(transform);
-        waterGen = waterPlaneGenerator.AddComponent<WaterPlaneGenerator>();
     }
 
     /// <summary>
@@ -58,8 +68,6 @@ public class MarchingCubes : MonoBehaviour
     /// </summary>
     public void GenerateTerrainData()
     {
-        // terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 10000);
-        // terrainDensityData.domainWarpSeed = UnityEngine.Random.Range(0, 10000);
         UpdateMesh();
     }
 
@@ -67,18 +75,11 @@ public class MarchingCubes : MonoBehaviour
     /// Updates the terrain mesh
     /// </summary>
     public void UpdateMesh() {
-        SetNoiseSetting();
-        SetHeights();
-        if(Mathf.RoundToInt(chunkPos.y/terrainDensityData.width) == 0) {
-            waterGen.UpdateMesh();
+        foreach (NoiseGenerator noiseGenerator in terrainDensityData.noiseGenerators) {
+            SetNoiseSetting(noiseGenerator);
         }
-        mat.sharedMaterial.SetFloat("_UnderwaterTexHeightEnd", terrainDensityData.waterLevel-15f);
-        mat.sharedMaterial.SetFloat("_Tex1HeightStart", terrainDensityData.waterLevel-18f);
-        StartCoroutine(MarchCubes());
-        // assetSpawner.ClearAssets();
-        if(!terrainDensityData.polygonizationVisualization) {
-            assetSpawner.SpawnAssets();
-        }
+        // SetHeights();
+        MarchCubes();
     }
 
     /// <summary>
@@ -95,89 +96,131 @@ public class MarchingCubes : MonoBehaviour
         meshCollider.sharedMesh = mesh;
     }
 
-    private void SetNoiseSetting() {
-        width = terrainDensityData.width;
-        height = terrainDensityData.height;
-        noiseScale = terrainDensityData.noiseScale;
-        isolevel = terrainDensityData.isolevel;
-        lerp = terrainDensityData.lerp;
+    private void SetNoiseSetting(NoiseGenerator noiseGenerator)
+    {
+        FastNoiseLite generator = new();
+        FastNoiseLite domainWarpGenerator = new();
         // Noise Values
-        noiseGenerator.SetNoiseType(terrainDensityData.noiseType);
-        noiseGenerator.SetFractalType(terrainDensityData.noiseFractalType);
-        noiseGenerator.SetSeed(terrainDensityData.noiseSeed);
-        noiseGenerator.SetFractalOctaves(terrainDensityData.noiseFractalOctaves);
-        noiseGenerator.SetFractalLacunarity(terrainDensityData.noiseFractalLacunarity);
-        noiseGenerator.SetFractalGain(terrainDensityData.noiseFractalGain);
-        noiseGenerator.SetFractalWeightedStrength(terrainDensityData.fractalWeightedStrength);
-        noiseGenerator.SetFrequency(terrainDensityData.noiseFrequency);
+        generator.SetNoiseType(noiseGenerator.noiseTypeOptions[(int)noiseGenerator.noiseType]);
+        generator.SetFractalType(noiseGenerator.noiseFractalTypeOptions[(int)noiseGenerator.noiseFractalType]);
+        generator.SetRotationType3D(noiseGenerator.rotationType3DOptions[(int)noiseGenerator.rotationType3D]);
+        generator.SetSeed(noiseGenerator.noiseSeed);
+        generator.SetFractalOctaves(noiseGenerator.noiseFractalOctaves);
+        generator.SetFractalLacunarity(noiseGenerator.noiseFractalLacunarity);
+        generator.SetFractalGain(noiseGenerator.noiseFractalGain);
+        generator.SetFractalWeightedStrength(noiseGenerator.fractalWeightedStrength);
+        generator.SetFrequency(noiseGenerator.noiseFrequency);
         // Cellular Values
-        if(terrainDensityData.noiseType == FastNoiseLite.NoiseType.Cellular) {
-            noiseGenerator.SetCellularDistanceFunction(terrainDensityData.cellularDistanceFunction);
-            noiseGenerator.SetCellularReturnType(terrainDensityData.cellularReturnType);
-            noiseGenerator.SetCellularJitter(terrainDensityData.cellularJitter);
-        }
+        generator.SetCellularDistanceFunction(noiseGenerator.cellularDistanceFunctionOptions[(int)noiseGenerator.cellularDistanceFunction]);
+        generator.SetCellularReturnType(noiseGenerator.cellularReturnTypeOptions[(int)noiseGenerator.cellularReturnType]);
+        generator.SetCellularJitter(noiseGenerator.cellularJitter);
         // Domain Warp Values
-        if(terrainDensityData.domainWarpToggle) {
-            domainWarp.SetNoiseType(terrainDensityData.noiseType);
-            domainWarp.SetFractalType(terrainDensityData.noiseFractalType);
-            domainWarp.SetDomainWarpType(terrainDensityData.domainWarpType);
-            domainWarp.SetDomainWarpAmp(terrainDensityData.domainWarpAmplitude);
-            domainWarp.SetSeed(terrainDensityData.domainWarpSeed);
-            domainWarp.SetFractalOctaves(terrainDensityData.domainWarpFractalOctaves);
-            domainWarp.SetFractalLacunarity(terrainDensityData.domainWarpFractalLacunarity);
-            domainWarp.SetFractalGain(terrainDensityData.domainWarpFractalGain);
-            domainWarp.SetFrequency(terrainDensityData.domainWarpFrequency);
+        domainWarpGenerator.SetFractalType(noiseGenerator.domainWarpFractalTypeOptions[(int)noiseGenerator.domainWarpFractalType]);
+        domainWarpGenerator.SetDomainWarpType(noiseGenerator.domainWarpTypeOptions[(int)noiseGenerator.domainWarpType]);
+        domainWarpGenerator.SetDomainWarpAmp(noiseGenerator.domainWarpAmplitude);
+        domainWarpGenerator.SetSeed(noiseGenerator.domainWarpSeed);
+        domainWarpGenerator.SetFractalOctaves(noiseGenerator.domainWarpFractalOctaves);
+        domainWarpGenerator.SetFractalLacunarity(noiseGenerator.domainWarpFractalLacunarity);
+        domainWarpGenerator.SetFractalGain(noiseGenerator.domainWarpFractalGain);
+        domainWarpGenerator.SetFrequency(noiseGenerator.domainWarpFrequency);
+        if (noiseGenerator.noiseGeneratorType == NoiseGenerator.NoiseGeneratorType.BaseGenerator)
+        {
+            baseNoiseGenerator = generator;
+            baseNoiseDomainWarp = domainWarpGenerator;
+            baseNoiseScale = noiseGenerator.noiseScale;
+        }
+        if (noiseGenerator.noiseGeneratorType == NoiseGenerator.NoiseGeneratorType.LargeCaveGenerator)
+        {
+            largeCaveNoiseGenerator = generator;
+            largeCaveDomainWarp = domainWarpGenerator;
+            largeCaveNoiseScale = noiseGenerator.noiseScale;
+        }
+        if (noiseGenerator.noiseGeneratorType == NoiseGenerator.NoiseGeneratorType.CaveDetail1Generator)
+        {
+            caveDetailNoiseGenerator = generator;
+            caveDetailDomainWarp = domainWarpGenerator;
+            caveDetailNoiseScale = noiseGenerator.noiseScale;
+        }
+        if (noiseGenerator.noiseGeneratorType == NoiseGenerator.NoiseGeneratorType.ContinentalnessGenerator)
+        {
+            continentalnessNoiseGenerator = generator;
+            continentalnessDomainWarp = domainWarpGenerator;
+            continentalnessNoiseScale = noiseGenerator.noiseScale;
+        }
+        if (noiseGenerator.noiseGeneratorType == NoiseGenerator.NoiseGeneratorType.TemperatureMapGenerator)
+        {
+            temperatureNoiseGenerator = generator;
+            temperatureDomainWarp = domainWarpGenerator;
+            temperatureNoiseScale = noiseGenerator.noiseScale;
+        }
+        if (noiseGenerator.noiseGeneratorType == NoiseGenerator.NoiseGeneratorType.HumidityMapGenerator)
+        {
+            humidityNoiseGenerator = generator;
+            humidityDomainWarp = domainWarpGenerator;
+            humidityNoiseScale = noiseGenerator.noiseScale;
+        }
+        if (noiseGenerator.noiseGeneratorType == NoiseGenerator.NoiseGeneratorType.PeaksAndValleysMapGenerator)
+        {
+            peaksAndValleysNoiseGenerator = generator;
+            peaksAndValleysDomainWarp = domainWarpGenerator;
+            peaksAndValleysNoiseScale = noiseGenerator.noiseScale;
+        }
+        if (noiseGenerator.noiseGeneratorType == NoiseGenerator.NoiseGeneratorType.ErosionMapGenerator)
+        {
+            erosionNoiseGenerator = generator;
+            erosionDomainWarp = domainWarpGenerator;
+            erosionNoiseScale = noiseGenerator.noiseScale;
         }
     }
 
     /// <summary>
     /// Essentially the density function that will dictate the heights of the terrain
     /// </summary>
-    private void SetHeights() {
-        heights = new float[width+1, width+1, width+1];
+    // private void SetHeights() {
+    //     heights = new float[terrainDensityData.width+1, terrainDensityData.width+1, terrainDensityData.width+1];
 
-        float xWarp = 0;
-        float yWarp = 0;
-        float zWarp = 0;
+    //     float xWarp = 0;
+    //     float yWarp = 0;
+    //     float zWarp = 0;
 
-        for(int x = 0; x < width+1; x++) {
-            for(int y = 0; y < width+1; y++) {
-                for(int z = 0; z < width+1; z++) {
-                    float currentHeight = 0;
-                    xWarp = (x + chunkPos.x) * noiseScale;
-                    yWarp = (y + chunkPos.y) * noiseScale;
-                    zWarp = (z + chunkPos.z) * noiseScale;
-                    if(terrainDensityData.domainWarpToggle) {
-                        if(terrainDensityData.noiseDimension == TerrainDensityDataOld.NoiseDimension._2D) {
-                            domainWarp.DomainWarp(ref xWarp, ref zWarp);
-                        }
-                        else {
-                            domainWarp.DomainWarp(ref xWarp, ref yWarp, ref zWarp);
-                        }
-                    }
-                    if(terrainDensityData.noiseDimension == TerrainDensityDataOld.NoiseDimension._2D) {
-                        currentHeight = height * ((noiseGenerator.GetNoise(xWarp, zWarp)+1)/2) + (terrainDensityData.terracing ? (y%terrainDensityData.terraceHeight) : 0);
-                    }
-                    else {
-                        currentHeight = height * ((noiseGenerator.GetNoise(xWarp, yWarp, zWarp)+1)/2) + (terrainDensityData.terracing ? (y%terrainDensityData.terraceHeight) : 0);
-                    }
+    //     for(int x = 0; x < terrainDensityData.width+1; x++) {
+    //         for(int y = 0; y < terrainDensityData.width+1; y++) {
+    //             for(int z = 0; z < terrainDensityData.width+1; z++) {
+    //                 float currentHeight = 0;
+    //                 xWarp = (x + chunkPos.x) * noiseScale;
+    //                 yWarp = (y + chunkPos.y) * noiseScale;
+    //                 zWarp = (z + chunkPos.z) * noiseScale;
+    //                 if(terrainDensityData.domainWarpToggle) {
+    //                     if(terrainDensityData.noiseDimension == NoiseGenerator.fnl_noise_dimension._2D) {
+    //                         domainWarp.DomainWarp(ref xWarp, ref zWarp);
+    //                     }
+    //                     else {
+    //                         domainWarp.DomainWarp(ref xWarp, ref yWarp, ref zWarp);
+    //                     }
+    //                 }
+    //                 if(terrainDensityData.noiseDimension == NoiseGenerator.fnl_noise_dimension._2D) {
+    //                     currentHeight = terrainDensityData.height * ((baseNoiseGenerator.GetNoise(xWarp, zWarp)+1)/2) + (terrainDensityData.terracing ? (y%terrainDensityData.terraceHeight) : 0);
+    //                 }
+    //                 else {
+    //                     currentHeight = terrainDensityData.height * ((baseNoiseGenerator.GetNoise(xWarp, yWarp, zWarp)+1)/2) + (terrainDensityData.terracing ? (y%terrainDensityData.terraceHeight) : 0);
+    //                 }
 
-                    heights[x, y, z] = chunkPos.y + y - currentHeight;
-                }
-            }
-        }
-    }
+    //                 heights[x, y, z] = chunkPos.y + y - currentHeight;
+    //             }
+    //         }
+    //     }
+    // }
 
     /// <summary>
     /// Marches through every cube in a given chunk
     /// </summary>
-    public IEnumerator MarchCubes() {
+    public void MarchCubes() {
         vertices.Clear();
         triangles.Clear();
 
-        for(int x = 0; x < width; x++) {
-            for(int y = 0; y < width; y++) {
-                for(int z = 0; z < width; z++) {
+        for(int x = 0; x < terrainDensityData.width; x++) {
+            for(int y = 0; y < terrainDensityData.width; y++) {
+                for(int z = 0; z < terrainDensityData.width; z++) {
                     float[] cubeVertices = new float[8];
                     for(int i = 0; i < 8; i++) {
                         Vector3Int vertex = new Vector3Int(x,y,z) + MarchingCubesTables.vertexOffsetTable[i];
@@ -185,20 +228,10 @@ public class MarchingCubes : MonoBehaviour
                     }
 
                     MarchCube(new Vector3(chunkPos.x + x,chunkPos.y + y,chunkPos.z + z), cubeVertices);
-                    cubesProcessed++;
-
-                    if(cubesProcessed % terrainDensityData.polygonizationVisualizationRate == 0 && terrainDensityData.polygonizationVisualization) {
-                        // Update the mesh after each cube
-                        SetupMesh();
-                        
-                        // Wait for a frame or time delay to visualize it
-                        yield return null; // Adjust delay as needed
-                    }
                 }
             }
         }
         SetupMesh();
-        assetSpawner.SpawnAssets();
     }
 
     /// <summary>
@@ -227,9 +260,9 @@ public class MarchingCubes : MonoBehaviour
                 Vector3 edgeV2 = cubePosition + MarchingCubesTables.vertexOffsetTable[MarchingCubesTables.edgeIndexTable[edgeValue, 1]];
 
                 Vector3 vertex;
-                if(lerp) {
+                if(terrainDensityData.lerp) {
                     vertex = Vector3.Lerp(edgeV1, edgeV2, 
-                    (isolevel - cubeVertices[MarchingCubesTables.edgeIndexTable[edgeValue, 0]]) / (cubeVertices[MarchingCubesTables.edgeIndexTable[edgeValue, 1]] - cubeVertices[MarchingCubesTables.edgeIndexTable[edgeValue, 0]]));
+                    (terrainDensityData.isolevel - cubeVertices[MarchingCubesTables.edgeIndexTable[edgeValue, 0]]) / (cubeVertices[MarchingCubesTables.edgeIndexTable[edgeValue, 1]] - cubeVertices[MarchingCubesTables.edgeIndexTable[edgeValue, 0]]));
                 }
                 else {
                     vertex = (edgeV1 + edgeV2) / 2;
@@ -252,7 +285,7 @@ public class MarchingCubes : MonoBehaviour
         int cubeIndex = 0;
         // Compare the value of each vertice with the iso level and do bitshifting
         for(int i = 0; i < 8; i++) {
-            if(cubeValues[i] > isolevel) cubeIndex |= 1 << i;
+            if(cubeValues[i] > terrainDensityData.isolevel) cubeIndex |= 1 << i;
         }
 
         return cubeIndex;

@@ -35,13 +35,25 @@ public class ComputeBufferPoolManager : MonoBehaviour
         bufferPool[bufferKey].Enqueue(computeBuffer);
     }
 
+    private void OnDisable()
+    {
+        ReleaseAllBuffers();
+    }
+
     private void OnDestroy()
+    {
+        ReleaseAllBuffers();
+    }
+
+    private void ReleaseAllBuffers()
     {
         foreach (var keyValuePair in bufferPool)
         {
             foreach (ComputeBuffer computeBuffer in keyValuePair.Value)
             {
-                computeBuffer.Release();
+                if (computeBuffer != null && computeBuffer.IsValid()) {
+                    computeBuffer.Release();
+                }
             }
         }
         bufferPool.Clear();

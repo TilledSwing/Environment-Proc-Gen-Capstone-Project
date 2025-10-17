@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a52165e4272dc6245bf8856295e36dc1, type: 3}
+  m_Name: GenerationConfiguration
+  m_EditorClassIdentifier: 
+  terrainConfigs:
+  - terrainDensityData: {fileID: 11400000, guid: 4bc939f839855ea45ade17dce060eea5, type: 2}
+    terrainTextureData: {fileID: 11400000, guid: f1603a815dc9cf041bd4a9e99c9988dc, type: 2}
+    assetSpawnData: {fileID: 11400000, guid: 29949715b352478458342a45d2b907a0, type: 2}
+  - terrainDensityData: {fileID: 11400000, guid: e06a394be1f689448a0fc4d4a198b94d, type: 2}
+    terrainTextureData: {fileID: 11400000, guid: a03d196ea8be0034185709f05345b6c4, type: 2}
+    assetSpawnData: {fileID: 11400000, guid: 7523c1177c7107f438e9602592f13e9f, type: 2}

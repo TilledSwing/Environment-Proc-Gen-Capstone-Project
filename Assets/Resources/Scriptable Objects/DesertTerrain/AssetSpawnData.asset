@@ -1,0 +1,132 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc7345c3cfdb9e941ad2d82d380718da, type: 3}
+  m_Name: AssetSpawnData
+  m_EditorClassIdentifier: 
+  spawnableAssets:
+  - asset: {fileID: 5314847637665799501, guid: f2612ce08bab1de44b3c77b0ccafd3a6, type: 3}
+    spawnedAssets: []
+    rotateToFaceNormal: 1
+    spawnProbability: 0.6
+    useMinSlope: 0
+    minSlope: 0
+    useMaxSlope: 1
+    maxSlope: 50
+    useMinHeight: 0
+    minHeight: 0
+    useMaxHeight: 0
+    maxHeight: 0
+    underwaterAsset: 0
+  - asset: {fileID: 8870124305551837701, guid: ee3fc01c853bba9428eae5e9b7ec5d94, type: 3}
+    spawnedAssets: []
+    rotateToFaceNormal: 1
+    spawnProbability: 0.5
+    useMinSlope: 0
+    minSlope: 0
+    useMaxSlope: 0
+    maxSlope: 50
+    useMinHeight: 0
+    minHeight: 0
+    useMaxHeight: 0
+    maxHeight: 0
+    underwaterAsset: 0
+  - asset: {fileID: 2929306197571036120, guid: cb9889006a121eb4f9b9f6e2695662df, type: 3}
+    spawnedAssets: []
+    rotateToFaceNormal: 1
+    spawnProbability: 0.4
+    useMinSlope: 0
+    minSlope: 0
+    useMaxSlope: 0
+    maxSlope: 50
+    useMinHeight: 0
+    minHeight: 0
+    useMaxHeight: 0
+    maxHeight: 0
+    underwaterAsset: 0
+  - asset: {fileID: 3252471215262533267, guid: 83742298e20f86143a0ab9eed9820d31, type: 3}
+    spawnedAssets: []
+    rotateToFaceNormal: 1
+    spawnProbability: 0.6
+    useMinSlope: 0
+    minSlope: 0
+    useMaxSlope: 0
+    maxSlope: 50
+    useMinHeight: 0
+    minHeight: 0
+    useMaxHeight: 0
+    maxHeight: 0
+    underwaterAsset: 0
+  - asset: {fileID: 3132064623988308670, guid: 7c70883d648a1654f9fe2bc2ffe1833c, type: 3}
+    spawnedAssets: []
+    rotateToFaceNormal: 1
+    spawnProbability: 0.3
+    useMinSlope: 0
+    minSlope: 0
+    useMaxSlope: 0
+    maxSlope: 50
+    useMinHeight: 0
+    minHeight: 0
+    useMaxHeight: 0
+    maxHeight: 0
+    underwaterAsset: 0
+  - asset: {fileID: 5828929049082976114, guid: f56adf55b4dddfc45b71a129cc4b0643, type: 3}
+    spawnedAssets: []
+    rotateToFaceNormal: 1
+    spawnProbability: 0.4
+    useMinSlope: 0
+    minSlope: 0
+    useMaxSlope: 0
+    maxSlope: 50
+    useMinHeight: 0
+    minHeight: 0
+    useMaxHeight: 0
+    maxHeight: 0
+    underwaterAsset: 0
+  - asset: {fileID: 8790676822955629317, guid: d85037ecef79bec40bf46c13c27a767b, type: 3}
+    spawnedAssets: []
+    rotateToFaceNormal: 1
+    spawnProbability: 0.2
+    useMinSlope: 0
+    minSlope: 0
+    useMaxSlope: 1
+    maxSlope: 50
+    useMinHeight: 0
+    minHeight: 0
+    useMaxHeight: 0
+    maxHeight: 0
+    underwaterAsset: 0
+  - asset: {fileID: 4813392701516390993, guid: 011a442e1661fa04f9cdf0c2716bb5c7, type: 3}
+    spawnedAssets: []
+    rotateToFaceNormal: 1
+    spawnProbability: 0.1
+    useMinSlope: 0
+    minSlope: 0
+    useMaxSlope: 1
+    maxSlope: 50
+    useMinHeight: 0
+    minHeight: 0
+    useMaxHeight: 0
+    maxHeight: 0
+    underwaterAsset: 0
+  - asset: {fileID: 6798094792736165173, guid: d4a6e56da12543d4996b56d8c7ec780a, type: 3}
+    spawnedAssets: []
+    rotateToFaceNormal: 1
+    spawnProbability: 0.2
+    useMinSlope: 0
+    minSlope: 0
+    useMaxSlope: 0
+    maxSlope: 50
+    useMinHeight: 0
+    minHeight: 0
+    useMaxHeight: 0
+    maxHeight: 0
+    underwaterAsset: 0

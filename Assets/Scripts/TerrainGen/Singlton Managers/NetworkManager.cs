@@ -19,9 +19,14 @@ public class NetworkManager : NetworkBehaviour
 
         ChunkGenNetwork.Instance.viewer = GameObject.Find("Player(Clone)").transform;
         ChunkGenNetwork.Instance.SetFogActive(true);
-        ChunkGenNetwork.Instance.objectiveCanvas.SetActive(true);
+        // ChunkGenNetwork.Instance.objectiveCanvas.SetActive(true);
         ChunkGenNetwork.Instance.chatContainer.SetActive(true);
         ChunkGenNetwork.Instance.lobbyContainer.SetActive(true);
+        PlayerController.instance.waterLevel = ChunkGenNetwork.Instance.terrainDensityData.waterLevel;
+
+        GameObject.Find("NetworkManager/NetworkHudCanvas/Logo").SetActive(false);
+        GameObject.Find("NetworkManager/NetworkHudCanvas/RemoteJoinTextBox").SetActive(false);
+        GameObject.Find("NetworkManager/NetworkHudCanvas/NameTextBox").SetActive(false);
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -34,7 +39,8 @@ public class NetworkManager : NetworkBehaviour
     [TargetRpc]
     void UpdateClientMesh(NetworkConnection conn, TerrainSettings settings)
     {
-        ChunkGenNetwork.Instance.terrainDensityData = SeedSerializer.DeserializeTerrainDensity(settings);
+        TerrainDensityData terrainDensityDataNew = SeedSerializer.DeserializeTerrainDensity(settings);
+        ChunkGenNetwork.Instance.terrainDensityData = terrainDensityDataNew;
 
         // Reset action and chunking to defaults (loading in from fresh)
         // Chunk Variables
@@ -47,7 +53,6 @@ public class NetworkManager : NetworkBehaviour
         ChunkGenNetwork.Instance.isLoadingChunkVisibility = false;
         // queueUpdateDistanceThreshold = 15f;
         ChunkGenNetwork.Instance.isLoadingChunks = false;
-        ChunkGenNetwork.Instance.initialLoadComplete = false;
         // Action Queues
         ChunkGenNetwork.Instance.hasPendingMeshInits = false;
         ChunkGenNetwork.Instance.pendingMeshInits = new();
@@ -61,5 +66,12 @@ public class NetworkManager : NetworkBehaviour
 
         ChunkGenNetwork.Instance.chunkSize = ChunkGenNetwork.Instance.terrainDensityData.width;
         ChunkGenNetwork.Instance.chunksVisible = Mathf.RoundToInt(ChunkGenNetwork.Instance.maxViewDst / ChunkGenNetwork.Instance.chunkSize);
+
+        PlayerController.instance.waterLevel = terrainDensityDataNew.waterLevel;
+
+        ChunkGenNetwork.Instance.assetSpawnData.ResetSpawnPoints();
+        ChunkGenNetwork.Instance.initialLoadComplete = false;
+        ChunkGenNetwork.Instance.UpdateVisibleChunks();
+
     }
 }
