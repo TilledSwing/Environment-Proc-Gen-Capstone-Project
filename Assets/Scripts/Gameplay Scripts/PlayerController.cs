@@ -36,7 +36,7 @@ public class PlayerController : NetworkBehaviour
 
     [SerializeField]
     private float cameraYOffset = 0.4f;
-    private Camera playerCamera;
+    public Camera playerCamera;
 
     private bool isFlightMode = false;
     private bool isSubmerged = false;

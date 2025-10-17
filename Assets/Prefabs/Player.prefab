@@ -236,6 +236,7 @@ GameObject:
   - component: {fileID: -7228457785996649697}
   - component: {fileID: -6082265350763826281}
   - component: {fileID: 591542628726547992}
+  - component: {fileID: 2249550695658749378}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -316,6 +317,7 @@ MonoBehaviour:
   canMove: 1
   waterLevel: 0
   cameraYOffset: 0.4
+  playerCamera: {fileID: 0}
 --- !u!114 &1324032884783071196
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -540,6 +542,22 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 1324032884783071196}
   _networkObjectCache: {fileID: 0}
   nameTag: {fileID: 3709563371915696952}
+--- !u!114 &2249550695658749378
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3941859824757792008}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db74503c793509644ae206de4f0c0aeb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _componentIndexCache: 255
+  _addedNetworkObject: {fileID: 1324032884783071196}
+  _networkObjectCache: {fileID: 0}
+  flashlight: {fileID: 7641844106616359319}
 --- !u!1 &6708386476203434984
 GameObject:
   m_ObjectHideFlags: 0
@@ -886,5 +904,10 @@ PrefabInstance:
 --- !u!4 &7009457092745990957 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3564386119237012600, guid: 324486698f8e86d41b143978af75a6d3, type: 3}
+  m_PrefabInstance: {fileID: 5778582714416570197}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &7641844106616359319 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4196491627730360002, guid: 324486698f8e86d41b143978af75a6d3, type: 3}
   m_PrefabInstance: {fileID: 5778582714416570197}
   m_PrefabAsset: {fileID: 0}
