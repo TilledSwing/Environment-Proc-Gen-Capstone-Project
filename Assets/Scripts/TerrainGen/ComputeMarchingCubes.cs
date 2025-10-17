@@ -39,10 +39,20 @@ public class ComputeMarchingCubes : MonoBehaviour
     public Mesh lod2Mesh;
     public Mesh lod3Mesh;
     public Mesh lod6Mesh;
-    public struct Vertex
+    public struct Vertex : IComparable<Vertex>
     {
         public float3 position;
         public float3 normal;
+        public int CompareTo(Vertex other)
+        {
+            int cmp = position.x.CompareTo(other.position.x);
+            if (cmp != 0) return cmp;
+
+            cmp = position.y.CompareTo(other.position.y);
+            if (cmp != 0) return cmp;
+
+            return position.z.CompareTo(other.position.z);
+        }
     }
 
     public struct Triangle
