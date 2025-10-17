@@ -10,6 +10,7 @@ using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Experimental.GlobalIllumination;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;
@@ -90,6 +91,7 @@ public class ChunkGenNetwork : MonoBehaviour
     // Lighting Blocker
     public GameObject lightingBlocker;
     private MeshRenderer lightingBlockerRenderer;
+    public Light lightChange;
     // Action Queues
     public bool hasPendingMeshInits = false;
     public Queue<Action> pendingMeshInits = new();
@@ -150,6 +152,7 @@ public class ChunkGenNetwork : MonoBehaviour
         chunksVisible = Mathf.RoundToInt(maxViewDst / chunkSize);
         lightingBlockerRenderer = lightingBlocker.GetComponent<MeshRenderer>();
         lightingBlockerRenderer.enabled = false;
+        lightChange.intensity = 25;
         TextureSetup();
         // Set seeds
         // foreach (NoiseGenerator noiseGenerator in terrainDensityData.noiseGenerators)
