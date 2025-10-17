@@ -39,6 +39,13 @@ public class NetworkManager : NetworkBehaviour
     [TargetRpc]
     void UpdateClientMesh(NetworkConnection conn, TerrainSettings settings)
     {
+        GameObject chunk = GameObject.Find("ChunkParent");
+
+        while (chunk.transform.childCount > 0)
+        {
+            DestroyImmediate(chunk.transform.GetChild(0).gameObject);
+        }
+
         TerrainDensityData terrainDensityDataNew = SeedSerializer.DeserializeTerrainDensity(settings);
         ChunkGenNetwork.Instance.terrainDensityData = terrainDensityDataNew;
 
