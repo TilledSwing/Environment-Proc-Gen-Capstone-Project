@@ -26,11 +26,12 @@ public class AssetSpawner : MonoBehaviour
     public List<ComputeMarchingCubes.Vertex> vertices;
     public Vector3Int chunkPos;
     public LayerMask assetLayer;
+    public LayerMask interactLayer;
     public int assetSpacing = 8;
-    public int maxAttempts = 8;
     public bool assetsSet = false;
     void Start() {
         assetLayer = LayerMask.GetMask("Asset Layer");
+        interactLayer = LayerMask.GetMask("Interact Layer");
     }
     /// <summary>
     /// Initiate asset spawning for a given chunk
@@ -38,15 +39,14 @@ public class AssetSpawner : MonoBehaviour
     public void SpawnAssets()
     {
         vertexBufferLength = chunkVertices.Length;
-        vertices = chunkVertices.ToList<ComputeMarchingCubes.Vertex>();
+        vertices = chunkVertices.ToList();
         vertices.Sort();
-        // Debug.Log(vertexBufferLength);
         if (!assetSpawnData.assets.ContainsKey(chunkPos) && vertexBufferLength > 0)
         {
             uint seed = Hash(chunkPos.x, chunkPos.y, chunkPos.z, terrainDensityData.noiseGenerators[0].noiseSeed);
             Unity.Mathematics.Random rng = new(seed);
             InitializeData();
-            CreateSpawnPointsJobHandler(rng);
+            CreateSpawnPointsJobHandler(ref rng);
             SetSpawnPoints();
             AssetSpawnHandler(rng);
         }
@@ -76,9 +76,9 @@ public class AssetSpawner : MonoBehaviour
             spawnedAssets.Add(new List<Asset>());
         }
     }
-    public void CreateSpawnPointsJobHandler(Unity.Mathematics.Random rng)
+    public void CreateSpawnPointsJobHandler(ref Unity.Mathematics.Random rng)
     {
-        int totalIterations = assetSpawnData.spawnableAssets.Count * maxAttempts;
+        int totalIterations = 0;
         List<AssetSpawnFilters> assetSpawnFilters = new(assetSpawnData.spawnableAssets.Count);
         for (int i = 0; i < assetSpawnData.spawnableAssets.Count; i++)
         {
@@ -86,72 +86,45 @@ public class AssetSpawner : MonoBehaviour
                                                          assetSpawnData.spawnableAssets[i].minSlope, assetSpawnData.spawnableAssets[i].useMaxSlope, assetSpawnData.spawnableAssets[i].maxSlope,
                                                          assetSpawnData.spawnableAssets[i].useMinHeight, assetSpawnData.spawnableAssets[i].minHeight, assetSpawnData.spawnableAssets[i].useMaxHeight,
                                                          assetSpawnData.spawnableAssets[i].maxHeight, assetSpawnData.spawnableAssets[i].underwaterAsset));
+            totalIterations += assetSpawnData.spawnableAssets[i].maxPerChunk;
         }
-        List<ComputeMarchingCubes.Vertex> flatSpawnPoints = new(totalIterations);
-        for (int i = 0; i < totalIterations; i++)
-        {
-            var vert = new ComputeMarchingCubes.Vertex();
-            vert.position = float3.zero;
-            vert.normal = float3.zero;
-            flatSpawnPoints.Add(vert);
-        }
-
-        // uint seed = Hash(chunkPos.x, chunkPos.y, chunkPos.z, terrainDensityData.noiseGenerators[0].noiseSeed); ;
-        // Unity.Mathematics.Random rng = new(seed);
-
-        for (int i = 0; i < totalIterations; i++)
-        {
-            int spawnableAssetIndex = i / maxAttempts;
-            int assetAttemptIndex = i % maxAttempts;
-
-            float roll = rng.NextFloat();
-
-            if (assetSpawnFilters[spawnableAssetIndex].spawnProbability < roll) continue;
-
-            int randomIndex = rng.NextInt(0, chunkVertices.Length);
-            float3 spawnPoint = vertices[randomIndex].position;
-            float3 spawnPointNormal = vertices[randomIndex].normal;
-
-            if (!assetSpawnFilters[spawnableAssetIndex].rotateToFaceNormal)
-            {
-                spawnPoint.y -= 0.75f;
-            }
-            else
-            {
-                spawnPoint.y -= 0.1f;
-            }
-
-            float height = spawnPoint.y;
-            float slope = math.degrees(math.acos(math.clamp(math.dot(math.normalize(spawnPointNormal), math.up()), -1f, 1f)));
-
-            if (assetSpawnFilters[spawnableAssetIndex].useMinSlope && slope < assetSpawnFilters[spawnableAssetIndex].minSlope - 0.001f) continue;
-            if (assetSpawnFilters[spawnableAssetIndex].useMaxSlope && slope > assetSpawnFilters[spawnableAssetIndex].maxSlope + 0.001f) continue;
-            if (assetSpawnFilters[spawnableAssetIndex].useMinHeight && height < assetSpawnFilters[spawnableAssetIndex].minHeight - 0.001f) continue;
-            if (assetSpawnFilters[spawnableAssetIndex].useMaxHeight && height > assetSpawnFilters[spawnableAssetIndex].maxHeight + 0.001f) continue;
-            if (assetSpawnFilters[spawnableAssetIndex].underwaterAsset && height > terrainDensityData.waterLevel - 3) continue;
-            if (!assetSpawnFilters[spawnableAssetIndex].underwaterAsset && height < terrainDensityData.waterLevel) continue;
-            // Debug.Log(randomIndex);
-            ComputeMarchingCubes.Vertex vert;
-            vert.position = spawnPoint;
-            vert.normal = spawnPointNormal;
-            flatSpawnPoints[(spawnableAssetIndex * maxAttempts) + assetAttemptIndex] = vert;
-        }
-
         for (int i = 0; i < assetSpawnData.spawnableAssets.Count; i++)
         {
-            List<ComputeMarchingCubes.Vertex> assetPoints = new();
-
-            int start = i * maxAttempts;
-            int end = start + maxAttempts;
-
-            for (int j = start; j < end; j++)
+            for(int j = 0; j < assetSpawnData.spawnableAssets[i].maxPerChunk; j++)
             {
-                var vert = flatSpawnPoints[j];
-                if (vert.position.Equals(float3.zero) || vert.normal.Equals(float3.zero)) continue;
-                assetPoints.Add(vert);
-            }
+                float roll = rng.NextFloat();
 
-            spawnPoints[i] = assetPoints;
+                if (assetSpawnFilters[i].spawnProbability < roll) continue;
+
+                int randomIndex = rng.NextInt(0, vertices.Count);
+                float3 spawnPoint = vertices[randomIndex].position;
+                float3 spawnPointNormal = vertices[randomIndex].normal;
+
+                if (!assetSpawnFilters[i].rotateToFaceNormal)
+                {
+                    spawnPoint.y -= 0.75f;
+                }
+                else
+                {
+                    spawnPoint.y -= 0.1f;
+                }
+
+                float height = spawnPoint.y;
+                float slope = math.round(math.degrees(math.acos(math.clamp(math.dot(math.normalize(spawnPointNormal), math.up()), -1f, 1f))) * 100f) / 100f;
+
+                if (assetSpawnFilters[i].useMinSlope && slope < assetSpawnFilters[i].minSlope - 0.01f) continue;
+                if (assetSpawnFilters[i].useMaxSlope && slope > assetSpawnFilters[i].maxSlope + 0.01f) continue;
+                if (assetSpawnFilters[i].useMinHeight && height < assetSpawnFilters[i].minHeight - 0.01f) continue;
+                if (assetSpawnFilters[i].useMaxHeight && height > assetSpawnFilters[i].maxHeight + 0.01f) continue;
+                if (assetSpawnFilters[i].underwaterAsset && height > terrainDensityData.waterLevel - 3) continue;
+                if (!assetSpawnFilters[i].underwaterAsset && height < terrainDensityData.waterLevel) continue;
+                ComputeMarchingCubes.Vertex vert;
+                vert.position = spawnPoint;
+                vert.normal = spawnPointNormal;
+                // flatSpawnPoints[(i * assetSpawnData.spawnableAssets[i].maxPerChunk) + j] = vert;
+                if (vert.position.Equals(float3.zero) || vert.normal.Equals(float3.zero)) continue;
+                spawnPoints[i].Add(vert);
+            }
         }
 
         for (int i = 0; i < assetSpawnData.spawnableAssets.Count; i++)
@@ -171,18 +144,17 @@ public class AssetSpawner : MonoBehaviour
                         tooClose = true;
                         break;
                     }
-                    // Collider[] colliders = Physics.OverlapSphere(spawnPoints[i][j].position, assetSpacing, assetLayer);
-                    // if (colliders.Length > 0)
-                    // {
-                    //     tooClose = true;
-                    //     break;
-                    // }
+                    Collider[] colliders = Physics.OverlapSphere(spawnPoints[i][j].position, assetSpacing, assetLayer | interactLayer);
+                    if (colliders.Length > 0)
+                    {
+                        tooClose = true;
+                        break;
+                    }
                 }
 
                 if (!tooClose)
                 {
                     tempAccepted.Add(spawnPoints[i][j]);
-                    // Debug.Log(spawnPoints[i][j]);
                 }
             }
 
@@ -439,6 +411,7 @@ public class SpawnableAsset
     public GameObject asset;
     public ComputeMarchingCubes.Vertex[] spawnPoints;
     public List<Asset> spawnedAssets = new();
+    public int maxPerChunk;
     public bool rotateToFaceNormal;
     public float spawnProbability;
     public bool useMinSlope;
@@ -450,9 +423,12 @@ public class SpawnableAsset
     public bool useMaxHeight;
     public int maxHeight;
     public bool underwaterAsset;
-    public SpawnableAsset(GameObject asset, float spawnProbability, bool useMinSlope, int minSlope, bool useMaxSlope, int maxSlope, bool useMinHeight, int minHeight, bool useMaxHeight, int maxHeight, bool underwaterAsset)
+    public bool undergroundAsset;
+    public SpawnableAsset(GameObject asset, int maxPerChunk, bool rotateToFaceNormal, float spawnProbability, bool useMinSlope, int minSlope, bool useMaxSlope, int maxSlope, bool useMinHeight, int minHeight, bool useMaxHeight, int maxHeight, bool underwaterAsset)
     {
         this.asset = asset;
+        this.maxPerChunk = maxPerChunk;
+        this.rotateToFaceNormal = rotateToFaceNormal;
         this.spawnProbability = spawnProbability;
         this.useMinSlope = useMinSlope;
         this.minSlope = minSlope;

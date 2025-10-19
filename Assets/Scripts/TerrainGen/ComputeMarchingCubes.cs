@@ -51,7 +51,16 @@ public class ComputeMarchingCubes : MonoBehaviour
             cmp = position.y.CompareTo(other.position.y);
             if (cmp != 0) return cmp;
 
-            return position.z.CompareTo(other.position.z);
+            cmp = position.z.CompareTo(other.position.z);
+            if (cmp != 0) return cmp;
+
+            cmp = normal.x.CompareTo(other.normal.x);
+            if (cmp != 0) return cmp;
+
+            cmp = normal.y.CompareTo(other.normal.y);
+            if (cmp != 0) return cmp;
+
+            return normal.z.CompareTo(other.normal.z);
         }
     }
 
@@ -452,19 +461,29 @@ public class ComputeMarchingCubes : MonoBehaviour
         Mesh.MeshDataArray meshDataArray = Mesh.AllocateWritableMeshData(1);
         Mesh.MeshData meshData = meshDataArray[0];
 
-        meshData.SetVertexBufferParams(vertexCount * 3,
+        List<Triangle> validTriangles = new();
+        for(int i = 0; i < vertexCount; i++)
+        {
+            Triangle t = vertexArray[i];
+            if (!(math.all(t.v1.position == float3.zero) && math.all(t.v2.position == float3.zero) && math.all(t.v3.position == float3.zero))) 
+                validTriangles.Add(t);
+        }
+
+        meshData.SetVertexBufferParams(validTriangles.Count * 3,
         new VertexAttributeDescriptor(VertexAttribute.Position),
         new VertexAttributeDescriptor(VertexAttribute.Normal));
 
         var vertexBuffer = meshData.GetVertexData<Vertex>(0);
 
-        meshData.SetIndexBufferParams(vertexCount * 3, IndexFormat.UInt32);
+        meshData.SetIndexBufferParams(validTriangles.Count * 3, IndexFormat.UInt32);
         var indexBuffer = meshData.GetIndexData<int>();
-
-        for (int i = 0; i < vertexCount; i++)
+        
+        for (int i = 0; i < validTriangles.Count; i++)
         {
             int start = i * 3;
-            Triangle t = vertexArray[i];
+            Triangle t = validTriangles[i];
+            
+            if (math.all(t.v1.position == float3.zero) && math.all(t.v2.position == float3.zero) && math.all(t.v3.position == float3.zero)) continue;
 
             vertexBuffer[start] = t.v1;
             vertexBuffer[start + 1] = t.v2;
@@ -476,7 +495,7 @@ public class ComputeMarchingCubes : MonoBehaviour
         }
 
         meshData.subMeshCount = 1;
-        meshData.SetSubMesh(0, new SubMeshDescriptor(0, vertexCount * 3, MeshTopology.Triangles));
+        meshData.SetSubMesh(0, new SubMeshDescriptor(0, validTriangles.Count * 3, MeshTopology.Triangles));
 
         if (!terraforming)
         {
@@ -538,7 +557,7 @@ public class ComputeMarchingCubes : MonoBehaviour
     {
         int iterations = Mathf.CeilToInt((terrainDensityData.width + 1) / ChunkGenNetwork.Instance.resolution) * Mathf.CeilToInt((terrainDensityData.width + 1) / ChunkGenNetwork.Instance.resolution) * Mathf.CeilToInt((terrainDensityData.width + 1) / ChunkGenNetwork.Instance.resolution);
 
-        NativeList<Triangle> triangleArray = new(iterations * 5, Allocator.Persistent);
+        NativeList<Triangle> triangleArray = new(iterations, Allocator.Persistent);
         NativeArray<float> heightsArray = new(heights, Allocator.Persistent);
         NativeArray<float3> vertexOffsetTable = new(MarchingCubesTables.vertexOffsetTable, Allocator.Persistent);
         NativeArray<int> edgeIndexTable = new(MarchingCubesTables.edgeIndexTable, Allocator.Persistent);

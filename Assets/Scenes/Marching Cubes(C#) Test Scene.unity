@@ -19057,7 +19057,6 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 0
   assetSpacing: 10
-  maxAttempts: 24
   assetsSet: 0
 --- !u!1 &1652846912
 GameObject:
