@@ -155,11 +155,11 @@ public class ChunkGenNetwork : MonoBehaviour
         lightChange.intensity = 25f;
         TextureSetup();
         // Set seeds
-        // foreach (NoiseGenerator noiseGenerator in terrainDensityData.noiseGenerators)
-        // {
-        //     noiseGenerator.noiseSeed = UnityEngine.Random.Range(0, 100000);
-        //     noiseGenerator.domainWarpSeed = UnityEngine.Random.Range(0, 100000);
-        // }
+        foreach (NoiseGenerator noiseGenerator in terrainDensityData.noiseGenerators)
+        {
+            noiseGenerator.noiseSeed = UnityEngine.Random.Range(0, 100000);
+            noiseGenerator.domainWarpSeed = UnityEngine.Random.Range(0, 100000);
+        }
         // Fog Shader Inits
         fogRenderPassFeature = rendererData.rendererFeatures.Find(f => f is FogRenderPassFeature) as FogRenderPassFeature;
         fogMat.SetFloat("_fogOffset", maxViewDst - 20f);
@@ -242,11 +242,11 @@ public class ChunkGenNetwork : MonoBehaviour
             StartCoroutine(LoadAssetInstantiationsOverTime());
         }
 
-        navMeshGentimer += Time.deltaTime;
-        if (navMeshGentimer >= navMeshUpdateTime)
-        {
-            updateNavMesh();
-        }
+        // navMeshGentimer += Time.deltaTime;
+        // if (navMeshGentimer >= navMeshUpdateTime)
+        // {
+        //     updateNavMesh();
+        // }
         
     }
 

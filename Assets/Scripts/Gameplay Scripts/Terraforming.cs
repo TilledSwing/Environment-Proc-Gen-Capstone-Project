@@ -16,6 +16,8 @@ public class Terraforming : NetworkBehaviour
     bool mode = true;
     LayerMask terrainLayer;
     public TerrainDensityData terrainDensityData;
+    public float terraformUpdateTic = 0.2f;
+    float time = 0f;
     //void Start()
     //{
     //    playerCamera = Camera.main;
@@ -45,16 +47,19 @@ public class Terraforming : NetworkBehaviour
             return;
         }
 
-        if (Input.GetMouseButton(0))
+        if (Input.GetMouseButton(0) && time >= terraformUpdateTic)
         {
+            time = 0f;
             mode = true;
             Terraform(mode);
         }
         if (Input.GetMouseButton(1))
         {
+            time = 0f;
             mode = false;
             Terraform(mode);
         }
+        time += Time.deltaTime;
     }
     /// <summary>
     /// Terraform where the player is looking when they use a terraform interaction key
@@ -66,9 +71,7 @@ public class Terraforming : NetworkBehaviour
         if (Physics.Raycast(ray, out RaycastHit hit, terraformMaxDst, terrainLayer))
         {
             if (hit.distance <= 1f || math.abs(hit.point.y - terraformRadius) >= terrainDensityData.width * (mode ? ChunkGenNetwork.Instance.maxWorldYChunks : ChunkGenNetwork.Instance.maxWorldYChunks + 1))
-            {
                 return;
-            }
             Vector3 terraformCenter = hit.point;
             GameObject hitChunk = hit.collider.gameObject;
             ComputeMarchingCubes hitMarchingCubes = hitChunk.GetComponent<ComputeMarchingCubes>();
@@ -87,7 +90,7 @@ public class Terraforming : NetworkBehaviour
         int terraformType = terraformMode == false ? 1 : 2;
         PlayerController.instance.terraformTypes.Add(terraformType);
 
-        Debug.LogWarning(PlayerController.instance.terraformCenters.Count);
+        // Debug.LogWarning(PlayerController.instance.terraformCenters.Count);
         TerraformClient(terraformCenter, hitChunkPos, terraformMode);
     }
 
@@ -128,7 +131,11 @@ public class Terraforming : NetworkBehaviour
 
                 marchingCubes.terraformComputeShader.Dispatch(terraformKernel, threadSizeX, threadSizeY, threadSizeZ);
 
-                marchingCubes.SyncMarchingCubes(marchingCubes.heightsBuffer, true);
+                int size = (terrainDensityData.width + 1) * (terrainDensityData.width + 1) * (terrainDensityData.width + 1);
+
+                marchingCubes.heightsBuffer.GetData(marchingCubes.heightsArray, 0, 0, size);
+
+                marchingCubes.MarchingCubesJobHandler(marchingCubes.heightsArray, true);
             }
         }
     }

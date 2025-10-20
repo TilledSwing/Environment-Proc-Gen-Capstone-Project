@@ -147,7 +147,7 @@ MonoBehaviour:
   terraformStrength: 25
   assetLayer:
     serializedVersion: 2
-    m_Bits: 192
+    m_Bits: 64
 --- !u!114 &6226870386460592029
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -234,7 +234,7 @@ MonoBehaviour:
   _spectatorInterpolation: 2
   _enableTeleport: 0
   _teleportThreshold: 1
-  <PrefabId>k__BackingField: 10
+  <PrefabId>k__BackingField: 11
   <SpawnableCollectionId>k__BackingField: 0
   <AssetPathHash>k__BackingField: 13218102392829198384
   <SceneId>k__BackingField: 0

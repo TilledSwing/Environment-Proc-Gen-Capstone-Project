@@ -37,6 +37,10 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - _AOMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _BaseMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -85,7 +89,15 @@ Material:
         m_Texture: {fileID: 2800000, guid: 6bfb04968a2dce8439dc9ec512faebe0, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _metallicMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _normalMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _roughnessMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -139,6 +151,8 @@ Material:
     - _fade: 0.5
     - _metallic: 0
     - _smoothness: 0.5
+    - _useMetallicMap: 0
+    - _useSmoothnessMap: 0
     m_Colors:
     - Color_3D89B5A2: {r: 1, g: 0.28256348, b: 0.090196066, a: 1}
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}

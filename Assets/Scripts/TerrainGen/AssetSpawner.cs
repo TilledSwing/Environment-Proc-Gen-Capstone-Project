@@ -24,11 +24,14 @@ public class AssetSpawner : MonoBehaviour
     public List<List<ComputeMarchingCubes.Vertex>> acceptedSpawnPoints;
     public NativeArray<ComputeMarchingCubes.Vertex> chunkVertices;
     public List<ComputeMarchingCubes.Vertex> vertices;
+    public float[] heightsArray;
+    float3[] minDepthPoints;
     public Vector3Int chunkPos;
     public LayerMask assetLayer;
     public LayerMask interactLayer;
     public int assetSpacing = 8;
     public bool assetsSet = false;
+    public bool emptyChunk = false;
     void Start() {
         assetLayer = LayerMask.GetMask("Asset Layer");
         interactLayer = LayerMask.GetMask("Interact Layer");
@@ -39,10 +42,11 @@ public class AssetSpawner : MonoBehaviour
     public void SpawnAssets()
     {
         vertexBufferLength = chunkVertices.Length;
-        vertices = chunkVertices.ToList();
-        vertices.Sort();
-        if (!assetSpawnData.assets.ContainsKey(chunkPos) && vertexBufferLength > 0)
+        if (vertexBufferLength <= 0) emptyChunk = true;
+        if (!assetSpawnData.assets.ContainsKey(chunkPos))
         {
+            vertices = chunkVertices.ToList();
+            vertices.Sort();
             uint seed = Hash(chunkPos.x, chunkPos.y, chunkPos.z, terrainDensityData.noiseGenerators[0].noiseSeed);
             Unity.Mathematics.Random rng = new(seed);
             InitializeData();
@@ -78,27 +82,46 @@ public class AssetSpawner : MonoBehaviour
     }
     public void CreateSpawnPointsJobHandler(ref Unity.Mathematics.Random rng)
     {
-        int totalIterations = 0;
         List<AssetSpawnFilters> assetSpawnFilters = new(assetSpawnData.spawnableAssets.Count);
         for (int i = 0; i < assetSpawnData.spawnableAssets.Count; i++)
         {
+            // if (emptyChunk && !assetSpawnData.spawnableAssets[i].undergroundAsset) continue;
             assetSpawnFilters.Add(new AssetSpawnFilters(assetSpawnData.spawnableAssets[i].rotateToFaceNormal, assetSpawnData.spawnableAssets[i].spawnProbability, assetSpawnData.spawnableAssets[i].useMinSlope,
                                                          assetSpawnData.spawnableAssets[i].minSlope, assetSpawnData.spawnableAssets[i].useMaxSlope, assetSpawnData.spawnableAssets[i].maxSlope,
                                                          assetSpawnData.spawnableAssets[i].useMinHeight, assetSpawnData.spawnableAssets[i].minHeight, assetSpawnData.spawnableAssets[i].useMaxHeight,
-                                                         assetSpawnData.spawnableAssets[i].maxHeight, assetSpawnData.spawnableAssets[i].underwaterAsset));
-            totalIterations += assetSpawnData.spawnableAssets[i].maxPerChunk;
+                                                         assetSpawnData.spawnableAssets[i].maxHeight, assetSpawnData.spawnableAssets[i].underwaterAsset, assetSpawnData.spawnableAssets[i].undergroundAsset));
         }
         for (int i = 0; i < assetSpawnData.spawnableAssets.Count; i++)
         {
-            for(int j = 0; j < assetSpawnData.spawnableAssets[i].maxPerChunk; j++)
+            // if (emptyChunk && !assetSpawnData.spawnableAssets[i].undergroundAsset) continue;
+            if (assetSpawnFilters[i].undergroundAsset)
+            {
+                minDepthPoints = GetMinDepthChunkPoints(assetSpawnData.spawnableAssets[i].minDepth, heightsArray);
+                if (minDepthPoints == null || minDepthPoints.Length == 0) continue;
+            }
+            for (int j = 0; j < assetSpawnData.spawnableAssets[i].maxPerChunk; j++)
             {
                 float roll = rng.NextFloat();
 
                 if (assetSpawnFilters[i].spawnProbability < roll) continue;
 
-                int randomIndex = rng.NextInt(0, vertices.Count);
-                float3 spawnPoint = vertices[randomIndex].position;
-                float3 spawnPointNormal = vertices[randomIndex].normal;
+                int randomIndex;
+                float3 spawnPoint;
+                float3 spawnPointNormal;
+
+                if (assetSpawnFilters[i].undergroundAsset)
+                {
+                    randomIndex = rng.NextInt(0, minDepthPoints.Length);
+                    spawnPoint = minDepthPoints[randomIndex];
+                    spawnPointNormal = new float3(rng.NextFloat(0f, 360f), rng.NextFloat(0f, 360f), rng.NextFloat(0f, 360f));
+                }
+                else
+                {
+                    if (emptyChunk) continue;
+                    randomIndex = rng.NextInt(0, vertices.Count);
+                    spawnPoint = vertices[randomIndex].position;
+                    spawnPointNormal = vertices[randomIndex].normal;
+                }
 
                 if (!assetSpawnFilters[i].rotateToFaceNormal)
                 {
@@ -117,19 +140,18 @@ public class AssetSpawner : MonoBehaviour
                 if (assetSpawnFilters[i].useMinHeight && height < assetSpawnFilters[i].minHeight - 0.01f) continue;
                 if (assetSpawnFilters[i].useMaxHeight && height > assetSpawnFilters[i].maxHeight + 0.01f) continue;
                 if (assetSpawnFilters[i].underwaterAsset && height > terrainDensityData.waterLevel - 3) continue;
-                if (!assetSpawnFilters[i].underwaterAsset && height < terrainDensityData.waterLevel) continue;
+                if (!assetSpawnFilters[i].underwaterAsset && height < terrainDensityData.waterLevel && !assetSpawnFilters[i].undergroundAsset) continue;
                 ComputeMarchingCubes.Vertex vert;
                 vert.position = spawnPoint;
                 vert.normal = spawnPointNormal;
-                // flatSpawnPoints[(i * assetSpawnData.spawnableAssets[i].maxPerChunk) + j] = vert;
                 if (vert.position.Equals(float3.zero) || vert.normal.Equals(float3.zero)) continue;
                 spawnPoints[i].Add(vert);
             }
         }
 
+        float spacingSquared = assetSpacing * assetSpacing;
         for (int i = 0; i < assetSpawnData.spawnableAssets.Count; i++)
         {
-            float spacingSquared = assetSpacing * assetSpacing;
             List<ComputeMarchingCubes.Vertex> tempAccepted = new();
             if (spawnPoints[i].Count == 0) continue;
             tempAccepted.Add(spawnPoints[i][0]);
@@ -314,7 +336,8 @@ public class AssetSpawner : MonoBehaviour
         public bool useMaxHeight;
         public int maxHeight;
         public bool underwaterAsset;
-        public AssetSpawnFilters(bool rotateToFaceNormal, float spawnProbability, bool useMinSlope, int minSlope, bool useMaxSlope, int maxSlope, bool useMinHeight, int minHeight, bool useMaxHeight, int maxHeight, bool underwaterAsset)
+        public bool undergroundAsset;
+        public AssetSpawnFilters(bool rotateToFaceNormal, float spawnProbability, bool useMinSlope, int minSlope, bool useMaxSlope, int maxSlope, bool useMinHeight, int minHeight, bool useMaxHeight, int maxHeight, bool underwaterAsset, bool undergroundAsset)
         {
             this.rotateToFaceNormal = rotateToFaceNormal;
             this.spawnProbability = spawnProbability;
@@ -327,6 +350,7 @@ public class AssetSpawner : MonoBehaviour
             this.useMaxHeight = useMaxHeight;
             this.maxHeight = maxHeight;
             this.underwaterAsset = underwaterAsset;
+            this.undergroundAsset = undergroundAsset;
         }
     }
     /// <summary>
@@ -361,7 +385,7 @@ public class AssetSpawner : MonoBehaviour
     }
     public void AssetInstantiation(int i, int j, Unity.Mathematics.Random rng)
     {
-        float randomRotationDeg = rng.NextFloat(0f,360f);
+        float randomRotationDeg = rng.NextFloat(0f, 360f);
         Quaternion randomYRotation = Quaternion.Euler(0f, randomRotationDeg, 0f);
         GameObject assetToSpawn;
         if (assetSpawnData.assets[chunkPos][i].rotateToFaceNormal)
@@ -378,6 +402,28 @@ public class AssetSpawner : MonoBehaviour
             spawnedAssets[i].Add(new Asset(assetToSpawn, assetToSpawn.GetComponent<MeshRenderer>(), assetToSpawn.GetComponent<MeshCollider>()));
         }
         assetSpawnData.assets[chunkPos][i].spawnedAssets.Add(new Asset(assetToSpawn, assetToSpawn.GetComponent<MeshRenderer>(), assetToSpawn.GetComponent<MeshCollider>()));
+    }
+    public float3[] GetMinDepthChunkPoints(float depth, float[] heightsArray)
+    {
+        List<float3> depthResult = new();
+        int size = terrainDensityData.width + 1;
+
+        for (int x = 0; x < size; x++)
+        {
+            for (int y = 0; y < size; y++)
+            {
+                for (int z = 0; z < size; z++)
+                {
+                    if(heightsArray[(x * size * size) + (y * size) + z] > depth)
+                    {
+                        // Debug.Log(heightsArray[(x * terrainDensityData.width * terrainDensityData.width) + (y * terrainDensityData.width) + z]);
+                        depthResult.Add(new float3(chunkPos.x + x, chunkPos.y + y, chunkPos.z + z));
+                    }
+                }
+            }
+        }
+
+        return depthResult.ToArray();
     }
     /// <summary>
     /// Destroy all the assets
@@ -424,7 +470,8 @@ public class SpawnableAsset
     public int maxHeight;
     public bool underwaterAsset;
     public bool undergroundAsset;
-    public SpawnableAsset(GameObject asset, int maxPerChunk, bool rotateToFaceNormal, float spawnProbability, bool useMinSlope, int minSlope, bool useMaxSlope, int maxSlope, bool useMinHeight, int minHeight, bool useMaxHeight, int maxHeight, bool underwaterAsset)
+    public float minDepth;
+    public SpawnableAsset(GameObject asset, int maxPerChunk, bool rotateToFaceNormal, float spawnProbability, bool useMinSlope, int minSlope, bool useMaxSlope, int maxSlope, bool useMinHeight, int minHeight, bool useMaxHeight, int maxHeight, bool underwaterAsset, float minDepth)
     {
         this.asset = asset;
         this.maxPerChunk = maxPerChunk;
@@ -439,6 +486,7 @@ public class SpawnableAsset
         this.useMaxHeight = useMaxHeight;
         this.maxHeight = maxHeight;
         this.underwaterAsset = underwaterAsset;
+        this.minDepth = minDepth;
     }
 }
 [Serializable]

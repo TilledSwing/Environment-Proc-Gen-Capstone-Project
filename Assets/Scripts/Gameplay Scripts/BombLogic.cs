@@ -129,7 +129,11 @@ public class BombLogic : NetworkBehaviour
 
                 marchingCubes.terraformComputeShader.Dispatch(terraformKernel, threadSizeX, threadSizeY, threadSizeZ);
 
-                marchingCubes.SyncMarchingCubes(marchingCubes.heightsBuffer, true);
+                int size = (terrainDensityData.width + 1) * (terrainDensityData.width + 1) * (terrainDensityData.width + 1);
+
+                marchingCubes.heightsBuffer.GetData(marchingCubes.heightsArray, 0, 0, size);
+
+                marchingCubes.MarchingCubesJobHandler(marchingCubes.heightsArray, true);
             }
         }
     }

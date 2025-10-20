@@ -27,6 +27,8 @@ MonoBehaviour:
     useMaxHeight: 1
     maxHeight: 50
     underwaterAsset: 0
+    undergroundAsset: 0
+    minDepth: 0
   - asset: {fileID: 2007192654614371893, guid: db907286f5ae1d5498c4f2ab90c984f2, type: 3}
     spawnedAssets: []
     maxPerChunk: 8
@@ -41,6 +43,8 @@ MonoBehaviour:
     useMaxHeight: 1
     maxHeight: 50
     underwaterAsset: 0
+    undergroundAsset: 0
+    minDepth: 0
   - asset: {fileID: 7646758127176492012, guid: f94ff99c261e9924bbbb894292ced45c, type: 3}
     spawnedAssets: []
     maxPerChunk: 8
@@ -55,6 +59,8 @@ MonoBehaviour:
     useMaxHeight: 0
     maxHeight: 0
     underwaterAsset: 0
+    undergroundAsset: 0
+    minDepth: 0
   - asset: {fileID: 7762856170357784386, guid: 1f761016c03a561418ff210aec563e01, type: 3}
     spawnedAssets: []
     maxPerChunk: 8
@@ -69,6 +75,8 @@ MonoBehaviour:
     useMaxHeight: 0
     maxHeight: 0
     underwaterAsset: 0
+    undergroundAsset: 0
+    minDepth: 0
   - asset: {fileID: 5314847637665799501, guid: f2612ce08bab1de44b3c77b0ccafd3a6, type: 3}
     spawnedAssets: []
     maxPerChunk: 8
@@ -83,6 +91,8 @@ MonoBehaviour:
     useMaxHeight: 0
     maxHeight: 0
     underwaterAsset: 0
+    undergroundAsset: 0
+    minDepth: 0
   - asset: {fileID: 4872043508624741418, guid: e08ec1f4b5e48ab4e96144348381a5d3, type: 3}
     spawnedAssets: []
     maxPerChunk: 8
@@ -97,20 +107,8 @@ MonoBehaviour:
     useMaxHeight: 0
     maxHeight: 0
     underwaterAsset: 1
-  - asset: {fileID: 7046172586671867047, guid: 1cb8589f3bf81294b81d0e23d1e5868b, type: 3}
-    spawnedAssets: []
-    maxPerChunk: 8
-    rotateToFaceNormal: 1
-    spawnProbability: 0.5
-    useMinSlope: 0
-    minSlope: 0
-    useMaxSlope: 0
-    maxSlope: 0
-    useMinHeight: 0
-    minHeight: 0
-    useMaxHeight: 0
-    maxHeight: 0
-    underwaterAsset: 1
+    undergroundAsset: 0
+    minDepth: 0
   - asset: {fileID: 3289464266404052115, guid: 25d2db3cddabd5044b15df3087fb148b, type: 3}
     spawnedAssets: []
     maxPerChunk: 8
@@ -125,6 +123,8 @@ MonoBehaviour:
     useMaxHeight: 0
     maxHeight: 0
     underwaterAsset: 0
+    undergroundAsset: 0
+    minDepth: 0
   - asset: {fileID: 8498971446905571726, guid: d461bde81a31c7546b8ca4bd4de3b937, type: 3}
     spawnedAssets: []
     maxPerChunk: 8
@@ -139,6 +139,8 @@ MonoBehaviour:
     useMaxHeight: 0
     maxHeight: 0
     underwaterAsset: 0
+    undergroundAsset: 0
+    minDepth: 0
   - asset: {fileID: 7155106886293182813, guid: 17aa0fb53545bd244975203542d39ad9, type: 3}
     spawnedAssets: []
     maxPerChunk: 8
@@ -153,6 +155,8 @@ MonoBehaviour:
     useMaxHeight: 1
     maxHeight: 55
     underwaterAsset: 0
+    undergroundAsset: 0
+    minDepth: 0
   - asset: {fileID: 1315793589245392064, guid: 87c56f7bf213b1d4eb030fc84823d811, type: 3}
     spawnedAssets: []
     maxPerChunk: 8
@@ -167,3 +171,37 @@ MonoBehaviour:
     useMaxHeight: 0
     maxHeight: 0
     underwaterAsset: 0
+    undergroundAsset: 0
+    minDepth: 0
+  - asset: {fileID: 7046172586671867047, guid: 1cb8589f3bf81294b81d0e23d1e5868b, type: 3}
+    spawnedAssets: []
+    maxPerChunk: 5
+    rotateToFaceNormal: 1
+    spawnProbability: 0.6
+    useMinSlope: 0
+    minSlope: 0
+    useMaxSlope: 0
+    maxSlope: 0
+    useMinHeight: 0
+    minHeight: 0
+    useMaxHeight: 0
+    maxHeight: 0
+    underwaterAsset: 1
+    undergroundAsset: 0
+    minDepth: 0
+  - asset: {fileID: 798320350305323362, guid: 9cda74eb5c847df4bacb99f2819097eb, type: 3}
+    spawnedAssets: []
+    maxPerChunk: 2
+    rotateToFaceNormal: 0
+    spawnProbability: 0.1
+    useMinSlope: 0
+    minSlope: 0
+    useMaxSlope: 0
+    maxSlope: 0
+    useMinHeight: 0
+    minHeight: 0
+    useMaxHeight: 0
+    maxHeight: 0
+    underwaterAsset: 0
+    undergroundAsset: 1
+    minDepth: 3
