@@ -392,12 +392,24 @@ public class AssetSpawner : MonoBehaviour
         {
             Quaternion normal = Quaternion.FromToRotation(Vector3.up, acceptedSpawnPoints[i][j].normal);
             assetToSpawn = Instantiate(assetSpawnData.assets[chunkPos][i].asset, acceptedSpawnPoints[i][j].position, normal * randomYRotation);
+            if (assetSpawnData.spawnableAssets[i].isValuable)
+            {
+                assetToSpawn.layer = LayerMask.NameToLayer("Interact Layer");
+                ValuableProperties properties = assetToSpawn.AddComponent<ValuableProperties>();
+                properties.value = rng.NextInt(assetSpawnData.spawnableAssets[i].minValue, assetSpawnData.spawnableAssets[i].maxValue);
+            }
             assetToSpawn.transform.SetParent(gameObject.transform);
             spawnedAssets[i].Add(new Asset(assetToSpawn, assetToSpawn.GetComponent<MeshRenderer>(), assetToSpawn.GetComponent<MeshCollider>()));
         }
         else
         {
             assetToSpawn = Instantiate(assetSpawnData.assets[chunkPos][i].asset, acceptedSpawnPoints[i][j].position, randomYRotation);
+            if (assetSpawnData.spawnableAssets[i].isValuable)
+            {
+                assetToSpawn.layer = LayerMask.NameToLayer("Interact Layer");;
+                ValuableProperties properties = assetToSpawn.AddComponent<ValuableProperties>();
+                properties.value = rng.NextInt(assetSpawnData.spawnableAssets[i].minValue, assetSpawnData.spawnableAssets[i].maxValue);
+            }
             assetToSpawn.transform.SetParent(gameObject.transform);
             spawnedAssets[i].Add(new Asset(assetToSpawn, assetToSpawn.GetComponent<MeshRenderer>(), assetToSpawn.GetComponent<MeshCollider>()));
         }
@@ -471,7 +483,10 @@ public class SpawnableAsset
     public bool underwaterAsset;
     public bool undergroundAsset;
     public float minDepth;
-    public SpawnableAsset(GameObject asset, int maxPerChunk, bool rotateToFaceNormal, float spawnProbability, bool useMinSlope, int minSlope, bool useMaxSlope, int maxSlope, bool useMinHeight, int minHeight, bool useMaxHeight, int maxHeight, bool underwaterAsset, float minDepth)
+    public bool isValuable;
+    public int minValue;
+    public int maxValue;
+    public SpawnableAsset(GameObject asset, int maxPerChunk, bool rotateToFaceNormal, float spawnProbability, bool useMinSlope, int minSlope, bool useMaxSlope, int maxSlope, bool useMinHeight, int minHeight, bool useMaxHeight, int maxHeight, bool underwaterAsset, float minDepth, bool isValuable, int minValue, int maxValue)
     {
         this.asset = asset;
         this.maxPerChunk = maxPerChunk;
@@ -487,6 +502,9 @@ public class SpawnableAsset
         this.maxHeight = maxHeight;
         this.underwaterAsset = underwaterAsset;
         this.minDepth = minDepth;
+        this.isValuable = isValuable;
+        this.minValue = minValue;
+        this.maxValue = maxValue;
     }
 }
 [Serializable]

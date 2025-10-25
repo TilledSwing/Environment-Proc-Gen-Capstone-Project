@@ -27,8 +27,7 @@ public class ChunkGenNetwork : MonoBehaviour
     private FogRenderPassFeature fogRenderPassFeature;
     // Objective Text Stuff
     public GameObject objectiveCanvas;
-    public GameObject objectiveHeader;
-    public GameObject objectiveCounterText;
+    public GameObject hudCanvas;
     // Chat & Lobby
     public GameObject chatContainer;
     public GameObject lobbyContainer;
@@ -37,7 +36,7 @@ public class ChunkGenNetwork : MonoBehaviour
     public int maxWorldYChunks = 10;
     public float maxViewDst = 100;
     public Transform viewer;
-    public static Vector3 viewerPos;
+    public Vector3 viewerPos;
     public float updateDistanceThreshold = 5f;
     private Vector3 lastUpdateViewerPos;
     public int chunkSize;
@@ -97,7 +96,7 @@ public class ChunkGenNetwork : MonoBehaviour
     public Queue<Action> pendingMeshInits = new();
     public bool isLoadingMeshes = false;
     public bool hasPendingReadbacks = false;
-    public Queue<ReadbackRequest> pendingReadbacks = new();
+    public PriorityQueue<ReadbackRequest> pendingReadbacks = new();
     public bool isLoadingReadbacks = false;
     public bool hasPendingAssetInstantiations = false;
     public Queue<Action> pendingAssetInstantiations = new();
@@ -113,11 +112,13 @@ public class ChunkGenNetwork : MonoBehaviour
 
     public class ReadbackRequest
     {
+        public Bounds bounds;
         public ComputeBuffer buffer;
         public Action<AsyncGPUReadbackRequest> readbackRequest;
 
-        public ReadbackRequest(ComputeBuffer buffer, Action<AsyncGPUReadbackRequest> readbackRequest)
+        public ReadbackRequest(Bounds bounds, ComputeBuffer buffer, Action<AsyncGPUReadbackRequest> readbackRequest)
         {
+            this.bounds = bounds;
             this.buffer = buffer;
             this.readbackRequest = readbackRequest;
         }
@@ -531,12 +532,27 @@ public class ChunkGenNetwork : MonoBehaviour
     /// <returns>yield return</returns>
     private IEnumerator LoadReadbacksOverTime()
     {
+        Vector3 startViewerPos = viewerPos;
         isLoadingReadbacks = true;
 
         List<AsyncGPUReadbackRequest> activeRequests = ListPoolManager<AsyncGPUReadbackRequest>.Get();
 
         while (pendingReadbacks.Count > 0 || activeRequests.Count > 0)
         {
+            if (Vector3.Distance(startViewerPos, viewerPos) >= queueUpdateDistanceThreshold)
+            {
+                List<ReadbackRequest> oldChunkReadbacks = new();
+                while (pendingReadbacks.Count > 0)
+                {
+                    oldChunkReadbacks.Add(pendingReadbacks.Dequeue());
+                }
+                foreach (ReadbackRequest chunk in oldChunkReadbacks)
+                {
+                    float chunkViewerDstFromBound = chunk.bounds.SqrDistance(viewerPos);
+                    pendingReadbacks.Enqueue(chunk, chunkViewerDstFromBound);
+                }
+                startViewerPos = viewerPos;
+            }
             for (int i = 0; i < activeRequests.Count; i++)
             {
                 if (activeRequests[i].done)
@@ -787,6 +803,7 @@ public class ChunkGenNetwork : MonoBehaviour
             marchingCubes.meshFilter = meshFilter;
             marchingCubes.meshCollider = meshCollider;
             marchingCubes.chunkPos = chunkPos;
+            marchingCubes.bounds = bounds;
             marchingCubes.assetSpawner = assetSpawner;
             marchingCubes.marchingCubesComputeShader = marchingCubesComputeShader;
             marchingCubes.terrainDensityComputeShader = terrainDensityComputeShader;
@@ -828,7 +845,7 @@ public class ChunkGenNetwork : MonoBehaviour
         /// <param name="chunkSize">The chunk size</param>
         public void UpdateChunk(float maxViewDst, int chunkSize)
         {
-            float viewerDstFromBound = bounds.SqrDistance(viewerPos);
+            float viewerDstFromBound = bounds.SqrDistance(Instance.viewerPos);
             // if (viewerDstFromBound <= chunkSize * 2) marchingCubes.UpdateMesh(LOD.LOD1);
             // else if (viewerDstFromBound <= chunkSize * 4) marchingCubes.UpdateMesh(LOD.LOD2);
             // else if (viewerDstFromBound <= chunkSize * 6) marchingCubes.UpdateMesh(LOD.LOD3);

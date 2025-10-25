@@ -14,15 +14,19 @@ public class InteractController : MonoBehaviour
     public LayerMask interactLayerMask;
     public Color interactHighlightColor;
     private GameObject objectiveCounterText;
+    private TextMeshProUGUI text;
     public int objectiveGoal;
     private int objectiveCounter = 0;
     private bool lastRayState = false;
     Renderer meshRenderer;
     Material[] materials;
-    
+
     void Awake()
     {
         playerCamera = Camera.main;
+        // objectiveCounterText = GameObject.Find("Objective Counter");
+        // text = objectiveCounterText.GetComponent<TextMeshProUGUI>();
+        // Debug.Log($"Text assigned? {text != null}");
     }
 
     void Update()
@@ -49,11 +53,15 @@ public class InteractController : MonoBehaviour
             }
             if (Input.GetKeyDown(KeyCode.F))
             {
+                // if (objectiveCounter < objectiveGoal) {
+                //     text.text = ++objectiveCounter + "/" + objectiveGoal;
+                // }
                 objectiveCounterText = GameObject.Find("Objective Counter");
-                TextMeshProUGUI text = objectiveCounterText.GetComponent<TextMeshProUGUI>();
-                if (objectiveCounter < objectiveGoal) {
-                    text.text = ++objectiveCounter + "/" + objectiveGoal;
-                }
+                text = objectiveCounterText.GetComponent<TextMeshProUGUI>();
+                int value = hit.transform.gameObject.GetComponent<ValuableProperties>().value;
+                // objectiveCounter += value;
+                // text.text = "$" + objectiveCounter;
+                StartCoroutine(EaseValueAdd(value, 0.5f));
                 foreach (Material material in materials)
                 {
                     StartCoroutine(FadeOutDitherAndDestroy(material, hit.collider.gameObject, 0.5f));
@@ -107,5 +115,21 @@ public class InteractController : MonoBehaviour
             yield return null;
         }
         Destroy(gameObject);
+    }
+    IEnumerator EaseValueAdd(int value, float duration)
+    {
+        float t = 0;
+        int startValue = objectiveCounter;
+        int endValue = objectiveCounter + value;
+        while (t < duration)
+        {
+            t += Time.deltaTime;
+            float ratio = Mathf.Clamp01(t / duration);
+            int currentCounter = (int)Mathf.Lerp(startValue, endValue, ratio);
+            text.text = "$" + currentCounter;
+            yield return null;
+        }
+        objectiveCounter = endValue;
+        text.text = "$" + objectiveCounter;
     }
 }

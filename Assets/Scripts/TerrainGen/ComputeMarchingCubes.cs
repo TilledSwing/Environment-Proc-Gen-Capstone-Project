@@ -29,6 +29,7 @@ public class ComputeMarchingCubes : MonoBehaviour
     public WaterPlaneGenerator waterGen;
     public AssetSpawner assetSpawner;
     public Vector3Int chunkPos;
+    public Bounds bounds;
     public ComputeBuffer heightsBuffer;
     public ComputeBuffer vertexBuffer;
     public float[] heightsArray;
@@ -288,7 +289,7 @@ public class ComputeMarchingCubes : MonoBehaviour
         heightsBuffer = new ComputeBuffer((terrainDensityData.width + 1) * (terrainDensityData.width + 1) * (terrainDensityData.width + 1), sizeof(float));
 
         terrainDensityComputeShader.SetBuffer(densityKernel, "HeightsBuffer", heightsBuffer);
-        terrainDensityComputeShader.Dispatch(densityKernel, Mathf.CeilToInt(terrainDensityData.width / 4f) + 1, Mathf.CeilToInt(terrainDensityData.width / 4f) + 1, Mathf.CeilToInt(terrainDensityData.width / 4f) + 1);
+        terrainDensityComputeShader.Dispatch(densityKernel, Mathf.CeilToInt(terrainDensityData.width / 8f) + 1, Mathf.CeilToInt(terrainDensityData.width / 8f) + 1, Mathf.CeilToInt(terrainDensityData.width / 8f) + 1);
 
         foreach (ComputeBuffer noiseBuffer in noiseBuffers)
         {
@@ -308,7 +309,7 @@ public class ComputeMarchingCubes : MonoBehaviour
         }
         else
         {
-            ChunkGenNetwork.Instance.pendingReadbacks.Enqueue(new ChunkGenNetwork.ReadbackRequest(heightsBuffer, (AsyncGPUReadbackRequest dataRequest) =>
+            ChunkGenNetwork.Instance.pendingReadbacks.Enqueue(new ChunkGenNetwork.ReadbackRequest(bounds, heightsBuffer, (AsyncGPUReadbackRequest dataRequest) =>
             {
                 if (dataRequest.hasError)
                 {
@@ -326,7 +327,7 @@ public class ComputeMarchingCubes : MonoBehaviour
                 }
 
                 MarchingCubesJobHandler(heightsArray, false);
-            }));
+            }), bounds.SqrDistance(ChunkGenNetwork.Instance.viewerPos));
         }
 
         // return heightsBuffer;
@@ -436,7 +437,7 @@ public class ComputeMarchingCubes : MonoBehaviour
             resolution = ChunkGenNetwork.Instance.resolution,
         };
 
-        JobHandle marchingCubesHandler = marchingCubesJob.Schedule(iterations, 32);
+        JobHandle marchingCubesHandler = marchingCubesJob.Schedule(iterations, 16);
         marchingCubesHandler.Complete();
 
         if (terrainDensityData.waterLevel > chunkPos.y && terrainDensityData.waterLevel < Mathf.RoundToInt(chunkPos.y + terrainDensityData.width))
@@ -470,30 +471,29 @@ public class ComputeMarchingCubes : MonoBehaviour
             int x = index / ((chunkSize + 1) * (chunkSize + 1));
             int y = index / (chunkSize + 1) % (chunkSize + 1);
             int z = index % (chunkSize + 1);
-            // uint3 id = new((uint)(index / ((chunkSize+1) * (chunkSize+1))), (uint)(index / (chunkSize+1) % (chunkSize+1)), (uint)(index % (chunkSize+1)));
             uint3 id = new((uint)x, (uint)y, (uint)z);
 
             if (id.x >= chunkSize || id.y >= chunkSize || id.z >= chunkSize)
-            {
                 return;
-            }
 
             if (id.x % resolution != 0 || id.y % resolution != 0 || id.z % resolution != 0)
-            {
                 return;
-            }
 
             CubeVertices cubeVertices;
-            cubeVertices.v0 = heightsArray[FlattenIndex(new float3(id.x * resolution, id.y * resolution, id.z * resolution) + (vertexOffsetTable[0] * resolution), chunkSize)];
-            cubeVertices.v1 = heightsArray[FlattenIndex(new float3(id.x * resolution, id.y * resolution, id.z * resolution) + (vertexOffsetTable[1] * resolution), chunkSize)];
-            cubeVertices.v2 = heightsArray[FlattenIndex(new float3(id.x * resolution, id.y * resolution, id.z * resolution) + (vertexOffsetTable[2] * resolution), chunkSize)];
-            cubeVertices.v3 = heightsArray[FlattenIndex(new float3(id.x * resolution, id.y * resolution, id.z * resolution) + (vertexOffsetTable[3] * resolution), chunkSize)];
-            cubeVertices.v4 = heightsArray[FlattenIndex(new float3(id.x * resolution, id.y * resolution, id.z * resolution) + (vertexOffsetTable[4] * resolution), chunkSize)];
-            cubeVertices.v5 = heightsArray[FlattenIndex(new float3(id.x * resolution, id.y * resolution, id.z * resolution) + (vertexOffsetTable[5] * resolution), chunkSize)];
-            cubeVertices.v6 = heightsArray[FlattenIndex(new float3(id.x * resolution, id.y * resolution, id.z * resolution) + (vertexOffsetTable[6] * resolution), chunkSize)];
-            cubeVertices.v7 = heightsArray[FlattenIndex(new float3(id.x * resolution, id.y * resolution, id.z * resolution) + (vertexOffsetTable[7] * resolution), chunkSize)];
+            float adjustedIdx = id.x * resolution;
+            float adjustedIdy = id.y * resolution;
+            float adjustedIdz = id.z * resolution;
+            float3 adjustedPos = new float3(adjustedIdx, adjustedIdy, adjustedIdz);
+            cubeVertices.v0 = heightsArray[FlattenIndex(adjustedPos + (vertexOffsetTable[0] * resolution), chunkSize)];
+            cubeVertices.v1 = heightsArray[FlattenIndex(adjustedPos + (vertexOffsetTable[1] * resolution), chunkSize)];
+            cubeVertices.v2 = heightsArray[FlattenIndex(adjustedPos + (vertexOffsetTable[2] * resolution), chunkSize)];
+            cubeVertices.v3 = heightsArray[FlattenIndex(adjustedPos + (vertexOffsetTable[3] * resolution), chunkSize)];
+            cubeVertices.v4 = heightsArray[FlattenIndex(adjustedPos + (vertexOffsetTable[4] * resolution), chunkSize)];
+            cubeVertices.v5 = heightsArray[FlattenIndex(adjustedPos + (vertexOffsetTable[5] * resolution), chunkSize)];
+            cubeVertices.v6 = heightsArray[FlattenIndex(adjustedPos + (vertexOffsetTable[6] * resolution), chunkSize)];
+            cubeVertices.v7 = heightsArray[FlattenIndex(adjustedPos + (vertexOffsetTable[7] * resolution), chunkSize)];
 
-            float3 cubePosition = new float3((id.x * resolution) + chunkPos.x, (id.y * resolution) + chunkPos.y, (id.z * resolution) + chunkPos.z);
+            float3 cubePosition = new float3(adjustedIdx + chunkPos.x, adjustedIdy + chunkPos.y, adjustedIdz + chunkPos.z);
 
             int configurationIndex = 0;
 
@@ -512,26 +512,30 @@ public class ComputeMarchingCubes : MonoBehaviour
             }
 
             int edgeIndex = 0;
+            int flattenedConfigurationIndex = configurationIndex << 4;
 
             for (int t = 0; t < 5; t++)
             {
-                int edge1Value = triangleTable[(configurationIndex * 16) + edgeIndex + 0];
-                int edge2Value = triangleTable[(configurationIndex * 16) + edgeIndex + 1];
-                int edge3Value = triangleTable[(configurationIndex * 16) + edgeIndex + 2];
+                int edge1Value = triangleTable[flattenedConfigurationIndex + edgeIndex];
+                int edge2Value = triangleTable[flattenedConfigurationIndex + edgeIndex + 1];
+                int edge3Value = triangleTable[flattenedConfigurationIndex + edgeIndex + 2];
 
                 if (edge1Value == -1 || edge2Value == -1 || edge3Value == -1)
                 {
                     return;
                 }
 
-                float3 edge1V1 = cubePosition + (vertexOffsetTable[edgeIndexTable[(edge1Value * 2) + 0]] * resolution);
-                float3 edge1V2 = cubePosition + (vertexOffsetTable[edgeIndexTable[(edge1Value * 2) + 1]] * resolution);
+                int flattenedEdge1Value = edge1Value << 1;
+                float3 edge1V1 = cubePosition + (vertexOffsetTable[edgeIndexTable[flattenedEdge1Value]] * resolution);
+                float3 edge1V2 = cubePosition + (vertexOffsetTable[edgeIndexTable[flattenedEdge1Value + 1]] * resolution);
+                
+                int flattenedEdge2Value = edge2Value << 1;
+                float3 edge2V1 = cubePosition + (vertexOffsetTable[edgeIndexTable[flattenedEdge2Value]] * resolution);
+                float3 edge2V2 = cubePosition + (vertexOffsetTable[edgeIndexTable[flattenedEdge2Value + 1]] * resolution);
 
-                float3 edge2V1 = cubePosition + (vertexOffsetTable[edgeIndexTable[(edge2Value * 2) + 0]] * resolution);
-                float3 edge2V2 = cubePosition + (vertexOffsetTable[edgeIndexTable[(edge2Value * 2) + 1]] * resolution);
-
-                float3 edge3V1 = cubePosition + (vertexOffsetTable[edgeIndexTable[(edge3Value * 2) + 0]] * resolution);
-                float3 edge3V2 = cubePosition + (vertexOffsetTable[edgeIndexTable[(edge3Value * 2) + 1]] * resolution);
+                int flattenedEdge3Value = edge3Value << 1;
+                float3 edge3V1 = cubePosition + (vertexOffsetTable[edgeIndexTable[flattenedEdge3Value]] * resolution);
+                float3 edge3V2 = cubePosition + (vertexOffsetTable[edgeIndexTable[flattenedEdge3Value + 1]] * resolution);
 
                 float3 vertex1;
                 float3 vertex2;
@@ -539,9 +543,9 @@ public class ComputeMarchingCubes : MonoBehaviour
 
                 if (lerpToggle)
                 {
-                    vertex1 = math.lerp(edge1V1, edge1V2, (isolevel - cubeVertices.GetCubeVertex(edgeIndexTable[(edge1Value * 2) + 0])) / (cubeVertices.GetCubeVertex(edgeIndexTable[(edge1Value * 2) + 1]) - cubeVertices.GetCubeVertex(edgeIndexTable[(edge1Value * 2) + 0])));
-                    vertex2 = math.lerp(edge2V1, edge2V2, (isolevel - cubeVertices.GetCubeVertex(edgeIndexTable[(edge2Value * 2) + 0])) / (cubeVertices.GetCubeVertex(edgeIndexTable[(edge2Value * 2) + 1]) - cubeVertices.GetCubeVertex(edgeIndexTable[(edge2Value * 2) + 0])));
-                    vertex3 = math.lerp(edge3V1, edge3V2, (isolevel - cubeVertices.GetCubeVertex(edgeIndexTable[(edge3Value * 2) + 0])) / (cubeVertices.GetCubeVertex(edgeIndexTable[(edge3Value * 2) + 1]) - cubeVertices.GetCubeVertex(edgeIndexTable[(edge3Value * 2) + 0])));
+                    vertex1 = math.lerp(edge1V1, edge1V2, (isolevel - cubeVertices.GetCubeVertex(edgeIndexTable[flattenedEdge1Value])) / (cubeVertices.GetCubeVertex(edgeIndexTable[flattenedEdge1Value + 1]) - cubeVertices.GetCubeVertex(edgeIndexTable[flattenedEdge1Value])));
+                    vertex2 = math.lerp(edge2V1, edge2V2, (isolevel - cubeVertices.GetCubeVertex(edgeIndexTable[flattenedEdge2Value])) / (cubeVertices.GetCubeVertex(edgeIndexTable[flattenedEdge2Value + 1]) - cubeVertices.GetCubeVertex(edgeIndexTable[flattenedEdge2Value])));
+                    vertex3 = math.lerp(edge3V1, edge3V2, (isolevel - cubeVertices.GetCubeVertex(edgeIndexTable[flattenedEdge3Value])) / (cubeVertices.GetCubeVertex(edgeIndexTable[flattenedEdge3Value + 1]) - cubeVertices.GetCubeVertex(edgeIndexTable[flattenedEdge3Value])));
                 }
                 else
                 {
@@ -641,7 +645,7 @@ public class ComputeMarchingCubes : MonoBehaviour
         ComputeBuffer vertexCountBuffer = ComputeBufferPoolManager.Instance.GetComputeBuffer("VertexCountBuffer", 1, sizeof(int), ComputeBufferType.Raw);
         ComputeBuffer.CopyCount(vertexBuffer, vertexCountBuffer, 0);
 
-        ChunkGenNetwork.Instance.pendingReadbacks.Enqueue(new ChunkGenNetwork.ReadbackRequest(vertexCountBuffer, (AsyncGPUReadbackRequest countRequest) =>
+        ChunkGenNetwork.Instance.pendingReadbacks.Enqueue(new ChunkGenNetwork.ReadbackRequest(bounds, vertexCountBuffer, (AsyncGPUReadbackRequest countRequest) =>
         {
             if (countRequest.hasError)
             {
@@ -652,7 +656,7 @@ public class ComputeMarchingCubes : MonoBehaviour
             int vertexCount = countRequest.GetData<int>()[0];
             ComputeBufferPoolManager.Instance.ReturnComputeBuffer("VertexCountBuffer", vertexCountBuffer);
 
-            ChunkGenNetwork.Instance.pendingReadbacks.Enqueue(new ChunkGenNetwork.ReadbackRequest(vertexBuffer, (AsyncGPUReadbackRequest dataRequest) =>
+            ChunkGenNetwork.Instance.pendingReadbacks.Enqueue(new ChunkGenNetwork.ReadbackRequest(bounds, vertexBuffer, (AsyncGPUReadbackRequest dataRequest) =>
             {
                 if (dataRequest.hasError)
                 {
@@ -682,8 +686,8 @@ public class ComputeMarchingCubes : MonoBehaviour
                     //     SetMeshValuesPerformant(vertexCount, vertexArray, terraforming)
                     // );
                 }
-            }));
-        }));
+            }), bounds.SqrDistance(ChunkGenNetwork.Instance.viewerPos));
+        }), bounds.SqrDistance(ChunkGenNetwork.Instance.viewerPos));
     }
     /// <summary>
     /// Perform marching cubes in a compute shader and trigger mesh generation and asset spawning

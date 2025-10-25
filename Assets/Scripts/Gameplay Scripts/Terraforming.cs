@@ -53,7 +53,7 @@ public class Terraforming : NetworkBehaviour
             mode = true;
             Terraform(mode);
         }
-        if (Input.GetMouseButton(1))
+        if (Input.GetMouseButton(1) && time >= terraformUpdateTic)
         {
             time = 0f;
             mode = false;
@@ -106,7 +106,7 @@ public class Terraforming : NetworkBehaviour
         foreach (ChunkGenNetwork.TerrainChunk terrainChunk in chunkAndNeighbors)
         {
             if (terrainChunk == null) continue;
-            if (Mathf.Sqrt(terrainChunk.bounds.SqrDistance(terraformCenter)) <= terraformRadius)
+            if (terrainChunk.bounds.SqrDistance(terraformCenter) <= terraformRadius * terraformRadius)
             {
                 ComputeMarchingCubes marchingCubes = terrainChunk.marchingCubes;
                 Vector3Int chunkPos = terrainChunk.chunkPos;

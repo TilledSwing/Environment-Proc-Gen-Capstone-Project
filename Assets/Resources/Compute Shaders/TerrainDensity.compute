@@ -81,7 +81,7 @@ float SampleCurve(StructuredBuffer<float> curve, float t)
     return lerp(curve[indexStart], curve[indexEnd], x);
 }
 // Compute total density of terrain use provided noise data
-[numthreads(4,4,4)]
+[numthreads(8,8,8)]
 void TerrainDensity (uint3 id : SV_DispatchThreadID)
 {
 

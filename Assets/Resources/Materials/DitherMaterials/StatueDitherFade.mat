@@ -136,7 +136,10 @@ Material:
     - _ZWrite: 1
     - _ditherScale: 0.3
     - _fade: 0.5
+    - _metallic: 0
     - _smoothness: 0.5
+    - _useMetallicMap: 1
+    - _useSmoothnessMap: 1
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
