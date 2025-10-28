@@ -340,7 +340,7 @@
                 "m_Node": {
                     "m_Id": "0ec0f123e7de4f96ade9b9f39288b7e1"
                 },
-                "m_SlotId": 3
+                "m_SlotId": 2
             },
             "m_InputSlot": {
                 "m_Node": {
@@ -4470,8 +4470,8 @@
     "m_ObjectId": "5ec5eafa2b4e416588b63067a1892dd0",
     "m_Title": "Ripple UV Coordinates",
     "m_Position": {
-        "x": -3166.000244140625,
-        "y": -24.000030517578126
+        "x": -3166.0,
+        "y": -24.0
     }
 }
 
@@ -4730,8 +4730,8 @@
     "m_ObjectId": "6842a6a6c86f4e39be68dfd3bfe73add",
     "m_Title": "Large Ripples",
     "m_Position": {
-        "x": -2328.000244140625,
-        "y": 438.9999084472656
+        "x": -2328.0,
+        "y": 439.0
     }
 }
 
@@ -6234,7 +6234,7 @@
     "m_ZTestMode": 4,
     "m_ZWriteControl": 0,
     "m_AlphaMode": 0,
-    "m_RenderFace": 2,
+    "m_RenderFace": 0,
     "m_AlphaClip": true,
     "m_CastShadows": false,
     "m_ReceiveShadows": true,
@@ -6639,8 +6639,8 @@
     "m_ObjectId": "aeb28f8d07f44bfbafcefeafc4a347a1",
     "m_Title": "Small Ripples",
     "m_Position": {
-        "x": -2162.000244140625,
-        "y": 30.999969482421876
+        "x": -2162.0,
+        "y": 30.999996185302736
     }
 }
 
@@ -6960,7 +6960,7 @@
     "m_ObjectId": "b5eb57ca612e4baca7abb96b30dadc90",
     "m_Title": "Convert Normals To World Space",
     "m_Position": {
-        "x": -1341.0001220703125,
+        "x": -1341.0,
         "y": 480.0
     }
 }
@@ -7692,8 +7692,8 @@
     "m_ObjectId": "cc8e3ba055c44ec7824b14b1ed9ccb21",
     "m_Title": "Water Refraction",
     "m_Position": {
-        "x": -1538.000244140625,
-        "y": -102.00003051757813
+        "x": -1538.0001220703125,
+        "y": -102.00000762939453
     }
 }
 

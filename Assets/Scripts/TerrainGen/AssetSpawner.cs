@@ -392,26 +392,20 @@ public class AssetSpawner : MonoBehaviour
         {
             Quaternion normal = Quaternion.FromToRotation(Vector3.up, acceptedSpawnPoints[i][j].normal);
             assetToSpawn = Instantiate(assetSpawnData.assets[chunkPos][i].asset, acceptedSpawnPoints[i][j].position, normal * randomYRotation);
-            if (assetSpawnData.spawnableAssets[i].isValuable)
-            {
-                assetToSpawn.layer = LayerMask.NameToLayer("Interact Layer");
-                ValuableProperties properties = assetToSpawn.AddComponent<ValuableProperties>();
-                properties.value = rng.NextInt(assetSpawnData.spawnableAssets[i].minValue, assetSpawnData.spawnableAssets[i].maxValue);
-            }
             assetToSpawn.transform.SetParent(gameObject.transform);
             spawnedAssets[i].Add(new Asset(assetToSpawn, assetToSpawn.GetComponent<MeshRenderer>(), assetToSpawn.GetComponent<MeshCollider>()));
         }
         else
         {
             assetToSpawn = Instantiate(assetSpawnData.assets[chunkPos][i].asset, acceptedSpawnPoints[i][j].position, randomYRotation);
-            if (assetSpawnData.spawnableAssets[i].isValuable)
-            {
-                assetToSpawn.layer = LayerMask.NameToLayer("Interact Layer");;
-                ValuableProperties properties = assetToSpawn.AddComponent<ValuableProperties>();
-                properties.value = rng.NextInt(assetSpawnData.spawnableAssets[i].minValue, assetSpawnData.spawnableAssets[i].maxValue);
-            }
             assetToSpawn.transform.SetParent(gameObject.transform);
             spawnedAssets[i].Add(new Asset(assetToSpawn, assetToSpawn.GetComponent<MeshRenderer>(), assetToSpawn.GetComponent<MeshCollider>()));
+        }
+        if (assetSpawnData.spawnableAssets[i].isValuable)
+        {
+            assetToSpawn.layer = LayerMask.NameToLayer("Interact Layer");
+            ValuableProperties properties = assetToSpawn.AddComponent<ValuableProperties>();
+            properties.value = rng.NextInt(assetSpawnData.spawnableAssets[i].minValue, assetSpawnData.spawnableAssets[i].maxValue);
         }
         assetSpawnData.assets[chunkPos][i].spawnedAssets.Add(new Asset(assetToSpawn, assetToSpawn.GetComponent<MeshRenderer>(), assetToSpawn.GetComponent<MeshCollider>()));
     }

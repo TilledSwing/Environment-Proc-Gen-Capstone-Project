@@ -21,6 +21,8 @@ public class ChunkGenNetwork : MonoBehaviour
     public static ChunkGenNetwork Instance;
     // Fog Render Feature Stuff
     public Material fogMat;
+    public float fogDensity;
+    public float fogOffset;
     public Color fogColor = new Color(160f, 196f, 233f, 1f);
     public Color darkFogColor;
     public UniversalRendererData rendererData;
@@ -163,8 +165,10 @@ public class ChunkGenNetwork : MonoBehaviour
         }
         // Fog Shader Inits
         fogRenderPassFeature = rendererData.rendererFeatures.Find(f => f is FogRenderPassFeature) as FogRenderPassFeature;
+        fogOffset = maxViewDst - 20f;
         fogMat.SetFloat("_fogOffset", maxViewDst - 20f);
         fogMat.SetColor("_fogColor", fogColor);
+        fogMat.SetFloat("_fogDensity", fogDensity);
         navMeshUpdater = FindFirstObjectByType<GlobalNavMeshUpdater>();
 
         // terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 100000);

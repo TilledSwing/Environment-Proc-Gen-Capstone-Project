@@ -21110,6 +21110,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   fogMat: {fileID: 2100000, guid: b78a36d964d317b498aa1107a6978473, type: 2}
+  fogDensity: 0.08
+  fogOffset: 124
   fogColor: {r: 0.102794595, g: 0.15040942, b: 0.20754719, a: 1}
   darkFogColor: {r: 0.050980393, g: 0.05882353, b: 0.06666667, a: 1}
   rendererData: {fileID: 11400000, guid: f288ae1f4751b564a96ac7587541f7a2, type: 2}

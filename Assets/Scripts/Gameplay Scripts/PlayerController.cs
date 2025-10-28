@@ -40,6 +40,7 @@ public class PlayerController : NetworkBehaviour
 
     private bool isFlightMode = false;
     private bool isSubmerged = false;
+    private bool underwater = false;
 
 
     public override void OnStartClient()
@@ -118,6 +119,18 @@ public class PlayerController : NetworkBehaviour
             jumpSpeed = 8.0f;
             walkingSpeed = 7.5f;
             runningSpeed = 20f;
+        }
+        if (playerCamera.transform.position.y - 0.08f < waterLevel && !underwater)
+        {
+            underwater = true;
+            ChunkGenNetwork.Instance.fogMat.SetFloat("_fogDensity", 0.015f);
+            ChunkGenNetwork.Instance.fogMat.SetFloat("_fogOffset", -20f);
+        }
+        else if(playerCamera.transform.position.y - 0.08f > waterLevel && underwater)
+        {
+            underwater = false;
+            ChunkGenNetwork.Instance.fogMat.SetFloat("_fogDensity", ChunkGenNetwork.Instance.fogDensity);
+            ChunkGenNetwork.Instance.fogMat.SetFloat("_fogOffset", ChunkGenNetwork.Instance.fogOffset);
         }
 
         // Goes from first person to a pseudo pause screen and vice versa on escape.

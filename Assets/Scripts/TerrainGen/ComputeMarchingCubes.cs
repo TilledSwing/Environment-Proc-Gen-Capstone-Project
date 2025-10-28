@@ -415,7 +415,7 @@ public class ComputeMarchingCubes : MonoBehaviour
 
     public void MarchingCubesJobHandler(float[] heights, bool terraforming)
     {
-        int iterations = Mathf.CeilToInt((terrainDensityData.width + 1) / ChunkGenNetwork.Instance.resolution) * Mathf.CeilToInt((terrainDensityData.width + 1) / ChunkGenNetwork.Instance.resolution) * Mathf.CeilToInt((terrainDensityData.width + 1) / ChunkGenNetwork.Instance.resolution);
+        int iterations = Mathf.CeilToInt(terrainDensityData.width / ChunkGenNetwork.Instance.resolution) * Mathf.CeilToInt(terrainDensityData.width / ChunkGenNetwork.Instance.resolution) * Mathf.CeilToInt(terrainDensityData.width / ChunkGenNetwork.Instance.resolution);
 
         NativeList<Triangle> triangleArray = new(iterations, Allocator.Persistent);
         NativeArray<float> heightsArray = new(heights, Allocator.Persistent);
@@ -468,21 +468,21 @@ public class ComputeMarchingCubes : MonoBehaviour
         public int resolution;
         public void Execute(int index)
         {
-            int x = index / ((chunkSize + 1) * (chunkSize + 1));
-            int y = index / (chunkSize + 1) % (chunkSize + 1);
-            int z = index % (chunkSize + 1);
-            uint3 id = new((uint)x, (uint)y, (uint)z);
+            int adjustedSize = chunkSize / resolution;
+            int x = index / (adjustedSize * adjustedSize);
+            int y = index / adjustedSize % adjustedSize;
+            int z = index % adjustedSize;
 
-            if (id.x >= chunkSize || id.y >= chunkSize || id.z >= chunkSize)
+            if (x >= chunkSize || y >= chunkSize || z >= chunkSize)
                 return;
 
-            if (id.x % resolution != 0 || id.y % resolution != 0 || id.z % resolution != 0)
-                return;
+            // if (x % resolution != 0 || y % resolution != 0 || z % resolution != 0)
+            //     return;
 
             CubeVertices cubeVertices;
-            float adjustedIdx = id.x * resolution;
-            float adjustedIdy = id.y * resolution;
-            float adjustedIdz = id.z * resolution;
+            float adjustedIdx = x * resolution;
+            float adjustedIdy = y * resolution;
+            float adjustedIdz = z * resolution;
             float3 adjustedPos = new float3(adjustedIdx, adjustedIdy, adjustedIdz);
             cubeVertices.v0 = heightsArray[FlattenIndex(adjustedPos + (vertexOffsetTable[0] * resolution), chunkSize)];
             cubeVertices.v1 = heightsArray[FlattenIndex(adjustedPos + (vertexOffsetTable[1] * resolution), chunkSize)];
