@@ -243,11 +243,11 @@ public class ChunkGenNetwork : MonoBehaviour
             StartCoroutine(LoadAssetInstantiationsOverTime());
         }
 
-        // navMeshGentimer += Time.deltaTime;
-        // if (navMeshGentimer >= navMeshUpdateTime)
-        // {
-        //     updateNavMesh();
-        // }
+        navMeshGentimer += Time.deltaTime;
+        if (navMeshGentimer >= navMeshUpdateTime)
+        {
+            updateNavMesh();
+        }
         
     }
 

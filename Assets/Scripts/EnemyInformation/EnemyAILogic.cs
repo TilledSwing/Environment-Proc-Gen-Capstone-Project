@@ -1,4 +1,6 @@
+using FishNet.Demo.AdditiveScenes;
 using FishNet.Object;
+using GameKit.Dependencies.Utilities;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
@@ -11,6 +13,8 @@ public class EnemyAILogic : NetworkBehaviour
     private float wanderRadius = 30f;
     private float minWanderDistance = 15f;
     private float thinkRate = .2f;
+    private float detectionRadius = 20f;
+    private float loseTargetRadius = 30f;
     private NavMeshAgent agent;
     private EnemyAIMovement enemyMovement;
     private EnemyAnimation enemyAnimation;
@@ -31,17 +35,6 @@ public class EnemyAILogic : NetworkBehaviour
             InvokeRepeating(nameof(ServerThink), 0f, thinkRate);
     }
 
-
-    /// <summary>
-    /// Sets the target of the enemy AI
-    /// </summary>
-    /// <param name="newTarget"></param>
-    [Server]
-    public void SetTarget(Transform newTarget)
-    {
-        target = newTarget;
-    }
-
     /// <summary>
     /// The server "thinks" about what the agent should do next. This includes starting attacks,
     /// wandering and moving towards its target
@@ -57,6 +50,7 @@ public class EnemyAILogic : NetworkBehaviour
         if (target != null)
             HandleChaseOrAttack();
         else
+            GetClosestTarget();
             HandleWander();
         
         //No matter what update speed as this changes based on terrain and position
@@ -71,10 +65,42 @@ public class EnemyAILogic : NetworkBehaviour
     private void HandleChaseOrAttack()
     {
         float distanceToTarget = Vector3.Distance(transform.position, target.position);
+        // if (distanceToTarget > loseTargetRadius)
+        // {
+        //     target = null;
+        //     return;
+        // }
+
         if (distanceToTarget <= attackRange)
+        {
             StartCoroutine(AttackTarget());
+        }
         else
             enemyMovement.MoveTo(target.position);
+    }
+
+    [Server]
+    private void GetClosestTarget()
+    {
+        var enemies = FindObjectsByType<PlayerController>(FindObjectsSortMode.None);
+        Transform closestTarget = null;
+        float closestDist = Mathf.Infinity;
+        foreach (PlayerController play in enemies)
+        {
+            float dist = Vector3.Distance(transform.position, play.transform.position);
+            if (dist < closestDist)
+            {
+                closestTarget = play.transform;
+                closestDist = dist;
+            }
+        }
+
+        if (closestTarget != null)
+        {
+            Debug.Log("Target has been found and assigned");
+            target = closestTarget;
+        }
+            
     }
 
     /// <summary>
@@ -94,11 +120,10 @@ public class EnemyAILogic : NetworkBehaviour
         enemyAnimation.SetInt("AttackIdx", attackIdx);
 
         //Client
-        RPCTrigger("Attack");
-        RPCSetInt("Attack", attackIdx);
+        RPCTrigger("Attacking");
+        RPCSetInt("AttackIdx", attackIdx);
 
         yield return new WaitForSeconds(2.333f);
-
         isAttacking = false;
     }
 
