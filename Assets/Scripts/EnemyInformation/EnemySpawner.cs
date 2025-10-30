@@ -8,14 +8,14 @@ using UnityEngine.EventSystems;
 using System.Collections.Generic;
 using Unity.AI.Navigation;
 using FishNet.Demo.HashGrid;
+using System.Linq;
 
 public class EnemySpawner : NetworkBehaviour
 {
     [SerializeField] private List<GameObject> enemies = new List<GameObject>();
     [SerializeField] private GameObject enemyPrefab;
     public int enemyCount = 20;
-    public float spawnRange = 800f;
-    public float minDistance = 50f;
+    public float minDistance = 25f;
     private string prefabAdress = "Assets/Stylized3DMonster/Monster04/Prefab/Monster04_01.prefab";
     private Camera playerCamera;
     private List<Vector3> usedPositions = new List<Vector3>();
@@ -95,12 +95,8 @@ public class EnemySpawner : NetworkBehaviour
         }
         
         //Set up player transforms for reachability checks
-        var playerTransforms = new List<Transform>();
         var players = FindObjectsByType<PlayerController>(FindObjectsSortMode.None);
-        foreach (var p in players)
-        {
-            playerTransforms.Add(p.transform);
-        }
+        var playerTransforms = players.Select(p => p.transform).ToList();
 
         Bounds navMeshBounds = navMeshSurface.navMeshData.sourceBounds;
         int spawned = 0;
@@ -110,56 +106,61 @@ public class EnemySpawner : NetworkBehaviour
         while (spawned < enemyCount && attempts < maxAttempts)
         {
             attempts++;
-
-            // Pick a random point inside the full NavMesh bounds
             Vector3 randomPoint = new Vector3(
-                Random.Range(navMeshBounds.min.x, navMeshBounds.max.x),
-                navMeshBounds.center.y,
-                Random.Range(navMeshBounds.min.z, navMeshBounds.max.z)
+            Random.Range(navMeshBounds.min.x, navMeshBounds.max.x),
+            navMeshBounds.center.y + 5f, // Start above
+            Random.Range(navMeshBounds.min.z, navMeshBounds.max.z)
             );
 
-            // Snap it to the nearest valid NavMesh position
             if (NavMesh.SamplePosition(randomPoint, out NavMeshHit hit, 10f, NavMesh.AllAreas))
             {
-                Vector3 spawnPos = hit.position;
+                Vector3 spawnPos = hit.position + Vector3.up * 0.1f;
 
-                bool canReachAny = false;
-                foreach (Transform player in playerTransforms)
-                {
-                    if (IsReachable(spawnPos, player.position))
-                    {
-                        canReachAny = true;
-                        break;
-                    }
-                }
-
-                if (!canReachAny)
+                // Check if reachable to any player
+                if (!playerTransforms.Any(p => IsReachable(spawnPos, p.position)))
                     continue;
 
-                // Ensure spacing between enemies
-                bool tooClose = false;
-                foreach (var pos in usedPositions)
-                {
-                    if (Vector3.Distance(pos, spawnPos) < minDistance)
-                    {
-                        tooClose = true;
-                        break;
-                    }
-                }
-                if (tooClose)
+                // Check min distance from other spawns
+                if (usedPositions.Any(pos => Vector3.Distance(pos, spawnPos) < minDistance))
                     continue;
 
-                // Spawn the enemy aligned to the surface
-                Quaternion rotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
-                var en = Instantiate(enemyPrefab, spawnPos + Vector3.up * 0.05f, rotation);
-                ServerManager.Spawn(en);
+                // Spawn and enable NavMeshAgent after placement
+                var enemy = Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
+                var agent = enemy.GetComponent<NavMeshAgent>();
+                if (agent != null) agent.enabled = false; // Prevent early pathing
+
+                ServerManager.Spawn(enemy);
+                if (agent != null) agent.enabled = true; // Re-enable after spawn
+
                 usedPositions.Add(spawnPos);
-                enemies.Add(en);
+                enemies.Add(enemy);
                 spawned++;
             }
         }
 
         Debug.Log($"Spawned {spawned} enemies after {attempts} attempts.");
+        if (spawned < enemyCount)
+        {
+            if(usedPositions.Count == 0)
+            {
+                Debug.LogWarning("No valid spawn positions found. Aborting additional spawns.");
+                return;
+            }
+            while (spawned < enemyCount)
+            {
+                var position = usedPositions[Random.Range(0, usedPositions.Count)];
+                var enemy = Instantiate(enemyPrefab, position, Quaternion.identity);
+                var agent = enemy.GetComponent<NavMeshAgent>();
+                if (agent != null) agent.enabled = false; // Prevent early pathing
+
+                ServerManager.Spawn(enemy);
+                if (agent != null) agent.enabled = true; // Re-enable after spawn
+                enemies.Add(enemy);
+                spawned++;
+            }
+            Debug.LogWarning("Could not find enough valid spawn positions. Spawned additional enemies at existing positions.");
+        }
+
     }
 
     bool IsReachable(Vector3 start, Vector3 end)

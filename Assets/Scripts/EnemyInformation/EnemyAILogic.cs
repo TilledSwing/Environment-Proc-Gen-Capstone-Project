@@ -13,8 +13,6 @@ public class EnemyAILogic : NetworkBehaviour
     private float wanderRadius = 30f;
     private float minWanderDistance = 15f;
     private float thinkRate = .2f;
-    private float detectionRadius = 20f;
-    private float loseTargetRadius = 30f;
     private NavMeshAgent agent;
     private EnemyAIMovement enemyMovement;
     private EnemyAnimation enemyAnimation;
@@ -97,7 +95,6 @@ public class EnemyAILogic : NetworkBehaviour
 
         if (closestTarget != null)
         {
-            Debug.Log("Target has been found and assigned");
             target = closestTarget;
         }
             

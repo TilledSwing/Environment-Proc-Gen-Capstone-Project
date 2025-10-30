@@ -21,6 +21,17 @@ public class GlobalNavMeshUpdater : MonoBehaviour
             }
         }
         navMeshSurface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
+        navMeshSurface.overrideVoxelSize = true;
+        navMeshSurface.voxelSize = 0.1f;
+        navMeshSurface.overrideTileSize = true;
+        navMeshSurface.tileSize = 256;
+
+        // ✅ Correct way: Modify build settings directly on NavMeshSurface
+        var buildSettings = navMeshSurface.GetBuildSettings();
+        buildSettings.agentSlope = 70f;   // Allow very steep slopes
+        buildSettings.agentClimb = 1.5f;  // Increase step/climb height
+        buildSettings.agentRadius = 0.3f;
+        
     }
     public IEnumerator RebuildNavMeshAsync(Bounds updateRegion, Dictionary<Vector3, ChunkGenNetwork.TerrainChunk> chunkDictionary)
     {
