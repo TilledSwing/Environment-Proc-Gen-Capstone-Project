@@ -123,11 +123,11 @@ public class PlayerController : NetworkBehaviour
         if (playerCamera.transform.position.y - 0.08f < waterLevel && !underwater)
         {
             underwater = true;
-            ChunkGenNetwork.Instance.fogMat.SetFloat("_fogDensity", 0.015f);
-            ChunkGenNetwork.Instance.fogMat.SetFloat("_fogOffset", -20f);
+            ChunkGenNetwork.Instance.fogMat.SetFloat("_fogDensity", 0.02f);
+            ChunkGenNetwork.Instance.fogMat.SetFloat("_fogOffset", -30f);
 
-            // ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogDensity", 0.015f);
-            // ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogOffset", -20f);
+            // ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogDensity", 0.02f);
+            // ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogOffset", -30f);
         }
         else if(playerCamera.transform.position.y - 0.08f > waterLevel && underwater)
         {
