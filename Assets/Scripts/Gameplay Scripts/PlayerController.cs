@@ -125,12 +125,18 @@ public class PlayerController : NetworkBehaviour
             underwater = true;
             ChunkGenNetwork.Instance.fogMat.SetFloat("_fogDensity", 0.015f);
             ChunkGenNetwork.Instance.fogMat.SetFloat("_fogOffset", -20f);
+
+            // ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogDensity", 0.015f);
+            // ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogOffset", -20f);
         }
         else if(playerCamera.transform.position.y - 0.08f > waterLevel && underwater)
         {
             underwater = false;
             ChunkGenNetwork.Instance.fogMat.SetFloat("_fogDensity", ChunkGenNetwork.Instance.fogDensity);
             ChunkGenNetwork.Instance.fogMat.SetFloat("_fogOffset", ChunkGenNetwork.Instance.fogOffset);
+
+            // ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogDensity", ChunkGenNetwork.Instance.fogDensity);
+            // ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogOffset", ChunkGenNetwork.Instance.fogOffset);
         }
 
         // Goes from first person to a pseudo pause screen and vice versa on escape.

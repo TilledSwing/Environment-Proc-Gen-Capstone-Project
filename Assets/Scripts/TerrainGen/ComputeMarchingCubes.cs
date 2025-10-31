@@ -469,9 +469,9 @@ public class ComputeMarchingCubes : MonoBehaviour
         public void Execute(int index)
         {
             int adjustedSize = chunkSize / resolution;
-            int x = index / (adjustedSize * adjustedSize);
+            int x = index % adjustedSize;
             int y = index / adjustedSize % adjustedSize;
-            int z = index % adjustedSize;
+            int z = index / (adjustedSize * adjustedSize);
 
             if (x >= chunkSize || y >= chunkSize || z >= chunkSize)
                 return;
@@ -573,7 +573,7 @@ public class ComputeMarchingCubes : MonoBehaviour
 
         int FlattenIndex(float3 id, int size)
         {
-            return (int)(id.x * (size + 1) * (size + 1) + id.y * (size + 1) + id.z);
+            return (int)(id.z * (size + 1) * (size + 1) + id.y * (size + 1) + id.x);
         }
 
         struct CubeVertices

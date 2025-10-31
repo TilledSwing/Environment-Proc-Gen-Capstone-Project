@@ -166,9 +166,11 @@ public class ChunkGenNetwork : MonoBehaviour
         // Fog Shader Inits
         fogRenderPassFeature = rendererData.rendererFeatures.Find(f => f is FogRenderPassFeature) as FogRenderPassFeature;
         fogOffset = maxViewDst - 20f;
-        fogMat.SetFloat("_fogOffset", maxViewDst - 20f);
-        fogMat.SetColor("_fogColor", fogColor);
+        fogMat.SetFloat("_fogOffset", fogOffset);
         fogMat.SetFloat("_fogDensity", fogDensity);
+        fogMat.SetColor("_fogColor", fogColor);
+        // waterMaterial.SetFloat("_fogOffset", fogOffset);
+        // waterMaterial.SetFloat("_fogDensity", fogDensity);
         navMeshUpdater = FindFirstObjectByType<GlobalNavMeshUpdater>();
 
         // terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 100000);
@@ -541,6 +543,7 @@ public class ChunkGenNetwork : MonoBehaviour
 
         List<AsyncGPUReadbackRequest> activeRequests = ListPoolManager<AsyncGPUReadbackRequest>.Get();
 
+        int count = 0;
         while (pendingReadbacks.Count > 0 || activeRequests.Count > 0)
         {
             if (Vector3.Distance(startViewerPos, viewerPos) >= queueUpdateDistanceThreshold)
@@ -557,7 +560,7 @@ public class ChunkGenNetwork : MonoBehaviour
                 }
                 startViewerPos = viewerPos;
             }
-            for (int i = 0; i < activeRequests.Count; i++)
+            for (int i = activeRequests.Count - 1; i >= 0; i--)
             {
                 if (activeRequests[i].done)
                 {
@@ -565,14 +568,19 @@ public class ChunkGenNetwork : MonoBehaviour
                 }
             }
 
-            while (activeRequests.Count <= 2 && pendingReadbacks.Count > 0)
+            // 1 readback per 20 fps with a min and max of 2 and 8
+            int maxActiveReadbacks = Mathf.Clamp(Mathf.RoundToInt(1f / Time.smoothDeltaTime / 20f), 2, 8);
+
+            while (activeRequests.Count <= maxActiveReadbacks && pendingReadbacks.Count > 0)
             {
                 ReadbackRequest pendingReadback = pendingReadbacks.Dequeue();
 
                 activeRequests.Add(AsyncGPUReadback.Request(pendingReadback.buffer, pendingReadback.readbackRequest));
             }
 
-            yield return null;
+            // Allow 2 dispatched per frame
+            if(++count % 2 == 0) 
+                yield return null;
         }
 
         ListPoolManager<AsyncGPUReadbackRequest>.Return(activeRequests);
