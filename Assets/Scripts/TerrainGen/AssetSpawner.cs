@@ -436,13 +436,13 @@ public class AssetSpawner : MonoBehaviour
         List<float3> depthResult = new();
         int size = terrainDensityData.width + 1;
 
-        for (int x = 0; x < size; x++)
+        for (int z = 0; z < size; z++)
         {
             for (int y = 0; y < size; y++)
             {
-                for (int z = 0; z < size; z++)
+                for (int x = 0; x < size; x++)
                 {
-                    if(heightsArray[(x * size * size) + (y * size) + z] > depth)
+                    if(heightsArray[(z * size * size) + (y * size) + x] > depth)
                     {
                         // Debug.Log(heightsArray[(x * terrainDensityData.width * terrainDensityData.width) + (y * terrainDensityData.width) + z]);
                         depthResult.Add(new float3(chunkPos.x + x, chunkPos.y + y, chunkPos.z + z));

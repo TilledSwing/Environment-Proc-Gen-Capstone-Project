@@ -3,8 +3,11 @@ using FishNet.Object;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 // Template by Bobsi Unity - Youtube
 // Modified by Jacob Ormsby
@@ -123,15 +126,21 @@ public class PlayerController : NetworkBehaviour
         if (playerCamera.transform.position.y - 0.08f < waterLevel && !underwater)
         {
             underwater = true;
-            ChunkGenNetwork.Instance.fogMat.SetFloat("_fogDensity", 0.02f);
-            ChunkGenNetwork.Instance.fogMat.SetFloat("_fogOffset", -30f);
+            GraphicsSettings.defaultRenderPipeline = ChunkGenNetwork.Instance.underwaterUrpAsset;
+            QualitySettings.renderPipeline = ChunkGenNetwork.Instance.underwaterUrpAsset;
+            ChunkGenNetwork.Instance.fogRenderPassFeature = ChunkGenNetwork.Instance.rendererData.rendererFeatures.Find(f => f is FogRenderPassFeature) as FogRenderPassFeature;
+            ChunkGenNetwork.Instance.fogMat.SetFloat("_fogDensity", 0.018f);
+            ChunkGenNetwork.Instance.fogMat.SetFloat("_fogOffset", -15f);
 
-            // ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogDensity", 0.02f);
-            // ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogOffset", -30f);
+            // ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogDensity", 0.018f);
+            // ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogOffset", -15f);
         }
         else if(playerCamera.transform.position.y - 0.08f > waterLevel && underwater)
         {
             underwater = false;
+            GraphicsSettings.defaultRenderPipeline = ChunkGenNetwork.Instance.mainUrpAsset;
+            QualitySettings.renderPipeline = ChunkGenNetwork.Instance.mainUrpAsset;
+            ChunkGenNetwork.Instance.fogRenderPassFeature = ChunkGenNetwork.Instance.rendererData.rendererFeatures.Find(f => f is FogRenderPassFeature) as FogRenderPassFeature;
             ChunkGenNetwork.Instance.fogMat.SetFloat("_fogDensity", ChunkGenNetwork.Instance.fogDensity);
             ChunkGenNetwork.Instance.fogMat.SetFloat("_fogOffset", ChunkGenNetwork.Instance.fogOffset);
 

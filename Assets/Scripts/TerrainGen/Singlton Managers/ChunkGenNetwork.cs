@@ -26,7 +26,9 @@ public class ChunkGenNetwork : MonoBehaviour
     public Color fogColor = new Color(160f, 196f, 233f, 1f);
     public Color darkFogColor;
     public UniversalRendererData rendererData;
-    private FogRenderPassFeature fogRenderPassFeature;
+    public FogRenderPassFeature fogRenderPassFeature;
+    public UniversalRenderPipelineAsset mainUrpAsset;
+    public UniversalRenderPipelineAsset underwaterUrpAsset;
     // Objective Text Stuff
     public GameObject objectiveCanvas;
     public GameObject hudCanvas;
@@ -671,6 +673,8 @@ public class ChunkGenNetwork : MonoBehaviour
         assetSpawnData.ResetSpawnPoints();
         chunkDictionary.Clear();
         fogRenderPassFeature.SetActive(false);
+        GraphicsSettings.defaultRenderPipeline = mainUrpAsset;
+        QualitySettings.renderPipeline = mainUrpAsset;
     }
     Bounds CalculateLoadedChunkBounds()
     {
