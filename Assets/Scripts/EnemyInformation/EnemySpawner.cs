@@ -94,6 +94,12 @@ public class EnemySpawner : NetworkBehaviour
             return;
         }
         
+        NavMeshTriangulation triangulation = NavMesh.CalculateTriangulation();
+        if (triangulation.vertices.Length == 0)
+        {
+            Debug.LogWarning("No NavMesh data available. Aborting spawn.");
+            return;
+        }
         //Set up player transforms for reachability checks
         var players = FindObjectsByType<PlayerController>(FindObjectsSortMode.None);
         var playerTransforms = players.Select(p => p.transform).ToList();
@@ -106,36 +112,44 @@ public class EnemySpawner : NetworkBehaviour
         while (spawned < enemyCount && attempts < maxAttempts)
         {
             attempts++;
-            Vector3 randomPoint = new Vector3(
-            Random.Range(navMeshBounds.min.x, navMeshBounds.max.x),
-            navMeshBounds.center.y + 5f, // Start above
-            Random.Range(navMeshBounds.min.z, navMeshBounds.max.z)
-            );
 
-            if (NavMesh.SamplePosition(randomPoint, out NavMeshHit hit, 10f, NavMesh.AllAreas))
+            int triIndex = Random.Range(0, triangulation.indices.Length / 3) * 3;
+            Vector3 a = triangulation.vertices[triangulation.indices[triIndex]];
+            Vector3 b = triangulation.vertices[triangulation.indices[triIndex + 1]];
+            Vector3 c = triangulation.vertices[triangulation.indices[triIndex + 2]];
+
+            // Pick a random point inside the triangle using barycentric coordinates
+            float r1 = Random.value;
+            float r2 = Random.value;
+            if (r1 + r2 > 1f)
             {
-                Vector3 spawnPos = hit.position + Vector3.up * 0.1f;
-
-                // Check if reachable to any player
-                if (!playerTransforms.Any(p => IsReachable(spawnPos, p.position)))
-                    continue;
-
-                // Check min distance from other spawns
-                if (usedPositions.Any(pos => Vector3.Distance(pos, spawnPos) < minDistance))
-                    continue;
-
-                // Spawn and enable NavMeshAgent after placement
-                var enemy = Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
-                var agent = enemy.GetComponent<NavMeshAgent>();
-                if (agent != null) agent.enabled = false; // Prevent early pathing
-
-                ServerManager.Spawn(enemy);
-                if (agent != null) agent.enabled = true; // Re-enable after spawn
-
-                usedPositions.Add(spawnPos);
-                enemies.Add(enemy);
-                spawned++;
+                r1 = 1f - r1;
+                r2 = 1f - r2;
             }
+            Vector3 spawnPos = a + r1 * (b - a) + r2 * (c - a);
+
+            spawnPos += Vector3.up * 0.1f;
+
+            // Check if reachable to any player
+            if (!playerTransforms.Any(p => IsReachable(spawnPos, p.position)))
+                continue;
+
+            // Check min distance from other spawns
+            if (usedPositions.Any(pos => Vector3.Distance(pos, spawnPos) < minDistance))
+                continue;
+
+            // Spawn and enable NavMeshAgent after placement
+            var enemy = Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
+            var agent = enemy.GetComponent<NavMeshAgent>();
+            if (agent != null) agent.enabled = false; // Prevent early pathing
+
+            ServerManager.Spawn(enemy);
+            if (agent != null) agent.enabled = true; // Re-enable after spawn
+
+            usedPositions.Add(spawnPos);
+            enemies.Add(enemy);
+            spawned++;
+            
         }
 
         Debug.Log($"Spawned {spawned} enemies after {attempts} attempts.");

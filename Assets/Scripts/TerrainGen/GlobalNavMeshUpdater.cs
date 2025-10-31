@@ -9,6 +9,7 @@ public class GlobalNavMeshUpdater : MonoBehaviour
     public NavMeshSurface navMeshSurface;
     private AsyncOperation currentOp;
     private bool isBuilding = false;
+    private NavMeshBuildSettings myBuildSettings;
 
     private void Awake()
     {
@@ -26,11 +27,10 @@ public class GlobalNavMeshUpdater : MonoBehaviour
         navMeshSurface.overrideTileSize = true;
         navMeshSurface.tileSize = 256;
 
-        // ✅ Correct way: Modify build settings directly on NavMeshSurface
-        var buildSettings = navMeshSurface.GetBuildSettings();
-        buildSettings.agentSlope = 70f;   // Allow very steep slopes
-        buildSettings.agentClimb = 1.5f;  // Increase step/climb height
-        buildSettings.agentRadius = 0.3f;
+        myBuildSettings = navMeshSurface.GetBuildSettings();
+        myBuildSettings.agentSlope = 70f;   // Allow very steep slopes
+        myBuildSettings.agentClimb = 1.5f;  // Increase step/climb height
+        myBuildSettings.agentRadius = 0.3f;
         
     }
     public IEnumerator RebuildNavMeshAsync(Bounds updateRegion, Dictionary<Vector3, ChunkGenNetwork.TerrainChunk> chunkDictionary)
@@ -67,10 +67,9 @@ public class GlobalNavMeshUpdater : MonoBehaviour
             NavMesh.AddNavMeshData(navMeshSurface.navMeshData);
         }
 
-        var settings = navMeshSurface.GetBuildSettings();
         currentOp = NavMeshBuilder.UpdateNavMeshDataAsync(
             navMeshSurface.navMeshData,
-            settings,
+            myBuildSettings,
             sources,
             updateRegion
         );
