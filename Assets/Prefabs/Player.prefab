@@ -239,7 +239,7 @@ GameObject:
   - component: {fileID: 2249550695658749378}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -473,7 +473,6 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 128
   interactHighlightColor: {r: 0.8666667, g: 0.84313726, b: 0.47058824, a: 0}
-  objectiveCounterText: {fileID: 5910244094315374996, guid: 1f7706505ccbeb34584e7df6390b6d97, type: 3}
   objectiveGoal: 10
 --- !u!114 &2263669559389862659
 MonoBehaviour:
