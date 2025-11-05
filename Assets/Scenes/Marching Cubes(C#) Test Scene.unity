@@ -11468,8 +11468,10 @@ MonoBehaviour:
   _componentIndexCache: 255
   _addedNetworkObject: {fileID: 928284566}
   _networkObjectCache: {fileID: 0}
-  enemy: {fileID: 0}
+  enemies: []
   enemyPrefab: {fileID: 0}
+  enemyCount: 20
+  minDistance: 25
 --- !u!4 &928284568
 Transform:
   m_ObjectHideFlags: 0
