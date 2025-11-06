@@ -18,6 +18,9 @@ public class EnemyAILogic : NetworkBehaviour
     private EnemyAnimation enemyAnimation;
     private float wanderTime = 0f;
     private bool isAttacking = false;
+    public  bool isFrozen = false;
+    private float freezeDuration = 5f;
+    private float frozenTime = 0f;
 
     public void Awake()
     {
@@ -40,6 +43,15 @@ public class EnemyAILogic : NetworkBehaviour
     [Server]
     void ServerThink()
     {
+        if (isFrozen)
+        {
+            frozenTime -= Time.deltaTime;
+            if (frozenTime <= 0f)
+            {
+                SetFrozen(false);
+            }
+            return;
+        }
         //Dont interupt the attack animation
         if (isAttacking)
             return;
@@ -50,9 +62,6 @@ public class EnemyAILogic : NetworkBehaviour
         else
             GetClosestTarget();
             HandleWander();
-        
-        //No matter what update speed as this changes based on terrain and position
-        UpdateEnemySpeed();
     }
 
     /// <summary>
@@ -74,7 +83,10 @@ public class EnemyAILogic : NetworkBehaviour
             StartCoroutine(AttackTarget());
         }
         else
+        {
             enemyMovement.MoveTo(target.position);
+            UpdateEnemySpeed();
+        }
     }
 
     [Server]
@@ -108,7 +120,7 @@ public class EnemyAILogic : NetworkBehaviour
     private IEnumerator AttackTarget()
     {
         isAttacking = true;
-        enemyMovement.StopMovement();
+        StopMovement();
 
         int attackIdx = Random.Range(1, 4);
 
@@ -122,6 +134,7 @@ public class EnemyAILogic : NetworkBehaviour
 
         yield return new WaitForSeconds(2.333f);
         isAttacking = false;
+        HandleChaseOrAttack();
     }
 
     /// <summary>
@@ -133,10 +146,14 @@ public class EnemyAILogic : NetworkBehaviour
     {
         //Checks if the agent is attacking for our purposes
         if (Time.time < wanderTime && agent.remainingDistance > 0.5f)
+        {
+            UpdateEnemySpeed();
             return;
+        }
 
         Vector3 newPos = RandomNavMeshLoaction(wanderRadius);
         enemyMovement.MoveTo(newPos);
+        UpdateEnemySpeed();
         wanderTime = Time.time + wanderInterval;
     }
 
@@ -149,6 +166,30 @@ public class EnemyAILogic : NetworkBehaviour
         float speed = agent.velocity.magnitude;
         enemyAnimation.SetFloat("Speed", speed);
         RPCUpdateEnemySpeed(speed);
+    }
+
+    [Server]
+    public void SetFrozen(bool frozen)
+    {
+        if (frozen)
+        {
+            if (isAttacking)
+                isAttacking = false;
+
+            if (!isFrozen)
+            {
+                StopMovement();
+                enemyAnimation.Trigger("GetHit");
+                RPCTrigger("GetHit");
+            }
+            isFrozen = true;
+            frozenTime = freezeDuration; 
+        }
+        else
+        {
+            isFrozen = false;
+            HandleChaseOrAttack();
+        }
     }
 
     /// ##### Client methods for updates ##### /// 
@@ -185,7 +226,13 @@ public class EnemyAILogic : NetworkBehaviour
     }
 
     ///##### Helper Methods ##### ///
-
+    
+    private void StopMovement()
+    {
+        enemyMovement.StopMovement();
+        enemyAnimation.SetFloat("Speed", 0);
+        RPCUpdateEnemySpeed(0);
+    }
     /// <summary>
     /// Finds a random wander location. Enemies appear to wander when this is called after t seconds 
     /// </summary>

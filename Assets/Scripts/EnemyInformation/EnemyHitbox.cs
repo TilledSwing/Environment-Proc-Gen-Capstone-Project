@@ -41,7 +41,6 @@ public class EnemyHitbox : NetworkBehaviour
         // // Apply damage
         // var health = other.GetComponent<Health>();
         // if (health != null) health.TakeDamage(damage);
-        Debug.Log("The attack connected and hit the player");
 
         // // Optional: small knockback or hit reaction
         // var rb = other.attachedRigidbody;

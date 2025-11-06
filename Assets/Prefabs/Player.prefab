@@ -561,6 +561,10 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 1324032884783071196}
   _networkObjectCache: {fileID: 1324032884783071196}
   flashlight: {fileID: 7641844106616359319}
+  flashlightRange: 10
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 256
 --- !u!1 &6708386476203434984
 GameObject:
   m_ObjectHideFlags: 0
