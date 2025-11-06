@@ -275,7 +275,6 @@ public class ChunkGenNetwork : MonoBehaviour
                 }
                 if (allChunksReady && navMeshNeedsUpdate && navMeshCreated)
                 {
-                    Debug.Log("Updating nav mesh");
                     Bounds updatedRegion = CalculateLoadedChunkBounds(); // explained below
                     StartCoroutine(navMeshUpdater.RebuildNavMeshAsync(updatedRegion, chunkDictionary));
                     navMeshNeedsUpdate = false;
@@ -284,7 +283,6 @@ public class ChunkGenNetwork : MonoBehaviour
 
                 if (allChunksReady && !navMeshCreated)
                 {
-                    Debug.Log("All chunks have been generated, making nav mesh");
                     Bounds updatedRegion = CalculateLoadedChunkBounds(); // explained below
                     StartCoroutine(navMeshUpdater.RebuildNavMeshAsync(updatedRegion, chunkDictionary));
                     navMeshCreated = true;

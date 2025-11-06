@@ -8,7 +8,7 @@ using UnityEngine.AI;
 public class EnemyAILogic : NetworkBehaviour
 {
     private Transform target;
-    private float attackRange = 2f;
+    private float attackRange = 1f;
     private float wanderInterval = 2f;
     private float wanderRadius = 30f;
     private float minWanderDistance = 15f;
@@ -45,7 +45,7 @@ public class EnemyAILogic : NetworkBehaviour
     {
         if (isFrozen)
         {
-            frozenTime -= Time.deltaTime;
+            frozenTime -= thinkRate;
             if (frozenTime <= 0f)
             {
                 SetFrozen(false);
@@ -84,8 +84,8 @@ public class EnemyAILogic : NetworkBehaviour
         }
         else
         {
-            enemyMovement.MoveTo(target.position);
             UpdateEnemySpeed();
+            enemyMovement.MoveTo(target.position);
         }
     }
 
@@ -181,6 +181,8 @@ public class EnemyAILogic : NetworkBehaviour
                 StopMovement();
                 enemyAnimation.Trigger("GetHit");
                 RPCTrigger("GetHit");
+                enemyAnimation.SetBool("IsStunned", frozen);
+                RPCSetBool("IsStunned", frozen);
             }
             isFrozen = true;
             frozenTime = freezeDuration; 
@@ -188,7 +190,8 @@ public class EnemyAILogic : NetworkBehaviour
         else
         {
             isFrozen = false;
-            Debug.Log("Should resume normal behavior");
+            enemyAnimation.SetBool("IsStunned", frozen);
+            RPCSetBool("IsStunned", frozen);
             HandleChaseOrAttack();
         }
     }
@@ -226,8 +229,18 @@ public class EnemyAILogic : NetworkBehaviour
         enemyAnimation.SetInt(param, attackIdx);
     }
 
+    /// <summary>
+    /// Sets the clients int animation paramater
+    /// </summary>
+    /// <param name="param"></param>
+    /// <param name="attackIdx"></param>
+    [ObserversRpc]
+    private void RPCSetBool(string param, bool value)
+    {
+        enemyAnimation.SetBool(param, value);
+    }
     ///##### Helper Methods ##### ///
-    
+
     private void StopMovement()
     {
         enemyMovement.StopMovement();

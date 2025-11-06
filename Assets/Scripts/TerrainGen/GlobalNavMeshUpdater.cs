@@ -78,6 +78,5 @@ public class GlobalNavMeshUpdater : MonoBehaviour
             yield return null;
 
         isBuilding = false;
-        Debug.Log($"NavMesh async update done for region {updateRegion.center}");
     }
 }
