@@ -34,11 +34,9 @@ public class PlayerFlashlightOrient : NetworkBehaviour
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
         if (Physics.Raycast(ray, out RaycastHit hit, flashlightRange, enemyLayer))
         {
-            Debug.Log("Collided with something");
             var enemy = hit.collider.GetComponentInParent<EnemyAILogic>();
             if (enemy != null && !enemy.isFrozen)
             {
-                Debug.Log("Freezing the enemy");
                 // Tell the server to freeze this enemy
                 FreezeEnemyServer(enemy.gameObject);
                 lastFreezeTime = Time.time;

@@ -188,6 +188,7 @@ public class EnemyAILogic : NetworkBehaviour
         else
         {
             isFrozen = false;
+            Debug.Log("Should resume normal behavior");
             HandleChaseOrAttack();
         }
     }
