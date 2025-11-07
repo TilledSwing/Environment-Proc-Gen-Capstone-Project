@@ -8,6 +8,10 @@ using static LobbyBroadcast;
 
 public class NetworkManager : NetworkBehaviour
 {
+    private float explosionRadius = 10f;
+    private float terraformStrength = 5f;
+    public LayerMask assetLayer;
+
     /// <summary>
     /// Sets the player to the new viewer for chunk generation and disables the local chunk generator
     /// </summary>
@@ -27,7 +31,7 @@ public class NetworkManager : NetworkBehaviour
         ChunkGenNetwork.Instance.hudCanvas.SetActive(true);
         ChunkGenNetwork.Instance.chatContainer.SetActive(true);
         ChunkGenNetwork.Instance.lobbyContainer.SetActive(true);
-        ChunkGenNetwork.Instance.lightChange.intensity = 0.8f;
+        // ChunkGenNetwork.Instance.lightChange.intensity = 0.8f;
 
         //ChunkGenNetwork.Instance.flashlight.SetActive(true);
         PlayerController.instance.waterLevel = ChunkGenNetwork.Instance.terrainDensityData.waterLevel;
@@ -100,17 +104,84 @@ public class NetworkManager : NetworkBehaviour
 
     private IEnumerator ApplyTerraforms(List<Vector3> terraformCenters, List<Vector3Int> hitChunkPositions, List<int> terraformTypes)
     {
-        yield return new WaitForSeconds(0.5f);
+        while (ChunkGenNetwork.Instance.isLoadingChunks || !ChunkGenNetwork.Instance.initialLoadComplete || ChunkGenNetwork.Instance.isLoadingAssetInstantiations || PlayerController.instance == null)
+        { 
+            yield return new WaitForSeconds(0.5f);
+        }
+
         GameObject player = PlayerController.instance.gameObject;
+
+        if (player.GetComponent<Terraforming>() == null)
+            Debug.LogError("Terraforming null");
+
+        //while (!player.GetComponent<BombLogic>().IsClientInitialized || !player.GetComponent<Terraforming>().IsClientInitialized)
+        while(!player.GetComponent<Terraforming>().IsClientInitialized)
+        {
+            yield return new WaitForSeconds(0.5f);
+        }
+
+        bool first = true;
+        if (first)
+            yield return new WaitForSeconds(5f);
+
+        Debug.LogWarning("Through Wait");
         for (int i = 0; i < terraformCenters.Count; i++)
         {
-            Debug.LogWarning("Inside Terraform Apply");
+            // Debug.LogWarning("Inside Terraform Apply");
             if (terraformTypes[i] == 0)
-                player.GetComponent<BombLogic>().BombTerraformLocal(terraformCenters[i], hitChunkPositions[i]);
-            else if (terraformTypes[i] == 1)
+                ApplyPreviousBombTerraform(terraformCenters[i], hitChunkPositions[i]);
+            if (terraformTypes[i] == 1)
                 player.GetComponent<Terraforming>().TerraformClientLocal(terraformCenters[i], hitChunkPositions[i], false);
             else
                 player.GetComponent<Terraforming>().TerraformClientLocal(terraformCenters[i], hitChunkPositions[i], true);
+        }
+    }
+
+    public void ApplyPreviousBombTerraform(Vector3 terraformCenter, Vector3Int hitChunkPos)
+    {
+        Collider[] colliders = Physics.OverlapSphere(terraformCenter, explosionRadius, assetLayer);
+        foreach (Collider collider in colliders)
+        {
+            Destroy(collider.gameObject);
+        }
+
+        TerrainDensityData terrainDensityData = ChunkGenNetwork.Instance.terrainDensityData;
+        Debug.LogWarning("BombTerraform called");
+        ChunkGenNetwork.TerrainChunk[] chunkAndNeighbors = ChunkGenNetwork.Instance.GetChunkAndNeighbors(hitChunkPos);
+        foreach (ChunkGenNetwork.TerrainChunk terrainChunk in chunkAndNeighbors)
+        {
+            if (terrainChunk == null) continue;
+            if (Mathf.Sqrt(terrainChunk.bounds.SqrDistance(terraformCenter)) <= explosionRadius)
+            {
+                ComputeMarchingCubes marchingCubes = terrainChunk.marchingCubes;
+                Vector3Int chunkPos = terrainChunk.chunkPos;
+                Vector3Int radius = new Vector3Int(Mathf.CeilToInt(explosionRadius), Mathf.CeilToInt(explosionRadius), Mathf.CeilToInt(explosionRadius));
+                Vector3Int start = Vector3Int.Max(Vector3Int.RoundToInt(terraformCenter) - radius - chunkPos, Vector3Int.zero);
+                Vector3Int end = Vector3Int.Min(Vector3Int.RoundToInt(terraformCenter) + radius - chunkPos, new Vector3Int(Mathf.CeilToInt(terrainDensityData.width), Mathf.CeilToInt(terrainDensityData.width), Mathf.CeilToInt(terrainDensityData.width)));
+
+                int threadSizeX = Mathf.CeilToInt((end.x - start.x) + 1f);
+                int threadSizeY = Mathf.CeilToInt((end.y - start.y) + 1f);
+                int threadSizeZ = Mathf.CeilToInt((end.z - start.z) + 1f);
+
+                int terraformKernel = marchingCubes.terraformComputeShader.FindKernel("Terraform");
+                marchingCubes.terraformComputeShader.SetBuffer(terraformKernel, "HeightsBuffer", marchingCubes.heightsBuffer);
+                marchingCubes.terraformComputeShader.SetInt("ChunkSize", terrainDensityData.width);
+                marchingCubes.terraformComputeShader.SetVector("ChunkPos", (Vector3)chunkPos);
+                marchingCubes.terraformComputeShader.SetVector("TerraformOffset", (Vector3)start);
+                marchingCubes.terraformComputeShader.SetVector("TerraformCenter", terraformCenter);
+                marchingCubes.terraformComputeShader.SetFloat("TerraformRadius", explosionRadius);
+                marchingCubes.terraformComputeShader.SetFloat("TerraformStrength", terraformStrength);
+                marchingCubes.terraformComputeShader.SetBool("TerraformMode", true);
+                marchingCubes.terraformComputeShader.SetInt("MaxWorldYChunks", ChunkGenNetwork.Instance.maxWorldYChunks);
+
+                marchingCubes.terraformComputeShader.Dispatch(terraformKernel, threadSizeX, threadSizeY, threadSizeZ);
+
+                int size = (terrainDensityData.width + 1) * (terrainDensityData.width + 1) * (terrainDensityData.width + 1);
+
+                marchingCubes.heightsBuffer.GetData(marchingCubes.heightsArray, 0, 0, size);
+
+                marchingCubes.MarchingCubesJobHandler(marchingCubes.heightsArray, true);
+            }
         }
     }
 }

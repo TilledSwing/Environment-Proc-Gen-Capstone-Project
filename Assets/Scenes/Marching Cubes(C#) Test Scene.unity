@@ -10693,6 +10693,9 @@ MonoBehaviour:
   _componentIndexCache: 255
   _addedNetworkObject: {fileID: 849160507}
   _networkObjectCache: {fileID: 0}
+  assetLayer:
+    serializedVersion: 2
+    m_Bits: 64
 --- !u!1 &850941760
 GameObject:
   m_ObjectHideFlags: 0
