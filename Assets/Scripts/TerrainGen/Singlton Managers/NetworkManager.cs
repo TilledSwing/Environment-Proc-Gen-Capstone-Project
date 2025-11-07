@@ -104,15 +104,13 @@ public class NetworkManager : NetworkBehaviour
 
     private IEnumerator ApplyTerraforms(List<Vector3> terraformCenters, List<Vector3Int> hitChunkPositions, List<int> terraformTypes)
     {
-        while (ChunkGenNetwork.Instance.isLoadingChunks || !ChunkGenNetwork.Instance.initialLoadComplete || ChunkGenNetwork.Instance.isLoadingAssetInstantiations || PlayerController.instance == null)
+        while (!ChunkGenNetwork.Instance.initialLoadComplete || ChunkGenNetwork.Instance.hasPendingMeshInits || ChunkGenNetwork.Instance.isLoadingMeshes || ChunkGenNetwork.Instance.hasPendingAssetInstantiations ||
+                ChunkGenNetwork.Instance.isLoadingAssetInstantiations || ChunkGenNetwork.Instance.hasPendingReadbacks || ChunkGenNetwork.Instance.isLoadingReadbacks || ChunkGenNetwork.Instance.isLoadingChunks || PlayerController.instance == null)
         { 
             yield return new WaitForSeconds(0.5f);
         }
 
         GameObject player = PlayerController.instance.gameObject;
-
-        if (player.GetComponent<Terraforming>() == null)
-            Debug.LogError("Terraforming null");
 
         //while (!player.GetComponent<BombLogic>().IsClientInitialized || !player.GetComponent<Terraforming>().IsClientInitialized)
         while(!player.GetComponent<Terraforming>().IsClientInitialized)
@@ -120,9 +118,9 @@ public class NetworkManager : NetworkBehaviour
             yield return new WaitForSeconds(0.5f);
         }
 
-        bool first = true;
-        if (first)
-            yield return new WaitForSeconds(5f);
+        //bool first = true;
+        //if (first)
+        yield return new WaitForSeconds(2f);
 
         Debug.LogWarning("Through Wait");
         for (int i = 0; i < terraformCenters.Count; i++)
