@@ -118,8 +118,6 @@ public class NetworkManager : NetworkBehaviour
             yield return new WaitForSeconds(0.5f);
         }
 
-        //bool first = true;
-        //if (first)
         yield return new WaitForSeconds(2f);
 
         Debug.LogWarning("Through Wait");
@@ -127,7 +125,8 @@ public class NetworkManager : NetworkBehaviour
         {
             // Debug.LogWarning("Inside Terraform Apply");
             if (terraformTypes[i] == 0)
-                ApplyPreviousBombTerraform(terraformCenters[i], hitChunkPositions[i]);
+                //player.GetComponent<BombThrow>().GetComponent<BombLogic>().BombTerraformLocal(terraformCenters[i], hitChunkPositions[i])
+                StartCoroutine(ApplyPreviousBombTerraform(terraformCenters[i], hitChunkPositions[i]));
             if (terraformTypes[i] == 1)
                 player.GetComponent<Terraforming>().TerraformClientLocal(terraformCenters[i], hitChunkPositions[i], false);
             else
@@ -135,7 +134,7 @@ public class NetworkManager : NetworkBehaviour
         }
     }
 
-    public void ApplyPreviousBombTerraform(Vector3 terraformCenter, Vector3Int hitChunkPos)
+    public IEnumerator ApplyPreviousBombTerraform(Vector3 terraformCenter, Vector3Int hitChunkPos)
     {
         Collider[] colliders = Physics.OverlapSphere(terraformCenter, explosionRadius, assetLayer);
         foreach (Collider collider in colliders)
@@ -160,6 +159,9 @@ public class NetworkManager : NetworkBehaviour
                 int threadSizeX = Mathf.CeilToInt((end.x - start.x) + 1f);
                 int threadSizeY = Mathf.CeilToInt((end.y - start.y) + 1f);
                 int threadSizeZ = Mathf.CeilToInt((end.z - start.z) + 1f);
+
+                while (marchingCubes.heightsBuffer == null)
+                    yield return new WaitForSeconds(0.5f);
 
                 int terraformKernel = marchingCubes.terraformComputeShader.FindKernel("Terraform");
                 marchingCubes.terraformComputeShader.SetBuffer(terraformKernel, "HeightsBuffer", marchingCubes.heightsBuffer);
