@@ -20,6 +20,7 @@ public class InteractController : MonoBehaviour
     private bool lastRayState = false;
     Renderer meshRenderer;
     Material[] materials;
+    Material[] lastMaterials;
 
     void Awake()
     {
@@ -41,11 +42,12 @@ public class InteractController : MonoBehaviour
         Ray ray = playerCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
         if (Physics.Raycast(ray, out RaycastHit hit, interactDst, interactLayerMask))
         {
-            if (!lastRayState)
+            meshRenderer = hit.collider.gameObject.GetComponent<Renderer>();
+            materials = meshRenderer.materials;
+            if (!lastRayState || lastMaterials != materials)
             {
                 lastRayState = true;
-                meshRenderer = hit.collider.gameObject.GetComponent<Renderer>();
-                materials = meshRenderer.materials;
+                lastMaterials = materials;
                 foreach (Material material in materials)
                 {
                     StartCoroutine(FadeInHightlight(material, 0.15f));

@@ -427,6 +427,7 @@ public class AssetSpawner : MonoBehaviour
             assetToSpawn.layer = LayerMask.NameToLayer("Interact Layer");
             ValuableProperties properties = assetToSpawn.AddComponent<ValuableProperties>();
             properties.value = rng.NextInt(assetSpawnData.spawnableAssets[i].minValue, assetSpawnData.spawnableAssets[i].maxValue);
+            assetToSpawn.AddComponent<ScanObject>();
             assetToSpawn.transform.rotation = Quaternion.Euler(rng.NextFloat(0f, 360f), assetToSpawn.transform.rotation.y, rng.NextFloat(0f, 360f));
         }
         assetSpawnData.spawnableAssets[i].spawnedAssets.Add(new Asset(assetToSpawn, assetToSpawn.GetComponent<MeshRenderer>(), assetToSpawn.GetComponent<MeshCollider>()));

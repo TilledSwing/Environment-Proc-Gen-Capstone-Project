@@ -227,6 +227,7 @@ GameObject:
   - component: {fileID: 4652008239368842796}
   - component: {fileID: 3675121155168622157}
   - component: {fileID: 3092386480338805281}
+  - component: {fileID: 2695194995097390186}
   - component: {fileID: 1324032884783071196}
   - component: {fileID: 3464545069803304171}
   - component: {fileID: -2765541620985245343}
@@ -318,6 +319,26 @@ MonoBehaviour:
   waterLevel: 0
   cameraYOffset: 0.4
   playerCamera: {fileID: 0}
+--- !u!114 &2695194995097390186
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3941859824757792008}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 909f71e24ee0e374fb0d67a8d86c9ae3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scanRadius: 50
+  scanSpeed: 1
+  scanDuration: 8
+  scanMaterial: {fileID: 2100000, guid: 359131121b1a4314098add5d50690ed2, type: 2}
+  scanLayer:
+    serializedVersion: 2
+    m_Bits: 128
+  visualScanObj: {fileID: 235067202098546940, guid: 531549b042e200142bf9824a350f44c0, type: 3}
 --- !u!114 &1324032884783071196
 MonoBehaviour:
   m_ObjectHideFlags: 0

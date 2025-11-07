@@ -571,7 +571,7 @@ public class ChunkGenNetwork : MonoBehaviour
             }
 
             // 1 readback per 20 fps with a min and max of 2 and 8
-            int maxActiveReadbacks = Mathf.Clamp(Mathf.RoundToInt(1f / Time.smoothDeltaTime / 20f), 2, 8);
+            int maxActiveReadbacks = Mathf.Clamp(Mathf.RoundToInt(1f / Time.smoothDeltaTime / 20f), 2, 6);
 
             while (activeRequests.Count <= maxActiveReadbacks && pendingReadbacks.Count > 0)
             {

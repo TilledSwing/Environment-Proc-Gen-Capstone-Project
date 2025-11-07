@@ -152,14 +152,14 @@ Shader "Custom/TerrainTextureShader"
             float4 frag(Varyings IN) : SV_Target
             {
                 float4 albedo = float4(0, 0, 0, 0);
-                float weights[MAX_TEXTURES];
+                // float weights[MAX_TEXTURES];
                 float totalWeight = 0;
                 float height = IN.worldPos.y;
                 float3 normal = normalize(IN.worldNormal);
                 float slope = 1 - dot(normal, float3(0, 1, 0));
 
-                if(height < _LowestStartHeight) height = _LowestStartHeight;
-                if(height > _GreatestEndHeight) height = _GreatestEndHeight;
+
+                height = clamp(height, _LowestStartHeight, _GreatestEndHeight);
 
                 // [unroll]
                 // for(int i = 0; i < _LayerCount; i++) {
@@ -194,16 +194,14 @@ Shader "Custom/TerrainTextureShader"
                     float slopeWeight = 1 - abs(slope - slopeMid) / slopeHalfWidth;
 
                     float weight = 0;
-                    if(_UseHeightsArray[i] == 1 || _UseSlopesArray[i] == 1) {
-                        if(_UseHeightsArray[i] == 1 && _UseSlopesArray[i] == 1) {
-                            weight = saturate(heightWeight) * saturate(slopeWeight);
-                        }
-                        else if(_UseHeightsArray[i] == 1) {
-                            weight = saturate(heightWeight);
-                        }
-                        else {
-                            weight = saturate(slopeWeight);
-                        }
+                    if(_UseHeightsArray[i] == 1 && _UseSlopesArray[i] == 1) {
+                        weight = saturate(heightWeight) * saturate(slopeWeight);
+                    }
+                    else if(_UseHeightsArray[i] == 1) {
+                        weight = saturate(heightWeight);
+                    }
+                    else {
+                        weight = saturate(slopeWeight);
                     }
 
                     if(weight > 0.001) {

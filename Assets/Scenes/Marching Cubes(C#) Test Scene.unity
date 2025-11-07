@@ -21435,6 +21435,7 @@ MonoBehaviour:
   fogColor: {r: 0.102794595, g: 0.15040942, b: 0.20754719, a: 1}
   darkFogColor: {r: 0.09429512, g: 0.10846831, b: 0.122641504, a: 1}
   rendererData: {fileID: 11400000, guid: f288ae1f4751b564a96ac7587541f7a2, type: 2}
+  fogRenderPassFeature: {fileID: 0}
   mainUrpAsset: {fileID: 11400000, guid: 4b83569d67af61e458304325a23e5dfd, type: 2}
   underwaterUrpAsset: {fileID: 11400000, guid: 2a0130e02479ff741a2d412b4faeb3a6, type: 2}
   objectiveCanvas: {fileID: 1523709550}
