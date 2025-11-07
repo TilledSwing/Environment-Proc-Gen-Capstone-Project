@@ -35,7 +35,7 @@ public class PlayerFlashlightOrient : NetworkBehaviour
         if (Physics.Raycast(ray, out RaycastHit hit, flashlightRange, enemyLayer))
         {
             var enemy = hit.collider.GetComponentInParent<EnemyAILogic>();
-            if (enemy != null && !enemy.isFrozen)
+            if (enemy != null)
             {
                 // Tell the server to freeze this enemy
                 FreezeEnemyServer(enemy.gameObject);
@@ -51,9 +51,7 @@ public class PlayerFlashlightOrient : NetworkBehaviour
         EnemyAILogic enemy = enemyObj.GetComponent<EnemyAILogic>();
         if (enemy != null)
         {
-            Debug.Log("Calling the EnemyAILogic freeze enemy script");
             enemy.SetFrozen(true);
-
         }
     }
     [ServerRpc(RequireOwnership = false)]

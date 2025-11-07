@@ -21,7 +21,9 @@ public class EnemyAILogic : NetworkBehaviour
     public  bool isFrozen = false;
     private float freezeDuration = 5f;
     private float frozenTime = 0f;
-
+    private float totalFrozenTime = 0f;
+    private float totalFrozenDeathTimer = 15f;
+    private bool isDead = false;
     public void Awake()
     {
         enemyMovement = GetComponent<EnemyAIMovement>();
@@ -43,13 +45,26 @@ public class EnemyAILogic : NetworkBehaviour
     [Server]
     void ServerThink()
     {
+        if (isDead)
+            return;
+
         if (isFrozen)
         {
             frozenTime -= thinkRate;
             if (frozenTime <= 0f)
             {
                 SetFrozen(false);
+                return;
             }
+
+            totalFrozenTime += thinkRate;
+            Debug.Log("Ive been frozen for: " + totalFrozenTime);
+            if (totalFrozenTime >= totalFrozenDeathTimer)
+            {
+                StartCoroutine(KillEnemy());
+                return;   
+            }
+
             return;
         }
         //Dont interupt the attack animation
@@ -137,6 +152,28 @@ public class EnemyAILogic : NetworkBehaviour
         HandleChaseOrAttack();
     }
 
+    /// <summary>
+    /// Kills the enemy
+    /// </summary>
+    /// <returns></returns>
+    [Server]
+    private IEnumerator KillEnemy()
+    {
+        Debug.Log("Calling kill enemy script");
+        isDead = true;
+
+        StopMovement();
+        CancelInvoke(nameof(ServerThink));
+
+        //Server
+        enemyAnimation.Trigger("Die");
+
+        //Client
+        RPCTrigger("Die");
+
+        yield return new WaitForSeconds(1.1f);
+        ServerManager.Despawn(gameObject);
+    }
     /// <summary>
     /// If a target hasn't been assigned we want the enemy to wander around the map. This updates the 
     /// wander destination location every wanderInterval seconds
