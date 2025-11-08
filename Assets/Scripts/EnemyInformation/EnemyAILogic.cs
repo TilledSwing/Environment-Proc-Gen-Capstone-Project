@@ -2,28 +2,33 @@ using FishNet.Demo.AdditiveScenes;
 using FishNet.Object;
 using GameKit.Dependencies.Utilities;
 using System.Collections;
+using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.SocialPlatforms.GameCenter;
 
 public class EnemyAILogic : NetworkBehaviour
 {
-    private Transform target;
-    private float attackRange = 1f;
-    private float wanderInterval = 2f;
-    private float wanderRadius = 30f;
+    private GameObject target;
+    private float attackRange = 3f;
+    private float wanderRadius = 50f;
     private float minWanderDistance = 15f;
+
     private float thinkRate = .2f;
     private NavMeshAgent agent;
     private EnemyAIMovement enemyMovement;
     private EnemyAnimation enemyAnimation;
     private float wanderTime = 0f;
+    private float wanderDuration = 5f;
     private bool isAttacking = false;
-    public  bool isFrozen = false;
+    public bool isFrozen = false;
     private float freezeDuration = 5f;
     private float frozenTime = 0f;
     private float totalFrozenTime = 0f;
     private float totalFrozenDeathTimer = 15f;
     private bool isDead = false;
+    private List<GameObject> targetsInRange = new List<GameObject>();
     public void Awake()
     {
         enemyMovement = GetComponent<EnemyAIMovement>();
@@ -58,11 +63,10 @@ public class EnemyAILogic : NetworkBehaviour
             }
 
             totalFrozenTime += thinkRate;
-            Debug.Log("Ive been frozen for: " + totalFrozenTime);
             if (totalFrozenTime >= totalFrozenDeathTimer)
             {
                 StartCoroutine(KillEnemy());
-                return;   
+                return;
             }
 
             return;
@@ -75,7 +79,6 @@ public class EnemyAILogic : NetworkBehaviour
         if (target != null)
             HandleChaseOrAttack();
         else
-            GetClosestTarget();
             HandleWander();
     }
 
@@ -86,13 +89,7 @@ public class EnemyAILogic : NetworkBehaviour
     [Server]
     private void HandleChaseOrAttack()
     {
-        float distanceToTarget = Vector3.Distance(transform.position, target.position);
-        // if (distanceToTarget > loseTargetRadius)
-        // {
-        //     target = null;
-        //     return;
-        // }
-
+        float distanceToTarget = Vector3.Distance(transform.position, target.transform.position);
         if (distanceToTarget <= attackRange)
         {
             StartCoroutine(AttackTarget());
@@ -100,31 +97,8 @@ public class EnemyAILogic : NetworkBehaviour
         else
         {
             UpdateEnemySpeed();
-            enemyMovement.MoveTo(target.position);
+            enemyMovement.MoveTo(target.transform.position);
         }
-    }
-
-    [Server]
-    private void GetClosestTarget()
-    {
-        var enemies = FindObjectsByType<PlayerController>(FindObjectsSortMode.None);
-        Transform closestTarget = null;
-        float closestDist = Mathf.Infinity;
-        foreach (PlayerController play in enemies)
-        {
-            float dist = Vector3.Distance(transform.position, play.transform.position);
-            if (dist < closestDist)
-            {
-                closestTarget = play.transform;
-                closestDist = dist;
-            }
-        }
-
-        if (closestTarget != null)
-        {
-            target = closestTarget;
-        }
-            
     }
 
     /// <summary>
@@ -149,7 +123,6 @@ public class EnemyAILogic : NetworkBehaviour
 
         yield return new WaitForSeconds(2.333f);
         isAttacking = false;
-        HandleChaseOrAttack();
     }
 
     /// <summary>
@@ -182,16 +155,15 @@ public class EnemyAILogic : NetworkBehaviour
     private void HandleWander()
     {
         //Checks if the agent is attacking for our purposes
-        if (Time.time < wanderTime && agent.remainingDistance > 0.5f)
+        if (wanderTime > 0 && agent.remainingDistance > 0.5f)
         {
+            wanderTime -= thinkRate;
             UpdateEnemySpeed();
             return;
         }
-
-        Vector3 newPos = RandomNavMeshLoaction(wanderRadius);
+        Vector3 newPos = RandomNavMeshLoaction();
         enemyMovement.MoveTo(newPos);
-        UpdateEnemySpeed();
-        wanderTime = Time.time + wanderInterval;
+        wanderTime = wanderDuration;
     }
 
     /// <summary>
@@ -222,14 +194,72 @@ public class EnemyAILogic : NetworkBehaviour
                 RPCSetBool("IsStunned", frozen);
             }
             isFrozen = true;
-            frozenTime = freezeDuration; 
+            frozenTime = freezeDuration;
         }
         else
         {
             isFrozen = false;
             enemyAnimation.SetBool("IsStunned", frozen);
             RPCSetBool("IsStunned", frozen);
-            HandleChaseOrAttack();
+        }
+    }
+
+    /// <summary>
+    /// If a player enters the enemies specified range, this is triggered and a target is assigned
+    /// </summary>
+    /// <param name="other"></param>
+    private void OnTriggerEnter(Collider other)
+    {
+        if (!IsServerInitialized) return;
+
+        if (other.CompareTag("Player"))
+        {
+            if (target == null)
+                target = other.gameObject;
+            targetsInRange.Add(other.gameObject);
+        }
+    }
+
+    /// <summary>
+    /// If a player exits the enemies specified range, this is triggered and the target is unnasigned
+    /// </summary>
+    /// <param name="other"></param>
+    private void OnTriggerExit(Collider other)
+    {
+
+        if (!IsServerInitialized) return;
+
+        if (targetsInRange.Contains(other.gameObject))
+            targetsInRange.Remove(other.gameObject);
+
+        if (other.gameObject == target)
+        {
+            target = null;  
+            if (targetsInRange.Count > 0)
+            {
+                if (targetsInRange.Count == 1)
+                {
+                    target = targetsInRange[0];
+                }
+                else
+                {
+                    float nearestPlayer = 100000000;
+                    float playerDistance = 0;
+                    GameObject nextTarget = null;
+                    GameObject potentialTarget = null;
+
+                    for (int i = 0; i < targetsInRange.Count; i++)
+                    {
+                        potentialTarget = targetsInRange[i];
+                        playerDistance = Vector3.Distance(transform.position, potentialTarget.transform.position);
+                        if (playerDistance < nearestPlayer)
+                        {
+                            nextTarget = potentialTarget;
+                        }
+                    }
+                    target = nextTarget;
+                }
+            }
         }
     }
 
@@ -289,19 +319,19 @@ public class EnemyAILogic : NetworkBehaviour
     /// </summary>
     /// <param name="wanderRadius"></param>
     /// <returns></returns>
-    private Vector3 RandomNavMeshLoaction(float wanderRadius)
+    private Vector3 RandomNavMeshLoaction()
     {
-        int attempts = 10;
+        int attempts = 30;
         while (attempts > 0)
         {
-            Vector3 randomDirection = Random.insideUnitSphere * wanderRadius;
-            randomDirection += agent.transform.position;
+            Vector3 randomDirection = agent.transform.position + Random.insideUnitSphere * wanderRadius;
             NavMeshHit navHit;
             if (NavMesh.SamplePosition(randomDirection, out navHit, 5f, NavMesh.AllAreas))
             {
                 if (Vector3.Distance(agent.transform.position, navHit.position) >= minWanderDistance)
                     return navHit.position;
             }
+            attempts--;
         }
         return agent.transform.position;
     }
