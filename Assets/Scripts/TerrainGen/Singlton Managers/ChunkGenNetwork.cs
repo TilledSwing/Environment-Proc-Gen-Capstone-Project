@@ -102,13 +102,9 @@ public class ChunkGenNetwork : MonoBehaviour
     public Queue<Action> pendingAssetInstantiations = new();
     public bool isLoadingAssetInstantiations = false;
     // Data structure pools
-    public bool navMeshCreated = false;
-    public bool navMeshNeedsUpdate = false;
     private GlobalNavMeshUpdater navMeshUpdater;
-    public bool allChunksGenerated = false;
-    private const float navMeshUpdateTime = 5f;
-    private float navMeshGentimer = navMeshUpdateTime;
-
+    public event Action OnTerrainReady;
+    public bool IsTerrainReady { get; private set; }
 
     public class ReadbackRequest
     {
@@ -208,10 +204,6 @@ public class ChunkGenNetwork : MonoBehaviour
     }
     void Update()
     {
-        if (navMeshUpdater == null)
-        {
-            navMeshUpdater = FindFirstObjectByType<GlobalNavMeshUpdater>();
-        }
         // Position updates
         viewerPos = viewer.position;
         lightingBlocker.transform.position = new Vector3(viewerPos.x, 0, viewerPos.z);
@@ -242,55 +234,20 @@ public class ChunkGenNetwork : MonoBehaviour
         {
             StartCoroutine(LoadAssetInstantiationsOverTime());
         }
-
-        navMeshGentimer += Time.deltaTime;
-        if (navMeshGentimer >= navMeshUpdateTime)
+        if (!IsTerrainReady)
         {
-            updateNavMesh();
+            
         }
-        
+
     }
 
-    public void updateNavMesh()
+    private void FinishInitialTerrain()
     {
-        if (navMeshNeedsUpdate || !navMeshCreated)
-        {
+        // Set the flag
+        IsTerrainReady = true;
 
-            if (initialLoadComplete && !hasPendingMeshInits && !isLoadingMeshes && !hasPendingAssetInstantiations &&
-                !isLoadingAssetInstantiations && !hasPendingReadbacks && !isLoadingReadbacks && !isLoadingChunks && navMeshUpdater != null)
-            {
-                bool allChunksReady = true;
-                foreach (KeyValuePair<Vector3, TerrainChunk> entry in chunkDictionary)
-                {
-                    var chunk = entry.Value;
-                    if (chunk.marchingCubes == null ||
-                        chunk.marchingCubes.meshFilter == null ||
-                        chunk.marchingCubes.meshFilter.mesh == null ||
-                        chunk.marchingCubes.initialLoadComplete == false ||
-                        chunk.marchingCubes.meshFilter.mesh == null)
-                    {
-                        allChunksReady = false;
-                        break; // stop checking, at least one isn’t done
-                    }
-                }
-                if (allChunksReady && navMeshNeedsUpdate && navMeshCreated)
-                {
-                    Bounds updatedRegion = CalculateLoadedChunkBounds(); // explained below
-                    StartCoroutine(navMeshUpdater.RebuildNavMeshAsync(updatedRegion, chunkDictionary));
-                    navMeshNeedsUpdate = false;
-                    navMeshGentimer = 0f;
-                }
-
-                if (allChunksReady && !navMeshCreated)
-                {
-                    Bounds updatedRegion = CalculateLoadedChunkBounds(); // explained below
-                    StartCoroutine(navMeshUpdater.RebuildNavMeshAsync(updatedRegion, chunkDictionary));
-                    navMeshCreated = true;
-                    navMeshNeedsUpdate = false;
-                    navMeshGentimer = 0f;
-                }
-            }
-        }
+        // Fire the event if there are subscribers
+        OnTerrainReady?.Invoke();
     }
     /// <summary>
     /// Update all the visible chunks loading in new ones and unloading old ones that are no longer visible
@@ -368,8 +325,8 @@ public class ChunkGenNetwork : MonoBehaviour
                             TerrainChunk chunk = new TerrainChunk(viewedChunkCoord, chunkSize, GameObject.Find("ChunkParent").transform, terrainDensityData, assetSpawnData, terrainTextureData,
                                                          marchingCubesComputeShader, terrainDensityComputeShader, terrainNoiseComputeShader, terraformComputeShader,
                                                          terrainMaterial, waterMaterial, initialLoadComplete);
-                            navMeshNeedsUpdate = true;
                             chunkDictionary.Add(viewedChunkCoord, chunk);
+                            navMeshUpdater.AddChunkForNavMeshUpdate(chunk);
                             chunk.UpdateChunk(maxViewDst, terrainDensityData.width);
 
                             if (chunk.IsVisible())
@@ -471,8 +428,8 @@ public class ChunkGenNetwork : MonoBehaviour
                                             terrainNoiseComputeShader,
                                             terraformComputeShader,
                                             terrainMaterial, waterMaterial, initialLoadComplete);
+                navMeshUpdater.AddChunkForNavMeshUpdate(chunk);
                 chunkDictionary.Add(coord, chunk);
-                navMeshNeedsUpdate = true;
                 chunk.UpdateChunk(maxViewDst, chunkSize);
                 if (chunk.IsVisible())
                 {
@@ -772,7 +729,7 @@ public class ChunkGenNetwork : MonoBehaviour
         public MeshFilter meshFilter;
         public MeshRenderer meshRenderer;
         public bool visible = false;
-
+        public bool isWater = false;
         public NavMeshSurface navMeshSurface;
         public TerrainChunk(Vector3Int chunkCoord, int chunkSize, Transform parent, TerrainDensityData terrainDensityData, AssetSpawnData assetSpawnData, TerrainTextureData terrainTextureData,
                             ComputeShader marchingCubesComputeShader, ComputeShader terrainDensityComputeShader, ComputeShader terrainNoiseComputeShader,
@@ -830,6 +787,10 @@ public class ChunkGenNetwork : MonoBehaviour
                 waterGen.marchingCubes = marchingCubes;
                 marchingCubes.waterGen = waterGen;
                 waterPlaneGenerator.AddComponent<DitherFadeController>();
+            }    
+            if( terrainDensityData.waterLevel > bounds.min.y)
+            {
+                isWater = true;
             }
             chunk.transform.SetParent(parent);
             Instance.chunkHideQueue.Enqueue(this);
