@@ -44,7 +44,8 @@ public class ScanController : MonoBehaviour
                 ScanObject obj = collider.GetComponent<ScanObject>();
                 if (scannedObjects.Contains(obj)) continue;
                 scannedObjects.Add(obj);
-                StartCoroutine(obj.SetScan(scanMaterial, scanDuration));
+                if (gameObject.GetComponent<InteractController>().currentObj != obj)
+                    StartCoroutine(obj.SetScan(scanMaterial, scanDuration));
             }
             yield return null;
         }

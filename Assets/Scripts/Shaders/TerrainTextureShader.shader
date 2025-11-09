@@ -35,6 +35,7 @@ Shader "Custom/TerrainTextureShader"
             #pragma multi_compile _ _LIGHT_COOKIES
             #pragma multi_compile _ _FORWARD_PLUS
             #pragma multi_compile_fragment _ _SHADOWS_SOFT
+            #pragma target 3.0
 
             // The Core.hlsl file contains definitions of frequently used HLSL
             // macros and functions, and also contains #include references to other

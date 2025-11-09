@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class ScanObject : MonoBehaviour
 {
-    Material originalMaterial;
+    public Material[] originalMaterials;
     Color originalColor;
     float originalSmoothness;
     float originalAlpha;
@@ -11,16 +11,17 @@ public class ScanObject : MonoBehaviour
     void Awake()
     {
         myRenderer = gameObject.GetComponent<Renderer>();
-        originalMaterial = myRenderer.material;
-        originalColor = originalMaterial.GetColor("_outlineColor");
-        originalSmoothness = originalMaterial.GetFloat("_smoothness");
-        originalAlpha = originalMaterial.GetFloat("_alpha");
+        originalMaterials = myRenderer.materials;
+        // originalColor = originalMaterial.GetColor("_outlineColor");
+        // originalSmoothness = originalMaterial.GetFloat("_smoothness");
+        // originalAlpha = originalMaterial.GetFloat("_alpha");
     }
 
     public IEnumerator SetScan(Material scanMaterial, float scanDuration)
     {
         myRenderer.material = scanMaterial;
         yield return new WaitForSeconds(scanDuration);
-        myRenderer.material = originalMaterial;
+        if (myRenderer != null)
+            myRenderer.materials = originalMaterials;
     }
 }
