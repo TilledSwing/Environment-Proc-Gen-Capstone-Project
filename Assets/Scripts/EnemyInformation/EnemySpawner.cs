@@ -22,7 +22,6 @@ public class EnemySpawner : NetworkBehaviour
 
     public override void OnStartClient()
     {
-        Debug.Log("SpawnerIsActive");
         base.OnStartClient();
         if (IsClientStarted)
         {
@@ -36,7 +35,6 @@ public class EnemySpawner : NetworkBehaviour
 
     void loadPrefab()
     {
-        Debug.Log("Entering load prefab method");
         Addressables.LoadAssetAsync<GameObject>(prefabAdress).Completed += handle =>
         {
             if (handle.Status != AsyncOperationStatus.Succeeded)
@@ -44,7 +42,6 @@ public class EnemySpawner : NetworkBehaviour
                 Debug.Log("Failed to load the desired pre-fab");
                 return;
             }
-            Debug.Log($"The results of the prefab load is: {handle.Status.ToString()}");
             enemyPrefab = handle.Result;
         };
 
@@ -57,7 +54,6 @@ public class EnemySpawner : NetworkBehaviour
         if (EventSystem.current.currentSelectedGameObject != null &&
             EventSystem.current.currentSelectedGameObject.GetComponent<TMP_InputField>() != null)
         {
-            Debug.Log("exiting the loop before keycode");
             return;
         }
 

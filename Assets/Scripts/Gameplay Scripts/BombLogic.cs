@@ -93,7 +93,8 @@ public class BombLogic : NetworkBehaviour
 
     [ObserversRpc]
     public void BombTerraform(Vector3 terraformCenter, Vector3Int hitChunkPos)
-    {
+    {                                          
+        SoundManager.Instance.PlaySFXAtPoint("BombExplosion", terraformCenter);
         BombTerraformLocal(terraformCenter, hitChunkPos);
     }
 

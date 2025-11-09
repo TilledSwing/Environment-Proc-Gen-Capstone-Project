@@ -212,12 +212,12 @@ public class EnemyAILogic : NetworkBehaviour
     {
         if (!IsServerInitialized) return;
 
-        if (other.CompareTag("Player"))
-        {
-            if (target == null)
-                target = other.gameObject;
-            targetsInRange.Add(other.gameObject);
-        }
+        if (!other.CompareTag("Player")) return;
+
+        SoundManager.Instance.PlayMusic("ChaseMusic");
+        if (target == null)
+            target = other.gameObject;
+        targetsInRange.Add(other.gameObject);
     }
 
     /// <summary>
@@ -228,7 +228,9 @@ public class EnemyAILogic : NetworkBehaviour
     {
 
         if (!IsServerInitialized) return;
+        if (!other.CompareTag("Player")) return;
 
+        SoundManager.Instance.PlayMusic("GameTheme");
         if (targetsInRange.Contains(other.gameObject))
             targetsInRange.Remove(other.gameObject);
 
