@@ -23,7 +23,8 @@ public class ChunkGenNetwork : MonoBehaviour
     public Material fogMat;
     public float fogDensity;
     public float fogOffset;
-    public Color fogColor = new Color(160f, 196f, 233f, 1f);
+    public Color upperFogColor;
+    public Color lowerFogColor;
     public Color darkFogColor;
     public UniversalRendererData rendererData;
     public FogRenderPassFeature fogRenderPassFeature;
@@ -170,9 +171,11 @@ public class ChunkGenNetwork : MonoBehaviour
         fogOffset = maxViewDst - 20f;
         fogMat.SetFloat("_fogOffset", fogOffset);
         fogMat.SetFloat("_fogDensity", fogDensity);
-        fogMat.SetColor("_fogColor", fogColor);
-        // waterMaterial.SetFloat("_fogOffset", fogOffset);
-        // waterMaterial.SetFloat("_fogDensity", fogDensity);
+        fogMat.SetColor("_upperFogColor", upperFogColor);
+        fogMat.SetColor("_lowerFogColor", lowerFogColor);
+        waterMaterial.SetFloat("_fogOffset", fogOffset);
+        waterMaterial.SetFloat("_fogDensity", fogDensity);
+        waterMaterial.SetColor("_fogColor", upperFogColor);
         navMeshUpdater = FindFirstObjectByType<GlobalNavMeshUpdater>();
 
         // terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 100000);
@@ -225,8 +228,9 @@ public class ChunkGenNetwork : MonoBehaviour
         lightingBlocker.transform.position = new Vector3(viewerPos.x, 0, viewerPos.z);
         // Darker fog at lower world heights
         float depthFactor = Mathf.Clamp01(-viewerPos.y * 0.01f);
-        Color currentFog = Color.Lerp(fogColor, darkFogColor, depthFactor);
-        fogMat.SetColor("_fogColor", currentFog);
+        Color currentFog = Color.Lerp(lowerFogColor, darkFogColor, depthFactor);
+        fogMat.SetColor("_lowerFogColor", currentFog);
+        waterMaterial.SetColor("_fogColor", currentFog);
 
         // Update chunks
         if ((viewerPos - lastUpdateViewerPos).sqrMagnitude > updateDistanceThreshold * updateDistanceThreshold && initialLoadComplete)
@@ -806,7 +810,7 @@ public class ChunkGenNetwork : MonoBehaviour
             meshFilter = chunk.AddComponent<MeshFilter>();
             meshRenderer = chunk.AddComponent<MeshRenderer>();
             // Chunk texture
-            meshRenderer.material = terrainMaterial;
+            meshRenderer.sharedMaterial = terrainMaterial;
             // meshRenderer.material.SetFloat("_UnderwaterTexHeightEnd", terrainDensityData.waterLevel - 15f);
             // meshRenderer.material.SetFloat("_Tex1HeightStart", terrainDensityData.waterLevel - 18f);
             // Set up the chunk's AssetSpawn script
@@ -839,7 +843,7 @@ public class ChunkGenNetwork : MonoBehaviour
                 waterPlaneGenerator.transform.SetParent(chunk.transform);
                 MeshFilter waterGenMeshFilter = waterPlaneGenerator.AddComponent<MeshFilter>();
                 MeshRenderer waterMat = waterPlaneGenerator.AddComponent<MeshRenderer>();
-                waterMat.material = waterMaterial;
+                waterMat.sharedMaterial = waterMaterial;
                 waterGen = waterPlaneGenerator.AddComponent<WaterPlaneGenerator>();
                 waterGen.meshFilter = waterGenMeshFilter;
                 waterGen.meshRenderer = waterMat;
@@ -847,7 +851,7 @@ public class ChunkGenNetwork : MonoBehaviour
                 waterGen.chunkPos = chunkPos;
                 waterGen.marchingCubes = marchingCubes;
                 marchingCubes.waterGen = waterGen;
-                waterPlaneGenerator.AddComponent<DitherFadeController>();
+                // waterPlaneGenerator.AddComponent<DitherFadeController>();
             }
             chunk.transform.SetParent(parent);
             Instance.chunkHideQueue.Enqueue(this);

@@ -17,6 +17,10 @@ Shader "Custom/WaterShader"
         _NormalStrength ("NormalStrength", Float) = 1
         _Smoothness ("Smoothness", Float) = 0.5
         _Specular ("Specular", Float) = 0.2
+
+        _fogOffset ("fogOffset", Float) = 0
+        _fogDensity ("fogDensity", Float) = 0
+        _fogColor ("fogColor", Color) = (1,1,1,1)
     }
     SubShader
     {
@@ -25,6 +29,7 @@ Shader "Custom/WaterShader"
             Tags { "RenderType"="Transparent" "Queue"="Transparent" "RenderPipeline"="UniversalPipeline" "Lightmode"="UniversalForward" }
             LOD 200
             ZWrite Off
+            Cull Off
             ZTest LEqual 
             Blend SrcAlpha OneMinusSrcAlpha
             HLSLPROGRAM
@@ -77,21 +82,29 @@ Shader "Custom/WaterShader"
             float _Depth;
             float4 _ShallowColor;
             float4 _DeepColor;
+
             float _RefractionSpeed;
             float4 _RefractionScale;
             float _RefractionStrength;
             TEXTURE2D(_RefractionTexture);
             SAMPLER(sampler_RefractionTexture);
+
             float _FoamSpeed;
             float _FoamScale;
             float _FoamAmount;
             float _FoamCutoff;
             float4 _FoamColor;
+
             float _NormalStrength;
             float _Smoothness;
             float _Specular;
+
             TEXTURE2D(_CameraOpaqueTexture);
             SAMPLER(sampler_CameraOpaqueTexture);
+
+            float _fogOffset;
+            float _fogDensity;
+            float4 _fogColor;
 
             Varyings vert(Attributes IN)
             {
@@ -102,9 +115,10 @@ Shader "Custom/WaterShader"
                 OUT.worldPos = worldPos;
                 OUT.worldNormal = TransformObjectToWorldNormal(IN.normalOS);
 
-                float2 refractionOffset = _Time.z * float2(_RefractionSpeed, _RefractionSpeed);
-                OUT.posRefractionUV = worldPos.xz * _RefractionScale.xy + refractionOffset;
-                OUT.negRefractionUV = worldPos.xz * _RefractionScale.xy - refractionOffset;
+                float2 refractionOffset1 = _Time.z * float2(_RefractionSpeed, _RefractionSpeed * 0.5);
+                float2 refractionOffset2 = _Time.z * float2(-_RefractionSpeed * 0.3, -_RefractionSpeed * 0.4);
+                OUT.posRefractionUV = worldPos.xz * _RefractionScale.xy + refractionOffset1;
+                OUT.negRefractionUV = worldPos.xz * _RefractionScale.xy + refractionOffset2;
 
                 float2 foamOffset = _Time.z * float2(_FoamSpeed, _FoamSpeed);
                 OUT.foamUV = (worldPos.xz * _FoamScale) + foamOffset;
@@ -141,6 +155,15 @@ Shader "Custom/WaterShader"
                 return lerp(lerp(d00, d01, fp.y), lerp(d10, d11, fp.y), fp.x);
             }
 
+            float FogFadeFactor(float fogOffset, float fogDensity, float3 worldPos) {
+                float dst = distance(_WorldSpaceCameraPos, worldPos);
+                float densityOffsetDst = max(0, dst - fogOffset) * fogDensity;
+                float exp = -2.0 * densityOffsetDst * densityOffsetDst;
+                float factor = saturate(pow(2, exp));
+
+                return factor;
+            }
+
             float4 frag(Varyings IN) : SV_Target
             {
                 // Color depth
@@ -158,12 +181,15 @@ Shader "Custom/WaterShader"
 
                 float3 posNormal = refractionPos.xyz * 2.0 - 1.0;
                 float3 negNormal = refractionNeg.xyz * 2.0 - 1.0;
-                float3 blendedNormal = normalize(posNormal + negNormal);
+                float3 blendedNormal = normalize(posNormal) + normalize(negNormal);
+                // float3 N = normalize(IN.worldNormal);
+                // float3 T = normalize(IN.worldTangent);
+                // float3 B = cross(N, T) * IN.tangentOS.w;
+                // float3x3 tbn = float3x3(T, B, N);
                 float2 strengthAdjustedNormal = (_RefractionStrength * 0.05) * blendedNormal.xy;
 
                 float4 refractionColor = SAMPLE_TEXTURE2D(_CameraOpaqueTexture, sampler_CameraOpaqueTexture, strengthAdjustedNormal + screenUV);
                 float4 waterColor = lerp(_ShallowColor, _DeepColor, colorFadeFactor);
-                // waterColor.a = saturate(depthDifference / 0.25);
 
                 //Foam
                 float foamFadeFactor = saturate(depthDifference / _FoamAmount);
@@ -178,7 +204,13 @@ Shader "Custom/WaterShader"
 
                 //Normals
                 float normalStrength = lerp(0, _NormalStrength, colorFadeFactor);
-                float3 normal = normalize(blendedNormal * normalStrength + IN.worldNormal);
+                // float3 normal = normalize(float3(blendedNormal.x * normalStrength + IN.worldNormal.x, 5, blendedNormal.y * normalStrength + IN.worldNormal.y));
+                float3 normal = normalize(float3(blendedNormal * normalStrength + IN.worldNormal));
+                if (dot(IN.worldNormal, normalize(_WorldSpaceCameraPos - IN.worldPos)) < 0)
+                {
+                    normal = -normal;
+                }
+                // float3 normal = normalize(float3(blendedNormal * normalStrength + IN.worldNormal));
 
                 InputData inputData = (InputData)0;
                 inputData.positionWS = IN.worldPos;
@@ -210,6 +242,8 @@ Shader "Custom/WaterShader"
                 surfaceData.clearCoatSmoothness = 0.0;
 
                 float4 finalColor = UniversalFragmentPBR(inputData, surfaceData);
+
+                finalColor = lerp(_fogColor, finalColor, FogFadeFactor(_fogOffset, _fogDensity, IN.worldPos));
 
                 return finalColor;
             }

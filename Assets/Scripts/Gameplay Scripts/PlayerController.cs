@@ -131,6 +131,8 @@ public class PlayerController : NetworkBehaviour
             ChunkGenNetwork.Instance.fogRenderPassFeature = ChunkGenNetwork.Instance.rendererData.rendererFeatures.Find(f => f is FogRenderPassFeature) as FogRenderPassFeature;
             ChunkGenNetwork.Instance.fogMat.SetFloat("_fogDensity", 0.018f);
             ChunkGenNetwork.Instance.fogMat.SetFloat("_fogOffset", -15f);
+            ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogDensity", 0.018f);
+            ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogOffset", -15f);
 
             // ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogDensity", 0.018f);
             // ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogOffset", -15f);
@@ -143,6 +145,8 @@ public class PlayerController : NetworkBehaviour
             ChunkGenNetwork.Instance.fogRenderPassFeature = ChunkGenNetwork.Instance.rendererData.rendererFeatures.Find(f => f is FogRenderPassFeature) as FogRenderPassFeature;
             ChunkGenNetwork.Instance.fogMat.SetFloat("_fogDensity", ChunkGenNetwork.Instance.fogDensity);
             ChunkGenNetwork.Instance.fogMat.SetFloat("_fogOffset", ChunkGenNetwork.Instance.fogOffset);
+            ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogDensity", ChunkGenNetwork.Instance.fogDensity);
+            ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogOffset", ChunkGenNetwork.Instance.fogOffset);
 
             // ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogDensity", ChunkGenNetwork.Instance.fogDensity);
             // ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogOffset", ChunkGenNetwork.Instance.fogOffset);
