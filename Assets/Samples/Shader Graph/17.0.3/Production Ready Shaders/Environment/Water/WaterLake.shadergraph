@@ -5009,8 +5009,8 @@
     "m_ObjectId": "5ec5eafa2b4e416588b63067a1892dd0",
     "m_Title": "Ripple UV Coordinates",
     "m_Position": {
-        "x": -3166.000244140625,
-        "y": -24.00006103515625
+        "x": -3166.0,
+        "y": -23.9998779296875
     }
 }
 
@@ -7278,8 +7278,8 @@
     "m_ObjectId": "aeb28f8d07f44bfbafcefeafc4a347a1",
     "m_Title": "Small Ripples",
     "m_Position": {
-        "x": -2162.000244140625,
-        "y": 30.999916076660158
+        "x": -2162.0,
+        "y": 31.0001220703125
     }
 }
 
@@ -7615,7 +7615,7 @@
     "m_Title": "Convert Normals To World Space",
     "m_Position": {
         "x": -1341.0001220703125,
-        "y": 480.0000305175781
+        "y": 479.99981689453127
     }
 }
 
@@ -8412,8 +8412,8 @@
     "m_ObjectId": "cc8e3ba055c44ec7824b14b1ed9ccb21",
     "m_Title": "Water Refraction",
     "m_Position": {
-        "x": -1538.0001220703125,
-        "y": -101.99998474121094
+        "x": -1538.000244140625,
+        "y": -101.99990844726563
     }
 }
 

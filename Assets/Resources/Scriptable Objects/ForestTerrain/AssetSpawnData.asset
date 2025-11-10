@@ -127,7 +127,7 @@ MonoBehaviour:
     useMaxHeight: 0
     maxHeight: 0
     underwaterAsset: 1
-    minDepth: 3
+    minDepth: 5
     undergroundAsset: 0
     minDensity: 0
     isValuable: 0
@@ -227,7 +227,7 @@ MonoBehaviour:
     useMaxHeight: 0
     maxHeight: 0
     underwaterAsset: 1
-    minDepth: 8
+    minDepth: 10
     undergroundAsset: 0
     minDensity: 0
     isValuable: 0

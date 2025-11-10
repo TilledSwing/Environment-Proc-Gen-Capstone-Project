@@ -2,19 +2,31 @@ Shader "Custom/WaterShader"
 {
     Properties
     {
-        _Color ("Color", Color) = (1,1,1,1)
-        _MainTex ("Albedo (RGB)", 2D) = "white" {}
-        _Glossiness ("Smoothness", Range(0,1)) = 0.5
-        _Metallic ("Metallic", Range(0,1)) = 0.0
+        _Depth ("Depth", Float) = 1
+        _ShallowColor ("ShallowColor", Color) = (1,1,1,1)
+        _DeepColor ("DeepColor", Color) = (0,0,0,1)
+        _RefractionSpeed ("RefractionSpeed", Float) = 1
+        _RefractionScale ("RefractionScale", Vector) = (1,1,0,0)
+        _RefractionStrength ("RefractionStrength", Float) = 1
+        _RefractionTexture ("RefractionTexture", 2D) = "white" {}
+        _FoamSpeed ("FoamSpeed", Float) = 1
+        _FoamScale ("FoamScale", Float) = 1
+        _FoamAmount ("FoamAmount", Float) = 1
+        _FoamCutoff ("FoamCutoff", Float) = 1
+        _FoamColor ("FoamColor", Color) = (0,0,0,1)
+        _NormalStrength ("NormalStrength", Float) = 1
+        _Smoothness ("Smoothness", Float) = 0.5
+        _Specular ("Specular", Float) = 0.2
     }
     SubShader
     {
         Pass
         {
-            Tags { "RenderType"="Opaque" "Queue"="Geometry" "RenderPipeline" = "UniversalPipeline" "Lightmode" = "UniversalForward" }
+            Tags { "RenderType"="Transparent" "Queue"="Transparent" "RenderPipeline"="UniversalPipeline" "Lightmode"="UniversalForward" }
             LOD 200
-            ZWrite On
+            ZWrite Off
             ZTest LEqual 
+            Blend SrcAlpha OneMinusSrcAlpha
             HLSLPROGRAM
             // This line defines the name of the vertex shader.
             #pragma vertex vert
@@ -26,8 +38,6 @@ Shader "Custom/WaterShader"
             #pragma multi_compile _ _LIGHT_COOKIES
             #pragma multi_compile _ _FORWARD_PLUS
             #pragma multi_compile_fragment _ _SHADOWS_SOFT
-
-            // Use shader model 3.0 target, to get nicer looking lighting
             #pragma target 3.0
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
@@ -37,12 +47,16 @@ Shader "Custom/WaterShader"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
             #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/CommonMaterial.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/RealtimeLights.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
+            #include "Assets/Resources/Compute Shaders/FastNoiseLite.hlsl"
 
             struct Attributes
             {
                 // The positionOS variable contains the vertex positions in object space.
                 float4 positionOS : POSITION;
                 float3 normalOS : NORMAL;
+                float2 uv : TEXCOORD0;
+                float4 tangentOS : TANGENT;
             };
 
             struct Varyings
@@ -53,7 +67,31 @@ Shader "Custom/WaterShader"
                 float3 worldNormal : TEXCOORD1;
                 float fogFactor : TEXCOORD2;
                 float4 shadowCoord : TEXCOORD3;
+                float2 posRefractionUV : TEXCOORD4;
+                float2 negRefractionUV : TEXCOORD5;
+                float2 foamUV : TEXCOORD6;
+                float3 worldTangent : TEXCOORD7;
+                float4 tangentOS : TEXCOORD8;
             };
+
+            float _Depth;
+            float4 _ShallowColor;
+            float4 _DeepColor;
+            float _RefractionSpeed;
+            float4 _RefractionScale;
+            float _RefractionStrength;
+            TEXTURE2D(_RefractionTexture);
+            SAMPLER(sampler_RefractionTexture);
+            float _FoamSpeed;
+            float _FoamScale;
+            float _FoamAmount;
+            float _FoamCutoff;
+            float4 _FoamColor;
+            float _NormalStrength;
+            float _Smoothness;
+            float _Specular;
+            TEXTURE2D(_CameraOpaqueTexture);
+            SAMPLER(sampler_CameraOpaqueTexture);
 
             Varyings vert(Attributes IN)
             {
@@ -64,6 +102,16 @@ Shader "Custom/WaterShader"
                 OUT.worldPos = worldPos;
                 OUT.worldNormal = TransformObjectToWorldNormal(IN.normalOS);
 
+                float2 refractionOffset = _Time.z * float2(_RefractionSpeed, _RefractionSpeed);
+                OUT.posRefractionUV = worldPos.xz * _RefractionScale.xy + refractionOffset;
+                OUT.negRefractionUV = worldPos.xz * _RefractionScale.xy - refractionOffset;
+
+                float2 foamOffset = _Time.z * float2(_FoamSpeed, _FoamSpeed);
+                OUT.foamUV = (worldPos.xz * _FoamScale) + foamOffset;
+
+                OUT.worldTangent = TransformObjectToWorldNormal(IN.tangentOS.xyz) * IN.tangentOS.w;
+                OUT.tangentOS = IN.tangentOS;
+
                 VertexPositionInputs vertexInput = GetVertexPositionInputs(IN.positionOS.xyz);
                 #if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
                 OUT.shadowCoord = GetShadowCoord(vertexInput);
@@ -72,10 +120,98 @@ Shader "Custom/WaterShader"
                 return OUT;
             }
 
+            float2 unity_gradientNoise_dir(float2 p)
+            {
+                p = p % 289;
+                float x = (34 * p.x + 1) * p.x % 289 + p.y;
+                x = (34 * x + 1) * x % 289;
+                x = frac(x / 41) * 2 - 1;
+                return normalize(float2(x - floor(x + 0.5), abs(x) - 0.5));
+            }
+
+            float unity_gradientNoise(float2 p)
+            {
+                float2 ip = floor(p);
+                float2 fp = frac(p);
+                float d00 = dot(unity_gradientNoise_dir(ip), fp);
+                float d01 = dot(unity_gradientNoise_dir(ip + float2(0, 1)), fp - float2(0, 1));
+                float d10 = dot(unity_gradientNoise_dir(ip + float2(1, 0)), fp - float2(1, 0));
+                float d11 = dot(unity_gradientNoise_dir(ip + float2(1, 1)), fp - float2(1, 1));
+                fp = fp * fp * fp * (fp * (fp * 6 - 15) + 10);
+                return lerp(lerp(d00, d01, fp.y), lerp(d10, d11, fp.y), fp.x);
+            }
+
             float4 frag(Varyings IN) : SV_Target
             {
-                float4 color = float4(0, 0, 0, 0);
-                return color;
+                // Color depth
+                float2 screenUV = GetNormalizedScreenSpaceUV(IN.positionHCS);
+                float rawSceneDepth = SampleSceneDepth(screenUV);
+                float eyeSceneDepth = LinearEyeDepth(rawSceneDepth, _ZBufferParams);
+                
+                float eyeObjectDepth = -TransformWorldToView(IN.worldPos).z;
+                float depthDifference = eyeSceneDepth - eyeObjectDepth;
+                float colorFadeFactor = pow(saturate(depthDifference / _Depth), 0.1);
+
+                // Refraction
+                float4 refractionPos = SAMPLE_TEXTURE2D(_RefractionTexture, sampler_RefractionTexture, IN.posRefractionUV);
+                float4 refractionNeg = SAMPLE_TEXTURE2D(_RefractionTexture, sampler_RefractionTexture, IN.negRefractionUV);
+
+                float3 posNormal = refractionPos.xyz * 2.0 - 1.0;
+                float3 negNormal = refractionNeg.xyz * 2.0 - 1.0;
+                float3 blendedNormal = normalize(posNormal + negNormal);
+                float2 strengthAdjustedNormal = (_RefractionStrength * 0.05) * blendedNormal.xy;
+
+                float4 refractionColor = SAMPLE_TEXTURE2D(_CameraOpaqueTexture, sampler_CameraOpaqueTexture, strengthAdjustedNormal + screenUV);
+                float4 waterColor = lerp(_ShallowColor, _DeepColor, colorFadeFactor);
+                // waterColor.a = saturate(depthDifference / 0.25);
+
+                //Foam
+                float foamFadeFactor = saturate(depthDifference / _FoamAmount);
+                float foam = foamFadeFactor * _FoamCutoff;
+                
+                float gradientNoise = unity_gradientNoise(IN.foamUV);
+                float steppedNoise = step(foam, gradientNoise) * _FoamColor.a;
+
+                float4 foamWaterColor = lerp(waterColor, _FoamColor, steppedNoise);
+                float4 color = lerp(refractionColor, foamWaterColor, colorFadeFactor);
+                color.a = saturate(depthDifference / 0.25);
+
+                //Normals
+                float normalStrength = lerp(0, _NormalStrength, colorFadeFactor);
+                float3 normal = normalize(blendedNormal * normalStrength + IN.worldNormal);
+
+                InputData inputData = (InputData)0;
+                inputData.positionWS = IN.worldPos;
+                inputData.normalWS = normal;
+                inputData.viewDirectionWS = normalize(_WorldSpaceCameraPos - IN.worldPos);
+                inputData.shadowCoord = TransformWorldToShadowCoord(IN.worldPos);
+                inputData.fogCoord = 0;
+                inputData.bakedGI = 0;
+                inputData.vertexLighting = 0;
+                inputData.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(IN.positionHCS);
+                inputData.shadowMask = 1;
+
+                SurfaceData surfaceData;
+                surfaceData.albedo = color.rgb;
+                surfaceData.alpha = color.a;
+                surfaceData.metallic = 0.0;
+                surfaceData.specular = _Specular;
+                surfaceData.smoothness = _Smoothness;
+
+                // float3 N = normalize(IN.worldNormal);
+                // float3 T = normalize(IN.worldTangent);
+                // float3 B = cross(N, T) * IN.tangentOS.w;
+                // float3x3 tbn = float3x3(T, B, N);
+                // surfaceData.normalTS = mul(tbn, normal);
+                surfaceData.normalTS = float3(0,1,0);
+                surfaceData.emission = 0.0;
+                surfaceData.occlusion = 1.0;
+                surfaceData.clearCoatMask = 0.0;
+                surfaceData.clearCoatSmoothness = 0.0;
+
+                float4 finalColor = UniversalFragmentPBR(inputData, surfaceData);
+
+                return finalColor;
             }
             ENDHLSL
         }

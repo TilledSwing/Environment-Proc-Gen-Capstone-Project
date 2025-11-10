@@ -19,7 +19,7 @@ Shader "Custom/TerrainTextureShader"
         {
             // SubShader Tags define when and under which conditions a SubShader block or
             // a pass is executed.
-            Tags { "RenderType" = "Opaque" "Queue"="Geometry" "RenderPipeline" = "UniversalPipeline" "Lightmode" = "UniversalForward" }
+            Tags { "RenderType"="Opaque" "Queue"="Geometry" "RenderPipeline"="UniversalPipeline" "Lightmode"="UniversalForward" }
             LOD 200
             ZWrite On
             ZTest LEqual    
