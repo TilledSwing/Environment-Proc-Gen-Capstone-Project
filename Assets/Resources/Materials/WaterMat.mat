@@ -146,8 +146,9 @@ Material:
     - _Surface: 1
     - _WorkflowMode: 1
     - _ZWrite: 0
+    - _fogActive: 1
     - _fogDensity: 0.08
-    - _fogOffset: 50
+    - _fogOffset: 124
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 0.72156864}
     - _Color: {r: 1, g: 1, b: 1, a: 0.72156864}

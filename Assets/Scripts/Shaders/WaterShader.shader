@@ -21,6 +21,7 @@ Shader "Custom/WaterShader"
         _fogOffset ("fogOffset", Float) = 0
         _fogDensity ("fogDensity", Float) = 0
         _fogColor ("fogColor", Color) = (1,1,1,1)
+        _fogActive ("fogActive", Float) = 0
     }
     SubShader
     {
@@ -105,6 +106,7 @@ Shader "Custom/WaterShader"
             float _fogOffset;
             float _fogDensity;
             float4 _fogColor;
+            float _fogActive;
 
             Varyings vert(Attributes IN)
             {
@@ -243,7 +245,8 @@ Shader "Custom/WaterShader"
 
                 float4 finalColor = UniversalFragmentPBR(inputData, surfaceData);
 
-                finalColor = lerp(_fogColor, finalColor, FogFadeFactor(_fogOffset, _fogDensity, IN.worldPos));
+                if (_fogActive == 1)
+                    finalColor = lerp(_fogColor, finalColor, FogFadeFactor(_fogOffset, _fogDensity, IN.worldPos));
 
                 return finalColor;
             }

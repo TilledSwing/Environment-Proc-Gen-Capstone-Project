@@ -176,6 +176,7 @@ public class ChunkGenNetwork : MonoBehaviour
         waterMaterial.SetFloat("_fogOffset", fogOffset);
         waterMaterial.SetFloat("_fogDensity", fogDensity);
         waterMaterial.SetColor("_fogColor", upperFogColor);
+        waterMaterial.SetFloat("_fogActive", 0);
         navMeshUpdater = FindFirstObjectByType<GlobalNavMeshUpdater>();
 
         // terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 100000);
