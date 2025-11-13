@@ -13,6 +13,7 @@ using Unity.Burst;
 public class Terraforming : NetworkBehaviour
 {
     Camera playerCamera;
+    public float terraformMinDst = 1.2f;
     public float terraformMaxDst = 20f;
     public float terraformRadius = 5f;
     public float terraformStrength = 5f;
@@ -21,6 +22,7 @@ public class Terraforming : NetworkBehaviour
     public TerrainDensityData terrainDensityData;
     public float terraformUpdateTic = 0.2f;
     float time = 0f;
+    bool firstClick = true;
     //void Start()
     //{
     //    playerCamera = Camera.main;
@@ -62,6 +64,10 @@ public class Terraforming : NetworkBehaviour
             mode = false;
             Terraform(mode);
         }
+        if(Input.GetMouseButtonUp(1))
+        {
+            firstClick = true;
+        }
         time += Time.deltaTime;
     }
     /// <summary>
@@ -73,8 +79,25 @@ public class Terraforming : NetworkBehaviour
         Ray ray = playerCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
         if (Physics.Raycast(ray, out RaycastHit hit, terraformMaxDst, terrainLayer))
         {
-            if (hit.distance <= 1f || math.abs(hit.point.y - terraformRadius) >= terrainDensityData.width * (mode ? ChunkGenNetwork.Instance.maxWorldYChunks : ChunkGenNetwork.Instance.maxWorldYChunks + 1))
+            if (hit.distance <= terraformMinDst || math.abs(hit.point.y - terraformRadius) >= terrainDensityData.width * (mode ? ChunkGenNetwork.Instance.maxWorldYChunks : ChunkGenNetwork.Instance.maxWorldYChunks + 1))
                 return;
+            // if (Vector3.Dot(playerCamera.transform.forward.normalized, Vector3.up) < -Mathf.Sin(45f * Mathf.Deg2Rad) && !mode)
+            // {
+            // Trying to avoid player clipping
+            if (hit.distance < 1.5f && Vector3.Dot(playerCamera.transform.forward.normalized, Vector3.up) < -Mathf.Sin(0f * Mathf.Deg2Rad) && !mode)
+            {
+                if (firstClick)
+                {
+                    PlayerController.instance.moveDirection.y = 0;
+                    PlayerController.instance.characterController.Move(Vector3.up * 2.5f);
+                    firstClick = false;
+                }
+                else
+                {
+                    // PlayerController.instance.moveDirection.y = 0;
+                    PlayerController.instance.characterController.Move(-ray.direction * 0.23f);
+                }
+            }
             Vector3 terraformCenter = hit.point;
             GameObject hitChunk = hit.collider.gameObject;
             ComputeMarchingCubes hitMarchingCubes = hitChunk.GetComponent<ComputeMarchingCubes>();

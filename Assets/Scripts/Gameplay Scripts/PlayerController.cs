@@ -25,8 +25,8 @@ public class PlayerController : NetworkBehaviour
     public float lookXLimit = 75.0f;
     public float flightSpeed = 6.0f;
 
-    CharacterController characterController;
-    Vector3 moveDirection = Vector3.zero;
+    public CharacterController characterController;
+    public Vector3 moveDirection = Vector3.zero;
     float rotationX = 0;
 
     public List<Vector3> terraformCenters;

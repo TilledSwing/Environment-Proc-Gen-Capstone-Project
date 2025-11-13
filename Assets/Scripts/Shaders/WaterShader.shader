@@ -77,7 +77,7 @@ Shader "Custom/WaterShader"
                 float2 negRefractionUV : TEXCOORD5;
                 float2 foamUV : TEXCOORD6;
                 float3 worldTangent : TEXCOORD7;
-                float4 tangentOS : TEXCOORD8;
+                float3 worldBitangent : TEXCOORD8;
             };
 
             float _Depth;
@@ -125,8 +125,8 @@ Shader "Custom/WaterShader"
                 float2 foamOffset = _Time.z * float2(_FoamSpeed, _FoamSpeed);
                 OUT.foamUV = (worldPos.xz * _FoamScale) + foamOffset;
 
-                OUT.worldTangent = TransformObjectToWorldNormal(IN.tangentOS.xyz) * IN.tangentOS.w;
-                OUT.tangentOS = IN.tangentOS;
+                OUT.worldTangent = TransformObjectToWorldDir(IN.tangentOS.xyz);
+                OUT.worldBitangent = cross(OUT.worldNormal, OUT.worldTangent) * IN.tangentOS.w;
 
                 VertexPositionInputs vertexInput = GetVertexPositionInputs(IN.positionOS.xyz);
                 #if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
@@ -166,53 +166,74 @@ Shader "Custom/WaterShader"
                 return factor;
             }
 
-            float4 frag(Varyings IN) : SV_Target
-            {
-                // Color depth
-                float2 screenUV = GetNormalizedScreenSpaceUV(IN.positionHCS);
-                float rawSceneDepth = SampleSceneDepth(screenUV);
+            float DepthDifference(float2 uv, float3 worldPos) {
+                float rawSceneDepth = SampleSceneDepth(uv);
                 float eyeSceneDepth = LinearEyeDepth(rawSceneDepth, _ZBufferParams);
                 
-                float eyeObjectDepth = -TransformWorldToView(IN.worldPos).z;
-                float depthDifference = eyeSceneDepth - eyeObjectDepth;
-                float colorFadeFactor = pow(saturate(depthDifference / _Depth), 0.1);
+                float eyeObjectDepth = -TransformWorldToView(worldPos).z;
+                float depthDifference = distance(eyeSceneDepth, eyeObjectDepth);
+                // float depthDifference = eyeSceneDepth - eyeObjectDepth;
+                return depthDifference;
+            }
 
-                // Refraction
-                float4 refractionPos = SAMPLE_TEXTURE2D(_RefractionTexture, sampler_RefractionTexture, IN.posRefractionUV);
-                float4 refractionNeg = SAMPLE_TEXTURE2D(_RefractionTexture, sampler_RefractionTexture, IN.negRefractionUV);
-
-                float3 posNormal = refractionPos.xyz * 2.0 - 1.0;
-                float3 negNormal = refractionNeg.xyz * 2.0 - 1.0;
-                float3 blendedNormal = normalize(posNormal) + normalize(negNormal);
+            float4 frag(Varyings IN) : SV_Target
+            {
+                float2 screenUV = GetNormalizedScreenSpaceUV(IN.positionHCS);
+                // float2 screenUV = IN.positionHCS.xy / IN.positionHCS.w;
+                // screenUV = screenUV;
+                // return float4(screenUV.x, screenUV.y, 0, 1);
                 // float3 N = normalize(IN.worldNormal);
                 // float3 T = normalize(IN.worldTangent);
                 // float3 B = cross(N, T) * IN.tangentOS.w;
-                // float3x3 tbn = float3x3(T, B, N);
-                float2 strengthAdjustedNormal = (_RefractionStrength * 0.05) * blendedNormal.xy;
+                // float3x3 TBN = float3x3(T, B, N);
+                float3x3 TBN = float3x3(IN.worldTangent, IN.worldBitangent, IN.worldNormal);
+                float aspectRatioCorrection = _ScreenParams.y / _ScreenParams.x;
 
-                float4 refractionColor = SAMPLE_TEXTURE2D(_CameraOpaqueTexture, sampler_CameraOpaqueTexture, strengthAdjustedNormal + screenUV);
+                // Refraction
+                float3 tRefractionPos = UnpackNormal(SAMPLE_TEXTURE2D(_RefractionTexture, sampler_RefractionTexture, IN.posRefractionUV));
+                float3 tRefractionNeg = UnpackNormal(SAMPLE_TEXTURE2D(_RefractionTexture, sampler_RefractionTexture, IN.negRefractionUV));
+
+                // float3 wRefractionPos = normalize(mul(TBN, tRefractionPos));
+                // float3 wRefractionNeg = normalize(mul(TBN, tRefractionNeg));
+                // float3 blendedNormal = normalize(wRefractionPos * wRefractionNeg);
+                float3 posNormal = tRefractionPos.xyz * 2.0 - 1.0;
+                posNormal = normalize(mul(TBN, posNormal));
+                float3 negNormal = tRefractionNeg.xyz * 2.0 - 1.0;
+                negNormal = normalize(mul(TBN, negNormal));
+                float3 blendedNormal = normalize(posNormal * negNormal);
+                float2 strengthAdjustedNormal = (_RefractionStrength * 0.05) * blendedNormal.xy;
+                // strengthAdjustedNormal.x *= aspectRatioCorrection;
+                // return float4(screenUV + strengthAdjustedNormal, 0, 1);
+
+                float4 refractionColor = SAMPLE_TEXTURE2D(_CameraOpaqueTexture, sampler_CameraOpaqueTexture, screenUV + strengthAdjustedNormal);
+
+                // Color depth
+                float depthDifference = DepthDifference(screenUV + strengthAdjustedNormal, IN.worldPos);
+
+                float colorFadeFactor = pow(saturate(depthDifference / _Depth), 0.1);
                 float4 waterColor = lerp(_ShallowColor, _DeepColor, colorFadeFactor);
+                // waterColor += SAMPLE_TEXTURE2D(_CameraOpaqueTexture, sampler_CameraOpaqueTexture, screenUV) * (1 - waterColor.a);
 
                 //Foam
-                float foamFadeFactor = saturate(depthDifference / _FoamAmount);
+                float foamDepthDifference = DepthDifference(screenUV, IN.worldPos);
+                float foamFadeFactor = saturate(foamDepthDifference / _FoamAmount);
                 float foam = foamFadeFactor * _FoamCutoff;
                 
                 float gradientNoise = unity_gradientNoise(IN.foamUV);
                 float steppedNoise = step(foam, gradientNoise) * _FoamColor.a;
 
                 float4 foamWaterColor = lerp(waterColor, _FoamColor, steppedNoise);
+
                 float4 color = lerp(refractionColor, foamWaterColor, colorFadeFactor);
-                color.a = saturate(depthDifference / 0.25);
+                // color.a = saturate(depthDifference / 0.25);
 
                 //Normals
-                float normalStrength = lerp(0, _NormalStrength, colorFadeFactor);
-                // float3 normal = normalize(float3(blendedNormal.x * normalStrength + IN.worldNormal.x, 5, blendedNormal.y * normalStrength + IN.worldNormal.y));
+                float normalStrength = lerp(0, _NormalStrength, 1 - steppedNoise);
                 float3 normal = normalize(float3(blendedNormal * normalStrength + IN.worldNormal));
                 if (dot(IN.worldNormal, normalize(_WorldSpaceCameraPos - IN.worldPos)) < 0)
                 {
                     normal = -normal;
                 }
-                // float3 normal = normalize(float3(blendedNormal * normalStrength + IN.worldNormal));
 
                 InputData inputData = (InputData)0;
                 inputData.positionWS = IN.worldPos;
@@ -222,7 +243,7 @@ Shader "Custom/WaterShader"
                 inputData.fogCoord = 0;
                 inputData.bakedGI = 0;
                 inputData.vertexLighting = 0;
-                inputData.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(IN.positionHCS);
+                inputData.normalizedScreenSpaceUV = screenUV;
                 inputData.shadowMask = 1;
 
                 SurfaceData surfaceData;
@@ -231,12 +252,6 @@ Shader "Custom/WaterShader"
                 surfaceData.metallic = 0.0;
                 surfaceData.specular = _Specular;
                 surfaceData.smoothness = _Smoothness;
-
-                // float3 N = normalize(IN.worldNormal);
-                // float3 T = normalize(IN.worldTangent);
-                // float3 B = cross(N, T) * IN.tangentOS.w;
-                // float3x3 tbn = float3x3(T, B, N);
-                // surfaceData.normalTS = mul(tbn, normal);
                 surfaceData.normalTS = float3(0,1,0);
                 surfaceData.emission = 0.0;
                 surfaceData.occlusion = 1.0;
@@ -246,11 +261,12 @@ Shader "Custom/WaterShader"
                 float4 finalColor = UniversalFragmentPBR(inputData, surfaceData);
 
                 if (_fogActive == 1)
-                    finalColor = lerp(_fogColor, finalColor, FogFadeFactor(_fogOffset, _fogDensity, IN.worldPos));
+                    finalColor.rgb = lerp(_fogColor.rgb, finalColor.rgb, FogFadeFactor(_fogOffset, _fogDensity, IN.worldPos));
 
                 return finalColor;
             }
             ENDHLSL
         }
+        // UsePass "Universal Render Pipeline/Lit/ShadowCaster"
     }
 }

@@ -312,6 +312,7 @@ MonoBehaviour:
   lookSpeed: 2
   lookXLimit: 90
   flightSpeed: 6
+  moveDirection: {x: 0, y: 0, z: 0}
   terraformCenters: []
   hitChunkPositions: []
   terraformTypes: 
@@ -455,6 +456,7 @@ MonoBehaviour:
   _componentIndexCache: 2
   _addedNetworkObject: {fileID: 1324032884783071196}
   _networkObjectCache: {fileID: 1324032884783071196}
+  terraformMinDst: 1
   terraformMaxDst: 40
   terraformRadius: 3
   terraformStrength: 3
@@ -495,6 +497,8 @@ MonoBehaviour:
     m_Bits: 128
   interactHighlightColor: {r: 0.8666667, g: 0.84313726, b: 0.47058824, a: 0}
   objectiveGoal: 10
+  lastRayState: 0
+  currentObj: {fileID: 0}
 --- !u!114 &2263669559389862659
 MonoBehaviour:
   m_ObjectHideFlags: 0
