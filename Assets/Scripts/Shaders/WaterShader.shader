@@ -5,18 +5,24 @@ Shader "Custom/WaterShader"
         _Depth ("Depth", Float) = 1
         _ShallowColor ("ShallowColor", Color) = (1,1,1,1)
         _DeepColor ("DeepColor", Color) = (0,0,0,1)
+
         _RefractionSpeed ("RefractionSpeed", Float) = 1
         _RefractionScale ("RefractionScale", Vector) = (1,1,0,0)
         _RefractionStrength ("RefractionStrength", Float) = 1
         _RefractionTexture ("RefractionTexture", 2D) = "white" {}
+
         _FoamSpeed ("FoamSpeed", Float) = 1
         _FoamScale ("FoamScale", Float) = 1
         _FoamAmount ("FoamAmount", Float) = 1
         _FoamCutoff ("FoamCutoff", Float) = 1
         _FoamColor ("FoamColor", Color) = (0,0,0,1)
+
         _NormalStrength ("NormalStrength", Float) = 1
         _Smoothness ("Smoothness", Float) = 0.5
         _Specular ("Specular", Float) = 0.2
+
+        _WaveSpeed ("WaveSpeed", Float) = 0
+        _WaveAmplitude ("WaveAmplitude", Float) = 0
 
         _fogOffset ("fogOffset", Float) = 0
         _fogDensity ("fogDensity", Float) = 0
@@ -100,6 +106,9 @@ Shader "Custom/WaterShader"
             float _Smoothness;
             float _Specular;
 
+            float _WaveSpeed;
+            float _WaveAmplitude;
+
             TEXTURE2D(_CameraOpaqueTexture);
             SAMPLER(sampler_CameraOpaqueTexture);
 
@@ -112,6 +121,7 @@ Shader "Custom/WaterShader"
             {
                 Varyings OUT;
                 float3 worldPos = TransformObjectToWorld(IN.positionOS.xyz);
+                worldPos.y += sin(worldPos.x * _WaveSpeed + _Time.z) * _WaveAmplitude;
                 OUT.positionHCS = TransformWorldToHClip(worldPos);
                 OUT.fogFactor = ComputeFogFactor(OUT.positionHCS.z);
                 OUT.worldPos = worldPos;
@@ -190,17 +200,12 @@ Shader "Custom/WaterShader"
                 float aspectRatioCorrection = _ScreenParams.y / _ScreenParams.x;
 
                 // Refraction
-                float3 tRefractionPos = UnpackNormal(SAMPLE_TEXTURE2D(_RefractionTexture, sampler_RefractionTexture, IN.posRefractionUV));
-                float3 tRefractionNeg = UnpackNormal(SAMPLE_TEXTURE2D(_RefractionTexture, sampler_RefractionTexture, IN.negRefractionUV));
+                float3 tRefractionPos = 2 * UnpackNormal(SAMPLE_TEXTURE2D(_RefractionTexture, sampler_RefractionTexture, IN.posRefractionUV)) - 1;
+                float3 tRefractionNeg = 2 * UnpackNormal(SAMPLE_TEXTURE2D(_RefractionTexture, sampler_RefractionTexture, IN.negRefractionUV)) - 1;
 
-                // float3 wRefractionPos = normalize(mul(TBN, tRefractionPos));
-                // float3 wRefractionNeg = normalize(mul(TBN, tRefractionNeg));
-                // float3 blendedNormal = normalize(wRefractionPos * wRefractionNeg);
-                float3 posNormal = tRefractionPos.xyz * 2.0 - 1.0;
-                posNormal = normalize(mul(TBN, posNormal));
-                float3 negNormal = tRefractionNeg.xyz * 2.0 - 1.0;
-                negNormal = normalize(mul(TBN, negNormal));
-                float3 blendedNormal = normalize(posNormal * negNormal);
+                float3 wRefractionPos = normalize(mul(TBN, tRefractionPos));
+                float3 wRefractionNeg = normalize(mul(TBN, tRefractionNeg));
+                float3 blendedNormal = normalize(wRefractionPos * wRefractionNeg);
                 float2 strengthAdjustedNormal = (_RefractionStrength * 0.05) * blendedNormal.xy;
                 // strengthAdjustedNormal.x *= aspectRatioCorrection;
                 // return float4(screenUV + strengthAdjustedNormal, 0, 1);
@@ -212,14 +217,13 @@ Shader "Custom/WaterShader"
 
                 float colorFadeFactor = pow(saturate(depthDifference / _Depth), 0.1);
                 float4 waterColor = lerp(_ShallowColor, _DeepColor, colorFadeFactor);
-                // waterColor += SAMPLE_TEXTURE2D(_CameraOpaqueTexture, sampler_CameraOpaqueTexture, screenUV) * (1 - waterColor.a);
 
                 //Foam
                 float foamDepthDifference = DepthDifference(screenUV, IN.worldPos);
                 float foamFadeFactor = saturate(foamDepthDifference / _FoamAmount);
                 float foam = foamFadeFactor * _FoamCutoff;
                 
-                float gradientNoise = unity_gradientNoise(IN.foamUV);
+                float gradientNoise = lerp(0.25, 1, unity_gradientNoise(IN.foamUV));
                 float steppedNoise = step(foam, gradientNoise) * _FoamColor.a;
 
                 float4 foamWaterColor = lerp(waterColor, _FoamColor, steppedNoise);
