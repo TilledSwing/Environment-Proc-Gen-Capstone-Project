@@ -102,7 +102,6 @@ public class ChunkGenNetwork : MonoBehaviour
     public Queue<Action> pendingAssetInstantiations = new();
     public bool isLoadingAssetInstantiations = false;
     // Data structure pools
-    private GlobalNavMeshUpdater navMeshUpdater;
     public event Action OnTerrainReady;
     public bool IsTerrainReady { get; private set; }
 
@@ -161,7 +160,6 @@ public class ChunkGenNetwork : MonoBehaviour
         fogRenderPassFeature = rendererData.rendererFeatures.Find(f => f is FogRenderPassFeature) as FogRenderPassFeature;
         fogMat.SetFloat("_fogOffset", maxViewDst - 20f);
         fogMat.SetColor("_fogColor", fogColor);
-        navMeshUpdater = FindFirstObjectByType<GlobalNavMeshUpdater>();
 
         // terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 100000);
         // terrainDensityData.caveNoiseSeed = UnityEngine.Random.Range(0, 100000);
@@ -236,18 +234,26 @@ public class ChunkGenNetwork : MonoBehaviour
         }
         if (!IsTerrainReady)
         {
-            
+            CheckInitialTerrainFinish();
         }
 
     }
 
-    private void FinishInitialTerrain()
+    private void CheckInitialTerrainFinish()
     {
-        // Set the flag
-        IsTerrainReady = true;
-
-        // Fire the event if there are subscribers
-        OnTerrainReady?.Invoke();
+        if (initialLoadComplete &&
+        !hasPendingMeshInits &&
+        !isLoadingMeshes &&
+        !hasPendingAssetInstantiations &&
+        !isLoadingAssetInstantiations &&
+        !hasPendingReadbacks &&
+        !isLoadingReadbacks &&
+        !isLoadingChunks)
+        {
+            IsTerrainReady = true;
+            OnTerrainReady?.Invoke();
+        }
+        
     }
     /// <summary>
     /// Update all the visible chunks loading in new ones and unloading old ones that are no longer visible
@@ -326,7 +332,6 @@ public class ChunkGenNetwork : MonoBehaviour
                                                          marchingCubesComputeShader, terrainDensityComputeShader, terrainNoiseComputeShader, terraformComputeShader,
                                                          terrainMaterial, waterMaterial, initialLoadComplete);
                             chunkDictionary.Add(viewedChunkCoord, chunk);
-                            navMeshUpdater.AddChunkForNavMeshUpdate(chunk);
                             chunk.UpdateChunk(maxViewDst, terrainDensityData.width);
 
                             if (chunk.IsVisible())
@@ -428,7 +433,6 @@ public class ChunkGenNetwork : MonoBehaviour
                                             terrainNoiseComputeShader,
                                             terraformComputeShader,
                                             terrainMaterial, waterMaterial, initialLoadComplete);
-                navMeshUpdater.AddChunkForNavMeshUpdate(chunk);
                 chunkDictionary.Add(coord, chunk);
                 chunk.UpdateChunk(maxViewDst, chunkSize);
                 if (chunk.IsVisible())
@@ -727,6 +731,7 @@ public class ChunkGenNetwork : MonoBehaviour
         public Bounds bounds;
         public MeshCollider meshCollider;
         public MeshFilter meshFilter;
+
         public MeshRenderer meshRenderer;
         public bool visible = false;
         public bool isWater = false;
@@ -755,6 +760,7 @@ public class ChunkGenNetwork : MonoBehaviour
             assetSpawner.assetSpawnData = assetSpawnData;
             // Set up the chunk's ComputeMarchingCubes script
             marchingCubes = chunk.AddComponent<ComputeMarchingCubes>();
+            marchingCubes.OnMeshGenerated += HandleMeshReady;
             marchingCubes.meshFilter = meshFilter;
             marchingCubes.meshCollider = meshCollider;
             marchingCubes.chunkPos = chunkPos;
@@ -766,6 +772,7 @@ public class ChunkGenNetwork : MonoBehaviour
             marchingCubes.terraformComputeShader = terraformComputeShader;
             marchingCubes.terrainDensityData = terrainDensityData;
             marchingCubes.initialLoadComplete = initialLoadComplete;
+
             // float viewerDstFromBound = bounds.SqrDistance(viewerPos);
             // if (viewerDstFromBound <= chunkSize * 2) marchingCubes.currentLOD = LOD.LOD1;
             // else if (viewerDstFromBound <= chunkSize * 4) marchingCubes.currentLOD = LOD.LOD2;
@@ -862,6 +869,17 @@ public class ChunkGenNetwork : MonoBehaviour
             // return chunk.activeSelf;
             return meshRenderer.enabled;
             // return visible;
+        }
+
+        private void HandleMeshReady(Mesh mesh)
+        {
+            GlobalNavMeshUpdater.Instance.AddChunkForNavMeshUpdate(this);
+        }
+
+        private void OnDestroy()
+        {
+            if (marchingCubes != null)
+                marchingCubes.OnMeshGenerated -= HandleMeshReady;
         }
     }
 }

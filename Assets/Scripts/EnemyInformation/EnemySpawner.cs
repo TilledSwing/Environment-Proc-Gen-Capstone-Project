@@ -90,7 +90,10 @@ public class EnemySpawner : NetworkBehaviour
             return;
         }
         
+        var handle = NavMesh.AddNavMeshData(navMeshSurface.navMeshData);
         NavMeshTriangulation triangulation = NavMesh.CalculateTriangulation();
+        NavMesh.RemoveNavMeshData(handle);
+
         if (triangulation.vertices.Length == 0)
         {
             Debug.LogWarning("No NavMesh data available. Aborting spawn.");

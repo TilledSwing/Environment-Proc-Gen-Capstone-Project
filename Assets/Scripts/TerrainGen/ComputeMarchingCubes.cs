@@ -40,6 +40,9 @@ public class ComputeMarchingCubes : MonoBehaviour
     public Mesh lod2Mesh;
     public Mesh lod3Mesh;
     public Mesh lod6Mesh;
+    public event Action<Mesh> OnMeshGenerated;
+    private Mesh generatedMesh;
+
     public struct Vertex : IComparable<Vertex>
     {
         public float3 position;
@@ -90,6 +93,8 @@ public class ComputeMarchingCubes : MonoBehaviour
     {
         SetTerrainSettings();
         GenerateMesh();
+        OnMeshGenerated?.Invoke(generatedMesh);
+
     }
     private void SetTerrainSettings()
     {
@@ -403,6 +408,8 @@ public class ComputeMarchingCubes : MonoBehaviour
         // if (lodData.lod == currentLOD)
         // {
         meshFilter.mesh = mesh;
+        OnMeshGenerated?.Invoke(generatedMesh);
+
         meshCollider.sharedMesh = mesh;
         mesh.bounds = new Bounds(chunkPos + (new Vector3(0.5f, 0.5f, 0.5f) * terrainDensityData.width), Vector3.one * terrainDensityData.width);
 
