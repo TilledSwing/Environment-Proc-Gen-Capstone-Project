@@ -62,13 +62,8 @@ public class BombLogic : NetworkBehaviour
             if (currentTime >= 1)
             {
                 Vector3 terraformCenter = gameObject.transform.position;
-                Vector3Int hitChunkPos = new Vector3Int(Mathf.FloorToInt(terraformCenter.x / terrainDensityData.width), Mathf.FloorToInt(terraformCenter.y / terrainDensityData.width), Mathf.FloorToInt(terraformCenter.z / terrainDensityData.width));
+                Vector3Int hitChunkPos = new Vector3Int(Mathf.FloorToInt(terraformCenter.x / terrainDensityData.width), Mathf.FloorToInt(terraformCenter.y / terrainDensityData.width), Mathf.FloorToInt(terraformCenter.z / terrainDensityData.width)) * terrainDensityData.width;
                 BombTerraformServer(terraformCenter, hitChunkPos);
-
-                Collider[] colliders = Physics.OverlapSphere(gameObject.transform.position, explosionRadius, assetLayer);
-                foreach (Collider collider in colliders) {
-                    Destroy(collider.gameObject);
-                }
             }
             yield return null;
         }
@@ -100,7 +95,7 @@ public class BombLogic : NetworkBehaviour
     public void BombTerraformLocal(Vector3 terraformCenter, Vector3Int hitChunkPos)
     {
         Debug.LogWarning("BombTerraform called");
-        ChunkGenNetwork.TerrainChunk[] chunkAndNeighbors = ChunkGenNetwork.Instance.GetChunkAndNeighbors(hitChunkPos);
+        ChunkGenNetwork.TerrainChunk[] chunkAndNeighbors = ChunkGenNetwork.Instance.GetChunkAndNeighbors(new Vector3Int(Mathf.CeilToInt(hitChunkPos.x / terrainDensityData.width), Mathf.CeilToInt(hitChunkPos.y / terrainDensityData.width), Mathf.CeilToInt(hitChunkPos.z / terrainDensityData.width)));
         foreach (ChunkGenNetwork.TerrainChunk terrainChunk in chunkAndNeighbors)
         {
             if (terrainChunk == null) continue;
@@ -135,6 +130,12 @@ public class BombLogic : NetworkBehaviour
 
                 marchingCubes.MarchingCubesJobHandler(marchingCubes.heightsArray, true);
             }
+        }
+
+        Collider[] colliders = Physics.OverlapSphere(terraformCenter, explosionRadius, assetLayer);
+        foreach (Collider collider in colliders)
+        {
+            Destroy(collider.gameObject);
         }
     }
 }
