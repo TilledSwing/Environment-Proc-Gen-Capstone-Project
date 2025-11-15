@@ -120,7 +120,7 @@ Material:
     - _DstBlendAlpha: 10
     - _EnableExternalAlpha: 0
     - _EnvironmentReflections: 1
-    - _FoamAmount: 100
+    - _FoamAmount: 150
     - _FoamCutoff: 100
     - _FoamScale: 1
     - _FoamSpeed: 0.15
@@ -144,6 +144,9 @@ Material:
     - _SrcBlend: 1
     - _SrcBlendAlpha: 1
     - _Surface: 1
+    - _WaveAmplitude: 0.18
+    - _WaveScale: 0.32
+    - _WaveSpeed: 0.46
     - _WorkflowMode: 1
     - _ZWrite: 0
     - _fogActive: 1

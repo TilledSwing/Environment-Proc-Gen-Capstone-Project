@@ -229,6 +229,8 @@ Shader "Custom/WaterShader"
                 float4 foamWaterColor = lerp(waterColor, _FoamColor, steppedNoise);
 
                 float4 color = lerp(refractionColor, foamWaterColor, colorFadeFactor);
+                // float3 ambient = 1.0 + float3(2, 2, 2);
+                // color.rgb *= ambient;
                 // color.a = saturate(depthDifference / 0.25);
 
                 //Normals
@@ -245,7 +247,7 @@ Shader "Custom/WaterShader"
                 inputData.viewDirectionWS = normalize(_WorldSpaceCameraPos - IN.worldPos);
                 inputData.shadowCoord = TransformWorldToShadowCoord(IN.worldPos);
                 inputData.fogCoord = 0;
-                inputData.bakedGI = 0;
+                inputData.bakedGI = saturate(SampleSH(inputData.normalWS) + float3(1, 1, 1));
                 inputData.vertexLighting = 0;
                 inputData.normalizedScreenSpaceUV = screenUV;
                 inputData.shadowMask = 1;

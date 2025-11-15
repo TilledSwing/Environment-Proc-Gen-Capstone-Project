@@ -310,8 +310,9 @@ MonoBehaviour:
   jumpSpeed: 12
   gravity: 20
   lookSpeed: 2
-  lookXLimit: 90
+  lookXLimit: 89
   flightSpeed: 6
+  characterController: {fileID: 0}
   moveDirection: {x: 0, y: 0, z: 0}
   terraformCenters: []
   hitChunkPositions: []
@@ -335,7 +336,7 @@ MonoBehaviour:
   scanRadius: 50
   scanSpeed: 1
   scanDuration: 8
-  scanMaterial: {fileID: 2100000, guid: 359131121b1a4314098add5d50690ed2, type: 2}
+  scanMaterial: {fileID: 2100000, guid: f3827e58509bd274e8cc4abfd85b438c, type: 2}
   scanLayer:
     serializedVersion: 2
     m_Bits: 128
