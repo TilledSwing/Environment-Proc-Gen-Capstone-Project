@@ -1,0 +1,10 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel GrassCompute
+
+
+
+[numthreads(8,8,8)]
+void GrassCompute (uint3 id : SV_DispatchThreadID)
+{
+    
+}
