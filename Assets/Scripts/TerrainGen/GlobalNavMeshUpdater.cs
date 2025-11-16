@@ -92,8 +92,8 @@ public class GlobalNavMeshUpdater : MonoBehaviour
         // if (!isBuildingLandNavMesh && landNavMeshNeedsRebuild)
         //     StartCoroutine(RebuildLandNavMeshBatched());
 
-        if (!isBuildingWaterNavMesh && waterNavMeshNeedsRebuild)
-            StartCoroutine(RebuildAndLinkWaterCoroutine(waterSources, 1.5f));
+        // if (!isBuildingWaterNavMesh && waterNavMeshNeedsRebuild)
+        //     StartCoroutine(RebuildAndLinkWaterCoroutine(waterSources, 1.5f));
     }
     /// <summary>
     /// Adds a chunk to the list of chunks to be included in the next navmesh rebuild
@@ -101,9 +101,9 @@ public class GlobalNavMeshUpdater : MonoBehaviour
     /// <param name="chunk"></param>
     public void AddChunkForNavMeshUpdate(ChunkGenNetwork.TerrainChunk chunk)
     {
-        addLandChunk(chunk);
-        if (chunk.isWater)
-            addWaterChunk(chunk);
+        // addLandChunk(chunk);
+        // if (chunk.isWater)
+        //     addWaterChunk(chunk);
     }
     private void addWaterChunk(ChunkGenNetwork.TerrainChunk chunk)
     {
