@@ -3,8 +3,11 @@ using FishNet.Object;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 // Template by Bobsi Unity - Youtube
 // Modified by Jacob Ormsby
@@ -22,8 +25,8 @@ public class PlayerController : NetworkBehaviour
     public float lookXLimit = 75.0f;
     public float flightSpeed = 6.0f;
 
-    CharacterController characterController;
-    Vector3 moveDirection = Vector3.zero;
+    public CharacterController characterController;
+    public Vector3 moveDirection = Vector3.zero;
     float rotationX = 0;
 
     public List<Vector3> terraformCenters;
@@ -40,6 +43,7 @@ public class PlayerController : NetworkBehaviour
 
     private bool isFlightMode = false;
     private bool isSubmerged = false;
+    private bool underwater = false;
 
 
     public override void OnStartClient()
@@ -118,6 +122,34 @@ public class PlayerController : NetworkBehaviour
             jumpSpeed = 8.0f;
             walkingSpeed = 7.5f;
             runningSpeed = 20f;
+        }
+        if (playerCamera.transform.position.y - 0.08f < waterLevel && !underwater)
+        {
+            underwater = true;
+            GraphicsSettings.defaultRenderPipeline = ChunkGenNetwork.Instance.underwaterUrpAsset;
+            QualitySettings.renderPipeline = ChunkGenNetwork.Instance.underwaterUrpAsset;
+            ChunkGenNetwork.Instance.fogRenderPassFeature = ChunkGenNetwork.Instance.rendererData.rendererFeatures.Find(f => f is FogRenderPassFeature) as FogRenderPassFeature;
+            ChunkGenNetwork.Instance.fogMat.SetFloat("_fogDensity", 0.018f);
+            ChunkGenNetwork.Instance.fogMat.SetFloat("_fogOffset", -15f);
+            ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogDensity", 0.018f);
+            ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogOffset", -15f);
+
+            // ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogDensity", 0.018f);
+            // ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogOffset", -15f);
+        }
+        else if(playerCamera.transform.position.y - 0.08f > waterLevel && underwater)
+        {
+            underwater = false;
+            GraphicsSettings.defaultRenderPipeline = ChunkGenNetwork.Instance.mainUrpAsset;
+            QualitySettings.renderPipeline = ChunkGenNetwork.Instance.mainUrpAsset;
+            ChunkGenNetwork.Instance.fogRenderPassFeature = ChunkGenNetwork.Instance.rendererData.rendererFeatures.Find(f => f is FogRenderPassFeature) as FogRenderPassFeature;
+            ChunkGenNetwork.Instance.fogMat.SetFloat("_fogDensity", ChunkGenNetwork.Instance.fogDensity);
+            ChunkGenNetwork.Instance.fogMat.SetFloat("_fogOffset", ChunkGenNetwork.Instance.fogOffset);
+            ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogDensity", ChunkGenNetwork.Instance.fogDensity);
+            ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogOffset", ChunkGenNetwork.Instance.fogOffset);
+
+            // ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogDensity", ChunkGenNetwork.Instance.fogDensity);
+            // ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogOffset", ChunkGenNetwork.Instance.fogOffset);
         }
 
         // Goes from first person to a pseudo pause screen and vice versa on escape.

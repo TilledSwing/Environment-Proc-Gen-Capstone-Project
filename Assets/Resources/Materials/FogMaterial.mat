@@ -49,6 +49,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _Cubemap:
+        m_Texture: {fileID: 8600000, guid: d557a5f297e9d2447a3cc2a264e944d5, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _DetailAlbedoMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -83,6 +87,10 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _SpecGlossMap:
         m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Texture2D:
+        m_Texture: {fileID: 2800000, guid: 97a3e543a60863542927e6360b4d433a, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
@@ -135,8 +143,8 @@ Material:
     - _fadeEnd: 30
     - _fadeHeight: 0.1
     - _fadeStart: 0
-    - _fogDensity: 0.08
-    - _fogOffset: 124
+    - _fogDensity: 0.02
+    - _fogOffset: 30
     - _verticalFadeStrength: 1.2
     - fogDensity: 0.4
     - fogOffset: 110
@@ -147,5 +155,8 @@ Material:
     - _FogColor: {r: 0.19999999, g: 0.83137256, b: 0.79431653, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
     - _fogColor: {r: 0.102794595, g: 0.15040942, b: 0.20754719, a: 1}
+    - _lowerFogColor: {r: 0.101960786, g: 0.14901961, b: 0.20784314, a: 0}
+    - _starColor: {r: 1, g: 1, b: 1, a: 0}
+    - _upperFogColor: {r: 0.015686275, g: 0.05882353, b: 0.14117648, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

@@ -21,10 +21,15 @@ public class ChunkGenNetwork : MonoBehaviour
     public static ChunkGenNetwork Instance;
     // Fog Render Feature Stuff
     public Material fogMat;
-    public Color fogColor = new Color(160f, 196f, 233f, 1f);
+    public float fogDensity;
+    public float fogOffset;
+    public Color upperFogColor;
+    public Color lowerFogColor;
     public Color darkFogColor;
     public UniversalRendererData rendererData;
-    private FogRenderPassFeature fogRenderPassFeature;
+    public FogRenderPassFeature fogRenderPassFeature;
+    public UniversalRenderPipelineAsset mainUrpAsset;
+    public UniversalRenderPipelineAsset underwaterUrpAsset;
     // Objective Text Stuff
     public GameObject objectiveCanvas;
     public GameObject hudCanvas;
@@ -158,8 +163,15 @@ public class ChunkGenNetwork : MonoBehaviour
         }
         // Fog Shader Inits
         fogRenderPassFeature = rendererData.rendererFeatures.Find(f => f is FogRenderPassFeature) as FogRenderPassFeature;
-        fogMat.SetFloat("_fogOffset", maxViewDst - 20f);
-        fogMat.SetColor("_fogColor", fogColor);
+        // fogOffset = maxViewDst - 20f;
+        fogMat.SetFloat("_fogOffset", fogOffset);
+        fogMat.SetFloat("_fogDensity", fogDensity);
+        fogMat.SetColor("_upperFogColor", upperFogColor);
+        fogMat.SetColor("_lowerFogColor", lowerFogColor);
+        waterMaterial.SetFloat("_fogOffset", fogOffset);
+        waterMaterial.SetFloat("_fogDensity", fogDensity);
+        waterMaterial.SetColor("_fogColor", upperFogColor);
+        waterMaterial.SetFloat("_fogActive", 0);
 
         // terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 100000);
         // terrainDensityData.caveNoiseSeed = UnityEngine.Random.Range(0, 100000);
@@ -207,8 +219,9 @@ public class ChunkGenNetwork : MonoBehaviour
         lightingBlocker.transform.position = new Vector3(viewerPos.x, 0, viewerPos.z);
         // Darker fog at lower world heights
         float depthFactor = Mathf.Clamp01(-viewerPos.y * 0.01f);
-        Color currentFog = Color.Lerp(fogColor, darkFogColor, depthFactor);
-        fogMat.SetColor("_fogColor", currentFog);
+        Color currentFog = Color.Lerp(lowerFogColor, darkFogColor, depthFactor);
+        fogMat.SetColor("_lowerFogColor", currentFog);
+        waterMaterial.SetColor("_fogColor", currentFog);
 
         // Update chunks
         if ((viewerPos - lastUpdateViewerPos).sqrMagnitude > updateDistanceThreshold * updateDistanceThreshold && initialLoadComplete)
@@ -496,6 +509,7 @@ public class ChunkGenNetwork : MonoBehaviour
 
         List<AsyncGPUReadbackRequest> activeRequests = ListPoolManager<AsyncGPUReadbackRequest>.Get();
 
+        int count = 0;
         while (pendingReadbacks.Count > 0 || activeRequests.Count > 0)
         {
             if (Vector3.Distance(startViewerPos, viewerPos) >= queueUpdateDistanceThreshold)
@@ -512,7 +526,7 @@ public class ChunkGenNetwork : MonoBehaviour
                 }
                 startViewerPos = viewerPos;
             }
-            for (int i = 0; i < activeRequests.Count; i++)
+            for (int i = activeRequests.Count - 1; i >= 0; i--)
             {
                 if (activeRequests[i].done)
                 {
@@ -520,14 +534,19 @@ public class ChunkGenNetwork : MonoBehaviour
                 }
             }
 
-            while (activeRequests.Count <= 2 && pendingReadbacks.Count > 0)
+            // 1 readback per 20 fps with a min and max of 2 and 8
+            int maxActiveReadbacks = Mathf.Clamp(Mathf.RoundToInt(1f / Time.smoothDeltaTime / 20f), 2, 6);
+
+            while (activeRequests.Count <= maxActiveReadbacks && pendingReadbacks.Count > 0)
             {
                 ReadbackRequest pendingReadback = pendingReadbacks.Dequeue();
 
                 activeRequests.Add(AsyncGPUReadback.Request(pendingReadback.buffer, pendingReadback.readbackRequest));
             }
 
-            yield return null;
+            // Allow 2 dispatched per frame
+            if(++count % 2 == 0) 
+                yield return null;
         }
 
         ListPoolManager<AsyncGPUReadbackRequest>.Return(activeRequests);
@@ -618,6 +637,8 @@ public class ChunkGenNetwork : MonoBehaviour
         assetSpawnData.ResetSpawnPoints();
         chunkDictionary.Clear();
         fogRenderPassFeature.SetActive(false);
+        GraphicsSettings.defaultRenderPipeline = mainUrpAsset;
+        QualitySettings.renderPipeline = mainUrpAsset;
     }
     Bounds CalculateLoadedChunkBounds()
     {
@@ -645,7 +666,7 @@ public class ChunkGenNetwork : MonoBehaviour
 
         return total;
     }
-    void TextureSetup()
+    public void TextureSetup()
     {
         foreach (BiomeTextureConfigs biomeTextureConfig in terrainTextureData.biomeTextureConfigs)
         {
@@ -750,7 +771,7 @@ public class ChunkGenNetwork : MonoBehaviour
             meshFilter = chunk.AddComponent<MeshFilter>();
             meshRenderer = chunk.AddComponent<MeshRenderer>();
             // Chunk texture
-            meshRenderer.material = terrainMaterial;
+            meshRenderer.sharedMaterial = terrainMaterial;
             // meshRenderer.material.SetFloat("_UnderwaterTexHeightEnd", terrainDensityData.waterLevel - 15f);
             // meshRenderer.material.SetFloat("_Tex1HeightStart", terrainDensityData.waterLevel - 18f);
             // Set up the chunk's AssetSpawn script
@@ -785,7 +806,7 @@ public class ChunkGenNetwork : MonoBehaviour
                 waterPlaneGenerator.transform.SetParent(chunk.transform);
                 MeshFilter waterGenMeshFilter = waterPlaneGenerator.AddComponent<MeshFilter>();
                 MeshRenderer waterMat = waterPlaneGenerator.AddComponent<MeshRenderer>();
-                waterMat.material = waterMaterial;
+                waterMat.sharedMaterial = waterMaterial;
                 waterGen = waterPlaneGenerator.AddComponent<WaterPlaneGenerator>();
                 waterGen.meshFilter = waterGenMeshFilter;
                 waterGen.meshRenderer = waterMat;
@@ -798,6 +819,7 @@ public class ChunkGenNetwork : MonoBehaviour
             if( terrainDensityData.waterLevel > bounds.min.y)
             {
                 isWater = true;
+                // waterPlaneGenerator.AddComponent<DitherFadeController>();
             }
             chunk.transform.SetParent(parent);
             Instance.chunkHideQueue.Enqueue(this);

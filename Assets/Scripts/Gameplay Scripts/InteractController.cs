@@ -17,8 +17,10 @@ public class InteractController : MonoBehaviour
     private TextMeshProUGUI text;
     public int objectiveGoal;
     private int objectiveCounter = 0;
-    private bool lastRayState = false;
+    public bool lastRayState = false;
+    public ScanObject currentObj;
     Renderer meshRenderer;
+    Material[] originalMaterials;
     Material[] materials;
 
     void Awake()
@@ -41,11 +43,24 @@ public class InteractController : MonoBehaviour
         Ray ray = playerCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
         if (Physics.Raycast(ray, out RaycastHit hit, interactDst, interactLayerMask))
         {
+            // meshRenderer = hit.collider.gameObject.GetComponent<Renderer>();
+            // originalMaterials = hit.collider.gameObject.GetComponent<ScanObject>().originalMaterials;
+            // materials = meshRenderer.materials;
+            // if (materials != originalMaterials) 
+            //     meshRenderer.materials = originalMaterials;
             if (!lastRayState)
             {
-                lastRayState = true;
-                meshRenderer = hit.collider.gameObject.GetComponent<Renderer>();
+                GameObject obj = hit.collider.gameObject;
+                currentObj = obj.GetComponent<ScanObject>();
+                meshRenderer = obj.GetComponent<Renderer>();
+                originalMaterials = obj.GetComponent<ScanObject>().originalMaterials;
                 materials = meshRenderer.materials;
+                if (materials != originalMaterials)
+                {
+                    meshRenderer.materials = originalMaterials;
+                    materials = originalMaterials;
+                }
+                lastRayState = true;
                 foreach (Material material in materials)
                 {
                     StartCoroutine(FadeInHightlight(material, 0.15f));

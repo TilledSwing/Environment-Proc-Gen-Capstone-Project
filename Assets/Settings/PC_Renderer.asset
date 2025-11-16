@@ -1,20 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-8913340993764310466
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d97e9e746664690449fb1f88800a78cd, type: 3}
-  m_Name: FogRenderPassFeature
-  m_EditorClassIdentifier: 
-  m_Active: 0
-  material: {fileID: -876546973899608171, guid: e02b81acc746bcc4c88df4f2ea11a960, type: 3}
-  renderPassEvent: 500
 --- !u!114 &-6941763473132003427
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -29,7 +14,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Active: 0
   material: {fileID: 2100000, guid: b78a36d964d317b498aa1107a6978473, type: 2}
-  renderPassEvent: 450
+  renderPassEvent: 400
+--- !u!114 &-4066635954998150948
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d97e9e746664690449fb1f88800a78cd, type: 3}
+  m_Name: EdgeDetectionRenderPassFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  material: {fileID: 2100000, guid: cd21a087edba7d04fb73d00b7515fa52, type: 2}
+  renderPassEvent: 350
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -57,8 +57,8 @@ MonoBehaviour:
   m_RendererFeatures:
   - {fileID: 7833122117494664109}
   - {fileID: -6941763473132003427}
-  - {fileID: -8913340993764310466}
-  m_RendererFeatureMap: ad6b866f10d7b46c9d5f2f75e6e6a99f3e42c05097734d84
+  - {fileID: -4066635954998150948}
+  m_RendererFeatureMap: ad6b866f10d7b46c9d5f2f75e6e6a99fdcf88017256890c7
   m_UseNativeRenderPass: 1
   xrSystemData: {fileID: 0}
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
@@ -98,7 +98,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Active: 1
   m_Settings:
-    AOMethod: 0
+    AOMethod: 1
     Downsample: 1
     AfterOpaque: 1
     Source: 1

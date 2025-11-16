@@ -31,6 +31,7 @@ public class WaterPlaneGenerator : MonoBehaviour
         mesh.triangles = triangles.ToArray();
         mesh.uv = uvs.ToArray();
         mesh.RecalculateNormals();
+        mesh.RecalculateBounds();
 
         meshFilter.mesh = mesh;
     }

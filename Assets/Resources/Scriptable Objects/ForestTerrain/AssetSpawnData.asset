@@ -27,8 +27,9 @@ MonoBehaviour:
     useMaxHeight: 1
     maxHeight: 50
     underwaterAsset: 0
-    undergroundAsset: 0
     minDepth: 0
+    undergroundAsset: 0
+    minDensity: 0
     isValuable: 0
     minValue: 0
     maxValue: 0
@@ -46,8 +47,9 @@ MonoBehaviour:
     useMaxHeight: 1
     maxHeight: 50
     underwaterAsset: 0
-    undergroundAsset: 0
     minDepth: 0
+    undergroundAsset: 0
+    minDensity: 0
     isValuable: 0
     minValue: 0
     maxValue: 0
@@ -65,8 +67,9 @@ MonoBehaviour:
     useMaxHeight: 0
     maxHeight: 0
     underwaterAsset: 0
-    undergroundAsset: 0
     minDepth: 0
+    undergroundAsset: 0
+    minDensity: 0
     isValuable: 0
     minValue: 0
     maxValue: 0
@@ -84,8 +87,9 @@ MonoBehaviour:
     useMaxHeight: 0
     maxHeight: 0
     underwaterAsset: 0
-    undergroundAsset: 0
     minDepth: 0
+    undergroundAsset: 0
+    minDensity: 0
     isValuable: 0
     minValue: 0
     maxValue: 0
@@ -103,8 +107,9 @@ MonoBehaviour:
     useMaxHeight: 0
     maxHeight: 0
     underwaterAsset: 0
-    undergroundAsset: 0
     minDepth: 0
+    undergroundAsset: 0
+    minDensity: 0
     isValuable: 0
     minValue: 0
     maxValue: 0
@@ -122,8 +127,9 @@ MonoBehaviour:
     useMaxHeight: 0
     maxHeight: 0
     underwaterAsset: 1
+    minDepth: 5
     undergroundAsset: 0
-    minDepth: 0
+    minDensity: 0
     isValuable: 0
     minValue: 0
     maxValue: 0
@@ -141,8 +147,9 @@ MonoBehaviour:
     useMaxHeight: 0
     maxHeight: 0
     underwaterAsset: 0
-    undergroundAsset: 0
     minDepth: 0
+    undergroundAsset: 0
+    minDensity: 0
     isValuable: 0
     minValue: 0
     maxValue: 0
@@ -160,8 +167,9 @@ MonoBehaviour:
     useMaxHeight: 0
     maxHeight: 0
     underwaterAsset: 0
-    undergroundAsset: 0
     minDepth: 0
+    undergroundAsset: 0
+    minDensity: 0
     isValuable: 0
     minValue: 0
     maxValue: 0
@@ -179,8 +187,9 @@ MonoBehaviour:
     useMaxHeight: 1
     maxHeight: 55
     underwaterAsset: 0
-    undergroundAsset: 0
     minDepth: 0
+    undergroundAsset: 0
+    minDensity: 0
     isValuable: 0
     minValue: 0
     maxValue: 0
@@ -198,8 +207,9 @@ MonoBehaviour:
     useMaxHeight: 0
     maxHeight: 0
     underwaterAsset: 0
-    undergroundAsset: 0
     minDepth: 0
+    undergroundAsset: 0
+    minDensity: 0
     isValuable: 0
     minValue: 0
     maxValue: 0
@@ -217,8 +227,9 @@ MonoBehaviour:
     useMaxHeight: 0
     maxHeight: 0
     underwaterAsset: 1
+    minDepth: 10
     undergroundAsset: 0
-    minDepth: 0
+    minDensity: 0
     isValuable: 0
     minValue: 0
     maxValue: 0
@@ -236,8 +247,9 @@ MonoBehaviour:
     useMaxHeight: 0
     maxHeight: 0
     underwaterAsset: 0
+    minDepth: 0
     undergroundAsset: 1
-    minDepth: 3
+    minDensity: 3
     isValuable: 1
     minValue: 20
     maxValue: 50

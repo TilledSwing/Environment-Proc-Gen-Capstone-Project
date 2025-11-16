@@ -161,7 +161,10 @@ Material:
     - _ZTestTransparent: 4
     - _ZWrite: 1
     - _ditherScale: 0.3
-    - _fade: 0.5
+    - _fade: 0
+    - _fogDensity: 0.08
+    - _fogOffset: 124
+    - _underwater: 0
     m_Colors:
     - _Color: {r: 0.61089355, g: 0.7412812, b: 0.9056604, a: 0}
     - _DepthColor: {r: 0.14328942, g: 0.19209889, b: 0.26415092, a: 0}
