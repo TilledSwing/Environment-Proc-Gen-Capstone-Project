@@ -60,7 +60,6 @@ Shader "Custom/WaterShader"
             #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/CommonMaterial.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/RealtimeLights.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
-            #include "Assets/Resources/Compute Shaders/FastNoiseLite.hlsl"
 
             struct Attributes
             {
@@ -189,15 +188,7 @@ Shader "Custom/WaterShader"
             float4 frag(Varyings IN) : SV_Target
             {
                 float2 screenUV = GetNormalizedScreenSpaceUV(IN.positionHCS);
-                // float2 screenUV = IN.positionHCS.xy / IN.positionHCS.w;
-                // screenUV = screenUV;
-                // return float4(screenUV.x, screenUV.y, 0, 1);
-                // float3 N = normalize(IN.worldNormal);
-                // float3 T = normalize(IN.worldTangent);
-                // float3 B = cross(N, T) * IN.tangentOS.w;
-                // float3x3 TBN = float3x3(T, B, N);
                 float3x3 TBN = float3x3(IN.worldTangent, IN.worldBitangent, IN.worldNormal);
-                float aspectRatioCorrection = _ScreenParams.y / _ScreenParams.x;
 
                 // Refraction
                 float3 tRefractionPos = 2 * UnpackNormal(SAMPLE_TEXTURE2D(_RefractionTexture, sampler_RefractionTexture, IN.posRefractionUV)) - 1;
@@ -207,8 +198,6 @@ Shader "Custom/WaterShader"
                 float3 wRefractionNeg = normalize(mul(TBN, tRefractionNeg));
                 float3 blendedNormal = normalize(wRefractionPos * wRefractionNeg);
                 float2 strengthAdjustedNormal = (_RefractionStrength * 0.05) * blendedNormal.xy;
-                // strengthAdjustedNormal.x *= aspectRatioCorrection;
-                // return float4(screenUV + strengthAdjustedNormal, 0, 1);
 
                 float4 refractionColor = SAMPLE_TEXTURE2D(_CameraOpaqueTexture, sampler_CameraOpaqueTexture, screenUV + strengthAdjustedNormal);
 
@@ -216,8 +205,9 @@ Shader "Custom/WaterShader"
                 float depthDifference = DepthDifference(screenUV + strengthAdjustedNormal, IN.worldPos);
 
                 float colorFadeFactor = pow(saturate(depthDifference / _Depth), 0.1);
-                float4 waterColor = lerp(_ShallowColor, _DeepColor, colorFadeFactor);
-
+                float4 shallowColor = _ShallowColor + (SAMPLE_TEXTURE2D(_CameraOpaqueTexture, sampler_CameraOpaqueTexture, screenUV) * (1 - _ShallowColor.a));
+                float4 waterColor = lerp(shallowColor, _DeepColor, colorFadeFactor);
+                
                 //Foam
                 float foamDepthDifference = DepthDifference(screenUV, IN.worldPos);
                 float foamFadeFactor = saturate(foamDepthDifference / _FoamAmount);
@@ -229,8 +219,6 @@ Shader "Custom/WaterShader"
                 float4 foamWaterColor = lerp(waterColor, _FoamColor, steppedNoise);
 
                 float4 color = lerp(refractionColor, foamWaterColor, colorFadeFactor);
-                // float3 ambient = 1.0 + float3(2, 2, 2);
-                // color.rgb *= ambient;
                 // color.a = saturate(depthDifference / 0.25);
 
                 //Normals
@@ -247,14 +235,14 @@ Shader "Custom/WaterShader"
                 inputData.viewDirectionWS = normalize(_WorldSpaceCameraPos - IN.worldPos);
                 inputData.shadowCoord = TransformWorldToShadowCoord(IN.worldPos);
                 inputData.fogCoord = 0;
-                inputData.bakedGI = saturate(SampleSH(inputData.normalWS) + float3(1, 1, 1));
+                inputData.bakedGI = saturate(SampleSH(inputData.normalWS) + float3(0.8, 0.8, 0.8));
                 inputData.vertexLighting = 0;
                 inputData.normalizedScreenSpaceUV = screenUV;
                 inputData.shadowMask = 1;
 
                 SurfaceData surfaceData;
                 surfaceData.albedo = color.rgb;
-                surfaceData.alpha = color.a;
+                surfaceData.alpha = 1;
                 surfaceData.metallic = 0.0;
                 surfaceData.specular = _Specular;
                 surfaceData.smoothness = _Smoothness;
