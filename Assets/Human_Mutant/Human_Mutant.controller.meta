@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: a4205588db411b44f97b7bfbde0398fa
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 140704
+  packageName: Human_Mutant
+  packageVersion: 1.0
+  assetPath: Assets/Human_Mutant/Human_Mutant.controller
+  uploadId: 296493

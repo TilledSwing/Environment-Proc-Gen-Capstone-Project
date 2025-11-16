@@ -5,11 +5,14 @@ using System.Collections.Generic;
 using Unity.AI.Navigation;
 using System.Linq;
 
+
+
 public class GlobalNavMeshUpdater : MonoBehaviour
 {
     public static GlobalNavMeshUpdater Instance;
     public NavMeshSurface landSurface;
     public NavMeshSurface waterSurface;
+    public WaterLinkManager linkManager;  
 
     private bool isBuildingLandNavMesh = false;
     private bool isBuildingWaterNavMesh = false;
@@ -23,10 +26,14 @@ public class GlobalNavMeshUpdater : MonoBehaviour
     private readonly object landSettingLock = new object();
     private readonly object waterSettingsLock = new object();
     private float navMeshUpdateInterval = 5f;
-
+    private const float planeCount = 2;
+    public List<Vector3> changedWaterChunks = new();
     private NavMeshDataInstance landNavMeshInstance;
     private NavMeshDataInstance waterNavMeshInstance;
     public int terrainArea1 = 0;
+    public float chunkHeight = 0;
+    public float planeWidth = 0; // same width as the chunk
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -51,9 +58,6 @@ public class GlobalNavMeshUpdater : MonoBehaviour
         waterSurface.voxelSize = 0.2f;
         waterSurface.overrideTileSize = true;
         waterSurface.tileSize = 256;
-
-        
-
     }
 
     private void OnDestroy()
@@ -89,7 +93,7 @@ public class GlobalNavMeshUpdater : MonoBehaviour
         //     StartCoroutine(RebuildLandNavMeshBatched());
 
         if (!isBuildingWaterNavMesh && waterNavMeshNeedsRebuild)
-            StartCoroutine(RebuildWaterNavMeshBatched());
+            StartCoroutine(RebuildAndLinkWaterCoroutine(waterSources, 1.5f));
     }
     /// <summary>
     /// Adds a chunk to the list of chunks to be included in the next navmesh rebuild
@@ -98,24 +102,19 @@ public class GlobalNavMeshUpdater : MonoBehaviour
     public void AddChunkForNavMeshUpdate(ChunkGenNetwork.TerrainChunk chunk)
     {
         addLandChunk(chunk);
-        addWaterChunk(chunk);
+        if (chunk.isWater)
+            addWaterChunk(chunk);
     }
     private void addWaterChunk(ChunkGenNetwork.TerrainChunk chunk)
     {
         var center = chunk.bounds.center;
-
+        changedWaterChunks.Add(center);
         lock (waterSettingsLock)
         {
             waterSources.Remove(center);
         }
             
         var waterLevel = ChunkGenNetwork.Instance.terrainDensityData.waterLevel;
-
-        // Only consider a chunk water if its lowest point is below the water level
-        bool isWater = waterLevel > chunk.bounds.min.y;
-
-        if (!isWater)
-            return;
 
         float bottomY = chunk.bounds.min.y;
         float topY = Mathf.Min(chunk.bounds.max.y, waterLevel);
@@ -124,21 +123,31 @@ public class GlobalNavMeshUpdater : MonoBehaviour
         if (height <= 0f)
             return;
 
-        Mesh prism = WaterMeshCache.GetQuad(); // cached unit cube
-        Matrix4x4 transformMatrix = Matrix4x4.TRS(
-            new Vector3(center.x, bottomY + height / 2f, center.z),
-            Quaternion.identity,
-            new Vector3(size.x, height, size.z)
-        );
+        float layerY;
+        List<NavMeshBuildSource> waterPlanes = new List<NavMeshBuildSource>();  
+        float terrainHeight = SampleTerrainHeight(chunk.bounds);
 
-        var prismSource = new NavMeshBuildSource
+        for (float i = 0; i < planeCount; i++)
         {
-            shape = NavMeshBuildSourceShape.Mesh,
-            sourceObject = prism,
-            transform = transformMatrix,
-            area = 0 // your Water area
-        };
+            layerY = bottomY + i / planeCount * height;
+            if (layerY < terrainHeight)
+                continue;
+            Mesh prism = WaterMeshCache.GetQuad(); // cached unit cube
+                Matrix4x4 transformMatrix = Matrix4x4.TRS(
+                new Vector3(center.x, layerY, center.z),
+                Quaternion.identity,
+                new Vector3(size.x, height, size.z)
+            );
 
+            var prismSource = new NavMeshBuildSource
+            {
+                shape = NavMeshBuildSourceShape.Mesh,
+                sourceObject = prism,
+                transform = transformMatrix,
+                area = 0 // your Water area
+            };
+            waterPlanes.Add(prismSource);
+        }
         
         NavMeshBuildSource? terrainSource = null;
         if (chunk.marchingCubes.meshFilter.sharedMesh != null && chunk.marchingCubes.meshFilter.sharedMesh.vertexCount != 0)        {
@@ -152,25 +161,41 @@ public class GlobalNavMeshUpdater : MonoBehaviour
             terrainArea1 ++;
         }
         
-        //I need to store this source somewhere to remove it later if the chunk becomes land
         lock (waterSettingsLock)
         {
             waterSources[center] = new WaterChunkSources
             {
-                waterPrism = prismSource,
-                terrainMesh = terrainSource
+                waterPlanes = waterPlanes,
+                terrainMesh = terrainSource,
             };
         }
 
         waterNavMeshNeedsRebuild = true;
 
         if (currentWaterBounds == null)
+        {
             currentWaterBounds = chunk.bounds;
+            chunkHeight = chunk.bounds.max.y - chunk.bounds.min.y;
+            planeWidth = chunk.bounds.size.x;
+
+        }
         else
             currentWaterBounds = ExpandBounds(currentWaterBounds.Value, chunk.bounds);
-
     }
-    
+    float SampleTerrainHeight(Bounds bounds)
+    {
+        LayerMask terrainLayer = LayerMask.GetMask("Terrain Layer");
+
+        float startY = bounds.max.y + 1f;  
+        float maxDistance = bounds.size.y + 5f;
+
+        Ray ray = new Ray(new Vector3(bounds.center.x, startY, bounds.center.z), Vector3.down);
+
+        if (Physics.Raycast(ray, out RaycastHit hit, maxDistance, terrainLayer))
+            return hit.point.y;
+
+        return float.NegativeInfinity; // no hit
+    }
     /// <summary>
     /// Adds a land chunk to the list of chunks to be included in the next navmesh rebuild
     /// </summary>
@@ -254,6 +279,17 @@ public class GlobalNavMeshUpdater : MonoBehaviour
         Debug.Log("Land NavMesh rebuilt");
     }
 
+    private IEnumerator RebuildAndLinkWaterCoroutine(Dictionary<Vector3, WaterChunkSources> waterSources, float agentStepHeight)
+    {
+        yield return RebuildWaterNavMeshBatched();
+
+        // Small yield to ensure NavMesh is fully updated
+        yield return null;
+
+        yield return StartCoroutine(linkManager.UpdateWaterLinksIncremental(changedWaterChunks, waterSources, agentStepHeight, chunkHeight, planeWidth));
+        changedWaterChunks.Clear();
+        Debug.Log($"Water NavMesh rebuilt and off-mesh links created.");
+    }
     /// <summary>
     /// Rebuilds the water navmesh for all changed water chunks in a batched manner
     /// </summary>
@@ -266,15 +302,26 @@ public class GlobalNavMeshUpdater : MonoBehaviour
         lock (waterSettingsLock)
         {
             sources = waterSources.Values
-                .SelectMany(x => x.terrainMesh.HasValue
-                    ? new[] { x.waterPrism, x.terrainMesh.Value }
-                    : new[] { x.waterPrism })
-                .ToList();
+            .SelectMany(x =>
+            {
+                var list = new List<NavMeshBuildSource>();
+
+                // Add all per-chunk swim layers
+                if (x.waterPlanes != null && x.waterPlanes.Count > 0)
+                    list.AddRange(x.waterPlanes);
+
+                // Add terrain mesh if it exists
+                if (x.terrainMesh.HasValue)
+                    list.Add(x.terrainMesh.Value);
+
+                return list;
+            })
+            .ToList();
         }
         if (waterSurface.navMeshData == null)
         {
             waterSurface.navMeshData = new NavMeshData(waterSurface.agentTypeID);
-            NavMesh.AddNavMeshData(waterSurface.navMeshData);
+            waterNavMeshInstance = NavMesh.AddNavMeshData(waterSurface.navMeshData);
         }
 
         var op = NavMeshBuilder.UpdateNavMeshDataAsync(
@@ -292,11 +339,11 @@ public class GlobalNavMeshUpdater : MonoBehaviour
         Debug.Log($"Terrain area 1 count: {terrainArea1}");
     }
 
-    private struct WaterChunkSources
-{
-    public NavMeshBuildSource waterPrism;
-    public NavMeshBuildSource? terrainMesh;
-}   
+    public struct WaterChunkSources
+    {
+        public List<NavMeshBuildSource> waterPlanes;
+        public NavMeshBuildSource? terrainMesh;
+    }   
 }
 
 
@@ -330,4 +377,5 @@ public static class WaterMeshCache
         return waterQuad;
     }
 }
+
 

@@ -408,9 +408,9 @@ public class ComputeMarchingCubes : MonoBehaviour
         // if (lodData.lod == currentLOD)
         // {
         meshFilter.mesh = mesh;
+        meshCollider.sharedMesh = mesh;
         OnMeshGenerated?.Invoke(generatedMesh);
 
-        meshCollider.sharedMesh = mesh;
         mesh.bounds = new Bounds(chunkPos + (new Vector3(0.5f, 0.5f, 0.5f) * terrainDensityData.width), Vector3.one * terrainDensityData.width);
 
         if (!terraforming)
