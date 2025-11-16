@@ -67,11 +67,6 @@ public class BombLogic : NetworkBehaviour
                 Vector3 terraformCenter = gameObject.transform.position;
                 Vector3Int hitChunkPos = new Vector3Int(Mathf.FloorToInt(terraformCenter.x / terrainDensityData.width), Mathf.FloorToInt(terraformCenter.y / terrainDensityData.width), Mathf.FloorToInt(terraformCenter.z / terrainDensityData.width)) * terrainDensityData.width;
                 BombTerraformServer(terraformCenter, hitChunkPos);
-
-                Collider[] colliders = Physics.OverlapSphere(gameObject.transform.position, explosionRadius, assetLayer);
-                foreach (Collider collider in colliders) {
-                    Destroy(collider.gameObject);
-                }
             }
             yield return null;
         }
@@ -161,6 +156,12 @@ public class BombLogic : NetworkBehaviour
 
                 marchingCubes.MarchingCubesJobHandler(marchingCubes.heightsArray, true);
             }
+        }
+
+        Collider[] colliders = Physics.OverlapSphere(terraformCenter, explosionRadius, assetLayer);
+        foreach (Collider collider in colliders)
+        {
+            Destroy(collider.gameObject);
         }
     }
 

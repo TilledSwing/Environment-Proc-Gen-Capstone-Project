@@ -10951,6 +10951,7 @@ MonoBehaviour:
   _componentIndexCache: 255
   _addedNetworkObject: {fileID: 849160507}
   _networkObjectCache: {fileID: 0}
+  bombPrefab: {fileID: 2829416588567123249, guid: 237e98ccbbe3e3a4d920901ddf4c6728, type: 3}
 --- !u!1 &850941760
 GameObject:
   m_ObjectHideFlags: 0

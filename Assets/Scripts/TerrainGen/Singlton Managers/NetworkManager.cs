@@ -1,13 +1,17 @@
 using FishNet;
 using FishNet.Connection;
 using FishNet.Object;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static LobbyBroadcast;
 
 public class NetworkManager : NetworkBehaviour
 {
+    [SerializeField] 
+    private GameObject bombPrefab;
+    private BombLogic bombLogic;
+
     /// <summary>
     /// Sets the player to the new viewer for chunk generation and disables the local chunk generator
     /// </summary>
@@ -30,7 +34,6 @@ public class NetworkManager : NetworkBehaviour
         ChunkGenNetwork.Instance.lobbyContainer.SetActive(true);
         ChunkGenNetwork.Instance.lightChange.intensity = 1.5f;
 
-        //ChunkGenNetwork.Instance.flashlight.SetActive(true);
         PlayerController.instance.waterLevel = ChunkGenNetwork.Instance.terrainDensityData.waterLevel;
 
         GameObject.Find("NetworkManager/NetworkHudCanvas/Logo").SetActive(false);
@@ -101,17 +104,50 @@ public class NetworkManager : NetworkBehaviour
 
     private IEnumerator ApplyTerraforms(List<Vector3> terraformCenters, List<Vector3Int> hitChunkPositions, List<int> terraformTypes)
     {
-        yield return new WaitForSeconds(0.5f);
+        while (!ChunkGenNetwork.Instance.initialLoadComplete || ChunkGenNetwork.Instance.hasPendingMeshInits || ChunkGenNetwork.Instance.isLoadingMeshes || ChunkGenNetwork.Instance.hasPendingAssetInstantiations ||
+                ChunkGenNetwork.Instance.isLoadingAssetInstantiations || ChunkGenNetwork.Instance.hasPendingReadbacks || ChunkGenNetwork.Instance.isLoadingReadbacks || ChunkGenNetwork.Instance.isLoadingChunks ||
+                PlayerController.instance == null || ChunkGenNetwork.Instance.assetSpawnData.assets.Count == 0)
+        { 
+            yield return new WaitForSeconds(0.5f);
+        }
+
         GameObject player = PlayerController.instance.gameObject;
-        for (int i = 0; i < terraformCenters.Count; i++)
+
+        //while (!player.GetComponent<BombLogic>().IsClientInitialized || !player.GetComponent<Terraforming>().IsClientInitialized)
+        while(!player.GetComponent<Terraforming>().IsClientInitialized)
         {
-            Debug.LogWarning("Inside Terraform Apply");
-            if (terraformTypes[i] == 0)
-                player.GetComponent<BombLogic>().BombTerraformLocal(terraformCenters[i], hitChunkPositions[i]);
-            else if (terraformTypes[i] == 1)
-                player.GetComponent<Terraforming>().TerraformClientLocal(terraformCenters[i], hitChunkPositions[i], false);
+            yield return new WaitForSeconds(0.5f);
+        }
+
+        bombLogic = bombPrefab.GetComponent<BombLogic>();
+        //yield return new WaitForSeconds(2f);
+
+        Debug.LogWarning("Through Wait");
+        int i = 0;
+        bool success = true;
+        while (i < terraformTypes.Count)
+        {
+            success = true;
+            try
+            {
+                if (terraformTypes[i] == 0)
+                    bombLogic.BombTerraformLocal(terraformCenters[i], hitChunkPositions[i]);
+                else if (terraformTypes[i] == 1)
+                    player.GetComponent<Terraforming>().TerraformClientLocal(terraformCenters[i], hitChunkPositions[i], false);
+                else
+                    player.GetComponent<Terraforming>().TerraformClientLocal(terraformCenters[i], hitChunkPositions[i], true);
+            } 
+            // yield returns aren't allowed in catch blocks.
+            // check for argument null exceptions (meaning that buffers / shaders haven't been set up yet
+            catch (ArgumentNullException e)
+            {
+                success = false;
+            }
+
+            if (success)
+                i++;
             else
-                player.GetComponent<Terraforming>().TerraformClientLocal(terraformCenters[i], hitChunkPositions[i], true);
+                yield return new WaitForSeconds(0.5f);
         }
     }
 }
