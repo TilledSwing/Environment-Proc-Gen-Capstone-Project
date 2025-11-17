@@ -170,7 +170,7 @@ public class ChunkGenNetwork : MonoBehaviour
         fogMat.SetColor("_lowerFogColor", lowerFogColor);
         waterMaterial.SetFloat("_fogOffset", fogOffset);
         waterMaterial.SetFloat("_fogDensity", fogDensity);
-        waterMaterial.SetColor("_fogColor", upperFogColor);
+        waterMaterial.SetColor("_fogColor", lowerFogColor);
         waterMaterial.SetFloat("_fogActive", 0);
 
         // terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 100000);
@@ -814,7 +814,6 @@ public class ChunkGenNetwork : MonoBehaviour
                 waterGen.chunkPos = chunkPos;
                 waterGen.marchingCubes = marchingCubes;
                 marchingCubes.waterGen = waterGen;
-                waterPlaneGenerator.AddComponent<DitherFadeController>();
             }    
             if( terrainDensityData.waterLevel > bounds.min.y)
             {
