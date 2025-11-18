@@ -18,7 +18,7 @@ public class WaterLinkManager : MonoBehaviour
         float planeSizeX
     )
     {
-        const int yieldAfterIterations = 30;
+        const int yieldAfterIterations = 15;
         int iterationCounter = 0;
 
         foreach (var chunkCenter in changedChunks)
