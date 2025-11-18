@@ -70,6 +70,11 @@ public class ChunkGenNetwork : MonoBehaviour
     // Material References
     public Material terrainMaterial;
     public Material waterMaterial;
+    // Grass Stuff
+    public ComputeShader grassPositionComputeShader;
+    public Mesh grassMesh;
+    public Material grassMaterial;
+    public int grassDensity;
     // Texture Arrays
     public Texture2DArray textureArray;
     public float[] useHeights;

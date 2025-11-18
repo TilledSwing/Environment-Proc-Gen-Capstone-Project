@@ -5694,6 +5694,7 @@ GameObject:
   - component: {fileID: 410087041}
   - component: {fileID: 410087040}
   - component: {fileID: 410087042}
+  - component: {fileID: 410087043}
   m_Layer: 0
   m_Name: Directional Light
   m_TagString: Untagged
@@ -5774,13 +5775,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 410087039}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.48186103, y: -0.2584211, z: -0.15121064, w: 0.8235071}
-  m_LocalPosition: {x: 166, y: 500, z: -35}
+  m_LocalRotation: {x: 0.41284508, y: 0.23012173, z: 0.10863518, w: 0.87452924}
+  m_LocalPosition: {x: 0, y: 500, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 45.683, y: -54.866, z: -45.476}
+  m_LocalEulerAnglesHint: {x: 42.229, y: 41.66, z: 30.878}
 --- !u!114 &410087042
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5804,6 +5805,19 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 1
+--- !u!114 &410087043
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 410087039}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4834770a7ff3725409c703a11542afa8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  fogMaterial: {fileID: 2100000, guid: b78a36d964d317b498aa1107a6978473, type: 2}
 --- !u!1 &415069116
 GameObject:
   m_ObjectHideFlags: 0
@@ -21761,7 +21775,7 @@ MonoBehaviour:
   chatContainer: {fileID: 898901602}
   lobbyContainer: {fileID: 194610414}
   maxWorldYChunks: 16
-  maxViewDst: 144
+  maxViewDst: 72
   viewer: {fileID: 1588582780}
   viewerPos: {x: 0, y: 0, z: 0}
   updateDistanceThreshold: 12
@@ -21790,6 +21804,10 @@ MonoBehaviour:
   terraformComputeShader: {fileID: 7200000, guid: e41356404106d3e4487dd76d300e0a73, type: 3}
   terrainMaterial: {fileID: 2100000, guid: d644a1ee14ca32a44b080e9c6de5ed62, type: 2}
   waterMaterial: {fileID: 2100000, guid: 804af839dce47f748a2151ac2e3113a9, type: 2}
+  grassPositionComputeShader: {fileID: 7200000, guid: f2f43ed31c15f4c499751ac8fe425ce1, type: 3}
+  grassMesh: {fileID: 3679985272907197249, guid: 64f6b014b6a06c44eb912584f647433f, type: 3}
+  grassMaterial: {fileID: 2100000, guid: bdfda37c10344e84ebfde33ef935cf28, type: 2}
+  grassDensity: 1
   textureArray: {fileID: 0}
   useHeights: []
   heightStarts: []
