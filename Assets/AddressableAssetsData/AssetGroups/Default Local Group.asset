@@ -15,6 +15,11 @@ MonoBehaviour:
   m_GroupName: Default Local Group
   m_GUID: 8e48f53c038a9a64e92b7be8b4c06274
   m_SerializeEntries:
+  - m_GUID: abf6335225e9add448b28bf5fcb465cd
+    m_Address: Assets/Human_Mutant/Prefab/Human_Mutant.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e0308b7739546ab48bd90632b943b010
     m_Address: Assets/Stylized3DMonster/Monster04/Prefab/Monster04_01.prefab
     m_ReadOnly: 0

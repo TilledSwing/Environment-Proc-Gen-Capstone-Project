@@ -11930,10 +11930,11 @@ MonoBehaviour:
   _componentIndexCache: 255
   _addedNetworkObject: {fileID: 928284566}
   _networkObjectCache: {fileID: 0}
-  enemies: []
-  enemyPrefab: {fileID: 0}
-  enemyCount: 20
+  landEnemyCount: 20
+  waterEnemyCount: 7
   minDistance: 25
+  landNavMeshSurface: {fileID: 0}
+  waterNavMeshSurface: {fileID: 0}
 --- !u!4 &928284568
 Transform:
   m_ObjectHideFlags: 0
@@ -21724,9 +21725,9 @@ GameObject:
   - component: {fileID: 1838274976}
   - component: {fileID: 1838274979}
   - component: {fileID: 1838274980}
-  - component: {fileID: 1838274982}
   - component: {fileID: 1838274981}
   - component: {fileID: 1838274983}
+  - component: {fileID: 1838274984}
   m_Layer: 0
   m_Name: NetworkChunkManager
   m_TagString: Untagged
@@ -21855,11 +21856,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 824ae9696e7161a429d9625587ec266e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  landSurface: {fileID: 1838274982}
+  landSurface: {fileID: 1838274984}
   waterSurface: {fileID: 1838274981}
   linkManager: {fileID: 1838274983}
   changedWaterChunks: []
-  terrainArea1: 0
   chunkHeight: 0
   planeWidth: 0
 --- !u!114 &1838274981
@@ -21894,7 +21894,19 @@ MonoBehaviour:
   m_MinRegionArea: 2
   m_NavMeshData: {fileID: 23800000, guid: f2555714e7ee7f444a845958361a4e35, type: 2}
   m_BuildHeightMesh: 0
---- !u!114 &1838274982
+--- !u!114 &1838274983
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1838274975}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d80607a63933f324d9764f12fe55dd1f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1838274984
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -21926,18 +21938,6 @@ MonoBehaviour:
   m_MinRegionArea: 2
   m_NavMeshData: {fileID: 0}
   m_BuildHeightMesh: 0
---- !u!114 &1838274983
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1838274975}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d80607a63933f324d9764f12fe55dd1f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1838910247 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4054564025817941334, guid: 4718757af3964764998de4140e2427ac, type: 3}

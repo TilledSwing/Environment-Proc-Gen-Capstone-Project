@@ -83,7 +83,7 @@ MonoBehaviour:
   NetworkBehaviours:
   - {fileID: 1984013878436646235}
   - {fileID: 5124199961911290323}
-  - {fileID: 3904299120803794151}
+  - {fileID: 0}
   InitializedParentNetworkBehaviour: {fileID: 0}
   InitializedNestedNetworkObjects: []
   RuntimeParentNetworkBehaviour: {fileID: 0}
@@ -211,12 +211,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 4787734284849576031}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b3cb185734786f347b6d72edb88562b3, type: 3}
+  m_Script: {fileID: 11500000, guid: 1684f4e49e7ed88458f8e082189e6755, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 2
+  _componentIndexCache: 255
   _addedNetworkObject: {fileID: 3000861625305372182}
-  _networkObjectCache: {fileID: 3000861625305372182}
+  _networkObjectCache: {fileID: 0}
   isFrozen: 0
 --- !u!114 &1072984882267816342
 MonoBehaviour:

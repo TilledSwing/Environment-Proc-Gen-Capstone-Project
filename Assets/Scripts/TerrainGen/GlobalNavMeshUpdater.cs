@@ -88,8 +88,8 @@ public class GlobalNavMeshUpdater : MonoBehaviour
 
     private void ProcessNavMeshUpdates()
     {
-        // if (!isBuildingLandNavMesh && landNavMeshNeedsRebuild)
-        //     StartCoroutine(RebuildLandNavMeshBatched());
+        if (!isBuildingLandNavMesh && landNavMeshNeedsRebuild)
+            StartCoroutine(RebuildLandNavMeshBatched());
 
         if (!isBuildingWaterNavMesh && waterNavMeshNeedsRebuild)
             StartCoroutine(RebuildAndLinkWaterCoroutine(waterSources, 1.5f));
@@ -100,7 +100,7 @@ public class GlobalNavMeshUpdater : MonoBehaviour
     /// <param name="chunk"></param>
     public void AddChunkForNavMeshUpdate(ChunkGenNetwork.TerrainChunk chunk)
     {
-        // addLandChunk(chunk);
+        addLandChunk(chunk);
         if (chunk.isWater)
             addWaterChunk(chunk);
     }
@@ -143,7 +143,7 @@ public class GlobalNavMeshUpdater : MonoBehaviour
                 shape = NavMeshBuildSourceShape.Mesh,
                 sourceObject = prism,
                 transform = transformMatrix,
-                area = 0 // your Water area
+                area = 3 // your Water area
             };
             waterPlanes.Add(prismSource);
         }
@@ -294,7 +294,7 @@ public class GlobalNavMeshUpdater : MonoBehaviour
         // Small yield to ensure NavMesh is fully updated
         yield return null;
         
-        //yield return StartCoroutine(linkManager.UpdateWaterLinksIncremental(changedChunks, copyWater, agentStepHeight, chunkHeight, planeWidth));
+        yield return StartCoroutine(linkManager.UpdateWaterLinksIncremental(changedChunks, copyWater, agentStepHeight, chunkHeight, planeWidth));
         Debug.Log($"Water NavMesh rebuilt and off-mesh links created.");
     }
     /// <summary>
