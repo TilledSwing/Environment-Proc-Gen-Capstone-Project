@@ -1,7 +1,9 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using System.Collections;
+using System.Threading.Tasks;
 public class EditUI : MonoBehaviour
 {
     public TerrainDensityData tdd;
@@ -21,16 +23,6 @@ public class EditUI : MonoBehaviour
 
     void Update()
     {
-        // setting inputs on update to make sure they're always correct
-        switch (input.name)
-        {
-            case "NoiseSeedInput":
-                input.text = ng.noiseSeed.ToString();
-                break;
-            case "DWSeedInput":
-                input.text = ng.domainWarpSeed.ToString();
-                break;
-        }
     }
 
     /// <summary>
@@ -67,6 +59,8 @@ public class EditUI : MonoBehaviour
         ChunkGenNetwork.Instance.assetSpawnData.ResetSpawnPoints();
         ChunkGenNetwork.Instance.initialLoadComplete = false;
         ChunkGenNetwork.Instance.UpdateVisibleChunks();
+
+        UpdateSettings();
     }
 
     /// <summary>
@@ -96,6 +90,17 @@ public class EditUI : MonoBehaviour
                 break;
             case "DWToggle":
                 toggle.isOn = ng.domainWarpToggle;
+                break;
+        }
+
+        // setting inputs
+        switch (input.name)
+        {
+            case "NoiseSeedInput":
+                input.text = ng.noiseSeed.ToString();
+                break;
+            case "DWSeedInput":
+                input.text = ng.domainWarpSeed.ToString();
                 break;
         }
 
@@ -154,7 +159,7 @@ public class EditUI : MonoBehaviour
     }
 
     /// <summary>
-    /// Resets the terrain modifiers and randomizes the seeds.
+    /// Resets the terrain modifiers to default
     /// </summary>
     public void ResetButton()
     {
@@ -167,7 +172,6 @@ public class EditUI : MonoBehaviour
         ng.noiseFractalGain = 0.5f;
         ng.fractalWeightedStrength = 0;
         ng.noiseFrequency = 0.01f;
-        ng.noiseSeed = Random.Range(0, 100000);
         // Domain Warp Values
         ng.domainWarpToggle = false;
         ng.domainWarpType = NoiseGenerator.fnl_domain_warp_type.OpenSimplex2;
@@ -177,33 +181,37 @@ public class EditUI : MonoBehaviour
         ng.domainWarpFractalLacunarity = 2;
         ng.domainWarpFractalGain = 0.5f;
         ng.domainWarpFrequency = 0.01f;
-        ng.domainWarpSeed = Random.Range(0, 100000);
         // Cellular(Voronoi) Values
         ng.cellularDistanceFunction = NoiseGenerator.fnl_cellular_distance_func.EuclideanSq;
         ng.cellularReturnType = NoiseGenerator.fnl_cellular_return_type.Distance;
         ng.cellularJitter = 1;
         // Terrain Values
         // ng.width = 24;
-        tdd.height = 100;
+        tdd.height = 250;
         ng.noiseScale = 0.6f;
         tdd.isolevel = 0.5f;
-        tdd.waterLevel = 35;
+        tdd.waterLevel = 30;
         tdd.lerp = true;
         tdd.terracing = false;
         tdd.terraceHeight = 2;
 
         Reload();
-        UpdateSettings();
     }
 
     /// <summary>
-    /// Launches Explore mode solo.
+    /// Reloads the scene to get a new seed
     /// </summary>
-    public void ExploreSoloButton()
+    public void RegenerateButton()
     {
-        ChunkGenNetwork.Instance.viewer = GameObject.Find("Player(Clone)").transform;
-        ChunkGenNetwork.Instance.SetFogActive(true);
+        Regen();
+        ResetButton();
     }
+
+    private void Regen()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
 
     /// <summary>
     /// Methods to change the different parameters of the TDD with the UI toggles
@@ -234,15 +242,15 @@ public class EditUI : MonoBehaviour
     /// <param name="seed">The int seed entered</param>
     public void OnNoiseSeedChanged(string seed)
     {
-        ng.noiseSeed = System.Convert.ToInt32(seed);
         Debug.Log("seed changed");
-        Reload();
+        RegenerateButton();
+        ng.noiseSeed = System.Convert.ToInt32(seed);
     }
     public void OnDWSeedChanged(string seed)
     {
-        ng.domainWarpSeed = System.Convert.ToInt32(seed);
         Debug.Log("seed changed");
-        Reload();
+        RegenerateButton();
+        ng.domainWarpSeed = System.Convert.ToInt32(seed);
     }
 
     /// <summary>
