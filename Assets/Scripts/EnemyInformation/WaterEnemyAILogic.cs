@@ -110,7 +110,7 @@ public class WaterEnemyAILogic : NetworkBehaviour
     {
         isAttacking = true;
         enemyMovement.StopMovement();
-;
+        ;
 
 
         //Server
@@ -159,10 +159,12 @@ public class WaterEnemyAILogic : NetworkBehaviour
             return;
         }
         Vector3 newPos;
-        if (Random.value < 0.2f)   // 20% chance
-            newPos = RandomPointAcrossOffMeshLink();
-        else
-            newPos = RandomNavMeshLoaction();
+        newPos = RandomPointAcrossOffMeshLink();
+
+        // if (Random.value < 0.2f)   // 20% chance
+        //     newPos = RandomPointAcrossOffMeshLink();
+        // else
+        //     newPos = RandomNavMeshLoaction();
         enemyMovement.MoveTo(newPos);
         wanderTime = wanderDuration;
     }
@@ -226,7 +228,7 @@ public class WaterEnemyAILogic : NetworkBehaviour
 
         if (other.gameObject == target)
         {
-            target = null;  
+            target = null;
             if (targetsInRange.Count > 0)
             {
                 if (targetsInRange.Count == 1)
@@ -306,13 +308,31 @@ public class WaterEnemyAILogic : NetworkBehaviour
         if (links.Length == 0)
             return agent.transform.position;
 
-        var link = links[Random.Range(0, links.Length)];
+        const int maxSamples = 20;
+        int attempts = Mathf.Min(maxSamples, links.Length);
 
-        // If the agent is on the start side, go to end side. Otherwise go to start.
-        bool closerToStart = Vector3.Distance(agent.transform.position, link.startTransform.position) <
-                            Vector3.Distance(agent.transform.position, link.endTransform.position);
+        for (int i = 0; i < attempts; i++)
+        {
+            // Pick a random link
+            var link = links[Random.Range(0, links.Length)];
 
-        return closerToStart ? link.endTransform.position : link.startTransform.position;
+            // Determine which end the agent is closer to
+            bool closerToStart = Vector3.Distance(agent.transform.position, link.startPoint) <
+                                 Vector3.Distance(agent.transform.position, link.endPoint);
+
+            Vector3 targetPoint = closerToStart ? link.endPoint : link.startPoint;
+
+            // Check if agent can actually reach the target point
+            NavMeshPath path = new NavMeshPath();
+            if (agent.CalculatePath(targetPoint, path) && path.status == NavMeshPathStatus.PathComplete)
+            {
+                return targetPoint;
+            }
+        }
+
+        // If no reachable link was found in the sampled points, return current position
+        Debug.LogWarning("No reachable OffMeshLink found for wandering.");
+        return agent.transform.position;
     }
 
 }

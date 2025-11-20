@@ -4,29 +4,34 @@ using UnityEngine;
 using UnityEngine.AI;
 using Unity.AI.Navigation;
 using System.Linq;
-using static GlobalNavMeshUpdater;
 
 public class WaterLinkManager : MonoBehaviour
 {
+    // Stores created NavMeshLink objects per chunk
     private Dictionary<Vector3, List<GameObject>> chunkLinks = new();
-
+    private int agentTypeID = 0; // make sure to set this to your NavMeshAgent's type ID
+    /// <summary>
+    /// Incrementally updates water links for changed chunks.
+    /// Ensures all link endpoints are on the baked NavMesh.
+    /// </summary>
     public IEnumerator UpdateWaterLinksIncremental(
         List<Vector3> changedChunks,
-        Dictionary<Vector3, WaterChunkSources> waterSources,
+        Dictionary<Vector3, GlobalNavMeshUpdater.WaterChunkSources> waterSources,
         float agentStepHeight,
         float chunkHeight,
-        float planeSizeX
+        float planeWidth, int waterAgentID
     )
     {
         const int yieldAfterIterations = 15;
         int iterationCounter = 0;
-
+        agentTypeID = waterAgentID;
         foreach (var chunkCenter in changedChunks)
         {
-            if (!waterSources.TryGetValue(chunkCenter, out var chunk) || chunk.waterPlanes == null || chunk.waterPlanes.Count == 0)
+            if (!waterSources.TryGetValue(chunkCenter, out var chunk) ||
+                chunk.waterPlanes == null || chunk.waterPlanes.Count == 0)
                 continue;
 
-            // --- Clear previous links for this chunk ---
+            // --- Clear previous links ---
             if (!chunkLinks.TryGetValue(chunkCenter, out var oldLinks))
             {
                 oldLinks = new List<GameObject>();
@@ -47,8 +52,8 @@ public class WaterLinkManager : MonoBehaviour
                 float verticalDiff = planes[i + 1].transform.GetColumn(3).y - planes[i].transform.GetColumn(3).y;
                 if (verticalDiff <= agentStepHeight * 10f)
                 {
-                    var link = CreateLink(planes[i], planes[i + 1], planeSizeX);
-                    oldLinks.Add(link);
+                    var link = CreateSnappedLink(planes[i], planes[i + 1], planeWidth);
+                    if (link != null) oldLinks.Add(link);
                 }
 
                 iterationCounter++;
@@ -62,36 +67,37 @@ public class WaterLinkManager : MonoBehaviour
             // --- Neighbor links (above, below, diagonals) ---
             Vector3[] neighborOffsets = new Vector3[]
             {
-            new Vector3(0, chunkHeight, 0),
-            new Vector3(0, -chunkHeight, 0),
-            new Vector3(chunkHeight, chunkHeight, 0),
-            new Vector3(-chunkHeight, chunkHeight, 0),
-            new Vector3(chunkHeight, -chunkHeight, 0),
-            new Vector3(-chunkHeight, -chunkHeight, 0),
-            new Vector3(0, chunkHeight, chunkHeight),
-            new Vector3(0, -chunkHeight, chunkHeight),
-            new Vector3(0, chunkHeight, -chunkHeight),
-            new Vector3(0, -chunkHeight, -chunkHeight),
+                new Vector3(0, chunkHeight, 0),
+                new Vector3(0, -chunkHeight, 0),
+                new Vector3(chunkHeight, chunkHeight, 0),
+                new Vector3(-chunkHeight, chunkHeight, 0),
+                new Vector3(chunkHeight, -chunkHeight, 0),
+                new Vector3(-chunkHeight, -chunkHeight, 0),
+                new Vector3(0, chunkHeight, chunkHeight),
+                new Vector3(0, -chunkHeight, chunkHeight),
+                new Vector3(0, chunkHeight, -chunkHeight),
+                new Vector3(0, -chunkHeight, -chunkHeight),
             };
 
             foreach (var offset in neighborOffsets)
             {
                 var neighborCenter = chunkCenter + offset;
-                if (!waterSources.TryGetValue(neighborCenter, out var neighborChunk)) continue;
-                if (neighborChunk.waterPlanes == null || neighborChunk.waterPlanes.Count == 0) continue;
+                if (!waterSources.TryGetValue(neighborCenter, out var neighborChunk) ||
+                    neighborChunk.waterPlanes == null || neighborChunk.waterPlanes.Count == 0)
+                    continue;
 
                 foreach (var plane in planes)
                 {
-                    // nearest plane in neighbor
-                    NavMeshBuildSource nearest = neighborChunk.waterPlanes
+                    // Find nearest plane in neighbor by height
+                    var nearest = neighborChunk.waterPlanes
                         .OrderBy(p => Mathf.Abs(p.transform.GetColumn(3).y - plane.transform.GetColumn(3).y))
                         .First();
 
                     float verticalDiff = Mathf.Abs(nearest.transform.GetColumn(3).y - plane.transform.GetColumn(3).y);
                     if (verticalDiff <= agentStepHeight * 10f)
                     {
-                        var link = CreateLink(plane, nearest, planeSizeX);
-                        oldLinks.Add(link);
+                        var link = CreateSnappedLink(plane, nearest, planeWidth);
+                        if (link != null) oldLinks.Add(link);
                     }
 
                     iterationCounter++;
@@ -108,25 +114,30 @@ public class WaterLinkManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Creates a NavMeshLink between two planes.
+    /// Creates a NavMeshLink between two NavMeshBuildSources, snapping endpoints to the baked NavMesh.
+    /// Returns null if either endpoint cannot be placed on the NavMesh.
     /// </summary>
-    private GameObject CreateLink(NavMeshBuildSource lower, NavMeshBuildSource upper, float planeWidth)
+    private GameObject CreateSnappedLink(NavMeshBuildSource lower, NavMeshBuildSource upper, float planeWidth)
     {
         Vector3 lowerPos = lower.transform.GetColumn(3);
         Vector3 upperPos = upper.transform.GetColumn(3);
 
-        GameObject linkObj = new GameObject($"WaterLink_{lowerPos.y}_{upperPos.y}");
-        linkObj.transform.position = lowerPos;
+        // Snap positions to NavMesh
+        if (!NavMesh.SamplePosition(lowerPos, out var hitLower, 1f, NavMesh.AllAreas)) return null;
+        if (!NavMesh.SamplePosition(upperPos, out var hitUpper, 1f, NavMesh.AllAreas)) return null;
+
+        GameObject linkObj = new GameObject($"WaterLink_{hitLower.position.y}_{hitUpper.position.y}");
+        linkObj.transform.position = hitLower.position;
 
         var link = linkObj.AddComponent<NavMeshLink>();
         link.startPoint = Vector3.zero;
-        link.endPoint = upperPos - lowerPos;
+        link.endPoint = hitUpper.position - hitLower.position;
         link.width = planeWidth;
         link.bidirectional = true;
         link.autoUpdate = true;
         link.area = 0; // water area
+        link.agentTypeID = agentTypeID; // make sure 'agent' is a reference to your NavMeshAgent
 
         return linkObj;
     }
-
 }

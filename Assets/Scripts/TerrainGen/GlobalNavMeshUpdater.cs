@@ -294,7 +294,7 @@ public class GlobalNavMeshUpdater : MonoBehaviour
         // Small yield to ensure NavMesh is fully updated
         yield return null;
         
-        yield return StartCoroutine(linkManager.UpdateWaterLinksIncremental(changedChunks, copyWater, agentStepHeight, chunkHeight, planeWidth));
+        yield return StartCoroutine(linkManager.UpdateWaterLinksIncremental(changedChunks, copyWater, agentStepHeight, chunkHeight, planeWidth, waterSurface.agentTypeID));
         Debug.Log($"Water NavMesh rebuilt and off-mesh links created.");
     }
     /// <summary>
