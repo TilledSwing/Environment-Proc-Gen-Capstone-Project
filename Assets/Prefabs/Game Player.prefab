@@ -563,7 +563,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3941859824757792008}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 20890102dac2d7649aa0cecc8785f972, type: 3}
   m_Name: 
@@ -572,6 +572,7 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 1324032884783071196}
   _networkObjectCache: {fileID: 1324032884783071196}
   nameTag: {fileID: 3709563371915696952}
+  inEditor: 0
 --- !u!114 &2249550695658749378
 MonoBehaviour:
   m_ObjectHideFlags: 0

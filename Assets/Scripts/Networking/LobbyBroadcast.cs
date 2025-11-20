@@ -87,7 +87,7 @@ public class LobbyBroadcast : MonoBehaviour
 
     /// <summary>
     /// If a client joins the server then they are added to the list of current players.
-    /// If a client leaves the server then they are removed frmo the list of current players.
+    /// If a client leaves the server then they are removed from the list of current players.
     /// A broadcast is then sent out to all connected clients to update their lobby views.
     /// </summary>
     /// <param name="conn">The remote connection.</param>

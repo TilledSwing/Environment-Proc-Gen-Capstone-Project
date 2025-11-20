@@ -7,15 +7,24 @@ using UnityEngine;
 public class PlayerNameSender : NetworkBehaviour
 {
     public TextMeshPro nameTag;
+    [SerializeField] private bool inEditor = true;
 
     public override void OnStartClient()
     {
        base.OnStartClient();
        if (base.IsOwner)
        {
-            string playerName = GameObject.Find("NetworkManager/NetworkHudCanvas/NameTextBox/MessageInput").GetComponent<TMP_InputField>().text;
-            if (string.IsNullOrEmpty(playerName))
-                playerName = "Anonymous";
+            string playerName = "";
+            if (inEditor)
+            {
+                playerName = GameObject.Find("NetworkManager/NetworkHudCanvas/NameTextBox/MessageInput").GetComponent<TMP_InputField>().text;
+                if (string.IsNullOrEmpty(playerName))
+                    playerName = "Anonymous";
+            }
+            else
+            {
+                playerName = BootstrapManager.getPersonalSteamName();
+            }
 
             // Updates new player name for players already in the server.
             SendNameTagServer(gameObject, playerName);
