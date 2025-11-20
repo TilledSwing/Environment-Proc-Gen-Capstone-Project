@@ -86,6 +86,9 @@ public class ChunkGenNetwork : MonoBehaviour
     // Texture Window Stuff
     public GameObject textureWindow;
     public GameObject textureSettingsTab;
+    // Asset Window Stuff
+    public GameObject assetWindow;
+    public GameObject assetSettingsTab;
     // Chunk Variables
     public Dictionary<Vector3, TerrainChunk> chunkDictionary = new();
     public List<TerrainChunk> chunksVisibleLastUpdate = new();
@@ -160,6 +163,7 @@ public class ChunkGenNetwork : MonoBehaviour
         lightingBlockerRenderer.enabled = false;
         lightChange.intensity = 25f;
         TextureSetup();
+        AssetSetup();
         // Set seeds
         foreach (NoiseGenerator noiseGenerator in terrainDensityData.noiseGenerators)
         {
@@ -168,27 +172,36 @@ public class ChunkGenNetwork : MonoBehaviour
         }
         // Fog Shader Inits
         fogRenderPassFeature = rendererData.rendererFeatures.Find(f => f is FogRenderPassFeature) as FogRenderPassFeature;
+        
         // fogOffset = maxViewDst - 20f;
-        fogMat.SetFloat("_fogOffset", fogOffset);
-        fogMat.SetFloat("_fogDensity", fogDensity);
+        // fogMat.SetFloat("_fogOffset", fogOffset);
+        // fogMat.SetFloat("_fogDensity", fogDensity);
         fogMat.SetColor("_upperFogColor", upperFogColor);
         fogMat.SetColor("_lowerFogColor", lowerFogColor);
-        waterMaterial.SetFloat("_fogOffset", fogOffset);
-        waterMaterial.SetFloat("_fogDensity", fogDensity);
+        // waterMaterial.SetFloat("_fogOffset", fogOffset);
+        // waterMaterial.SetFloat("_fogDensity", fogDensity);
         waterMaterial.SetColor("_fogColor", lowerFogColor);
         waterMaterial.SetFloat("_fogActive", 0);
+        SetFogActive(false);
 
         // terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 100000);
         // terrainDensityData.caveNoiseSeed = UnityEngine.Random.Range(0, 100000);
         // terrainDensityData.domainWarpSeed = UnityEngine.Random.Range(0, 100000);
         // terrainDensityData.caveDomainWarpSeed = UnityEngine.Random.Range(0, 100000);
     }
+    // public void SetFogActive(bool active)
+    // {
+    //     if (fogRenderPassFeature != null)
+    //     {
+    //         fogRenderPassFeature.SetActive(active);
+    //     }
+    // }
     public void SetFogActive(bool active)
     {
-        if (fogRenderPassFeature != null)
-        {
-            fogRenderPassFeature.SetActive(active);
-        }
+        fogMat.SetFloat("_fogOffset", active ? fogOffset : 1000);
+        fogMat.SetFloat("_fogDensity", active ? fogDensity : 1);
+        waterMaterial.SetFloat("_fogOffset", active ? fogOffset : 1000);
+        waterMaterial.SetFloat("_fogDensity", active ? fogDensity : 1);
     }
 
     public void UpdateFromDB(TerrainSettings settings)
@@ -640,8 +653,10 @@ public class ChunkGenNetwork : MonoBehaviour
     void OnApplicationQuit()
     {
         assetSpawnData.ResetSpawnPoints();
+        assetSpawnData.RestoreToOriginalState();
         chunkDictionary.Clear();
-        fogRenderPassFeature.SetActive(false);
+        // fogRenderPassFeature.SetActive(false);
+        SetFogActive(false);
         GraphicsSettings.defaultRenderPipeline = mainUrpAsset;
         QualitySettings.renderPipeline = mainUrpAsset;
     }
@@ -741,6 +756,16 @@ public class ChunkGenNetwork : MonoBehaviour
             terrainMaterial.SetInt("_LayerCount", biomeTextureConfig.biomeTextures.Count);
             terrainMaterial.SetFloat("_LowestStartHeight", lowestStartHeight);
             terrainMaterial.SetFloat("_GreatestEndHeight", greatestEndHeight);
+        }
+    }
+    public void AssetSetup()
+    {
+        assetSpawnData.BackupOriginalState();
+        foreach(SpawnableAsset asset in assetSpawnData.spawnableAssets)
+        {
+            GameObject assSettingsTab = Instantiate(assetSettingsTab, assetWindow.transform);
+
+
         }
     }
     /// <summary>

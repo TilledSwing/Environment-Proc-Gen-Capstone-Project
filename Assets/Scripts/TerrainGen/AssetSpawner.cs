@@ -32,6 +32,7 @@ public class AssetSpawner : MonoBehaviour
     public int assetSpacing = 8;
     public bool assetsSet = false;
     public bool emptyChunk = false;
+    Unity.Mathematics.Random rng;
     void Start() {
         assetLayer = LayerMask.GetMask("Asset Layer");
         interactLayer = LayerMask.GetMask("Interact Layer");
@@ -48,7 +49,7 @@ public class AssetSpawner : MonoBehaviour
             vertices = chunkVertices.ToList();
             vertices.Sort();
             uint seed = Hash(chunkPos.x, chunkPos.y, chunkPos.z, terrainDensityData.noiseGenerators[0].noiseSeed);
-            Unity.Mathematics.Random rng = new(seed);
+            rng = new(seed);
             InitializeData();
             CreateSpawnPointsJobHandler(ref rng);
             SetSpawnPoints();
@@ -484,7 +485,9 @@ public class AssetSpawner : MonoBehaviour
 public class SpawnableAsset
 {
     public GameObject asset;
-    public ComputeMarchingCubes.Vertex[] spawnPoints;
+    public string name;
+    public Texture icon;
+    // public ComputeMarchingCubes.Vertex[] spawnPoints;
     public List<Asset> spawnedAssets = new();
     public int maxPerChunk;
     public bool rotateToFaceNormal;
@@ -504,27 +507,54 @@ public class SpawnableAsset
     public bool isValuable;
     public int minValue;
     public int maxValue;
-    public SpawnableAsset(GameObject asset, int maxPerChunk, bool rotateToFaceNormal, float spawnProbability, bool useMinSlope, int minSlope, bool useMaxSlope, int maxSlope, bool useMinHeight, int minHeight, bool useMaxHeight, int maxHeight, bool underwaterAsset, float minDepth, bool undergroundAsset, float minDensity, bool isValuable, int minValue, int maxValue)
+    // public SpawnableAsset(GameObject asset, int maxPerChunk, bool rotateToFaceNormal, float spawnProbability, bool useMinSlope, int minSlope, bool useMaxSlope, int maxSlope, bool useMinHeight, int minHeight, bool useMaxHeight, int maxHeight, bool underwaterAsset, float minDepth, bool undergroundAsset, float minDensity, bool isValuable, int minValue, int maxValue)
+    // {
+    //     this.asset = asset;
+    //     this.maxPerChunk = maxPerChunk;
+    //     this.rotateToFaceNormal = rotateToFaceNormal;
+    //     this.spawnProbability = spawnProbability;
+    //     this.useMinSlope = useMinSlope;
+    //     this.minSlope = minSlope;
+    //     this.useMaxSlope = useMaxSlope;
+    //     this.maxSlope = maxSlope;
+    //     this.useMinHeight = useMinHeight;
+    //     this.minHeight = minHeight;
+    //     this.useMaxHeight = useMaxHeight;
+    //     this.maxHeight = maxHeight;
+    //     this.underwaterAsset = underwaterAsset;
+    //     this.minDepth = minDepth;
+    //     this.undergroundAsset = undergroundAsset;
+    //     this.minDensity = minDensity;
+    //     this.isValuable = isValuable;
+    //     this.minValue = minValue;
+    //     this.maxValue = maxValue;
+    // }
+    public SpawnableAsset Clone()
     {
-        this.asset = asset;
-        this.maxPerChunk = maxPerChunk;
-        this.rotateToFaceNormal = rotateToFaceNormal;
-        this.spawnProbability = spawnProbability;
-        this.useMinSlope = useMinSlope;
-        this.minSlope = minSlope;
-        this.useMaxSlope = useMaxSlope;
-        this.maxSlope = maxSlope;
-        this.useMinHeight = useMinHeight;
-        this.minHeight = minHeight;
-        this.useMaxHeight = useMaxHeight;
-        this.maxHeight = maxHeight;
-        this.underwaterAsset = underwaterAsset;
-        this.minDepth = minDepth;
-        this.undergroundAsset = undergroundAsset;
-        this.minDensity = minDensity;
-        this.isValuable = isValuable;
-        this.minValue = minValue;
-        this.maxValue = maxValue;
+        return new SpawnableAsset {
+            asset = asset,
+            name = name,
+            icon = icon,
+            spawnedAssets = new(),
+            maxPerChunk = maxPerChunk,
+            rotateToFaceNormal = rotateToFaceNormal,
+            spawnProbability = spawnProbability,
+            useMinSlope = useMinSlope,
+            minSlope = minSlope,
+            useMaxSlope = useMaxSlope,
+            maxSlope = maxSlope,
+            useMinHeight = useMinHeight,
+            minHeight = minHeight,
+            useMaxHeight = useMaxHeight,
+            maxHeight = maxHeight,
+            underwaterAsset = underwaterAsset,
+            minDepth = minDepth,
+            undergroundAsset = undergroundAsset,
+            minDensity = minDensity,
+            isValuable = isValuable,
+            minValue = minValue,
+            maxValue = maxValue
+        };
     }
 }
 [Serializable]
