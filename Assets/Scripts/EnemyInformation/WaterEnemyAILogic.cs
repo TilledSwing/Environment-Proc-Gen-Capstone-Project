@@ -110,8 +110,6 @@ public class WaterEnemyAILogic : NetworkBehaviour
     {
         isAttacking = true;
         enemyMovement.StopMovement();
-        ;
-
 
         //Server
         enemyAnimation.Trigger("Attacking");
@@ -119,7 +117,7 @@ public class WaterEnemyAILogic : NetworkBehaviour
         //Client
         RPCTrigger("Attacking");
 
-        yield return new WaitForSeconds(2.333f);
+        yield return new WaitForSeconds(1f);
         isAttacking = false;
     }
 
@@ -142,7 +140,7 @@ public class WaterEnemyAILogic : NetworkBehaviour
         //Client
         RPCTrigger("Die");
 
-        yield return new WaitForSeconds(1.1f);
+        yield return new WaitForSeconds(1.3f);
         ServerManager.Despawn(gameObject);
     }
     /// <summary>
@@ -159,12 +157,11 @@ public class WaterEnemyAILogic : NetworkBehaviour
             return;
         }
         Vector3 newPos;
-        newPos = RandomPointAcrossOffMeshLink();
 
-        // if (Random.value < 0.2f)   // 20% chance
-        //     newPos = RandomPointAcrossOffMeshLink();
-        // else
-        //     newPos = RandomNavMeshLoaction();
+        if (Random.value < 0.2f)   // 20% chance
+            newPos = RandomPointAcrossOffMeshLink();
+        else
+            newPos = RandomNavMeshLoaction();
         enemyMovement.MoveTo(newPos);
         wanderTime = wanderDuration;
     }
