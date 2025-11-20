@@ -69,7 +69,7 @@ public class LobbyBroadcast : MonoBehaviour
     {
         if (nameField != null && connection.ClientId.ToString() == "0")
             connectedPlayers.Add(connection.ClientId, name.connectedPlayer + " (Host)");
-        else if (nameField == null && BootstrapManager.IsHost(BootstrapManager.getPersonalSteamName()))
+        else if (nameField == null && BootstrapManager.IsHost())
             connectedPlayers.Add(connection.ClientId, name.connectedPlayer + " (Host)");
         else
             connectedPlayers.Add(connection.ClientId, name.connectedPlayer);
