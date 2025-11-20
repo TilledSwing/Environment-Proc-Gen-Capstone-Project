@@ -48,9 +48,17 @@ public class LobbyBroadcast : MonoBehaviour
     {
         if (args.ConnectionState == LocalConnectionState.Started)
         {
-            string initialPlayerName = nameField.text.Trim();
-            if (string.IsNullOrEmpty(initialPlayerName))
-                initialPlayerName = "Anonymous";
+            string initialPlayerName = "";
+            if (nameField != null)
+            {
+                initialPlayerName = nameField.text.Trim();
+                if (string.IsNullOrEmpty(initialPlayerName))
+                    initialPlayerName = "Anonymous";
+            }
+            else
+            {
+                initialPlayerName = BootstrapManager.getPersonalSteamName();
+            }
 
             PlayerName playerName = new PlayerName() { connectedPlayer = initialPlayerName };
             InstanceFinder.ClientManager.Broadcast<PlayerName>(playerName);
@@ -59,7 +67,9 @@ public class LobbyBroadcast : MonoBehaviour
 
     private void OnRemoteJoin(NetworkConnection connection, PlayerName name, Channel channel)
     {
-        if (connection.ClientId.ToString() == "0")
+        if (nameField != null && connection.ClientId.ToString() == "0")
+            connectedPlayers.Add(connection.ClientId, name.connectedPlayer + " (Host)");
+        else if (nameField == null && BootstrapManager.IsHost(BootstrapManager.getPersonalSteamName()))
             connectedPlayers.Add(connection.ClientId, name.connectedPlayer + " (Host)");
         else
             connectedPlayers.Add(connection.ClientId, name.connectedPlayer);

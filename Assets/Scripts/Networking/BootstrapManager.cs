@@ -9,7 +9,7 @@ public class BootstrapManager : MonoBehaviour
 {
     private static BootstrapManager instance;
 
-    [SerializeField] private string menuName = "GameMenu";
+    [SerializeField] private string menuName = "GameActive";
     [SerializeField] private FishNet.Managing.NetworkManager _networkManager;
     [SerializeField] private FishySteamworks.FishySteamworks _fishySteamworks;
 
@@ -72,8 +72,10 @@ public class BootstrapManager : MonoBehaviour
         _fishySteamworks.StartConnection(false);
 
         // Start up game sequence
-        UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(menuName);
-        SceneManager.LoadScene("GameActive", LoadSceneMode.Additive);
+        GameMenuManager.instance.DisableLobbyMenu();
+        GameMenuManager.instance.LoadPreGameFeatures();
+        // UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(menuName);
+        // SceneManager.LoadScene("GameActive", LoadSceneMode.Additive);
     }
 
     public static void JoinByID(CSteamID steamID)
@@ -93,5 +95,17 @@ public class BootstrapManager : MonoBehaviour
         instance._fishySteamworks.StopConnection(false);
         if (instance._networkManager.IsServerStarted)
             instance._fishySteamworks.StopConnection(true);
+    }
+
+    public static string getPersonalSteamName()
+    {
+        return SteamFriends.GetPersonaName().ToString();
+    }
+
+    public static bool IsHost(string steamName)
+    {
+        string suffix = "'s PEGG lobby";
+        string hostLobbyName = SteamMatchmaking.GetLobbyData(new CSteamID(CurrentLobbyID), "name");
+        return steamName.Equals(hostLobbyName.Substring(0, hostLobbyName.Length - suffix.Length));
     }
 }

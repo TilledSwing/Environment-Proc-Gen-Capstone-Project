@@ -239,7 +239,7 @@ GameObject:
   - component: {fileID: 591542628726547992}
   - component: {fileID: 2249550695658749378}
   m_Layer: 0
-  m_Name: Player
+  m_Name: Game Player
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -312,6 +312,7 @@ MonoBehaviour:
   lookSpeed: 2
   lookXLimit: 89
   flightSpeed: 6
+  editorPlayer: 0
   characterController: {fileID: 0}
   moveDirection: {x: 0, y: 0, z: 0}
   terraformCenters: []
@@ -390,9 +391,9 @@ MonoBehaviour:
   _spectatorInterpolation: 2
   _enableTeleport: 0
   _teleportThreshold: 1
-  <PrefabId>k__BackingField: 5
+  <PrefabId>k__BackingField: 6
   <SpawnableCollectionId>k__BackingField: 0
-  <AssetPathHash>k__BackingField: 7807759643866311769
+  <AssetPathHash>k__BackingField: 8897874770719922295
   <SceneId>k__BackingField: 0
   SerializedTransformProperties:
     Position: {x: 0, y: 0, z: 0}
@@ -562,7 +563,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3941859824757792008}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 20890102dac2d7649aa0cecc8785f972, type: 3}
   m_Name: 
