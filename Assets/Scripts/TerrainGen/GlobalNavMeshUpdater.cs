@@ -25,7 +25,7 @@ public class GlobalNavMeshUpdater : MonoBehaviour
     public Bounds? currentLandBounds = null;
     private readonly object landSettingLock = new object();
     private readonly object waterSettingsLock = new object();
-    private float navMeshUpdateInterval = 5f;
+    private float navMeshUpdateInterval = 15f;
     private const float planeCount = 2;
     public List<Vector3> changedWaterChunks = new();
     private NavMeshDataInstance landNavMeshInstance;
@@ -81,18 +81,19 @@ public class GlobalNavMeshUpdater : MonoBehaviour
             Destroy(waterSurface.navMeshData);
     }
 
-    private void StartNavMeshBuilds()
+    public void StartNavMeshBuilds()
     {
-        // InvokeRepeating(nameof(ProcessNavMeshUpdates), .1f, navMeshUpdateInterval);
+        Debug.Log("Invoke repeating called");
+        InvokeRepeating(nameof(ProcessNavMeshUpdates), .1f, navMeshUpdateInterval);
     }
 
-    public IEnumerator ProcessNavMeshUpdates()
+    public void ProcessNavMeshUpdates()
     {
         if (!isBuildingLandNavMesh && landNavMeshNeedsRebuild)
-            yield return StartCoroutine(RebuildLandNavMeshBatched());
+            StartCoroutine(RebuildLandNavMeshBatched());
 
         if (!isBuildingWaterNavMesh && waterNavMeshNeedsRebuild)
-            yield return StartCoroutine(RebuildAndLinkWaterCoroutine(waterSources, 1.5f));
+            StartCoroutine(RebuildAndLinkWaterCoroutine(waterSources, 1.5f));
     }
     /// <summary>
     /// Adds a chunk to the list of chunks to be included in the next navmesh rebuild
