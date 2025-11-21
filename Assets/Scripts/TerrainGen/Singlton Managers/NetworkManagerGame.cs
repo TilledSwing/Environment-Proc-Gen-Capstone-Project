@@ -30,8 +30,8 @@ public class NetworkManagerGame : NetworkBehaviour
         ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogActive", 1);
         ChunkGenNetwork.Instance.objectiveCanvas.SetActive(true);
         ChunkGenNetwork.Instance.hudCanvas.SetActive(true);
-        ChunkGenNetwork.Instance.chatContainer.SetActive(true);
-        ChunkGenNetwork.Instance.lobbyContainer.SetActive(true);
+       // ChunkGenNetwork.Instance.chatContainer.SetActive(true);
+        //ChunkGenNetwork.Instance.lobbyContainer.SetActive(true);
         ChunkGenNetwork.Instance.lightChange.intensity = 1.5f;
 
         PlayerController.instance.waterLevel = ChunkGenNetwork.Instance.terrainDensityData.waterLevel;
