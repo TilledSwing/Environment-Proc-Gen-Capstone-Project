@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Threading.Tasks;
+using System;
 public class EditUI : MonoBehaviour
 {
     public TerrainDensityData tdd;
@@ -12,6 +13,7 @@ public class EditUI : MonoBehaviour
     public Slider slider;
     public Toggle toggle;
     public TMP_InputField input;
+    public GameObject loadScreen;
 
     /// <summary>
     /// Sets the sliders, toggles, and entry boxes to the values of the Terrain Density Data (only if the scene was built/rebuilt)
@@ -28,8 +30,9 @@ public class EditUI : MonoBehaviour
     /// <summary>
     /// Reloads the terrain and the assets.
     /// </summary>
-    public void Reload()
+    public IEnumerator Reload()
     {
+
         // destroys all children
         GameObject chunk = GameObject.Find("ChunkParent");
         while (chunk.transform.childCount > 0)
@@ -55,12 +58,21 @@ public class EditUI : MonoBehaviour
         ChunkGenNetwork.Instance.hasPendingAssetInstantiations = false;
         ChunkGenNetwork.Instance.pendingAssetInstantiations = new();
         ChunkGenNetwork.Instance.isLoadingAssetInstantiations = false;
-
+        
         ChunkGenNetwork.Instance.assetSpawnData.ResetSpawnPoints();
         ChunkGenNetwork.Instance.initialLoadComplete = false;
         ChunkGenNetwork.Instance.UpdateVisibleChunks();
 
+        yield return null;
+
         UpdateSettings();
+    }
+
+    private IEnumerator ReloadWrapper()
+    {
+        yield return null;
+        yield return StartCoroutine(Reload());
+        loadScreen.SetActive(false);
     }
 
     /// <summary>
@@ -68,8 +80,9 @@ public class EditUI : MonoBehaviour
     /// </summary>
     public void OnDeselect()
     {
+        loadScreen.SetActive(true);
         Debug.Log("deselected slider");
-        Reload();
+        StartCoroutine(ReloadWrapper());
     }
 
     /// <summary>
@@ -163,6 +176,8 @@ public class EditUI : MonoBehaviour
     /// </summary>
     public void ResetButton()
     {
+        loadScreen.SetActive(true);
+        
         // Noise and Fractal Settings
         ng.noiseDimension = NoiseGenerator.fnl_noise_dimension._3D;
         ng.noiseType = NoiseGenerator.fnl_noise_type.OpenSimplex2;
@@ -195,7 +210,7 @@ public class EditUI : MonoBehaviour
         tdd.terracing = false;
         tdd.terraceHeight = 2;
 
-        Reload();
+        StartCoroutine(ReloadWrapper());
     }
 
     /// <summary>
@@ -203,6 +218,7 @@ public class EditUI : MonoBehaviour
     /// </summary>
     public void RegenerateButton()
     {
+        loadScreen.SetActive(true);
         Regen();
         ResetButton();
     }
@@ -219,21 +235,24 @@ public class EditUI : MonoBehaviour
     /// <param name="marked">Whether the box is checked or not</param>
     public void OnLERPToggleChanged(bool marked)
     {
+        loadScreen.SetActive(true);
         tdd.lerp = marked;
         Debug.Log("toggle changed");
-        Reload();
+        StartCoroutine(ReloadWrapper());
     }
     public void OnTerraceToggleChanged(bool marked)
     {
+        loadScreen.SetActive(true);
         tdd.terracing = marked;
         Debug.Log("toggle changed");
-        Reload();
+        StartCoroutine(ReloadWrapper());
     }
     public void OnDWToggleChanged(bool marked)
     {
+        loadScreen.SetActive(true);
         ng.domainWarpToggle = marked;
         Debug.Log("toggle changed");
-        Reload();
+        StartCoroutine(ReloadWrapper());
     }
 
     /// <summary>
@@ -242,12 +261,14 @@ public class EditUI : MonoBehaviour
     /// <param name="seed">The int seed entered</param>
     public void OnNoiseSeedChanged(string seed)
     {
+        loadScreen.SetActive(true);
         Debug.Log("seed changed");
         RegenerateButton();
         ng.noiseSeed = System.Convert.ToInt32(seed);
     }
     public void OnDWSeedChanged(string seed)
     {
+        loadScreen.SetActive(true);
         Debug.Log("seed changed");
         RegenerateButton();
         ng.domainWarpSeed = System.Convert.ToInt32(seed);
