@@ -1,93 +1,25 @@
-# PEGG Project
+Build and Run Instructions:
+To build and run our program, Unity is required. Clone the repo, open in Unity, and select “Build and Run” from the File dropdown. You are presented with a main menu screen and from there you can either start up game mode or enter editing mode.
+
+Game Mode:
+In game mode, you have to be connected to Steam. 
+
+If you press “Create Lobby”, then you create a local Steam lobby and enter a world as a game player in a pre-game lobby. You are presented with a host panel. By default, a random terrain will generate below you, but you can use the “Random” or “Load” buttons to either generate another random terrain or load a saved terrain. Connected clients automatically also load this. There is also an in-game lobby screen and chat screen. You can press the escape key to free your mouse and click into the chat screen to talk to other players. In the host panel there is also the lobby ID which you can send to your Steam Friends. The “Start” button can be used to start the game, at which point you and all remote clients will drop into the game and the pre-game lobby will disappear.
+
+If you press “Join Lobby”, then if you have a valid Steam lobby ID entered in, then you will join the host as a remote client. As a client, you must wait for the host to start the game. Anytime the host edits the terrain, it is also loaded for the remote clients. While you do have the option to quit, the host holds all control over the game. You can also chat and see the in-game lobby like the host.
+
+Once the game starts, read the in game menu for all the different player abilities. Collect idols to earn money and survive as long as you can against the monsters that hunt you down.
+
+Editor Mode:
+In editor mode you are presented with a screen where you can modify terrain settings with sliders and buttons. Hovering over these will present further information on what the settings do. There are also options for changing textures. On the navigation bar at the top, you can save your terrain, load in a terrain from the database (see MAMP below), or enter explore mode. When you select explore mode, you are presented with options to start a server, client, enter an IP, or enter a name. If no IP is provided, then you host / connect as a client over the local network. Starting server establishes the connection, starting client joins the connection as a player. If an IP is provided of a remote server (like through ZeroTier), then players can join remotely. See in-game help menu for all player options. There is also a lobby and chat provided like with the game mode. If no name was presented then the player is “Anonymous”. 
 
 
+Additional Libraries / Systems Needed:
+MAMP:
+MAMP facilitates the local host server. You will need to download MAMP and drag the folder “sqlconnect” into the MAMP htdocs folder. This will run our created php scripts when the game requests it.  
+Steam for the game lobby.
 
-## Getting started
+Supported Systems:
+Windows
+MacOS
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
-
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
-
-```
-cd existing_repo
-git remote add origin https://capstone.cs.utah.edu/pegg/pegg-project.git
-git branch -M main
-git push -uf origin main
-```
-
-## Integrate with your tools
-
-- [ ] [Set up project integrations](https://capstone.cs.utah.edu/pegg/pegg-project/-/settings/integrations)
-
-## Collaborate with your team
-
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
-
-## Test and Deploy
-
-Use the built-in continuous integration in GitLab.
-
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
-
-***
-
-# Editing this README
-
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
-
-## Suggestions for a good README
-
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
-
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
