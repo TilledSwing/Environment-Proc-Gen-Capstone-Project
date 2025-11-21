@@ -87,6 +87,7 @@ GameObject:
   - component: {fileID: 6735856249714159662}
   - component: {fileID: 6275409480254539907}
   - component: {fileID: 8344941714571207121}
+  - component: {fileID: 7196897346827538806}
   m_Layer: 5
   m_Name: Input
   m_TagString: Untagged
@@ -200,20 +201,44 @@ MonoBehaviour:
   m_VerticalScrollbarEventHandler: {fileID: 0}
   m_LayoutGroup: {fileID: 0}
   m_ScrollSensitivity: 1
-  m_ContentType: 0
+  m_ContentType: 2
   m_InputType: 0
   m_AsteriskChar: 42
-  m_KeyboardType: 0
+  m_KeyboardType: 4
   m_LineType: 0
   m_HideMobileInput: 0
   m_HideSoftKeyboard: 0
-  m_CharacterValidation: 0
+  m_CharacterValidation: 2
   m_RegexValue: 
   m_GlobalPointSize: 14
   m_CharacterLimit: 0
   m_OnEndEdit:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: -2928067652705745836}
+        m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+        m_MethodName: UpdateMinHeightInput
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: -2928067652705745836}
+        m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+        m_MethodName: BlockUI
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   m_OnSubmit:
     m_PersistentCalls:
       m_Calls: []
@@ -238,7 +263,7 @@ MonoBehaviour:
   m_CaretColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_CustomCaretColor: 0
   m_SelectionColor: {r: 0.65882355, g: 0.80784315, b: 1, a: 0.7529412}
-  m_Text: 
+  m_Text: -384
   m_CaretBlinkRate: 0.85
   m_CaretWidth: 1
   m_ReadOnly: 0
@@ -253,6 +278,21 @@ MonoBehaviour:
   isAlert: 0
   m_InputValidator: {fileID: 0}
   m_ShouldActivateOnSelect: 1
+--- !u!114 &7196897346827538806
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 46184513875516798}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 327859ec2ebb8c74fabe3c5b08fea844, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  input: {fileID: 8344941714571207121}
+  slider: {fileID: 273363946774068734}
+  isFloat: 0
 --- !u!1 &195557282248933792
 GameObject:
   m_ObjectHideFlags: 0
@@ -445,7 +485,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u200B"
+  m_text: "-384\u200B"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -601,6 +641,7 @@ GameObject:
   m_Component:
   - component: {fileID: 464334044904466287}
   - component: {fileID: 8975028206317350471}
+  - component: {fileID: 5020729081468392207}
   m_Layer: 5
   m_Name: Underground Min Density
   m_TagString: Untagged
@@ -677,12 +718,65 @@ MonoBehaviour:
   m_HandleRect: {fileID: 6283640532986342585}
   m_Direction: 0
   m_MinValue: 0
-  m_MaxValue: 20
-  m_WholeNumbers: 1
+  m_MaxValue: 10
+  m_WholeNumbers: 0
   m_Value: 0
   m_OnValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 6836503478766438506}
+        m_TargetAssemblyTypeName: SliderUpdateInput, Assembly-CSharp
+        m_MethodName: UpdateInput
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!114 &5020729081468392207
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 499378801119816342}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Delegates:
+  - eventID: 3
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: -2928067652705745836}
+          m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+          m_MethodName: UpdateMinDensitySlider
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+        - m_Target: {fileID: -2928067652705745836}
+          m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+          m_MethodName: BlockUI
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!1 &563388210455757874
 GameObject:
   m_ObjectHideFlags: 0
@@ -1129,9 +1223,21 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: TextureSettingsTabController, Assembly-CSharp
-        m_MethodName: UpdateUseHeightTexture
+      - m_Target: {fileID: -2928067652705745836}
+        m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+        m_MethodName: UpdateUndergroundToggle
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: -2928067652705745836}
+        m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+        m_MethodName: BlockUI
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1295,7 +1401,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u200B"
+  m_text: "384\u200B"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1550,6 +1656,7 @@ GameObject:
   - component: {fileID: 3917447925467435117}
   - component: {fileID: 16728901016227327}
   - component: {fileID: 1195778361073461459}
+  - component: {fileID: 3363485488120123531}
   m_Layer: 5
   m_Name: Input
   m_TagString: Untagged
@@ -1663,20 +1770,44 @@ MonoBehaviour:
   m_VerticalScrollbarEventHandler: {fileID: 0}
   m_LayoutGroup: {fileID: 0}
   m_ScrollSensitivity: 1
-  m_ContentType: 0
+  m_ContentType: 2
   m_InputType: 0
   m_AsteriskChar: 42
-  m_KeyboardType: 0
+  m_KeyboardType: 4
   m_LineType: 0
   m_HideMobileInput: 0
   m_HideSoftKeyboard: 0
-  m_CharacterValidation: 0
+  m_CharacterValidation: 2
   m_RegexValue: 
   m_GlobalPointSize: 14
   m_CharacterLimit: 0
   m_OnEndEdit:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: -2928067652705745836}
+        m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+        m_MethodName: UpdateMaxSlopeInput
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: -2928067652705745836}
+        m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+        m_MethodName: BlockUI
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   m_OnSubmit:
     m_PersistentCalls:
       m_Calls: []
@@ -1701,7 +1832,7 @@ MonoBehaviour:
   m_CaretColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_CustomCaretColor: 0
   m_SelectionColor: {r: 0.65882355, g: 0.80784315, b: 1, a: 0.7529412}
-  m_Text: 
+  m_Text: 360
   m_CaretBlinkRate: 0.85
   m_CaretWidth: 1
   m_ReadOnly: 0
@@ -1716,6 +1847,21 @@ MonoBehaviour:
   isAlert: 0
   m_InputValidator: {fileID: 0}
   m_ShouldActivateOnSelect: 1
+--- !u!114 &3363485488120123531
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 936987382154079180}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 327859ec2ebb8c74fabe3c5b08fea844, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  input: {fileID: 1195778361073461459}
+  slider: {fileID: 3319416382523091688}
+  isFloat: 0
 --- !u!1 &971513363526939392
 GameObject:
   m_ObjectHideFlags: 0
@@ -1801,9 +1947,21 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: TextureSettingsTabController, Assembly-CSharp
-        m_MethodName: UpdateUseHeightTexture
+      - m_Target: {fileID: -2928067652705745836}
+        m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+        m_MethodName: UpdateFaceAlignmentToggle
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: -2928067652705745836}
+        m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+        m_MethodName: BlockUI
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1903,7 +2061,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1093812818193369976}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
@@ -2205,6 +2363,7 @@ GameObject:
   - component: {fileID: 6752982155825564311}
   - component: {fileID: 7334457165624239238}
   - component: {fileID: 6864486739700165468}
+  - component: {fileID: 636064588821995131}
   m_Layer: 5
   m_Name: Input
   m_TagString: Untagged
@@ -2318,20 +2477,44 @@ MonoBehaviour:
   m_VerticalScrollbarEventHandler: {fileID: 0}
   m_LayoutGroup: {fileID: 0}
   m_ScrollSensitivity: 1
-  m_ContentType: 0
+  m_ContentType: 2
   m_InputType: 0
   m_AsteriskChar: 42
-  m_KeyboardType: 0
+  m_KeyboardType: 4
   m_LineType: 0
   m_HideMobileInput: 0
   m_HideSoftKeyboard: 0
-  m_CharacterValidation: 0
+  m_CharacterValidation: 2
   m_RegexValue: 
   m_GlobalPointSize: 14
   m_CharacterLimit: 0
   m_OnEndEdit:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: -2928067652705745836}
+        m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+        m_MethodName: UpdateMaxHeightInput
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: -2928067652705745836}
+        m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+        m_MethodName: BlockUI
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   m_OnSubmit:
     m_PersistentCalls:
       m_Calls: []
@@ -2356,7 +2539,7 @@ MonoBehaviour:
   m_CaretColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_CustomCaretColor: 0
   m_SelectionColor: {r: 0.65882355, g: 0.80784315, b: 1, a: 0.7529412}
-  m_Text: 
+  m_Text: 384
   m_CaretBlinkRate: 0.85
   m_CaretWidth: 1
   m_ReadOnly: 0
@@ -2371,6 +2554,21 @@ MonoBehaviour:
   isAlert: 0
   m_InputValidator: {fileID: 0}
   m_ShouldActivateOnSelect: 1
+--- !u!114 &636064588821995131
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1518969177845397114}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 327859ec2ebb8c74fabe3c5b08fea844, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  input: {fileID: 6864486739700165468}
+  slider: {fileID: 388093429026968991}
+  isFloat: 0
 --- !u!1 &1527551424564719191
 GameObject:
   m_ObjectHideFlags: 0
@@ -2626,7 +2824,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1724060368982035853}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
@@ -2795,7 +2993,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u200B"
+  m_text: "0\u200B"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -3163,6 +3361,7 @@ GameObject:
   m_Component:
   - component: {fileID: 987255920480455822}
   - component: {fileID: 2622732499506935746}
+  - component: {fileID: 3724756889676240473}
   m_Layer: 5
   m_Name: Spawn Probability
   m_TagString: Untagged
@@ -3241,10 +3440,63 @@ MonoBehaviour:
   m_MinValue: 0
   m_MaxValue: 1
   m_WholeNumbers: 0
-  m_Value: 0
+  m_Value: 1
   m_OnValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 7942894783461378519}
+        m_TargetAssemblyTypeName: SliderUpdateInput, Assembly-CSharp
+        m_MethodName: UpdateInput
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!114 &3724756889676240473
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1948563636392690980}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Delegates:
+  - eventID: 3
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: -2928067652705745836}
+          m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+          m_MethodName: UpdateSpawnProbabilitySlider
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+        - m_Target: {fileID: -2928067652705745836}
+          m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+          m_MethodName: BlockUI
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!1 &2054961746886377610
 GameObject:
   m_ObjectHideFlags: 0
@@ -3298,7 +3550,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2054961746886377610}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
@@ -3562,9 +3814,21 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: TextureSettingsTabController, Assembly-CSharp
-        m_MethodName: UpdateUseHeightTexture
+      - m_Target: {fileID: -2928067652705745836}
+        m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+        m_MethodName: UpdateUseMaxSlopeToggle
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: -2928067652705745836}
+        m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+        m_MethodName: BlockUI
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3723,6 +3987,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7845799320173604340}
   - component: {fileID: 3319416382523091688}
+  - component: {fileID: 5995443274886957196}
   m_Layer: 5
   m_Name: Max Slope Slider
   m_TagString: Untagged
@@ -3798,12 +4063,65 @@ MonoBehaviour:
   m_HandleRect: {fileID: 7774456591580836519}
   m_Direction: 0
   m_MinValue: 0
-  m_MaxValue: 20
+  m_MaxValue: 360
   m_WholeNumbers: 1
-  m_Value: 0
+  m_Value: 360
   m_OnValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 3363485488120123531}
+        m_TargetAssemblyTypeName: SliderUpdateInput, Assembly-CSharp
+        m_MethodName: UpdateInput
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!114 &5995443274886957196
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2265330128665392475}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Delegates:
+  - eventID: 3
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: -2928067652705745836}
+          m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+          m_MethodName: UpdateMaxSlopeSlider
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+        - m_Target: {fileID: -2928067652705745836}
+          m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+          m_MethodName: BlockUI
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!1 &2309543065425636152
 GameObject:
   m_ObjectHideFlags: 0
@@ -3869,7 +4187,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 360
+  m_text: 500
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -4061,9 +4379,21 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: TextureSettingsTabController, Assembly-CSharp
-        m_MethodName: UpdateUseHeightTexture
+      - m_Target: {fileID: -2928067652705745836}
+        m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+        m_MethodName: UpdateUnderwaterToggle
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: -2928067652705745836}
+        m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+        m_MethodName: BlockUI
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -4267,7 +4597,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2791879739070576076}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
@@ -4560,7 +4890,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2862820751130680968}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
@@ -4792,7 +5122,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2909666812691142480}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
@@ -5173,7 +5503,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 0
+  m_text: 1
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -5279,7 +5609,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: -0.37488556, y: 0}
-  m_SizeDelta: {x: -7.250245, y: 0}
+  m_SizeDelta: {x: -7.2502465, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5795832480733364946
 CanvasRenderer:
@@ -5534,7 +5864,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "-512\u200B"
+  m_text: "500\u200B"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -5765,9 +6095,21 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: TextureSettingsTabController, Assembly-CSharp
-        m_MethodName: UpdateUseHeightTexture
+      - m_Target: {fileID: -2928067652705745836}
+        m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+        m_MethodName: UpdateUseMaxHeightToggle
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: -2928067652705745836}
+        m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+        m_MethodName: BlockUI
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -5863,9 +6205,21 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: TextureSettingsTabController, Assembly-CSharp
-        m_MethodName: UpdateUseHeightTexture
+      - m_Target: {fileID: -2928067652705745836}
+        m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+        m_MethodName: UpdateUseMinSlopeToggle
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: -2928067652705745836}
+        m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+        m_MethodName: BlockUI
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -6196,6 +6550,7 @@ GameObject:
   - component: {fileID: 4212618755690849162}
   - component: {fileID: 544044350689272849}
   - component: {fileID: 6037762251641576583}
+  - component: {fileID: 3166102067860606781}
   m_Layer: 5
   m_Name: Input
   m_TagString: Untagged
@@ -6309,20 +6664,44 @@ MonoBehaviour:
   m_VerticalScrollbarEventHandler: {fileID: 0}
   m_LayoutGroup: {fileID: 0}
   m_ScrollSensitivity: 1
-  m_ContentType: 0
+  m_ContentType: 2
   m_InputType: 0
   m_AsteriskChar: 42
-  m_KeyboardType: 0
+  m_KeyboardType: 4
   m_LineType: 0
   m_HideMobileInput: 0
   m_HideSoftKeyboard: 0
-  m_CharacterValidation: 0
+  m_CharacterValidation: 2
   m_RegexValue: 
   m_GlobalPointSize: 14
   m_CharacterLimit: 0
   m_OnEndEdit:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: -2928067652705745836}
+        m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+        m_MethodName: UpdateMaxPerChunkInput
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: -2928067652705745836}
+        m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+        m_MethodName: BlockUI
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   m_OnSubmit:
     m_PersistentCalls:
       m_Calls: []
@@ -6347,7 +6726,7 @@ MonoBehaviour:
   m_CaretColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_CustomCaretColor: 0
   m_SelectionColor: {r: 0.65882355, g: 0.80784315, b: 1, a: 0.7529412}
-  m_Text: 
+  m_Text: 1
   m_CaretBlinkRate: 0.85
   m_CaretWidth: 1
   m_ReadOnly: 0
@@ -6362,6 +6741,21 @@ MonoBehaviour:
   isAlert: 0
   m_InputValidator: {fileID: 0}
   m_ShouldActivateOnSelect: 1
+--- !u!114 &3166102067860606781
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4028852694542053476}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 327859ec2ebb8c74fabe3c5b08fea844, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  input: {fileID: 6037762251641576583}
+  slider: {fileID: 2681513379201583155}
+  isFloat: 0
 --- !u!1 &4115458668990947478
 GameObject:
   m_ObjectHideFlags: 0
@@ -6479,7 +6873,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u200B"
+  m_text: "1\u200B"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -6690,7 +7084,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u200B"
+  m_text: "360\u200B"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -6959,6 +7353,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4361636985654412164}
   - component: {fileID: 273363946774068734}
+  - component: {fileID: 5990935249190593429}
   m_Layer: 5
   m_Name: Min Height Slider
   m_TagString: Untagged
@@ -7033,13 +7428,66 @@ MonoBehaviour:
   m_FillRect: {fileID: 4074958654623886273}
   m_HandleRect: {fileID: 8856436207797309955}
   m_Direction: 0
-  m_MinValue: 0
-  m_MaxValue: 20
+  m_MinValue: -512
+  m_MaxValue: 512
   m_WholeNumbers: 1
-  m_Value: 0
+  m_Value: -512
   m_OnValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 7196897346827538806}
+        m_TargetAssemblyTypeName: SliderUpdateInput, Assembly-CSharp
+        m_MethodName: UpdateInput
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!114 &5990935249190593429
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4512491042182757090}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Delegates:
+  - eventID: 3
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: -2928067652705745836}
+          m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+          m_MethodName: UpdateMinHeightSlider
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+        - m_Target: {fileID: -2928067652705745836}
+          m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+          m_MethodName: BlockUI
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!1 &4573152933729194282
 GameObject:
   m_ObjectHideFlags: 0
@@ -7168,7 +7616,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4616178980945163411}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
@@ -7337,7 +7785,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "-512\u200B"
+  m_text: "1\u200B"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -7495,6 +7943,7 @@ GameObject:
   - component: {fileID: 2831381124391878634}
   - component: {fileID: 2831687323116631950}
   - component: {fileID: 7949435652042392404}
+  - component: {fileID: 3556188701881855928}
   m_Layer: 5
   m_Name: Valuable Min Max Slider
   m_TagString: Untagged
@@ -7617,14 +8066,55 @@ MonoBehaviour:
   minText: {fileID: 7333621255953695980}
   maxText: {fileID: 3633279878395815242}
   textFormat: 0
-  minLimit: 0
-  maxLimit: 360
+  minLimit: 1
+  maxLimit: 500
   wholeNumbers: 1
-  minValue: 0
-  maxValue: 360
+  minValue: 1
+  maxValue: 500
   onValueChanged:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &3556188701881855928
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4694912074195880435}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Delegates:
+  - eventID: 3
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: -2928067652705745836}
+          m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+          m_MethodName: UpdateValueRangeSlider
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+        - m_Target: {fileID: -2928067652705745836}
+          m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+          m_MethodName: BlockUI
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!1 &4781427084094382604
 GameObject:
   m_ObjectHideFlags: 0
@@ -7782,6 +8272,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3231489380035078463}
   - component: {fileID: 2681513379201583155}
+  - component: {fileID: 6557561545244062800}
   m_Layer: 5
   m_Name: Max Per Chunk
   m_TagString: Untagged
@@ -7863,7 +8354,60 @@ MonoBehaviour:
   m_Value: 1
   m_OnValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 3166102067860606781}
+        m_TargetAssemblyTypeName: SliderUpdateInput, Assembly-CSharp
+        m_MethodName: UpdateInput
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!114 &6557561545244062800
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4955717371444485717}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Delegates:
+  - eventID: 3
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: -2928067652705745836}
+          m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+          m_MethodName: UpdateMaxPerChunkSlider
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+        - m_Target: {fileID: -2928067652705745836}
+          m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+          m_MethodName: BlockUI
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!1 &4956248794059307901
 GameObject:
   m_ObjectHideFlags: 0
@@ -7948,7 +8492,31 @@ MonoBehaviour:
   m_Group: {fileID: 0}
   onValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: -2928067652705745836}
+        m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+        m_MethodName: UpdateValueableToggle
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: -2928067652705745836}
+        m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+        m_MethodName: BlockUI
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   m_IsOn: 0
 --- !u!1 &4972049976146212096
 GameObject:
@@ -8187,7 +8755,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u200B"
+  m_text: "1\u200B"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -8795,9 +9363,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: TextureSettingsTabController, Assembly-CSharp
-        m_MethodName: RemoveTexture
+      - m_Target: {fileID: -2928067652705745836}
+        m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+        m_MethodName: RemoveAsset
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -8853,6 +9421,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4861410217444547218}
   - component: {fileID: 8631969749041162003}
+  - component: {fileID: 5061619045837997674}
   m_Layer: 5
   m_Name: Underwater Min Depth
   m_TagString: Untagged
@@ -8929,12 +9498,65 @@ MonoBehaviour:
   m_HandleRect: {fileID: 8056287350170079859}
   m_Direction: 0
   m_MinValue: 0
-  m_MaxValue: 20
-  m_WholeNumbers: 1
+  m_MaxValue: 50
+  m_WholeNumbers: 0
   m_Value: 0
   m_OnValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 2916826763908682376}
+        m_TargetAssemblyTypeName: SliderUpdateInput, Assembly-CSharp
+        m_MethodName: UpdateInput
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!114 &5061619045837997674
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5817305487843625339}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Delegates:
+  - eventID: 3
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: -2928067652705745836}
+          m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+          m_MethodName: UpdateMinDepthSlider
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+        - m_Target: {fileID: -2928067652705745836}
+          m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+          m_MethodName: BlockUI
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!1 &5845471298098934167
 GameObject:
   m_ObjectHideFlags: 0
@@ -9186,9 +9808,21 @@ MonoBehaviour:
   m_OnEndEdit:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: TextureSettingsTabController, Assembly-CSharp
-        m_MethodName: UpdateSlopeMinInputTexture
+      - m_Target: {fileID: -2928067652705745836}
+        m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+        m_MethodName: UpdateMinValueInput
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: -2928067652705745836}
+        m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+        m_MethodName: BlockUI
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -9222,7 +9856,7 @@ MonoBehaviour:
   m_CaretColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_CustomCaretColor: 0
   m_SelectionColor: {r: 0.65882355, g: 0.80784315, b: 1, a: 0.7529412}
-  m_Text: -512
+  m_Text: 1
   m_CaretBlinkRate: 0.85
   m_CaretWidth: 1
   m_ReadOnly: 0
@@ -9673,6 +10307,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0eeef0b468290da49b7fe4d97eda3fb7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  assetSpawnData: {fileID: 0}
   assetPreview: {fileID: 5292589432236893111}
   assetName: {fileID: 2941422101408176180}
   rotateToFaceNormalToggle: {fileID: 536582973958334914}
@@ -9695,11 +10330,16 @@ MonoBehaviour:
   underwaterToggle: {fileID: 2350864255992254060}
   minDepthInput: {fileID: 5912935956556050630}
   minDepthSlider: {fileID: 8631969749041162003}
-  undegroundToggle: {fileID: 4894711617069632245}
+  undergroundToggle: {fileID: 4894711617069632245}
   minDensityInput: {fileID: 7240899335230994926}
   minDensitySlider: {fileID: 8975028206317350471}
   valueableToggle: {fileID: 103610726748556584}
+  minValueInput: {fileID: 5471550373954566875}
+  maxValueInput: {fileID: 5745459722569810763}
   valueRangeSlider: {fileID: 7949435652042392404}
+  assetIndex: 0
+  initialized: 0
+  canvasGroup: {fileID: 4910549471378888901, guid: dcdc050e26e194d4bbe810bf7ee2ee81, type: 3}
 --- !u!1 &6401291680359510469
 GameObject:
   m_ObjectHideFlags: 0
@@ -9900,6 +10540,7 @@ GameObject:
   - component: {fileID: 8075738048636348527}
   - component: {fileID: 7939941007889761395}
   - component: {fileID: 1612482106916863325}
+  - component: {fileID: 7942894783461378519}
   m_Layer: 5
   m_Name: Input
   m_TagString: Untagged
@@ -10013,20 +10654,44 @@ MonoBehaviour:
   m_VerticalScrollbarEventHandler: {fileID: 0}
   m_LayoutGroup: {fileID: 0}
   m_ScrollSensitivity: 1
-  m_ContentType: 0
+  m_ContentType: 3
   m_InputType: 0
   m_AsteriskChar: 42
-  m_KeyboardType: 0
+  m_KeyboardType: 2
   m_LineType: 0
   m_HideMobileInput: 0
   m_HideSoftKeyboard: 0
-  m_CharacterValidation: 0
+  m_CharacterValidation: 3
   m_RegexValue: 
   m_GlobalPointSize: 14
   m_CharacterLimit: 0
   m_OnEndEdit:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: -2928067652705745836}
+        m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+        m_MethodName: UpdateSpawnProbabilityInput
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: -2928067652705745836}
+        m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+        m_MethodName: BlockUI
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   m_OnSubmit:
     m_PersistentCalls:
       m_Calls: []
@@ -10051,7 +10716,7 @@ MonoBehaviour:
   m_CaretColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_CustomCaretColor: 0
   m_SelectionColor: {r: 0.65882355, g: 0.80784315, b: 1, a: 0.7529412}
-  m_Text: 
+  m_Text: 1
   m_CaretBlinkRate: 0.85
   m_CaretWidth: 1
   m_ReadOnly: 0
@@ -10066,6 +10731,21 @@ MonoBehaviour:
   isAlert: 0
   m_InputValidator: {fileID: 0}
   m_ShouldActivateOnSelect: 1
+--- !u!114 &7942894783461378519
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6488905250275454877}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 327859ec2ebb8c74fabe3c5b08fea844, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  input: {fileID: 1612482106916863325}
+  slider: {fileID: 2622732499506935746}
+  isFloat: 1
 --- !u!1 &6602487863503284700
 GameObject:
   m_ObjectHideFlags: 0
@@ -10549,9 +11229,21 @@ MonoBehaviour:
   m_OnEndEdit:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: TextureSettingsTabController, Assembly-CSharp
-        m_MethodName: UpdateSlopeMaxInputTexture
+      - m_Target: {fileID: -2928067652705745836}
+        m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+        m_MethodName: UpdateMaxValueInput
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: -2928067652705745836}
+        m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+        m_MethodName: BlockUI
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -10585,7 +11277,7 @@ MonoBehaviour:
   m_CaretColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_CustomCaretColor: 0
   m_SelectionColor: {r: 0.65882355, g: 0.80784315, b: 1, a: 0.7529412}
-  m_Text: -512
+  m_Text: 500
   m_CaretBlinkRate: 0.85
   m_CaretWidth: 1
   m_ReadOnly: 0
@@ -10850,6 +11542,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3096796956967509892}
   - component: {fileID: 8498189365315020970}
+  - component: {fileID: 992256366946406345}
   m_Layer: 5
   m_Name: Min Slope Slider
   m_TagString: Untagged
@@ -10925,12 +11618,65 @@ MonoBehaviour:
   m_HandleRect: {fileID: 7050389838129484760}
   m_Direction: 0
   m_MinValue: 0
-  m_MaxValue: 20
+  m_MaxValue: 360
   m_WholeNumbers: 1
   m_Value: 0
   m_OnValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 4161570943568060668}
+        m_TargetAssemblyTypeName: SliderUpdateInput, Assembly-CSharp
+        m_MethodName: UpdateInput
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!114 &992256366946406345
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7681955653551545841}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Delegates:
+  - eventID: 3
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: -2928067652705745836}
+          m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+          m_MethodName: UpdateMinSlopeSlider
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+        - m_Target: {fileID: -2928067652705745836}
+          m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+          m_MethodName: BlockUI
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!1 &7736853422073177387
 GameObject:
   m_ObjectHideFlags: 0
@@ -11018,6 +11764,7 @@ GameObject:
   - component: {fileID: 7129530254044440203}
   - component: {fileID: 3583435861213678925}
   - component: {fileID: 7240899335230994926}
+  - component: {fileID: 6836503478766438506}
   m_Layer: 5
   m_Name: Input
   m_TagString: Untagged
@@ -11131,20 +11878,44 @@ MonoBehaviour:
   m_VerticalScrollbarEventHandler: {fileID: 0}
   m_LayoutGroup: {fileID: 0}
   m_ScrollSensitivity: 1
-  m_ContentType: 0
+  m_ContentType: 3
   m_InputType: 0
   m_AsteriskChar: 42
-  m_KeyboardType: 0
+  m_KeyboardType: 2
   m_LineType: 0
   m_HideMobileInput: 0
   m_HideSoftKeyboard: 0
-  m_CharacterValidation: 0
+  m_CharacterValidation: 3
   m_RegexValue: 
   m_GlobalPointSize: 14
   m_CharacterLimit: 0
   m_OnEndEdit:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: -2928067652705745836}
+        m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+        m_MethodName: UpdateMinDensityInput
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: -2928067652705745836}
+        m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+        m_MethodName: BlockUI
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   m_OnSubmit:
     m_PersistentCalls:
       m_Calls: []
@@ -11169,7 +11940,7 @@ MonoBehaviour:
   m_CaretColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_CustomCaretColor: 0
   m_SelectionColor: {r: 0.65882355, g: 0.80784315, b: 1, a: 0.7529412}
-  m_Text: 
+  m_Text: 0
   m_CaretBlinkRate: 0.85
   m_CaretWidth: 1
   m_ReadOnly: 0
@@ -11184,6 +11955,21 @@ MonoBehaviour:
   isAlert: 0
   m_InputValidator: {fileID: 0}
   m_ShouldActivateOnSelect: 1
+--- !u!114 &6836503478766438506
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7809289323937467387}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 327859ec2ebb8c74fabe3c5b08fea844, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  input: {fileID: 7240899335230994926}
+  slider: {fileID: 8975028206317350471}
+  isFloat: 1
 --- !u!1 &7838276284629048138
 GameObject:
   m_ObjectHideFlags: 0
@@ -11675,7 +12461,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7996641175352110059}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
@@ -12046,7 +12832,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u200B"
+  m_text: "0\u200B"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -12205,6 +12991,7 @@ GameObject:
   - component: {fileID: 4908663611061170084}
   - component: {fileID: 4957680004297198293}
   - component: {fileID: 5912935956556050630}
+  - component: {fileID: 2916826763908682376}
   m_Layer: 5
   m_Name: Input
   m_TagString: Untagged
@@ -12318,20 +13105,44 @@ MonoBehaviour:
   m_VerticalScrollbarEventHandler: {fileID: 0}
   m_LayoutGroup: {fileID: 0}
   m_ScrollSensitivity: 1
-  m_ContentType: 0
+  m_ContentType: 3
   m_InputType: 0
   m_AsteriskChar: 42
-  m_KeyboardType: 0
+  m_KeyboardType: 2
   m_LineType: 0
   m_HideMobileInput: 0
   m_HideSoftKeyboard: 0
-  m_CharacterValidation: 0
+  m_CharacterValidation: 3
   m_RegexValue: 
   m_GlobalPointSize: 14
   m_CharacterLimit: 0
   m_OnEndEdit:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: -2928067652705745836}
+        m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+        m_MethodName: UpdateMinDepthInput
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: -2928067652705745836}
+        m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+        m_MethodName: BlockUI
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   m_OnSubmit:
     m_PersistentCalls:
       m_Calls: []
@@ -12356,7 +13167,7 @@ MonoBehaviour:
   m_CaretColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_CustomCaretColor: 0
   m_SelectionColor: {r: 0.65882355, g: 0.80784315, b: 1, a: 0.7529412}
-  m_Text: 
+  m_Text: 0
   m_CaretBlinkRate: 0.85
   m_CaretWidth: 1
   m_ReadOnly: 0
@@ -12371,6 +13182,21 @@ MonoBehaviour:
   isAlert: 0
   m_InputValidator: {fileID: 0}
   m_ShouldActivateOnSelect: 1
+--- !u!114 &2916826763908682376
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8461556011543989024}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 327859ec2ebb8c74fabe3c5b08fea844, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  input: {fileID: 5912935956556050630}
+  slider: {fileID: 8631969749041162003}
+  isFloat: 1
 --- !u!1 &8785314852251249153
 GameObject:
   m_ObjectHideFlags: 0
@@ -12383,6 +13209,7 @@ GameObject:
   - component: {fileID: 7946904067636075215}
   - component: {fileID: 2887622878908870083}
   - component: {fileID: 2364836246085609662}
+  - component: {fileID: 4161570943568060668}
   m_Layer: 5
   m_Name: Input
   m_TagString: Untagged
@@ -12496,20 +13323,44 @@ MonoBehaviour:
   m_VerticalScrollbarEventHandler: {fileID: 0}
   m_LayoutGroup: {fileID: 0}
   m_ScrollSensitivity: 1
-  m_ContentType: 0
+  m_ContentType: 2
   m_InputType: 0
   m_AsteriskChar: 42
-  m_KeyboardType: 0
+  m_KeyboardType: 4
   m_LineType: 0
   m_HideMobileInput: 0
   m_HideSoftKeyboard: 0
-  m_CharacterValidation: 0
+  m_CharacterValidation: 2
   m_RegexValue: 
   m_GlobalPointSize: 14
   m_CharacterLimit: 0
   m_OnEndEdit:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: -2928067652705745836}
+        m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+        m_MethodName: UpdateMinSlopeInput
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: -2928067652705745836}
+        m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+        m_MethodName: BlockUI
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   m_OnSubmit:
     m_PersistentCalls:
       m_Calls: []
@@ -12534,7 +13385,7 @@ MonoBehaviour:
   m_CaretColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_CustomCaretColor: 0
   m_SelectionColor: {r: 0.65882355, g: 0.80784315, b: 1, a: 0.7529412}
-  m_Text: 
+  m_Text: 0
   m_CaretBlinkRate: 0.85
   m_CaretWidth: 1
   m_ReadOnly: 0
@@ -12549,6 +13400,21 @@ MonoBehaviour:
   isAlert: 0
   m_InputValidator: {fileID: 0}
   m_ShouldActivateOnSelect: 1
+--- !u!114 &4161570943568060668
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8785314852251249153}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 327859ec2ebb8c74fabe3c5b08fea844, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  input: {fileID: 2364836246085609662}
+  slider: {fileID: 8498189365315020970}
+  isFloat: 0
 --- !u!1 &8811845563630207491
 GameObject:
   m_ObjectHideFlags: 0
@@ -12559,6 +13425,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4159502814972217091}
   - component: {fileID: 388093429026968991}
+  - component: {fileID: 3473494387808044916}
   m_Layer: 5
   m_Name: Max Height Slider
   m_TagString: Untagged
@@ -12633,13 +13500,66 @@ MonoBehaviour:
   m_FillRect: {fileID: 378984775844438599}
   m_HandleRect: {fileID: 8912463105874566457}
   m_Direction: 0
-  m_MinValue: 0
-  m_MaxValue: 20
+  m_MinValue: -512
+  m_MaxValue: 512
   m_WholeNumbers: 1
-  m_Value: 0
+  m_Value: 512
   m_OnValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 636064588821995131}
+        m_TargetAssemblyTypeName: SliderUpdateInput, Assembly-CSharp
+        m_MethodName: UpdateInput
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!114 &3473494387808044916
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8811845563630207491}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Delegates:
+  - eventID: 3
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: -2928067652705745836}
+          m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+          m_MethodName: UpdateMaxHeightSlider
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+        - m_Target: {fileID: -2928067652705745836}
+          m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+          m_MethodName: BlockUI
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!1 &8834544375865920000
 GameObject:
   m_ObjectHideFlags: 0
@@ -12705,7 +13625,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u200B"
+  m_text: "0\u200B"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -13013,9 +13933,21 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: TextureSettingsTabController, Assembly-CSharp
-        m_MethodName: UpdateUseHeightTexture
+      - m_Target: {fileID: -2928067652705745836}
+        m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+        m_MethodName: UpdateUseMinHeightToggle
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: -2928067652705745836}
+        m_TargetAssemblyTypeName: AssetSettingsTabController, Assembly-CSharp
+        m_MethodName: BlockUI
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

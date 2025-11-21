@@ -507,28 +507,32 @@ public class SpawnableAsset
     public bool isValuable;
     public int minValue;
     public int maxValue;
-    // public SpawnableAsset(GameObject asset, int maxPerChunk, bool rotateToFaceNormal, float spawnProbability, bool useMinSlope, int minSlope, bool useMaxSlope, int maxSlope, bool useMinHeight, int minHeight, bool useMaxHeight, int maxHeight, bool underwaterAsset, float minDepth, bool undergroundAsset, float minDensity, bool isValuable, int minValue, int maxValue)
-    // {
-    //     this.asset = asset;
-    //     this.maxPerChunk = maxPerChunk;
-    //     this.rotateToFaceNormal = rotateToFaceNormal;
-    //     this.spawnProbability = spawnProbability;
-    //     this.useMinSlope = useMinSlope;
-    //     this.minSlope = minSlope;
-    //     this.useMaxSlope = useMaxSlope;
-    //     this.maxSlope = maxSlope;
-    //     this.useMinHeight = useMinHeight;
-    //     this.minHeight = minHeight;
-    //     this.useMaxHeight = useMaxHeight;
-    //     this.maxHeight = maxHeight;
-    //     this.underwaterAsset = underwaterAsset;
-    //     this.minDepth = minDepth;
-    //     this.undergroundAsset = undergroundAsset;
-    //     this.minDensity = minDensity;
-    //     this.isValuable = isValuable;
-    //     this.minValue = minValue;
-    //     this.maxValue = maxValue;
-    // }
+    public SpawnableAsset()
+    {
+        
+    }
+    public SpawnableAsset(GameObject asset, int maxPerChunk, bool rotateToFaceNormal, float spawnProbability, bool useMinSlope, int minSlope, bool useMaxSlope, int maxSlope, bool useMinHeight, int minHeight, bool useMaxHeight, int maxHeight, bool underwaterAsset, float minDepth, bool undergroundAsset, float minDensity, bool isValuable, int minValue, int maxValue)
+    {
+        this.asset = asset;
+        this.maxPerChunk = maxPerChunk;
+        this.rotateToFaceNormal = rotateToFaceNormal;
+        this.spawnProbability = spawnProbability;
+        this.useMinSlope = useMinSlope;
+        this.minSlope = minSlope;
+        this.useMaxSlope = useMaxSlope;
+        this.maxSlope = maxSlope;
+        this.useMinHeight = useMinHeight;
+        this.minHeight = minHeight;
+        this.useMaxHeight = useMaxHeight;
+        this.maxHeight = maxHeight;
+        this.underwaterAsset = underwaterAsset;
+        this.minDepth = minDepth;
+        this.undergroundAsset = undergroundAsset;
+        this.minDensity = minDensity;
+        this.isValuable = isValuable;
+        this.minValue = minValue;
+        this.maxValue = maxValue;
+    }
     public SpawnableAsset Clone()
     {
         return new SpawnableAsset {

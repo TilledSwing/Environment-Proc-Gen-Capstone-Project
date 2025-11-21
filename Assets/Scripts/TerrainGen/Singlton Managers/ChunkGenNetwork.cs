@@ -763,9 +763,48 @@ public class ChunkGenNetwork : MonoBehaviour
         assetSpawnData.BackupOriginalState();
         foreach(SpawnableAsset asset in assetSpawnData.spawnableAssets)
         {
-            GameObject assSettingsTab = Instantiate(assetSettingsTab, assetWindow.transform);
+            AssetSettingsTabController assSettingsTab = Instantiate(assetSettingsTab, assetWindow.transform).GetComponent<AssetSettingsTabController>();
+            assSettingsTab.canvasGroup = assetWindow.GetComponent<CanvasGroup>();
+            assSettingsTab.assetSpawnData = assetSpawnData;
+            // Header Settings
+            assSettingsTab.assetPreview.texture = asset.icon;
+            assSettingsTab.assetName.text = asset.name;
+            assSettingsTab.rotateToFaceNormalToggle.isOn = asset.rotateToFaceNormal;
+            // Spawn Probability Settings
+            assSettingsTab.spawnProbInput.text = asset.spawnProbability.ToString();
+            assSettingsTab.spawnProbSlider.value = asset.spawnProbability;
+            // Max Per Chunk Settings
+            assSettingsTab.maxPerChunkInput.text = asset.maxPerChunk.ToString();
+            assSettingsTab.maxPerChunkSlider.value = asset.maxPerChunk;
+            // Min Height Settings
+            assSettingsTab.useMinHeightToggle.isOn = asset.useMinHeight;
+            assSettingsTab.minHeightInput.text = asset.minHeight.ToString();
+            assSettingsTab.minHeightSlider.value = asset.minHeight;
+            // Max Height Settings
+            assSettingsTab.useMaxHeightToggle.isOn = asset.useMaxHeight;
+            assSettingsTab.maxHeightInput.text = asset.maxHeight.ToString();
+            assSettingsTab.maxHeightSlider.value = asset.maxHeight;
+            // Min Slope Settings
+            assSettingsTab.useMinSlopeToggle.isOn = asset.useMinSlope;
+            assSettingsTab.minSlopeInput.text = asset.minSlope.ToString();
+            assSettingsTab.minSlopeSlider.value = asset.minSlope;
+            // Max Slope Settings
+            assSettingsTab.useMaxSlopeToggle.isOn = asset.useMaxSlope;
+            assSettingsTab.maxSlopeInput.text = asset.maxSlope.ToString();
+            assSettingsTab.maxSlopeSlider.value = asset.maxSlope;
+            // Underwater Settings
+            assSettingsTab.underwaterToggle.isOn = asset.underwaterAsset;
+            assSettingsTab.minDepthInput.text = asset.minDepth.ToString();
+            assSettingsTab.minDepthSlider.value = asset.minDepth;
+            // Underground Settings
+            assSettingsTab.undergroundToggle.isOn = asset.undergroundAsset;
+            assSettingsTab.minDensityInput.text = asset.minDensity.ToString();
+            assSettingsTab.minDensitySlider.value = asset.minDensity;
+            // Valuable Settings
+            assSettingsTab.valueableToggle.isOn = asset.isValuable;
+            assSettingsTab.valueRangeSlider.SetValues(assSettingsTab.valueRangeSlider.Values.minLimit, assSettingsTab.valueRangeSlider.Values.maxLimit, asset.minValue, asset.maxValue);
 
-
+            assSettingsTab.initialized = true;
         }
     }
     /// <summary>

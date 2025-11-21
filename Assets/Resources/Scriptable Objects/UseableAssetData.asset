@@ -49,3 +49,6 @@ MonoBehaviour:
   - obj: {fileID: 4076257425805142985, guid: ed840f491f852754796378ea5eff6478, type: 3}
     icon: {fileID: 2800000, guid: 83f88be2df527424981199367958b8f7, type: 3}
     name: Jade Moai Statue
+  - obj: {fileID: 1207449177372228529, guid: 46ca9bca5d4d6824c9973375d741a3df, type: 3}
+    icon: {fileID: 2800000, guid: 179fe279d344c254fa8d0a473e2b4049, type: 3}
+    name: Blue Light Plant 1
