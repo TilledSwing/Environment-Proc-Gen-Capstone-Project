@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Pekdata.meta
 guid: d934be76142320442a16384f2b65cbbe
+========
+guid: 85dc0088a41467046b392fc7ade4a174
+>>>>>>>> origin/NetworkingLobbyFinal:Assets/FishNet/Plugins.meta
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}

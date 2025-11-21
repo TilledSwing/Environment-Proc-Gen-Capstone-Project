@@ -14,6 +14,15 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Marching Cubes(C#) Test Scene.unity
     guid: 262d3c793c751c24794a593f2248c4dd
+  - enabled: 1
+    path: Assets/Scenes/Bootstrap.unity
+    guid: 9c7c85527a712c24d90c147876dd0a8f
+  - enabled: 1
+    path: Assets/Scenes/GameMenu.unity
+    guid: 597a680b7cfba9f418875faf7ab92828
+  - enabled: 1
+    path: Assets/Scenes/GameActive.unity
+    guid: c7ae66e89edd144428e178e85ab11aca
   m_configObjects:
     com.unity.addressableassets: {fileID: 11400000, guid: ec24315c70ffede449e564249438d910, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

@@ -1,13 +1,9 @@
-using FishNet.Connection;
 using FishNet.Object;
-using System.Collections;
 using System.Collections.Generic;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Rendering;
-using UnityEngine.Rendering.Universal;
 
 // Template by Bobsi Unity - Youtube
 // Modified by Jacob Ormsby
@@ -24,6 +20,8 @@ public class PlayerController : NetworkBehaviour
     public float lookSpeed = 2.0f;
     public float lookXLimit = 75.0f;
     public float flightSpeed = 6.0f;
+    public bool editorPlayer = true;
+    public bool gameStarted = false;
 
     public CharacterController characterController;
     public Vector3 moveDirection = Vector3.zero;
@@ -52,6 +50,7 @@ public class PlayerController : NetworkBehaviour
         if (base.IsOwner)
         {
             playerCamera = Camera.main;
+            //playerCamera = new Camera();
             playerCamera.transform.position = new Vector3(transform.position.x, transform.position.y + cameraYOffset, transform.position.z);
             playerCamera.transform.SetParent(transform);
 
@@ -162,8 +161,8 @@ public class PlayerController : NetworkBehaviour
             canMove = isCursorVisible;
         }
 
-        // Allows player to switch between walking and flying mode.
-        if (Input.GetKeyDown(KeyCode.M))
+        // Allows player to switch between walking and flying mode. Only available in editor mode.
+        if (editorPlayer && Input.GetKeyDown(KeyCode.M))
             isFlightMode = !isFlightMode;
 
         // We are grounded, so recalculate move direction based on axis

@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Materials.meta
 guid: e6650922233be584faa767305b501949
+========
+guid: 795f2cb832e4fda47b6218f53a17b8ca
+>>>>>>>> origin/NetworkingLobbyFinal:Assets/Editor.meta
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}

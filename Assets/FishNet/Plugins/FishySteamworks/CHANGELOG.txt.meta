@@ -1,0 +1,12 @@
+fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Resources/Compute Shaders/GrassCompute.compute.meta
+guid: d90d305fd5b56a04a83ea4b3aaa3af86
+ComputeShaderImporter:
+========
+guid: 1b338ba60dee2854e94b9e8bb0d2d79e
+TextScriptImporter:
+>>>>>>>> origin/NetworkingLobbyFinal:Assets/FishNet/Plugins/FishySteamworks/CHANGELOG.txt.meta
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

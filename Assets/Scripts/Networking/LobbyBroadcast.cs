@@ -48,9 +48,17 @@ public class LobbyBroadcast : MonoBehaviour
     {
         if (args.ConnectionState == LocalConnectionState.Started)
         {
-            string initialPlayerName = nameField.text.Trim();
-            if (string.IsNullOrEmpty(initialPlayerName))
-                initialPlayerName = "Anonymous";
+            string initialPlayerName = "";
+            if (nameField != null)
+            {
+                initialPlayerName = nameField.text.Trim();
+                if (string.IsNullOrEmpty(initialPlayerName))
+                    initialPlayerName = "Anonymous";
+            }
+            else
+            {
+                initialPlayerName = BootstrapManager.getPersonalSteamName();
+            }
 
             PlayerName playerName = new PlayerName() { connectedPlayer = initialPlayerName };
             InstanceFinder.ClientManager.Broadcast<PlayerName>(playerName);
@@ -59,7 +67,10 @@ public class LobbyBroadcast : MonoBehaviour
 
     private void OnRemoteJoin(NetworkConnection connection, PlayerName name, Channel channel)
     {
-        if (connection.ClientId.ToString() == "0")
+        Debug.Log("This is the connection id: " + connection.ClientId.ToString());
+        if (nameField != null && connection.ClientId.ToString() == "0")
+            connectedPlayers.Add(connection.ClientId, name.connectedPlayer + " (Host)");
+        else if (nameField == null && BootstrapManager.IsHost())
             connectedPlayers.Add(connection.ClientId, name.connectedPlayer + " (Host)");
         else
             connectedPlayers.Add(connection.ClientId, name.connectedPlayer);
@@ -77,7 +88,7 @@ public class LobbyBroadcast : MonoBehaviour
 
     /// <summary>
     /// If a client joins the server then they are added to the list of current players.
-    /// If a client leaves the server then they are removed frmo the list of current players.
+    /// If a client leaves the server then they are removed from the list of current players.
     /// A broadcast is then sent out to all connected clients to update their lobby views.
     /// </summary>
     /// <param name="conn">The remote connection.</param>

@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/MarioParadiso.meta
 guid: f26210b97cd23e14b8dc83ce905395ad
+========
+guid: afe46f0778c1228448297ce3bb0129e9
+>>>>>>>> origin/NetworkingLobbyFinal:Assets/FishNet/Plugins/FishySteamworks/Core.meta
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}
