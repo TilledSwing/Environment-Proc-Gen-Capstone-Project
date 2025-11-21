@@ -149,7 +149,7 @@ Material:
     - _WaveSpeed: 0.46
     - _WorkflowMode: 1
     - _ZWrite: 0
-    - _fogActive: 1
+    - _fogActive: 0
     - _fogDensity: 0.02
     - _fogOffset: 30
     m_Colors:
