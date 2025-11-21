@@ -28,10 +28,21 @@ try {
 
     $conn->begin_transaction();
     try {
-
         $insertTerrain = $conn->prepare("
-                INSERT INTO Terrains (UserId, TerrainName, width, height, isolevel, waterLevel, lerp, terracing, terraceHeight)
-                VALUES ((SELECT Id FROM Users WHERE SteamId = ?), ?, ?, ?, ?, ?, ?, ?, ?)
+                        INSERT INTO Terrains (UserId, TerrainName)
+                        VALUES ((SELECT Id FROM Users WHERE SteamId = ?), ?)");  
+        
+        $insertTerrain->bind_param(
+            "is",
+            $steamId,
+            $terrainName,
+        );
+        $insertTerrain->execute();
+        $terrainId = $conn->insert_id;
+
+        $insertTerrainSettings = $conn->prepare("
+                INSERT INTO TerrainSettings (TerrainId,  width, height, isolevel, waterLevel, lerp, terracing, terraceHeight)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE TerrainId = LAST_INSERT_ID(TerrainID),
                 width = VALUES(width),
                 height = VALUES(height),

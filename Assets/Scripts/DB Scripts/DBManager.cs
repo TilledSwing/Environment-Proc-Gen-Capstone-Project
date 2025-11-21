@@ -63,8 +63,7 @@ public class DBManager : MonoBehaviour
         string url = "http://localhost/sqlconnect/saveTerrain.php";
         WWWForm form = new();
 
-        ChunkGenNetwork abc = FindFirstObjectByType<ChunkGenNetwork>();
-        TerrainSettings settings = SeedSerializer.SerializeTerrainDensity(abc.terrainDensityData);
+        TerrainSettings settings = SeedSerializer.SerializeTerrainDensity(ChunkGenNetwork.Instance.terrainDensityData);
         string json = JsonUtility.ToJson(settings);
 
         form.AddField("TerrainSettings", json);
@@ -276,68 +275,8 @@ public class DBManager : MonoBehaviour
                 Debug.LogError("Response Code: " + request.responseCode);
             }
         }
-        yield return StartCoroutine(LoadTerrainAsset(2));
-
     }
 
-    /// <summary>
-    /// Once a terrains data has been loaded, this method is called to load in all of the users manually placed terrain assets.
-    /// </summary>
-    /// <param name="loadedTerrainId"></param>
-    /// <returns></returns>
-    IEnumerator LoadTerrainAsset(int loadedTerrainId)
-    {
-        ManualAssetIdentification.PlacedAssets.Clear();
-        string url = "http://localhost/sqlconnect/loadAssets.php";
-        WWWForm form = new();
-
-        //Need to pass the SteamId and steamId to the php to determine if the user exists, or if we need to add them to the db
-        form.AddField("terrainId", loadedTerrainId);
-        using (UnityWebRequest request = UnityWebRequest.Post(url, form))
-        {
-            // Set timeout (in seconds)
-            request.timeout = 10;
-
-            yield return request.SendWebRequest();
-
-            if (request.result == UnityWebRequest.Result.Success)
-            {
-                try
-                {
-                    // Parse the JSON response
-                    ManualAssetJSONList response = JsonUtility.FromJson<ManualAssetJSONList>(request.downloadHandler.text);
-                    if (response.success && response.data != null)
-                    {
-                        foreach (ManualAssetJSON mas in response.data)
-                        {
-                            ManualAssetId assetId = (ManualAssetId)mas.AssetId;
-                            GameObject obj = ManualAssetTracker.Create(assetId);
-                            obj.transform.position = new Vector3(mas.xPos, mas.yPos, mas.zPos);
-                            obj.transform.rotation = Quaternion.identity;
-                            if (obj.GetComponent<Rigidbody>() == null)
-                                obj.AddComponent<Rigidbody>();
-                            ManualAssetIdentification asset = new(assetId, mas.xPos, mas.yPos, mas.zPos);
-                            Instantiate(obj, gameObject.transform.position, Quaternion.identity);
-                        }
-                    }
-                    else
-                    {
-                        Debug.LogError("PHP Error: " + response.message);
-                    }
-                }
-                catch (System.Exception e)
-                {
-                    Debug.LogError("JSON Parse Error: " + e.Message);
-                    Debug.Log("Raw Response: " + request.downloadHandler.text);
-                }
-            }
-            else
-            {
-                Debug.LogError("Request Failed: " + request.error);
-                Debug.LogError("Response Code: " + request.responseCode);
-            }
-        }
-    }
     // Helper classes for JSON parsing of returned data
     [System.Serializable]
     public class PHPResponse
