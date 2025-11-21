@@ -26,6 +26,8 @@ public class SoundManager : MonoBehaviour
             Instance = this;
             DontDestroyOnLoad(gameObject);
             InitializeDictionaries();
+            SetMusicVolume(.2f);
+
         }
         else
         {
