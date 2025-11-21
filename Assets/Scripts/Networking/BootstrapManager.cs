@@ -14,6 +14,7 @@ public class BootstrapManager : MonoBehaviour
     [SerializeField] private FishNet.Managing.NetworkManager _networkManager;
     [SerializeField] private FishySteamworks.FishySteamworks _fishySteamworks;
     [SerializeField] private GameObject preGameLobby;
+    [SerializeField] private GameObject lobbyModel;
 
     protected Callback<LobbyCreated_t> LobbyCreated;
     protected Callback<GameLobbyJoinRequested_t> JoinRequest;
@@ -115,5 +116,6 @@ public class BootstrapManager : MonoBehaviour
     public static void DisablePreGameLobby()
     {
         instance.preGameLobby.SetActive(false);
+        instance.lobbyModel.SetActive(false);
     }
 }

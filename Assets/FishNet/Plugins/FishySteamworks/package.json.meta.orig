@@ -1,0 +1,12 @@
+fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Prefabs/Scan.prefab.meta
+guid: 7ac03aa3a31f3ef4494450676481ffba
+PrefabImporter:
+========
+guid: 92cba198b65691f4a972842b6acb55ff
+TextScriptImporter:
+>>>>>>>> origin/NetworkingLobbyFinal:Assets/FishNet/Plugins/FishySteamworks/package.json.meta
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

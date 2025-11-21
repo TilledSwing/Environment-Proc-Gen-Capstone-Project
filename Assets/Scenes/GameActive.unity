@@ -770,7 +770,7 @@ PrefabInstance:
     - target: {fileID: 7443408887813606060, guid: 0b650fca685f2eb41a86538aa883e4c1, type: 3}
       propertyPath: _playerPrefab
       value: 
-      objectReference: {fileID: 1324032884783071196, guid: cd9aa93f97d7a214e94c78a0b29314a1, type: 3}
+      objectReference: {fileID: 1324032884783071196, guid: 77ba93f05507acb4aaa9790fe99dd73e, type: 3}
     - target: {fileID: 7443408887813606060, guid: 0b650fca685f2eb41a86538aa883e4c1, type: 3}
       propertyPath: Spawns.Array.size
       value: 3
@@ -1438,6 +1438,7 @@ MonoBehaviour:
   slider: {fileID: 96751030}
   toggle: {fileID: 1457604244}
   input: {fileID: 1883917722}
+  loadScreen: {fileID: 0}
 --- !u!1 &106299902
 GameObject:
   m_ObjectHideFlags: 0
@@ -1791,6 +1792,7 @@ MonoBehaviour:
   slider: {fileID: 117533758}
   toggle: {fileID: 1457604244}
   input: {fileID: 1883917722}
+  loadScreen: {fileID: 0}
 --- !u!114 &117533757
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2000,6 +2002,7 @@ MonoBehaviour:
   slider: {fileID: 920832984}
   toggle: {fileID: 118591367}
   input: {fileID: 1883917722}
+  loadScreen: {fileID: 0}
 --- !u!1 &136361289
 GameObject:
   m_ObjectHideFlags: 0
@@ -2648,6 +2651,7 @@ MonoBehaviour:
   slider: {fileID: 166906070}
   toggle: {fileID: 1457604244}
   input: {fileID: 1883917722}
+  loadScreen: {fileID: 0}
 --- !u!114 &166906069
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2800,6 +2804,7 @@ MonoBehaviour:
   slider: {fileID: 174333193}
   toggle: {fileID: 1457604244}
   input: {fileID: 1883917722}
+  loadScreen: {fileID: 0}
 --- !u!114 &174333192
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3430,6 +3435,7 @@ Transform:
   m_Children:
   - {fileID: 216301961}
   - {fileID: 1976810761}
+  - {fileID: 1052684214}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &234269273
@@ -3694,6 +3700,7 @@ MonoBehaviour:
   slider: {fileID: 235302849}
   toggle: {fileID: 1457604244}
   input: {fileID: 1883917722}
+  loadScreen: {fileID: 0}
 --- !u!114 &235302848
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3846,6 +3853,7 @@ MonoBehaviour:
   slider: {fileID: 235822230}
   toggle: {fileID: 1457604244}
   input: {fileID: 1883917722}
+  loadScreen: {fileID: 0}
 --- !u!114 &235822229
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6116,6 +6124,7 @@ MonoBehaviour:
   slider: {fileID: 407932984}
   toggle: {fileID: 1457604244}
   input: {fileID: 1883917722}
+  loadScreen: {fileID: 0}
 --- !u!114 &407932983
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7655,6 +7664,7 @@ MonoBehaviour:
   slider: {fileID: 501624157}
   toggle: {fileID: 1457604244}
   input: {fileID: 1883917722}
+  loadScreen: {fileID: 0}
 --- !u!114 &501624156
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7926,6 +7936,7 @@ MonoBehaviour:
   slider: {fileID: 920832984}
   toggle: {fileID: 539599870}
   input: {fileID: 1883917722}
+  loadScreen: {fileID: 0}
 --- !u!1 &542892564
 GameObject:
   m_ObjectHideFlags: 0
@@ -8485,6 +8496,7 @@ MonoBehaviour:
   _networkManager: {fileID: 33696784}
   _fishySteamworks: {fileID: 33696786}
   preGameLobby: {fileID: 1976810760}
+  lobbyModel: {fileID: 1052684215}
 --- !u!114 &583819570
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10315,6 +10327,7 @@ MonoBehaviour:
   slider: {fileID: 920832984}
   toggle: {fileID: 1457604244}
   input: {fileID: 708923466}
+  loadScreen: {fileID: 0}
 --- !u!1 &723138626
 GameObject:
   m_ObjectHideFlags: 0
@@ -10562,6 +10575,7 @@ MonoBehaviour:
   slider: {fileID: 742816217}
   toggle: {fileID: 1457604244}
   input: {fileID: 1883917722}
+  loadScreen: {fileID: 0}
 --- !u!114 &742816216
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13034,6 +13048,7 @@ MonoBehaviour:
   slider: {fileID: 865131374}
   toggle: {fileID: 1457604244}
   input: {fileID: 1883917722}
+  loadScreen: {fileID: 0}
 --- !u!114 &865131373
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13386,6 +13401,7 @@ MonoBehaviour:
   slider: {fileID: 920832984}
   toggle: {fileID: 0}
   input: {fileID: 0}
+  loadScreen: {fileID: 0}
 --- !u!114 &920832986
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15808,6 +15824,85 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1046415714}
   m_CullTransparentMesh: 1
+--- !u!1001 &1052684213
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 231536403}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: 67c38a676cff46642959ba6716d24a42, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 67c38a676cff46642959ba6716d24a42, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 67c38a676cff46642959ba6716d24a42, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 67c38a676cff46642959ba6716d24a42, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -770
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 67c38a676cff46642959ba6716d24a42, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 228
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 67c38a676cff46642959ba6716d24a42, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -335
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 67c38a676cff46642959ba6716d24a42, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 67c38a676cff46642959ba6716d24a42, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 67c38a676cff46642959ba6716d24a42, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 67c38a676cff46642959ba6716d24a42, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 67c38a676cff46642959ba6716d24a42, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 67c38a676cff46642959ba6716d24a42, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 67c38a676cff46642959ba6716d24a42, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 67c38a676cff46642959ba6716d24a42, type: 3}
+      propertyPath: m_Name
+      value: Unity
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 67c38a676cff46642959ba6716d24a42, type: 3}
+--- !u!4 &1052684214 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 67c38a676cff46642959ba6716d24a42, type: 3}
+  m_PrefabInstance: {fileID: 1052684213}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1052684215 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 67c38a676cff46642959ba6716d24a42, type: 3}
+  m_PrefabInstance: {fileID: 1052684213}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1055271825
 GameObject:
   m_ObjectHideFlags: 0
@@ -16575,6 +16670,7 @@ MonoBehaviour:
   slider: {fileID: 1110276788}
   toggle: {fileID: 1457604244}
   input: {fileID: 1883917722}
+  loadScreen: {fileID: 0}
 --- !u!114 &1110276787
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16853,6 +16949,7 @@ MonoBehaviour:
   slider: {fileID: 920832984}
   toggle: {fileID: 1457604244}
   input: {fileID: 1883917722}
+  loadScreen: {fileID: 0}
 --- !u!1 &1125585764
 GameObject:
   m_ObjectHideFlags: 0
@@ -21053,6 +21150,7 @@ MonoBehaviour:
   slider: {fileID: 0}
   toggle: {fileID: 1457604244}
   input: {fileID: 0}
+  loadScreen: {fileID: 0}
 --- !u!114 &1457604246
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -21882,6 +21980,7 @@ MonoBehaviour:
   slider: {fileID: 1473536065}
   toggle: {fileID: 1457604244}
   input: {fileID: 1883917722}
+  loadScreen: {fileID: 0}
 --- !u!114 &1473536064
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -22424,6 +22523,7 @@ MonoBehaviour:
   slider: {fileID: 920832984}
   toggle: {fileID: 1457604244}
   input: {fileID: 1487592659}
+  loadScreen: {fileID: 0}
 --- !u!1 &1497401977
 GameObject:
   m_ObjectHideFlags: 0
@@ -25796,6 +25896,7 @@ MonoBehaviour:
   slider: {fileID: 1797554416}
   toggle: {fileID: 1457604244}
   input: {fileID: 1883917722}
+  loadScreen: {fileID: 0}
 --- !u!114 &1797554415
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -26491,6 +26592,7 @@ MonoBehaviour:
   slider: {fileID: 920832984}
   toggle: {fileID: 1837485282}
   input: {fileID: 1883917722}
+  loadScreen: {fileID: 0}
 --- !u!1 &1838274975
 GameObject:
   m_ObjectHideFlags: 0
@@ -27338,6 +27440,7 @@ MonoBehaviour:
   slider: {fileID: 0}
   toggle: {fileID: 0}
   input: {fileID: 1883917722}
+  loadScreen: {fileID: 0}
 --- !u!114 &1883917722
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -29134,8 +29237,8 @@ Transform:
   m_GameObject: {fileID: 1976810760}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -770, y: 230, z: -335}
-  m_LocalScale: {x: 10, y: 1, z: 10}
+  m_LocalPosition: {x: -770, y: 227.95, z: -335}
+  m_LocalScale: {x: 5, y: 1, z: 3}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 231536403}
@@ -30220,6 +30323,7 @@ MonoBehaviour:
   slider: {fileID: 2022988739}
   toggle: {fileID: 1457604244}
   input: {fileID: 1883917722}
+  loadScreen: {fileID: 0}
 --- !u!114 &2022988738
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -30408,6 +30512,7 @@ MonoBehaviour:
   slider: {fileID: 2031233512}
   toggle: {fileID: 1457604244}
   input: {fileID: 1883917722}
+  loadScreen: {fileID: 0}
 --- !u!114 &2031233511
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -32213,6 +32318,7 @@ MonoBehaviour:
   slider: {fileID: 2134919376}
   toggle: {fileID: 1457604244}
   input: {fileID: 1883917722}
+  loadScreen: {fileID: 0}
 --- !u!114 &2134919375
 MonoBehaviour:
   m_ObjectHideFlags: 0
