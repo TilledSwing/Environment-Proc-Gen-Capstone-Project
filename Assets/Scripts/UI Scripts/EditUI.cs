@@ -177,7 +177,7 @@ public class EditUI : MonoBehaviour
     public void ResetButton()
     {
         loadScreen.SetActive(true);
-        
+
         // Noise and Fractal Settings
         ng.noiseDimension = NoiseGenerator.fnl_noise_dimension._3D;
         ng.noiseType = NoiseGenerator.fnl_noise_type.OpenSimplex2;
@@ -223,7 +223,7 @@ public class EditUI : MonoBehaviour
         ResetButton();
     }
 
-    private void Regen()
+    public void Regen()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
