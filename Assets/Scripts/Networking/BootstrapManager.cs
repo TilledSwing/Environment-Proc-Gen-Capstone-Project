@@ -98,6 +98,8 @@ public class BootstrapManager : MonoBehaviour
         instance._fishySteamworks.StopConnection(false);
         if (instance._networkManager.IsServerStarted)
             instance._fishySteamworks.StopConnection(true);
+
+        //Destroy(instance._networkManager);
     }
 
     public static string getPersonalSteamName()

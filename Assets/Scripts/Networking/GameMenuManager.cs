@@ -4,6 +4,7 @@ using System.Windows.Forms;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using SceneManager = UnityEngine.SceneManagement.SceneManager;
 
 public class GameMenuManager : MonoBehaviour
 {
@@ -73,5 +74,11 @@ public class GameMenuManager : MonoBehaviour
         startGameButton.enabled = false;
         loadButton.enabled = false;
         randomButton.enabled = false;
+    }
+
+    public void QuitGameScene()
+    {
+        BootstrapManager.LeaveLobby();
+        SceneManager.LoadScene("MainMenu");
     }
 }
