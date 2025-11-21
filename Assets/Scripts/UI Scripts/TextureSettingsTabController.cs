@@ -82,7 +82,7 @@ public class TextureSettingsTabController : MonoBehaviour
             ChunkGenNetwork.Instance.terrainTextureData.biomeTextureConfigs[0].biomeTextures.Add(textureConfig);
             added = true;
             initialized = true;
-            ChunkGenNetwork.Instance.TextureSetup();
+            // ChunkGenNetwork.Instance.TextureSetup();
         }
     }
     public void UpdateHeightMinMaxTexture()

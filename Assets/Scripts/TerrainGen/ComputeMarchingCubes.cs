@@ -416,6 +416,17 @@ public class ComputeMarchingCubes : MonoBehaviour
         if (!terraforming)
         {
             assetSpawner.SpawnAssets();
+            // if(chunkPos.y + terrainDensityData.width >= terrainDensityData.waterLevel && assetSpawner.chunkVertices.Length > 0)
+            // {
+            //     GrassRender grass = gameObject.AddComponent<GrassRender>();
+            //     grass.chunkPos = chunkPos;
+            //     grass.grassDensity = ChunkGenNetwork.Instance.grassDensity;
+            //     grass.grassMaterial = ChunkGenNetwork.Instance.grassMaterial;
+            //     grass.grassMesh = ChunkGenNetwork.Instance.grassMesh;
+            //     grass.grassPositionComputeShader = ChunkGenNetwork.Instance.grassPositionComputeShader;
+            //     grass.grassPositions = assetSpawner.chunkVertices.ToArray();
+            //     grass.bounds = mesh.bounds;
+            // }
         }
         // }
     }

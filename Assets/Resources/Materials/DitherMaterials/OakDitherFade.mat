@@ -149,7 +149,7 @@ Material:
     - _ZWrite: 1
     - _alpha: 1
     - _ditherScale: 0.3
-    - _fade: 0.5
+    - _fade: 0
     - _metallic: 0
     - _smoothness: 0.5
     - _useMetallicMap: 0

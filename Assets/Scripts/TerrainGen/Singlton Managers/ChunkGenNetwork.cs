@@ -70,6 +70,11 @@ public class ChunkGenNetwork : MonoBehaviour
     // Material References
     public Material terrainMaterial;
     public Material waterMaterial;
+    // Grass Stuff
+    public ComputeShader grassPositionComputeShader;
+    public Mesh grassMesh;
+    public Material grassMaterial;
+    public int grassDensity;
     // Texture Arrays
     public Texture2DArray textureArray;
     public float[] useHeights;
@@ -81,6 +86,9 @@ public class ChunkGenNetwork : MonoBehaviour
     // Texture Window Stuff
     public GameObject textureWindow;
     public GameObject textureSettingsTab;
+    // Asset Window Stuff
+    public GameObject assetWindow;
+    public GameObject assetSettingsTab;
     // Chunk Variables
     public Dictionary<Vector3, TerrainChunk> chunkDictionary = new();
     public List<TerrainChunk> chunksVisibleLastUpdate = new();
@@ -155,6 +163,7 @@ public class ChunkGenNetwork : MonoBehaviour
         lightingBlockerRenderer.enabled = false;
         lightChange.intensity = 25f;
         TextureSetup();
+        AssetSetup();
         // Set seeds
         foreach (NoiseGenerator noiseGenerator in terrainDensityData.noiseGenerators)
         {
@@ -163,27 +172,36 @@ public class ChunkGenNetwork : MonoBehaviour
         }
         // Fog Shader Inits
         fogRenderPassFeature = rendererData.rendererFeatures.Find(f => f is FogRenderPassFeature) as FogRenderPassFeature;
+        
         // fogOffset = maxViewDst - 20f;
-        fogMat.SetFloat("_fogOffset", fogOffset);
-        fogMat.SetFloat("_fogDensity", fogDensity);
+        // fogMat.SetFloat("_fogOffset", fogOffset);
+        // fogMat.SetFloat("_fogDensity", fogDensity);
         fogMat.SetColor("_upperFogColor", upperFogColor);
         fogMat.SetColor("_lowerFogColor", lowerFogColor);
-        waterMaterial.SetFloat("_fogOffset", fogOffset);
-        waterMaterial.SetFloat("_fogDensity", fogDensity);
-        waterMaterial.SetColor("_fogColor", upperFogColor);
+        // waterMaterial.SetFloat("_fogOffset", fogOffset);
+        // waterMaterial.SetFloat("_fogDensity", fogDensity);
+        waterMaterial.SetColor("_fogColor", lowerFogColor);
         waterMaterial.SetFloat("_fogActive", 0);
+        SetFogActive(false);
 
         // terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 100000);
         // terrainDensityData.caveNoiseSeed = UnityEngine.Random.Range(0, 100000);
         // terrainDensityData.domainWarpSeed = UnityEngine.Random.Range(0, 100000);
         // terrainDensityData.caveDomainWarpSeed = UnityEngine.Random.Range(0, 100000);
     }
+    // public void SetFogActive(bool active)
+    // {
+    //     if (fogRenderPassFeature != null)
+    //     {
+    //         fogRenderPassFeature.SetActive(active);
+    //     }
+    // }
     public void SetFogActive(bool active)
     {
-        if (fogRenderPassFeature != null)
-        {
-            fogRenderPassFeature.SetActive(active);
-        }
+        fogMat.SetFloat("_fogOffset", active ? fogOffset : 1000);
+        fogMat.SetFloat("_fogDensity", active ? fogDensity : 1);
+        waterMaterial.SetFloat("_fogOffset", active ? fogOffset : 1000);
+        waterMaterial.SetFloat("_fogDensity", active ? fogDensity : 1);
     }
 
     public void UpdateFromDB(TerrainSettings settings)
@@ -635,8 +653,10 @@ public class ChunkGenNetwork : MonoBehaviour
     void OnApplicationQuit()
     {
         assetSpawnData.ResetSpawnPoints();
+        assetSpawnData.RestoreToOriginalState();
         chunkDictionary.Clear();
-        fogRenderPassFeature.SetActive(false);
+        // fogRenderPassFeature.SetActive(false);
+        SetFogActive(false);
         GraphicsSettings.defaultRenderPipeline = mainUrpAsset;
         QualitySettings.renderPipeline = mainUrpAsset;
     }
@@ -738,6 +758,55 @@ public class ChunkGenNetwork : MonoBehaviour
             terrainMaterial.SetFloat("_GreatestEndHeight", greatestEndHeight);
         }
     }
+    public void AssetSetup()
+    {
+        assetSpawnData.BackupOriginalState();
+        foreach(SpawnableAsset asset in assetSpawnData.spawnableAssets)
+        {
+            AssetSettingsTabController assSettingsTab = Instantiate(assetSettingsTab, assetWindow.transform).GetComponent<AssetSettingsTabController>();
+            assSettingsTab.canvasGroup = assetWindow.GetComponent<CanvasGroup>();
+            assSettingsTab.assetSpawnData = assetSpawnData;
+            // Header Settings
+            assSettingsTab.assetPreview.texture = asset.icon;
+            assSettingsTab.assetName.text = asset.name;
+            assSettingsTab.rotateToFaceNormalToggle.isOn = asset.rotateToFaceNormal;
+            // Spawn Probability Settings
+            assSettingsTab.spawnProbInput.text = asset.spawnProbability.ToString();
+            assSettingsTab.spawnProbSlider.value = asset.spawnProbability;
+            // Max Per Chunk Settings
+            assSettingsTab.maxPerChunkInput.text = asset.maxPerChunk.ToString();
+            assSettingsTab.maxPerChunkSlider.value = asset.maxPerChunk;
+            // Min Height Settings
+            assSettingsTab.useMinHeightToggle.isOn = asset.useMinHeight;
+            assSettingsTab.minHeightInput.text = asset.minHeight.ToString();
+            assSettingsTab.minHeightSlider.value = asset.minHeight;
+            // Max Height Settings
+            assSettingsTab.useMaxHeightToggle.isOn = asset.useMaxHeight;
+            assSettingsTab.maxHeightInput.text = asset.maxHeight.ToString();
+            assSettingsTab.maxHeightSlider.value = asset.maxHeight;
+            // Min Slope Settings
+            assSettingsTab.useMinSlopeToggle.isOn = asset.useMinSlope;
+            assSettingsTab.minSlopeInput.text = asset.minSlope.ToString();
+            assSettingsTab.minSlopeSlider.value = asset.minSlope;
+            // Max Slope Settings
+            assSettingsTab.useMaxSlopeToggle.isOn = asset.useMaxSlope;
+            assSettingsTab.maxSlopeInput.text = asset.maxSlope.ToString();
+            assSettingsTab.maxSlopeSlider.value = asset.maxSlope;
+            // Underwater Settings
+            assSettingsTab.underwaterToggle.isOn = asset.underwaterAsset;
+            assSettingsTab.minDepthInput.text = asset.minDepth.ToString();
+            assSettingsTab.minDepthSlider.value = asset.minDepth;
+            // Underground Settings
+            assSettingsTab.undergroundToggle.isOn = asset.undergroundAsset;
+            assSettingsTab.minDensityInput.text = asset.minDensity.ToString();
+            assSettingsTab.minDensitySlider.value = asset.minDensity;
+            // Valuable Settings
+            assSettingsTab.valueableToggle.isOn = asset.isValuable;
+            assSettingsTab.valueRangeSlider.SetValues(assSettingsTab.valueRangeSlider.Values.minLimit, assSettingsTab.valueRangeSlider.Values.maxLimit, asset.minValue, asset.maxValue);
+
+            assSettingsTab.initialized = true;
+        }
+    }
     /// <summary>
     /// Custom class to store chunk objects and their relevant information and data
     /// </summary>
@@ -814,7 +883,6 @@ public class ChunkGenNetwork : MonoBehaviour
                 waterGen.chunkPos = chunkPos;
                 waterGen.marchingCubes = marchingCubes;
                 marchingCubes.waterGen = waterGen;
-                waterPlaneGenerator.AddComponent<DitherFadeController>();
             }    
             if( terrainDensityData.waterLevel > bounds.min.y)
             {

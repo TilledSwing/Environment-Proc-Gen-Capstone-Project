@@ -1,5 +1,6 @@
 fileFormatVersion: 2
 <<<<<<< HEAD
+<<<<<<< HEAD
 <<<<<<<< HEAD:Assets/Prefabs/Scan.prefab.meta
 guid: 531549b042e200142bf9824a350f44c0
 PrefabImporter:
@@ -11,6 +12,10 @@ TextScriptImporter:
 guid: 447898ec37281fc479e7b537b9e4a313
 PrefabImporter:
 >>>>>>> origin/NetworkingLobbyFinal
+=======
+guid: 531549b042e200142bf9824a350f44c0
+PrefabImporter:
+>>>>>>> origin/Nick_Final_Demo
   externalObjects: {}
   userData: 
   assetBundleName: 

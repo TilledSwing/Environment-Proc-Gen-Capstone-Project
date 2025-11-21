@@ -14,8 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   spawnableAssets:
   - asset: {fileID: 6577857602279842889, guid: 6ecd8b4bc211e454ea918d6d527c28f7, type: 3}
+    name: Green Oak Tree 1
+    icon: {fileID: 2800000, guid: 2c55d834fa8ca2244a0352ca83934dd0, type: 3}
     spawnedAssets: []
-    maxPerChunk: 8
+    maxPerChunk: 4
     rotateToFaceNormal: 0
     spawnProbability: 0.5
     useMinSlope: 0
@@ -34,10 +36,12 @@ MonoBehaviour:
     minValue: 0
     maxValue: 0
   - asset: {fileID: 2007192654614371893, guid: db907286f5ae1d5498c4f2ab90c984f2, type: 3}
+    name: Green Bush 1
+    icon: {fileID: 2800000, guid: 39751025e02044840bc0773ba91124eb, type: 3}
     spawnedAssets: []
-    maxPerChunk: 8
+    maxPerChunk: 5
     rotateToFaceNormal: 1
-    spawnProbability: 0.4
+    spawnProbability: 0.3
     useMinSlope: 0
     minSlope: 0
     useMaxSlope: 1
@@ -54,6 +58,8 @@ MonoBehaviour:
     minValue: 0
     maxValue: 0
   - asset: {fileID: 7646758127176492012, guid: f94ff99c261e9924bbbb894292ced45c, type: 3}
+    name: Green Spruce Tree 1
+    icon: {fileID: 2800000, guid: 6ebf6d3282883884fbe73a36837fc550, type: 3}
     spawnedAssets: []
     maxPerChunk: 8
     rotateToFaceNormal: 0
@@ -74,6 +80,8 @@ MonoBehaviour:
     minValue: 0
     maxValue: 0
   - asset: {fileID: 7762856170357784386, guid: 1f761016c03a561418ff210aec563e01, type: 3}
+    name: Rock 1
+    icon: {fileID: 2800000, guid: 6e499ed7a8e2b064caa8296a08e70d59, type: 3}
     spawnedAssets: []
     maxPerChunk: 8
     rotateToFaceNormal: 1
@@ -94,6 +102,8 @@ MonoBehaviour:
     minValue: 0
     maxValue: 0
   - asset: {fileID: 5314847637665799501, guid: f2612ce08bab1de44b3c77b0ccafd3a6, type: 3}
+    name: Red Mushroom 1
+    icon: {fileID: 2800000, guid: e6db3a0e1a5123c4db6b74a14fc6c810, type: 3}
     spawnedAssets: []
     maxPerChunk: 8
     rotateToFaceNormal: 1
@@ -114,6 +124,8 @@ MonoBehaviour:
     minValue: 0
     maxValue: 0
   - asset: {fileID: 4872043508624741418, guid: e08ec1f4b5e48ab4e96144348381a5d3, type: 3}
+    name: Green Kelp 1
+    icon: {fileID: 2800000, guid: a811a452892d04b4d9dfaf0d78ded8dc, type: 3}
     spawnedAssets: []
     maxPerChunk: 8
     rotateToFaceNormal: 0
@@ -134,6 +146,8 @@ MonoBehaviour:
     minValue: 0
     maxValue: 0
   - asset: {fileID: 3289464266404052115, guid: 25d2db3cddabd5044b15df3087fb148b, type: 3}
+    name: Yellow Mushroom 1
+    icon: {fileID: 2800000, guid: d6667b9497bb0384bacdeee548a993dc, type: 3}
     spawnedAssets: []
     maxPerChunk: 8
     rotateToFaceNormal: 1
@@ -154,6 +168,8 @@ MonoBehaviour:
     minValue: 0
     maxValue: 0
   - asset: {fileID: 8498971446905571726, guid: d461bde81a31c7546b8ca4bd4de3b937, type: 3}
+    name: Rock 2
+    icon: {fileID: 2800000, guid: 9c083dc191aa10f4f940335899972540, type: 3}
     spawnedAssets: []
     maxPerChunk: 8
     rotateToFaceNormal: 1
@@ -174,6 +190,8 @@ MonoBehaviour:
     minValue: 0
     maxValue: 0
   - asset: {fileID: 7155106886293182813, guid: 17aa0fb53545bd244975203542d39ad9, type: 3}
+    name: Green Plant 1
+    icon: {fileID: 2800000, guid: 081827891e3df8544b4a70363c123e0c, type: 3}
     spawnedAssets: []
     maxPerChunk: 8
     rotateToFaceNormal: 1
@@ -194,6 +212,8 @@ MonoBehaviour:
     minValue: 0
     maxValue: 0
   - asset: {fileID: 1315793589245392064, guid: 87c56f7bf213b1d4eb030fc84823d811, type: 3}
+    name: White Plant 1
+    icon: {fileID: 2800000, guid: f22d2e26efbc15e42a9da8f34fb11d6d, type: 3}
     spawnedAssets: []
     maxPerChunk: 8
     rotateToFaceNormal: 1
@@ -214,6 +234,8 @@ MonoBehaviour:
     minValue: 0
     maxValue: 0
   - asset: {fileID: 7046172586671867047, guid: 1cb8589f3bf81294b81d0e23d1e5868b, type: 3}
+    name: Purple Coral
+    icon: {fileID: 2800000, guid: 5436fc9c6733319448b1b3453dd95457, type: 3}
     spawnedAssets: []
     maxPerChunk: 5
     rotateToFaceNormal: 1
@@ -234,6 +256,8 @@ MonoBehaviour:
     minValue: 0
     maxValue: 0
   - asset: {fileID: 4076257425805142985, guid: ed840f491f852754796378ea5eff6478, type: 3}
+    name: Jade Moai Statue
+    icon: {fileID: 2800000, guid: 83f88be2df527424981199367958b8f7, type: 3}
     spawnedAssets: []
     maxPerChunk: 2
     rotateToFaceNormal: 0

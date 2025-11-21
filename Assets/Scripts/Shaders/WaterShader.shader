@@ -254,7 +254,7 @@ Shader "Custom/WaterShader"
 
                 float4 finalColor = UniversalFragmentPBR(inputData, surfaceData);
 
-                if (_fogActive == 1)
+                if (_fogActive != 0)
                     finalColor.rgb = lerp(_fogColor.rgb, finalColor.rgb, FogFadeFactor(_fogOffset, _fogDensity, IN.worldPos));
 
                 return finalColor;
