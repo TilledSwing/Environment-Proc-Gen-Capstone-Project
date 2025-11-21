@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using Unity.AI.Navigation;
 using FishNet.Demo.HashGrid;
 using System.Linq;
+using System.Collections;
 
 public class EnemySpawner : NetworkBehaviour
 {
@@ -31,12 +32,19 @@ public class EnemySpawner : NetworkBehaviour
     public override void OnStartClient()
     {
         base.OnStartClient();
-        if (IsServerStarted)
+        if (IsServerInitialized)
         {
             loadPrefab();
+            StartCoroutine(WaitForBothParallel());
         }
     }
-
+    public IEnumerator WaitForBothParallel()
+    {
+        yield return GlobalNavMeshUpdater.Instance.ProcessNavMeshUpdates();
+        SpawnLandEnemies_FilteredByAgent();
+        SpawnWaterEnemies_FilteredByAgent();
+    }
+  
     void loadPrefab()
     {
         Addressables.LoadAssetAsync<GameObject>(landPrefabAdress).Completed += handle =>
@@ -63,25 +71,11 @@ public class EnemySpawner : NetworkBehaviour
         return;
     }
 
-    void Update()
-    {
-        // Block input if in a chat message block. Ensures that typing words with certain letters or numbers won't trigger input events.
-        if (EventSystem.current.currentSelectedGameObject != null &&
-            EventSystem.current.currentSelectedGameObject.GetComponent<TMP_InputField>() != null)
-        {
-            return;
-        }
-
-        if (IsServerOnlyStarted && Input.GetKeyDown(KeyCode.L))
-            SpawnLandEnemies_FilteredByAgent();
-        else if (IsClientStarted && Input.GetKeyDown(KeyCode.L))
-            RequestSpawnEnemy();
-    }
-
     [ServerRpc(RequireOwnership = false)]
-    private void RequestSpawnEnemy()
+    public void RequestSpawnEnemy()
     {
         SpawnLandEnemies_FilteredByAgent();
+        SpawnWaterEnemies_FilteredByAgent();
     }
 
     private struct Tri
@@ -180,9 +174,9 @@ public class EnemySpawner : NetworkBehaviour
             if (!NavMesh.SamplePosition(spawnPos, out hit, sampleMaxDist, filter))
                 continue;
 
-            // Check reachable to any player (keep your IsReachable)
-            if (!playerTransforms.Any(p => IsReachable(spawnPos, p.position)))
-                continue;
+            // // Check reachable to any player (keep your IsReachable)
+            // if (!playerTransforms.Any(p => IsReachable(spawnPos, p.position)))
+            //     continue;
 
             // Check min spacing
             if (usedLandPositions.Any(pos => Vector3.Distance(pos, spawnPos) < minDistance))

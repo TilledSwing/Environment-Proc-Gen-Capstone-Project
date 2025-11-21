@@ -83,17 +83,16 @@ public class GlobalNavMeshUpdater : MonoBehaviour
 
     private void StartNavMeshBuilds()
     {
-        InvokeRepeating(nameof(ProcessNavMeshUpdates), 0.1f, navMeshUpdateInterval);
+        // InvokeRepeating(nameof(ProcessNavMeshUpdates), .1f, navMeshUpdateInterval);
     }
 
-    private void ProcessNavMeshUpdates()
+    public IEnumerator ProcessNavMeshUpdates()
     {
-                CancelInvoke(nameof(ProcessNavMeshUpdates));
         if (!isBuildingLandNavMesh && landNavMeshNeedsRebuild)
-            StartCoroutine(RebuildLandNavMeshBatched());
+            yield return StartCoroutine(RebuildLandNavMeshBatched());
 
         if (!isBuildingWaterNavMesh && waterNavMeshNeedsRebuild)
-            StartCoroutine(RebuildAndLinkWaterCoroutine(waterSources, 1.5f));
+            yield return StartCoroutine(RebuildAndLinkWaterCoroutine(waterSources, 1.5f));
     }
     /// <summary>
     /// Adds a chunk to the list of chunks to be included in the next navmesh rebuild
