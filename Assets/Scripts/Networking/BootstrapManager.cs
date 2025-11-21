@@ -2,16 +2,18 @@
 
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using FishNet.Managing;
 using Steamworks;
+using FishNet.Managing.Scened;
+using SceneManager = UnityEngine.SceneManagement.SceneManager;
 
 public class BootstrapManager : MonoBehaviour
 {
     private static BootstrapManager instance;
 
-    [SerializeField] private string menuName = "GameActive";
+    [SerializeField] private string menuName = "GameMenu";
     [SerializeField] private FishNet.Managing.NetworkManager _networkManager;
     [SerializeField] private FishySteamworks.FishySteamworks _fishySteamworks;
+    [SerializeField] private GameObject preGameLobby;
 
     protected Callback<LobbyCreated_t> LobbyCreated;
     protected Callback<GameLobbyJoinRequested_t> JoinRequest;
@@ -39,6 +41,8 @@ public class BootstrapManager : MonoBehaviour
 
     public void LoadMenu()
     {
+        //SceneLoadData sld = new SceneLoadData("GameActive");
+        //InstanceFinder.SceneManager.LoadConnectionScenes(InstanceFinder.ClientManager.Connection, sld);
         SceneManager.LoadScene(menuName, LoadSceneMode.Additive);
     }
 
@@ -72,8 +76,8 @@ public class BootstrapManager : MonoBehaviour
         _fishySteamworks.StartConnection(false);
 
         // Start up game sequence
-        GameMenuManager.instance.DisableLobbyMenu();
-        GameMenuManager.instance.LoadPreGameFeatures();
+        //GameMenuManager.instance.DisableLobbyMenu();
+        //GameMenuManager.instance.LoadPreGameFeatures(instance._networkManager.IsServerStarted);
         // UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(menuName);
         // SceneManager.LoadScene("GameActive", LoadSceneMode.Additive);
     }
@@ -108,5 +112,10 @@ public class BootstrapManager : MonoBehaviour
         //string suffix = "'s PEGG lobby";
         //string hostLobbyName = SteamMatchmaking.GetLobbyData(new CSteamID(CurrentLobbyID), "name");
         //return steamName.Equals(hostLobbyName.Substring(0, hostLobbyName.Length - suffix.Length));
+    }
+
+    public static void DisablePreGameLobby()
+    {
+        instance.preGameLobby.SetActive(false);
     }
 }
