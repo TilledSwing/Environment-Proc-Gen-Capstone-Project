@@ -14,7 +14,7 @@ public class StartGameScript : NetworkBehaviour
     public void StartButtonPressed()
     {
         StartGameServer();
-        //GameMenuManager.instance.DisableHostTerrainButtons();
+        GameMenuManager.instance.DisableHostTerrainButtons();
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -28,5 +28,6 @@ public class StartGameScript : NetworkBehaviour
     {
         //Debug.Log("Reached Observer");
         BootstrapManager.DisablePreGameLobby();
+        PlayerController.instance.gameStarted = true;
     }
 }

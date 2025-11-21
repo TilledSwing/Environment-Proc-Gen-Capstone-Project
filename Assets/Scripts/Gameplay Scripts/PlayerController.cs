@@ -1,13 +1,9 @@
-using FishNet.Connection;
 using FishNet.Object;
-using System.Collections;
 using System.Collections.Generic;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Rendering;
-using UnityEngine.Rendering.Universal;
 
 // Template by Bobsi Unity - Youtube
 // Modified by Jacob Ormsby
@@ -25,6 +21,7 @@ public class PlayerController : NetworkBehaviour
     public float lookXLimit = 75.0f;
     public float flightSpeed = 6.0f;
     public bool editorPlayer = true;
+    public bool gameStarted = false;
 
     public CharacterController characterController;
     public Vector3 moveDirection = Vector3.zero;

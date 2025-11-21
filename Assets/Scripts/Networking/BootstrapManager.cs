@@ -10,7 +10,7 @@ public class BootstrapManager : MonoBehaviour
 {
     private static BootstrapManager instance;
 
-    [SerializeField] private string menuName = "GameMenu";
+    [SerializeField] private GameObject gameMenu;
     [SerializeField] private FishNet.Managing.NetworkManager _networkManager;
     [SerializeField] private FishySteamworks.FishySteamworks _fishySteamworks;
     [SerializeField] private GameObject preGameLobby;
@@ -43,7 +43,7 @@ public class BootstrapManager : MonoBehaviour
     {
         //SceneLoadData sld = new SceneLoadData("GameActive");
         //InstanceFinder.SceneManager.LoadConnectionScenes(InstanceFinder.ClientManager.Connection, sld);
-        SceneManager.LoadScene(menuName, LoadSceneMode.Additive);
+        gameMenu.SetActive(true);
     }
 
     private void OnLobbyCreated(LobbyCreated_t callback)
@@ -76,10 +76,8 @@ public class BootstrapManager : MonoBehaviour
         _fishySteamworks.StartConnection(false);
 
         // Start up game sequence
-        //GameMenuManager.instance.DisableLobbyMenu();
-        //GameMenuManager.instance.LoadPreGameFeatures(instance._networkManager.IsServerStarted);
-        // UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(menuName);
-        // SceneManager.LoadScene("GameActive", LoadSceneMode.Additive);
+        GameMenuManager.instance.DisableLobbyMenu();
+        GameMenuManager.instance.LoadPreGameFeatures(instance._networkManager.IsServerStarted);
     }
 
     public static void JoinByID(CSteamID steamID)
