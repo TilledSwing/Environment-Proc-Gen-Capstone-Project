@@ -25,7 +25,7 @@ try {
     try {
         $terrainStmt = $conn->prepare("
             SELECT width, height, isolevel, waterLevel, lerp, terracing, terraceHeight
-            FROM Terrains
+            FROM TerrainSettings
             WHERE TerrainId = ?
         ");
         $terrainStmt->bind_param("i", $terrainId);
@@ -39,60 +39,61 @@ try {
         $terrainRow = $terrainResult->fetch_assoc();
 
         $noiseStmt = $conn->prepare("
-            SELECT * 
-            FROM NoiseSettings
-            WHERE TerrainId = ?
+            SELECT * FROM TerrainNoiseSettings WHERE TerrainId = ?
         ");
         $noiseStmt->bind_param("i", $terrainId);
         $noiseStmt->execute();
-        $noiseResult = $noiseStmt->get_result();
+        $result = $noiseStmt->get_result();
 
-        if (!$noiseResult) {
+        if (!$result) {
             throw new Exception("Query failed: " . $conn->error);
         }
-
-        $noiseSettings = [];
-        while ($row = $noiseResult->fetch_assoc()) {
-            $noiseSettings[] = [
+        $NoiseGeneratorSettings = [];
+        while ($row = $result->fetch_assoc()) {
+            $NoiseGeneratorSettings[] = [
                 'activated' => (bool) $row['activated'],
-                'noiseGeneratorType' => (int) $row['noiseGeneratorType'],
-                'selectedNoiseDimension' => (int) $row['selectedNoiseDimension'],
-                'noiseDimension' => (int) $row['noiseDimension'],
-                'selectedNoiseType' => (int) $row['selectedNoiseType'],
-                'noiseType' => (int) $row['noiseType'],
-                'selectedNoiseFractalType' => (int) $row['selectedNoiseFractalType'],
-                'noiseFractalType' => (int) $row['noiseFractalType'],
-                'selectedRotationType3D' => (int) $row['selectedRotationType3D'],
-                'rotationType3D' => (int) $row['rotationType3D'],
-                'noiseSeed' => (int) $row['noiseSeed'],
-                'noiseFractalOctaves' => (int) $row['noiseFractalOctaves'],
-                'noiseFractalLacunarity' => (float) $row['noiseFractalLacunarity'],
-                'noiseFractalGain' => (float) $row['noiseFractalGain'],
-                'fractalWeightedStrength' => (float) $row['fractalWeightedStrength'],
-                'noiseFrequency' => (float) $row['noiseFrequency'],
+                'remoteTexture' => json_decode($row['remoteTexture'], true),
+                'noiseGeneratorType' => $row['noiseGeneratorType'],
+
+                'selectedNoiseDimension' => (int)$row['selectedNoiseDimension'],
+                'noiseDimension' => (int)$row['noiseDimension'],
+                'selectedNoiseType' => (int)$row['selectedNoiseType'],
+                'noiseType' => (int)$row['noiseType'],
+                'selectedNoiseFractalType' => (int)$row['selectedNoiseFractalType'],
+                'noiseFractalType' => (int)$row['noiseFractalType'],
+                'selectedRotationType3D' => (int)$row['selectedRotationType3D'],
+                'rotationType3D'  => (int)$row['rotationType3D'],
+                'noiseSeed' => (int)$row['noiseSeed'],
+                'noiseFractalOctaves' => (int)$row['noiseFractalOctaves'],
+                'noiseFractalLacunarity'=> (float)$row['noiseFractalLacunarity'],
+                'noiseFractalGain' => (float)$row['noiseFractalGain'],
+                'fractalWeightedStrength'=> (float)$row['fractalWeightedStrength'],
+                'noiseFrequency' => (float)$row['noiseFrequency'],
+
                 'domainWarpToggle' => (bool) $row['domainWarpToggle'],
-                'selectedDomainWarpType' => (int) $row['selectedDomainWarpType'],
-                'domainWarpType' => (int) $row['domainWarpType'],
-                'selectedDomainWarpFractalType' => (int) $row['selectedDomainWarpFractalType'],
-                'domainWarpFractalType' => (int) $row['domainWarpFractalType'],
-                'domainWarpAmplitude' => (float) $row['domainWarpAmplitude'],
-                'domainWarpSeed' => (int) $row['domainWarpSeed'],
-                'domainWarpFractalOctaves' => (int) $row['domainWarpFractalOctaves'],
-                'domainWarpFractalLacunarity' => (float) $row['domainWarpFractalLacunarity'],
-                'domainWarpFractalGain' => (float) $row['domainWarpFractalGain'],
-                'domainWarpFrequency' => (float) $row['domainWarpFrequency'],
-                'selectedCellularDistanceFunction' => (int) $row['selectedCellularDistanceFunction'],
-                'cellularDistanceFunction' => (int) $row['cellularDistanceFunction'],
-                'selectedCellularReturnType' => (int) $row['selectedCellularReturnType'],
-                'cellularReturnType' => (int) $row['cellularReturnType'],
-                'cellularJitter' => (float) $row['cellularJitter'],
-                'noiseScale' => (float) $row['noiseScale'],
-                'width' => (int) $row['width']
+                'selectedDomainWarpType' => (int)$row['selectedDomainWarpType'],
+                'domainWarpType' => (int)$row['domainWarpType'],
+                'selectedDomainWarpFractalType' => (int)$row['selectedDomainWarpFractalType'],
+                'domainWarpFractalType' => (int)$row['domainWarpFractalType'],
+                'domainWarpAmplitude'=> (float)$row['domainWarpAmplitude'],
+                'domainWarpSeed' => (int)$row['domainWarpSeed'],
+                'domainWarpFractalOctaves' => (int)$row['domainWarpFractalOctaves'],
+                'domainWarpFractalLacunarity' => (float)$row['domainWarpFractalLacunarity'],
+                'domainWarpFractalGain' => (float)$row['domainWarpFractalGain'],
+                'domainWarpFrequency' => (float)$row['domainWarpFrequency'],
+
+                'selectedCellularDistanceFunction'=> (int)$row['selectedCellularDistanceFunction'],
+                'cellularDistanceFunction' => (int)$row['cellularDistanceFunction'],
+                'selectedCellularReturnType' => (int)$row['selectedCellularReturnType'],
+                'cellularReturnType' => (int)$row['cellularReturnType'],
+                'cellularJitter' => (float)$row['cellularJitter'],
+                'noiseScale' => (float)$row['noiseScale'],
             ];
         }
 
         // 3. Build the final TerrainSettings response
         $response['data'] = [
+            'noiseSettings' => $NoiseGeneratorSettings,
             'width' => (int) $terrainRow['width'],
             'height' => (int) $terrainRow['height'],
             'isolevel' => (float) $terrainRow['isolevel'],
@@ -100,7 +101,6 @@ try {
             'lerp' => (bool) $terrainRow['lerp'],
             'terracing' => (bool) $terrainRow['terracing'],
             'terraceHeight' => (int) $terrainRow['terraceHeight'],
-            'noiseSettings' => $noiseSettings
         ];
 
         $conn->commit();
@@ -120,6 +120,5 @@ try {
     }
     echo json_encode($response);
 }
-
 
 ?>

@@ -83,7 +83,7 @@ MonoBehaviour:
   NetworkBehaviours:
   - {fileID: 1984013878436646235}
   - {fileID: 5124199961911290323}
-  - {fileID: 3904299120803794151}
+  - {fileID: 0}
   InitializedParentNetworkBehaviour: {fileID: 0}
   InitializedNestedNetworkObjects: []
   RuntimeParentNetworkBehaviour: {fileID: 0}
@@ -211,12 +211,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 4787734284849576031}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b3cb185734786f347b6d72edb88562b3, type: 3}
+  m_Script: {fileID: 11500000, guid: 1684f4e49e7ed88458f8e082189e6755, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 2
+  _componentIndexCache: 255
   _addedNetworkObject: {fileID: 3000861625305372182}
-  _networkObjectCache: {fileID: 3000861625305372182}
+  _networkObjectCache: {fileID: 0}
   isFrozen: 0
 --- !u!114 &1072984882267816342
 MonoBehaviour:
@@ -627,7 +627,7 @@ PrefabInstance:
       addedObject: {fileID: 8399760115761749008}
     - targetCorrespondingSourceObject: {fileID: -861405314158159493, guid: bbd47ea680a7caf47a6bf0b56983272b, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 7347546656062620002}
+      addedObject: {fileID: 6251874300835313589}
     - targetCorrespondingSourceObject: {fileID: 1525170383582102499, guid: bbd47ea680a7caf47a6bf0b56983272b, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2505834842960109316}
@@ -661,7 +661,7 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &7347546656062620002
+--- !u!114 &6251874300835313589
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -670,7 +670,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 2635381372300672642}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 86ed5600148c640469cd8e25e1ce5dd1, type: 3}
+  m_Script: {fileID: 11500000, guid: a0f46fa750848c04abc5ae6dbd73a21f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _componentIndexCache: 255
@@ -713,7 +713,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 5022379353171436570}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 86ed5600148c640469cd8e25e1ce5dd1, type: 3}
+  m_Script: {fileID: 11500000, guid: a0f46fa750848c04abc5ae6dbd73a21f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _componentIndexCache: 255

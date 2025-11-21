@@ -63,8 +63,7 @@ public class DBManager : MonoBehaviour
         string url = "http://localhost/sqlconnect/saveTerrain.php";
         WWWForm form = new();
 
-        ChunkGenNetwork abc = FindFirstObjectByType<ChunkGenNetwork>();
-        TerrainSettings settings = SeedSerializer.SerializeTerrainDensity(abc.terrainDensityData);
+        TerrainSettings settings = SeedSerializer.SerializeTerrainDensity(ChunkGenNetwork.Instance.terrainDensityData);
         string json = JsonUtility.ToJson(settings);
 
         form.AddField("TerrainSettings", json);
@@ -90,7 +89,6 @@ public class DBManager : MonoBehaviour
                 Debug.Log("request failed: " + request.error + " response code: " + request.responseCode);
 
         }
-        yield return StartCoroutine(SaveTerrainAssets(ManualAssetIdentification.PlacedAssets, loadedTerrainId));
     }
 
     /// <summary>
@@ -250,75 +248,46 @@ public class DBManager : MonoBehaviour
                     PHPTerrainDataResponse response = JsonUtility.FromJson<PHPTerrainDataResponse>(request.downloadHandler.text);
                     if (response.success)
                     {
+                        Debug.Log("Loaded the terrain now going to see if we can deserealize and load");
                         GameObject chunk = GameObject.Find("ChunkParent");
 
                         while (chunk.transform.childCount > 0)
                         {
                             DestroyImmediate(chunk.transform.GetChild(0).gameObject);
                         }
-                        ChunkGenNetwork cg = FindFirstObjectByType<ChunkGenNetwork>();
-                        cg.UpdateFromDB(response.data);
-                    }
-                    else
-                    {
-                        Debug.LogError("PHP Error: " + response.message);
-                    }
-                }
-                catch (System.Exception e)
-                {
-                    Debug.LogError("JSON Parse Error: " + e.Message);
-                    Debug.Log("Raw Response: " + request.downloadHandler.text);
-                }
-            }
-            else
-            {
-                Debug.LogError("Request Failed: " + request.error);
-                Debug.LogError("Response Code: " + request.responseCode);
-            }
-        }
-        yield return StartCoroutine(LoadTerrainAsset(2));
+                        Debug.Log("Deleted the terrain");
+                        TerrainDensityData terrainDensityDataNew = SeedSerializer.DeserializeTerrainDensity(response.data);
+                        ChunkGenNetwork.Instance.terrainDensityData = terrainDensityDataNew;
+                        Debug.Log("de-serealized the terrain response data");
 
-    }
+                        // Reset action and chunking to defaults (loading in from fresh)
+                        // Chunk Variables
+                        ChunkGenNetwork.Instance.chunkDictionary = new();
+                        ChunkGenNetwork.Instance.chunksVisibleLastUpdate = new();
+                        ChunkGenNetwork.Instance.chunkLoadQueue = new();
+                        ChunkGenNetwork.Instance.chunkLoadSet = new();
+                        ChunkGenNetwork.Instance.chunkHideQueue = new();
+                        ChunkGenNetwork.Instance.chunkShowQueue = new();
+                        ChunkGenNetwork.Instance.isLoadingChunkVisibility = false;
+                        // queueUpdateDistanceThreshold = 15f;
+                        ChunkGenNetwork.Instance.isLoadingChunks = false;
+                        // Action Queues
+                        ChunkGenNetwork.Instance.hasPendingMeshInits = false;
+                        ChunkGenNetwork.Instance.pendingMeshInits = new();
+                        ChunkGenNetwork.Instance.isLoadingMeshes = false;
+                        ChunkGenNetwork.Instance.hasPendingReadbacks = false;
+                        ChunkGenNetwork.Instance.pendingReadbacks = new();
+                        ChunkGenNetwork.Instance.isLoadingReadbacks = false;
+                        ChunkGenNetwork.Instance.hasPendingAssetInstantiations = false;
+                        ChunkGenNetwork.Instance.pendingAssetInstantiations = new();
+                        ChunkGenNetwork.Instance.isLoadingAssetInstantiations = false;
 
-    /// <summary>
-    /// Once a terrains data has been loaded, this method is called to load in all of the users manually placed terrain assets.
-    /// </summary>
-    /// <param name="loadedTerrainId"></param>
-    /// <returns></returns>
-    IEnumerator LoadTerrainAsset(int loadedTerrainId)
-    {
-        ManualAssetIdentification.PlacedAssets.Clear();
-        string url = "http://localhost/sqlconnect/loadAssets.php";
-        WWWForm form = new();
+                        ChunkGenNetwork.Instance.chunkSize = ChunkGenNetwork.Instance.terrainDensityData.width;
+                        ChunkGenNetwork.Instance.chunksVisible = Mathf.RoundToInt(ChunkGenNetwork.Instance.maxViewDst / ChunkGenNetwork.Instance.chunkSize);
 
-        //Need to pass the SteamId and steamId to the php to determine if the user exists, or if we need to add them to the db
-        form.AddField("terrainId", loadedTerrainId);
-        using (UnityWebRequest request = UnityWebRequest.Post(url, form))
-        {
-            // Set timeout (in seconds)
-            request.timeout = 10;
-
-            yield return request.SendWebRequest();
-
-            if (request.result == UnityWebRequest.Result.Success)
-            {
-                try
-                {
-                    // Parse the JSON response
-                    ManualAssetJSONList response = JsonUtility.FromJson<ManualAssetJSONList>(request.downloadHandler.text);
-                    if (response.success && response.data != null)
-                    {
-                        foreach (ManualAssetJSON mas in response.data)
-                        {
-                            ManualAssetId assetId = (ManualAssetId)mas.AssetId;
-                            GameObject obj = ManualAssetTracker.Create(assetId);
-                            obj.transform.position = new Vector3(mas.xPos, mas.yPos, mas.zPos);
-                            obj.transform.rotation = Quaternion.identity;
-                            if (obj.GetComponent<Rigidbody>() == null)
-                                obj.AddComponent<Rigidbody>();
-                            ManualAssetIdentification asset = new(assetId, mas.xPos, mas.yPos, mas.zPos);
-                            Instantiate(obj, gameObject.transform.position, Quaternion.identity);
-                        }
+                        ChunkGenNetwork.Instance.assetSpawnData.ResetSpawnPoints();
+                        ChunkGenNetwork.Instance.initialLoadComplete = false;
+                        ChunkGenNetwork.Instance.UpdateVisibleChunks();
                     }
                     else
                     {
@@ -338,6 +307,7 @@ public class DBManager : MonoBehaviour
             }
         }
     }
+
     // Helper classes for JSON parsing of returned data
     [System.Serializable]
     public class PHPResponse
