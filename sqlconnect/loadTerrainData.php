@@ -39,15 +39,7 @@ try {
         $terrainRow = $terrainResult->fetch_assoc();
 
         $noiseStmt = $conn->prepare("
-            SELECT *
-            FROM TerrainNoiseLink AS tnl
-            INNER JOIN NoiseSettings AS ns 
-                ON tnl.Noise_Settings_Id = ns.Noise_Settings_Id
-            LEFT JOIN DomainWarpSettings AS dw
-                ON ns.Noise_Settings_Id = dw.Noise_Settings_Id
-            LEFT JOIN CellularValues AS cv
-                ON ns.Noise_Settings_Id = cv.Noise_Settings_Id
-            WHERE tnl.TerrainId = ?
+            SELECT * FROM TerrainNoiseSettings WHERE TerrainId = ?
         ");
         $noiseStmt->bind_param("i", $terrainId);
         $noiseStmt->execute();
@@ -60,8 +52,8 @@ try {
         while ($row = $result->fetch_assoc()) {
             $NoiseGeneratorSettings[] = [
                 'activated' => (bool) $row['activated'],
-                'remoteTexture' => $row['remoteTexture'],
-                'noiseGeneratorType' => (int)$row['noiseGeneratorType'],
+                'remoteTexture' => json_decode($row['remoteTexture'], true),
+                'noiseGeneratorType' => $row['noiseGeneratorType'],
 
                 'selectedNoiseDimension' => (int)$row['selectedNoiseDimension'],
                 'noiseDimension' => (int)$row['noiseDimension'],
@@ -127,20 +119,6 @@ try {
         $conn->close();
     }
     echo json_encode($response);
-}
-
-function decodeFloatArray(string $blob): array {
-    $floats = [];
-    $length = strlen($blob);
-
-    // 4 bytes per float
-    for ($i = 0; $i < $length; $i += 4) {
-        $chunk = substr($blob, $i, 4);
-        $float = unpack('f', $chunk)[1];
-        $floats[] = $float;
-    }
-
-    return $floats;
 }
 
 ?>

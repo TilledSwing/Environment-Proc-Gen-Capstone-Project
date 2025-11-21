@@ -89,7 +89,6 @@ public class DBManager : MonoBehaviour
                 Debug.Log("request failed: " + request.error + " response code: " + request.responseCode);
 
         }
-        yield return StartCoroutine(SaveTerrainAssets(ManualAssetIdentification.PlacedAssets, loadedTerrainId));
     }
 
     /// <summary>
@@ -249,14 +248,46 @@ public class DBManager : MonoBehaviour
                     PHPTerrainDataResponse response = JsonUtility.FromJson<PHPTerrainDataResponse>(request.downloadHandler.text);
                     if (response.success)
                     {
+                        Debug.Log("Loaded the terrain now going to see if we can deserealize and load");
                         GameObject chunk = GameObject.Find("ChunkParent");
 
                         while (chunk.transform.childCount > 0)
                         {
                             DestroyImmediate(chunk.transform.GetChild(0).gameObject);
                         }
-                        ChunkGenNetwork cg = FindFirstObjectByType<ChunkGenNetwork>();
-                        cg.UpdateFromDB(response.data);
+                        Debug.Log("Deleted the terrain");
+                        TerrainDensityData terrainDensityDataNew = SeedSerializer.DeserializeTerrainDensity(response.data);
+                        ChunkGenNetwork.Instance.terrainDensityData = terrainDensityDataNew;
+                        Debug.Log("de-serealized the terrain response data");
+
+                        // Reset action and chunking to defaults (loading in from fresh)
+                        // Chunk Variables
+                        ChunkGenNetwork.Instance.chunkDictionary = new();
+                        ChunkGenNetwork.Instance.chunksVisibleLastUpdate = new();
+                        ChunkGenNetwork.Instance.chunkLoadQueue = new();
+                        ChunkGenNetwork.Instance.chunkLoadSet = new();
+                        ChunkGenNetwork.Instance.chunkHideQueue = new();
+                        ChunkGenNetwork.Instance.chunkShowQueue = new();
+                        ChunkGenNetwork.Instance.isLoadingChunkVisibility = false;
+                        // queueUpdateDistanceThreshold = 15f;
+                        ChunkGenNetwork.Instance.isLoadingChunks = false;
+                        // Action Queues
+                        ChunkGenNetwork.Instance.hasPendingMeshInits = false;
+                        ChunkGenNetwork.Instance.pendingMeshInits = new();
+                        ChunkGenNetwork.Instance.isLoadingMeshes = false;
+                        ChunkGenNetwork.Instance.hasPendingReadbacks = false;
+                        ChunkGenNetwork.Instance.pendingReadbacks = new();
+                        ChunkGenNetwork.Instance.isLoadingReadbacks = false;
+                        ChunkGenNetwork.Instance.hasPendingAssetInstantiations = false;
+                        ChunkGenNetwork.Instance.pendingAssetInstantiations = new();
+                        ChunkGenNetwork.Instance.isLoadingAssetInstantiations = false;
+
+                        ChunkGenNetwork.Instance.chunkSize = ChunkGenNetwork.Instance.terrainDensityData.width;
+                        ChunkGenNetwork.Instance.chunksVisible = Mathf.RoundToInt(ChunkGenNetwork.Instance.maxViewDst / ChunkGenNetwork.Instance.chunkSize);
+
+                        ChunkGenNetwork.Instance.assetSpawnData.ResetSpawnPoints();
+                        ChunkGenNetwork.Instance.initialLoadComplete = false;
+                        ChunkGenNetwork.Instance.UpdateVisibleChunks();
                     }
                     else
                     {

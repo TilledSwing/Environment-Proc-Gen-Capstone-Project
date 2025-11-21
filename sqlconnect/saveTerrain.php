@@ -28,22 +28,31 @@ try {
 
     $conn->begin_transaction();
     try {
+
         $insertTerrain = $conn->prepare("
                         INSERT INTO Terrains (UserId, TerrainName)
-                        VALUES ((SELECT Id FROM Users WHERE SteamId = ?), ?)");  
+                        VALUES ((SELECT Id FROM Users WHERE SteamId = ?), ?) ON DUPLICATE KEY UPDATE TerrainId = LAST_INSERT_ID(TerrainID)");  
         
         $insertTerrain->bind_param(
             "is",
             $steamId,
-            $terrainName,
+            $terrainName
         );
         $insertTerrain->execute();
         $terrainId = $conn->insert_id;
 
+        //Delete the old settings if they exist
+        $deleteStmt = $conn->prepare("DELETE FROM TerrainSettings WHERE TerrainId = ?");
+        $deleteStmt->bind_param("i", $terrainId);
+        $deleteStmt->execute();
+
+        $deleteStmt = $conn->prepare("DELETE FROM TerrainNoiseSettings WHERE TerrainId = ?");
+        $deleteStmt->bind_param("i", $terrainId);
+        $deleteStmt->execute();
+
         $insertTerrainSettings = $conn->prepare("
                 INSERT INTO TerrainSettings (TerrainId,  width, height, isolevel, waterLevel, lerp, terracing, terraceHeight)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                ON DUPLICATE KEY UPDATE TerrainId = LAST_INSERT_ID(TerrainID),
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE
                 width = VALUES(width),
                 height = VALUES(height),
                 isolevel = VALUES(isolevel),
@@ -52,6 +61,7 @@ try {
                 terracing = VALUES(terracing),
                 terraceHeight = VALUES(terraceHeight)
             ");
+
         $width = $terrainSettings['width'];
         $height = $terrainSettings['height'];
         $isolevel = $terrainSettings['isolevel'];
@@ -59,10 +69,9 @@ try {
         $lerp = $terrainSettings['lerp'] ? 1 : 0;
         $terracing = $terrainSettings['terracing'] ? 1 : 0;
         $terraceHeight = $terrainSettings['terraceHeight'] ?? 0;
-        $insertTerrain->bind_param(
-            "isiiiiiii",
-            $steamId,
-            $terrainName,
+        $insertTerrainSettings->bind_param(
+            "iiidiiii",
+            $terrainId,
             $width,
             $height,
             $isolevel,
@@ -71,61 +80,27 @@ try {
             $terracing,
             $terraceHeight
         );
-        $insertTerrain->execute();
-        $terrainId = $conn->insert_id;
+        $insertTerrainSettings->execute();
 
         $insertNoise = $conn->prepare("
-                    INSERT INTO NoiseSettings (
-                        TerrainId, activated, noiseGeneratorType, selectedNoiseDimension, noiseDimension,
+                    INSERT INTO TerrainNoiseSettings (
+                        TerrainId, activated, remoteTexture, noiseGeneratorType, selectedNoiseDimension, noiseDimensions,
                         selectedNoiseType, noiseType, selectedNoiseFractalType, noiseFractalType,
                         selectedRotationType3D, rotationType3D, noiseSeed, noiseFractalOctaves,
-                        noiseFractalLacunarity, noiseFractalGain, fractalWeightedStrength, noiseFrequency,
+                        noiseFractalLacunarity, noiseFractalGain, fractalWeightedStrength, noiseFrequency, noiseScale,
                         domainWarpToggle, selectedDomainWarpType, domainWarpType, selectedDomainWarpFractalType,
                         domainWarpFractalType, domainWarpAmplitude, domainWarpSeed, domainWarpFractalOctaves,
                         domainWarpFractalLacunarity, domainWarpFractalGain, domainWarpFrequency,
                         selectedCellularDistanceFunction, cellularDistanceFunction, selectedCellularReturnType,
-                        cellularReturnType, cellularJitter, noiseScale, width
+                        cellularReturnType, cellularJitter
                     ) VALUES (
                         ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
                     )
-                        ON DUPLICATE KEY UPDATE
-                        activated = VALUES(activated),
-                        selectedNoiseDimension = VALUES(selectedNoiseDimension),
-                        noiseDimension = VALUES(noiseDimension),
-                        selectedNoiseType = VALUES(selectedNoiseType),
-                        noiseType = VALUES(noiseType),
-                        selectedNoiseFractalType = VALUES(selectedNoiseFractalType),
-                        noiseFractalType = VALUES(noiseFractalType),
-                        selectedRotationType3D = VALUES(selectedRotationType3D),
-                        rotationType3D = VALUES(rotationType3D),
-                        noiseSeed = VALUES(noiseSeed),
-                        noiseFractalOctaves = VALUES(noiseFractalOctaves),
-                        noiseFractalLacunarity = VALUES(noiseFractalLacunarity),
-                        noiseFractalGain = VALUES(noiseFractalGain),
-                        fractalWeightedStrength = VALUES(fractalWeightedStrength),
-                        noiseFrequency = VALUES(noiseFrequency),
-                        domainWarpToggle = VALUES(domainWarpToggle),
-                        selectedDomainWarpType = VALUES(selectedDomainWarpType),
-                        domainWarpType = VALUES(domainWarpType),
-                        selectedDomainWarpFractalType = VALUES(selectedDomainWarpFractalType),
-                        domainWarpFractalType = VALUES(domainWarpFractalType),
-                        domainWarpAmplitude = VALUES(domainWarpAmplitude),
-                        domainWarpSeed = VALUES(domainWarpSeed),
-                        domainWarpFractalOctaves = VALUES(domainWarpFractalOctaves),
-                        domainWarpFractalLacunarity = VALUES(domainWarpFractalLacunarity),
-                        domainWarpFractalGain = VALUES(domainWarpFractalGain),
-                        domainWarpFrequency = VALUES(domainWarpFrequency),
-                        selectedCellularDistanceFunction = VALUES(selectedCellularDistanceFunction),
-                        cellularDistanceFunction = VALUES(cellularDistanceFunction),
-                        selectedCellularReturnType = VALUES(selectedCellularReturnType),
-                        cellularReturnType = VALUES(cellularReturnType),
-                        cellularJitter = VALUES(cellularJitter),
-                        noiseScale = VALUES(noiseScale),
-                        width = VALUES(width)
                 ");
 
         foreach ($terrainSettings['noiseSettings'] as $noise) {
             $activated = $noise['activated'] ? 1 : 0;
+            $remoteTexture = json_encode($noise['remoteTexture']);;
             $noiseGeneratorType = $noise['noiseGeneratorType'];
             $selectedNoiseDimension = $noise['selectedNoiseDimension'];
             $noiseDimension = $noise['noiseDimension'];
@@ -158,11 +133,11 @@ try {
             $cellularReturnType = $noise['cellularReturnType'];
             $cellularJitter = $noise['cellularJitter'];
             $noiseScale = $noise['noiseScale'];
-            $terrainWidth = $terrainSettings['width'];
             $insertNoise->bind_param(
-                "iiiiiiiiiiiiiddddiiiiidiidddiiiiddi",
+                "iisiiiiiiiiiiidddddiiiiidiidddiiiid",
                 $terrainId,
                 $activated,
+                $remoteTexture,
                 $noiseGeneratorType,
                 $selectedNoiseDimension,
                 $noiseDimension,
@@ -178,6 +153,7 @@ try {
                 $noiseFractalGain,
                 $fractalWeightedStrength,
                 $noiseFrequency,
+                $noiseScale,
                 $domainWarpToggle,
                 $selectedDomainWarpType,
                 $domainWarpType,
@@ -194,8 +170,6 @@ try {
                 $selectedCellularReturnType,
                 $cellularReturnType,
                 $cellularJitter,
-                $noiseScale,
-                $terrainWidth
             );
             $insertNoise->execute();
         }

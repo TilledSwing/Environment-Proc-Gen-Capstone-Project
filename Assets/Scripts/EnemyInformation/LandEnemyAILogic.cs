@@ -6,8 +6,6 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.SocialPlatforms.GameCenter;
-
 public class LandEnemyAILogic : NetworkBehaviour
 {
     private GameObject target;
