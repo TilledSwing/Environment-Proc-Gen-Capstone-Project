@@ -35,16 +35,10 @@ public class EnemySpawner : NetworkBehaviour
         if (IsServerInitialized)
         {
             loadPrefab();
-            StartCoroutine(WaitForBothParallel());
+            //GlobalNavMeshUpdater.Instance.StartNavMeshBuilds();
         }
     }
-    public IEnumerator WaitForBothParallel()
-    {
-        yield return GlobalNavMeshUpdater.Instance.ProcessNavMeshUpdates();
-        SpawnLandEnemies_FilteredByAgent();
-        SpawnWaterEnemies_FilteredByAgent();
-    }
-  
+
     void loadPrefab()
     {
         Addressables.LoadAssetAsync<GameObject>(landPrefabAdress).Completed += handle =>
@@ -70,7 +64,21 @@ public class EnemySpawner : NetworkBehaviour
         waterNavMeshSurface = GlobalNavMeshUpdater.Instance.waterSurface;
         return;
     }
+    void Update()
+    {
+        // Block input if in a chat message block. Ensures that typing words with certain letters or numbers won't trigger input events.
+        if (EventSystem.current.currentSelectedGameObject != null &&
+            EventSystem.current.currentSelectedGameObject.GetComponent<TMP_InputField>() != null)
+        {
+            return;
+        }
 
+        if (IsServerOnlyStarted && Input.GetKeyDown(KeyCode.L))
+            SpawnLandEnemies_FilteredByAgent();
+        else if (IsClientStarted && Input.GetKeyDown(KeyCode.L))
+            RequestSpawnEnemy();
+    }
+    
     [ServerRpc(RequireOwnership = false)]
     public void RequestSpawnEnemy()
     {
