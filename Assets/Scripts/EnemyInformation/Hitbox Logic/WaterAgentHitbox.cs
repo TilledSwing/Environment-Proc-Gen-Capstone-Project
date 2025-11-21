@@ -4,7 +4,7 @@ using FishNet.Object;
 
 public class WaterAgentHitbox : NetworkBehaviour
 {
-    public int damage = 10;
+    public int damage = 1;
     public string targetTag = "Player";
 
     private Collider[] colliders;          // all colliders under this hitbox
@@ -25,12 +25,16 @@ public class WaterAgentHitbox : NetworkBehaviour
 
     public void EnableHitbox()
     {
+        if (!IsServerInitialized) 
+            return;
         foreach (var c in colliders)
             c.enabled = true;
     }
 
     public void DisableHitbox()
     {
+        if (!IsServerInitialized) 
+            return;
         foreach (var c in colliders)
             c.enabled = false;
     }
@@ -45,14 +49,15 @@ public class WaterAgentHitbox : NetworkBehaviour
             ? other.attachedRigidbody.gameObject
             : other.transform.root.gameObject;
 
-        if (!root.CompareTag(targetTag))
+        if (!root.CompareTag(targetTag) || registry.alreadyHit.Contains(root))
             return;
 
-        if (registry.alreadyHit.Contains(root))
-            return;
         
         registry.alreadyHit.Add(root);
-        // var health = root.GetComponent<Health>();
-        // if (health != null) health.TakeDamage(damage);
+        
+        // // Apply damage
+        var health = root.GetComponent<Health>();
+        if (health != null) 
+            health.TakeDamage(damage);
     }
 }

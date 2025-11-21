@@ -73,7 +73,7 @@ public class EnemySpawner : NetworkBehaviour
         }
 
         if (IsServerOnlyStarted && Input.GetKeyDown(KeyCode.L))
-            SpawnWaterEnemies_FilteredByAgent();
+            SpawnLandEnemies_FilteredByAgent();
         else if (IsClientStarted && Input.GetKeyDown(KeyCode.L))
             RequestSpawnEnemy();
     }
@@ -81,7 +81,7 @@ public class EnemySpawner : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     private void RequestSpawnEnemy()
     {
-        SpawnWaterEnemies_FilteredByAgent();
+        SpawnLandEnemies_FilteredByAgent();
     }
 
     private struct Tri

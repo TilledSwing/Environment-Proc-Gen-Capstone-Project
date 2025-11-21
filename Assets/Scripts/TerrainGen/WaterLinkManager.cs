@@ -10,10 +10,18 @@ public class WaterLinkManager : MonoBehaviour
     // Stores created NavMeshLink objects per chunk
     private Dictionary<Vector3, List<GameObject>> chunkLinks = new();
     private int agentTypeID = 0; // make sure to set this to your NavMeshAgent's type ID
+    private GameObject linkParent;
+
+    private void Awake()
+    {
+        linkParent = new GameObject("WaterLinks");
+        linkParent.transform.localPosition = Vector3.zero;
+    }
     /// <summary>
     /// Incrementally updates water links for changed chunks.
     /// Ensures all link endpoints are on the baked NavMesh.
     /// </summary>
+    /// 
     public IEnumerator UpdateWaterLinksIncremental(
         List<Vector3> changedChunks,
         Dictionary<Vector3, GlobalNavMeshUpdater.WaterChunkSources> waterSources,
@@ -119,6 +127,7 @@ public class WaterLinkManager : MonoBehaviour
     /// </summary>
     private GameObject CreateSnappedLink(NavMeshBuildSource lower, NavMeshBuildSource upper, float planeWidth)
     {
+        // Create parent if it doesn't exist
         Vector3 lowerPos = lower.transform.GetColumn(3);
         Vector3 upperPos = upper.transform.GetColumn(3);
 
@@ -128,6 +137,7 @@ public class WaterLinkManager : MonoBehaviour
 
         GameObject linkObj = new GameObject($"WaterLink_{hitLower.position.y}_{hitUpper.position.y}");
         linkObj.transform.position = hitLower.position;
+        linkObj.transform.SetParent(linkParent.transform);
 
         var link = linkObj.AddComponent<NavMeshLink>();
         link.startPoint = Vector3.zero;
@@ -135,7 +145,7 @@ public class WaterLinkManager : MonoBehaviour
         link.width = planeWidth;
         link.bidirectional = true;
         link.autoUpdate = true;
-        link.area = 0; // water area
+        link.area = 3; // water area
         link.agentTypeID = agentTypeID; // make sure 'agent' is a reference to your NavMeshAgent
 
         return linkObj;

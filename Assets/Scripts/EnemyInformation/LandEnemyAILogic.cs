@@ -8,7 +8,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.SocialPlatforms.GameCenter;
 
-public class EnemyAILogic : NetworkBehaviour
+public class LandEnemyAILogic : NetworkBehaviour
 {
     private GameObject target;
     private float attackRange = 3f;
@@ -214,7 +214,7 @@ public class EnemyAILogic : NetworkBehaviour
 
         if (!other.CompareTag("Player")) return;
 
-        SoundManager.Instance.PlayMusic("ChaseMusic");
+        //SoundManager.Instance.PlayMusic("ChaseMusic");
         if (target == null)
             target = other.gameObject;
         targetsInRange.Add(other.gameObject);
@@ -230,7 +230,7 @@ public class EnemyAILogic : NetworkBehaviour
         if (!IsServerInitialized) return;
         if (!other.CompareTag("Player")) return;
 
-        SoundManager.Instance.PlayMusic("GameTheme");
+        //SoundManager.Instance.PlayMusic("GameTheme");
         if (targetsInRange.Contains(other.gameObject))
             targetsInRange.Remove(other.gameObject);
 
@@ -246,9 +246,9 @@ public class EnemyAILogic : NetworkBehaviour
                 else
                 {
                     float nearestPlayer = 100000000;
-                    float playerDistance = 0;
+                    float playerDistance;
                     GameObject nextTarget = null;
-                    GameObject potentialTarget = null;
+                    GameObject potentialTarget;
 
                     for (int i = 0; i < targetsInRange.Count; i++)
                     {
@@ -257,6 +257,7 @@ public class EnemyAILogic : NetworkBehaviour
                         if (playerDistance < nearestPlayer)
                         {
                             nextTarget = potentialTarget;
+                            nearestPlayer = playerDistance;
                         }
                     }
                     target = nextTarget;

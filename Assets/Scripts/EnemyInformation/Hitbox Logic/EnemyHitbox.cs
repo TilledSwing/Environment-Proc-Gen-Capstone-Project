@@ -4,7 +4,7 @@ using FishNet.Object;
 
 public class EnemyHitbox : NetworkBehaviour
 {
-    public int damage = 10;
+    public int damage = 1;
     public string targetTag = "Player"; // what it can hit
 
     private Collider col;
@@ -19,12 +19,16 @@ public class EnemyHitbox : NetworkBehaviour
 
     public void EnableHitbox()
     {
+        if (!IsServerInitialized) 
+            return;
         alreadyHit.Clear();
         col.enabled = true;
     }
 
     public void DisableHitbox()
     {
+        if (!IsServerInitialized) 
+            return;
         col.enabled = false;
     }
 
@@ -33,18 +37,18 @@ public class EnemyHitbox : NetworkBehaviour
         if (!IsServerInitialized) 
             return;
 
-        if (!col.enabled || !other.CompareTag(targetTag) || alreadyHit.Contains(other.gameObject)) 
+        GameObject root = other.attachedRigidbody != null
+            ? other.attachedRigidbody.gameObject
+            : other.transform.root.gameObject;
+
+        if (!root.CompareTag(targetTag) || alreadyHit.Contains(root))
             return;
 
-        alreadyHit.Add(other.gameObject);
+        alreadyHit.Add(root);
 
         // // Apply damage
-        // var health = other.GetComponent<Health>();
-        // if (health != null) health.TakeDamage(damage);
-
-        // // Optional: small knockback or hit reaction
-        // var rb = other.attachedRigidbody;
-        // if (rb != null)
-        //     rb.AddForce((other.transform.position - transform.position).normalized * 3f, ForceMode.Impulse);
+        var health = root.GetComponent<Health>();
+        if (health != null) 
+            health.TakeDamage(damage);
     }
 }
