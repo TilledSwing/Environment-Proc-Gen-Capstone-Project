@@ -221,6 +221,7 @@ public class EditUI : MonoBehaviour
         loadScreen.SetActive(true);
         Regen();
         ResetButton();
+        
     }
 
     public void Regen()
