@@ -173,6 +173,7 @@ public class ChunkGenNetwork : MonoBehaviour
         // Fog Shader Inits
         fogRenderPassFeature = rendererData.rendererFeatures.Find(f => f is FogRenderPassFeature) as FogRenderPassFeature;
         
+        // Tester Comment
         // fogOffset = maxViewDst - 20f;
         // fogMat.SetFloat("_fogOffset", fogOffset);
         // fogMat.SetFloat("_fogDensity", fogDensity);
