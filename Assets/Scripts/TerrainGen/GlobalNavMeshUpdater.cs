@@ -88,6 +88,7 @@ public class GlobalNavMeshUpdater : MonoBehaviour
 
     private void ProcessNavMeshUpdates()
     {
+                CancelInvoke(nameof(ProcessNavMeshUpdates));
         if (!isBuildingLandNavMesh && landNavMeshNeedsRebuild)
             StartCoroutine(RebuildLandNavMeshBatched());
 
