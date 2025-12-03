@@ -147,8 +147,8 @@ Material:
     - _fadeEnd: 30
     - _fadeHeight: 0.1
     - _fadeStart: 0
-    - _fogDensity: 1
-    - _fogOffset: 1000
+    - _fogDensity: 0.02
+    - _fogOffset: 30
     - _sunSize: 0.1
     - _verticalFadeStrength: 1.2
     - fogDensity: 0.4

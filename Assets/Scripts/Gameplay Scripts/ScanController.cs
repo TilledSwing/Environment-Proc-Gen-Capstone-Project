@@ -16,8 +16,14 @@ public class ScanController : MonoBehaviour
     bool isScanning = false;
     Vector3 scanPosition;
     List<ScanObject> scannedObjects = new();
+
     void Update()
     {
+        // Wait for the player instance to be active.
+        if (PlayerController.instance == null)
+            return;
+        
+
         if (!PlayerController.instance.gameStarted && !PlayerController.instance.editorPlayer)
             return;
 

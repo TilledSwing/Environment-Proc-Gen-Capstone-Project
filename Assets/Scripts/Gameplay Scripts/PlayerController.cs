@@ -23,10 +23,6 @@ public class PlayerController : NetworkBehaviour
     public bool editorPlayer = true;
     public bool gameStarted = false;
 
-    public CharacterController characterController;
-    public Vector3 moveDirection = Vector3.zero;
-    float rotationX = 0;
-
     public List<Vector3> terraformCenters;
     public List<Vector3Int> hitChunkPositions;
     public List<int> terraformTypes;
@@ -42,6 +38,10 @@ public class PlayerController : NetworkBehaviour
     private bool isFlightMode = false;
     private bool isSubmerged = false;
     private bool underwater = false;
+
+    public CharacterController characterController;
+    public Vector3 moveDirection = Vector3.zero;
+    float rotationX = 0;
 
 
     public override void OnStartClient()

@@ -45,6 +45,10 @@ public class Terraforming : NetworkBehaviour
 
     void Update()
     {
+        // Wait for player to instantiate.
+        if (PlayerController.instance == null)
+            return;
+
         if (!PlayerController.instance.gameStarted && !PlayerController.instance.editorPlayer)
             return;
 
@@ -73,6 +77,7 @@ public class Terraforming : NetworkBehaviour
         }
         time += Time.deltaTime;
     }
+
     /// <summary>
     /// Terraform where the player is looking when they use a terraform interaction key
     /// </summary>

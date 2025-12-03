@@ -33,6 +33,10 @@ public class InteractController : MonoBehaviour
 
     void Update()
     {
+        // Wait for player to instantiate.
+        if (PlayerController.instance == null)
+            return;
+
         if (!PlayerController.instance.gameStarted && !PlayerController.instance.editorPlayer)
             return;
 
