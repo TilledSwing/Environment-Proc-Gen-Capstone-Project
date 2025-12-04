@@ -32,7 +32,7 @@ public class NetworkManager : NetworkBehaviour
         ChunkGenNetwork.Instance.hudCanvas.SetActive(true);
         ChunkGenNetwork.Instance.chatContainer.SetActive(true);
         ChunkGenNetwork.Instance.lobbyContainer.SetActive(true);
-        ChunkGenNetwork.Instance.lightChange.intensity = 1.5f;
+        // ChunkGenNetwork.Instance.lightChange.intensity = 5f;
 
         PlayerController.instance.waterLevel = ChunkGenNetwork.Instance.terrainDensityData.waterLevel;
 

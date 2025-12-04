@@ -1,16 +1,18 @@
 using System.Collections;
 using UnityEngine;
 
-public class AssetIndexUpdater : MonoBehaviour
+public class AssetRegenManager : MonoBehaviour
 {
-    public void UpdateAllIndices()
+    AssetSpawnData assetSpawnData;
+    void Start()
     {
-        int count = 0;
-        foreach(Transform child in transform)
-        {
-            child.GetComponent<AssetSettingsTabController>().assetIndex = child.GetSiblingIndex();
-            count++;
-        }
+        assetSpawnData = ChunkGenNetwork.Instance.assetSpawnData;
+    }
+
+    // Regenerate the assets with the current asset settings
+    public void RespawnAssets()
+    {
+        StartCoroutine(AssetRespawnCoroutine());
     }
 
     public IEnumerator AssetRespawnCoroutine()

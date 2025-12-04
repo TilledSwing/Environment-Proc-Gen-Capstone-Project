@@ -11,41 +11,27 @@ using UnityEngine.UI.Extensions;
 
 public class TextureSettingsTabController : MonoBehaviour
 {
-    private int textureIndex;
-    private Toggle heightToggle;
-    private MinMaxSlider heightSlider;
-    private TMP_InputField heightMinInput;
-    private TMP_InputField heightMaxInput;
-    private Toggle slopeToggle;
-    private MinMaxSlider slopeSlider;
-    private TMP_InputField slopeMinInput;
-    private TMP_InputField slopeMaxInput;
+    public int textureIndex;
+    public Toggle heightToggle;
+    public MinMaxSlider heightSlider;
+    public TMP_InputField heightMinInput;
+    public TMP_InputField heightMaxInput;
+    public Toggle slopeToggle;
+    public MinMaxSlider slopeSlider;
+    public TMP_InputField slopeMinInput;
+    public TMP_InputField slopeMaxInput;
     public GameObject textureList;
-    RawImage texturePreview;
+    public RawImage texturePreview;
     bool added = false;
     bool initialized = false;
-    public List<TextureConfig> biomeTextures;
+    private TextureIndexUpdater textureIndexUpdater;
     void Start()
     {
         textureIndex = transform.GetSiblingIndex();
 
-        MinMaxSlider[] sliders = gameObject.GetComponentsInChildren<MinMaxSlider>();
-        heightSlider = sliders[0];
-        slopeSlider = sliders[1];
+        textureIndexUpdater = transform.parent.GetComponent<TextureIndexUpdater>();
 
-        Toggle[] toggles = gameObject.GetComponentsInChildren<Toggle>();
-        heightToggle = toggles[0];
-        slopeToggle = toggles[1];
         initialized = true;
-
-        TMP_InputField[] heightInputs = heightSlider.GetComponentsInChildren<TMP_InputField>();
-        heightMinInput = heightInputs[0];
-        heightMaxInput = heightInputs[1];
-        TMP_InputField[] slopeInputs = slopeSlider.GetComponentsInChildren<TMP_InputField>();
-        slopeMinInput = slopeInputs[0];
-        slopeMaxInput = slopeInputs[1];
-
-        biomeTextures = ChunkGenNetwork.Instance.terrainTextureData.biomeTextureConfigs[0].biomeTextures;
     }
     public void AddTexture()
     {
@@ -57,29 +43,71 @@ public class TextureSettingsTabController : MonoBehaviour
         if (paths.Length > 0)
         {
             string path = paths[0];
-            Texture2D texture = ProcessTextureFile(path);
+            Texture2D texture = ResizeTexture(ProcessTextureFile(path), ChunkGenNetwork.Instance.terrainTextureData.maxTextureSize, ChunkGenNetwork.Instance.terrainTextureData.maxTextureSize, ChunkGenNetwork.Instance.terrainTextureData.textureFormat);
+            // Texture2D texture = ProcessTextureFile(path);
 
-            GameObject texSettingsTab = Instantiate(ChunkGenNetwork.Instance.textureSettingsTab, ChunkGenNetwork.Instance.textureWindow.transform);
+            TextureSettingsTabController texSettingsTab = Instantiate(ChunkGenNetwork.Instance.textureSettingsTab, ChunkGenNetwork.Instance.textureWindow.transform).GetComponent<TextureSettingsTabController>();
             initialized = false;
-            RawImage texturePreview = texSettingsTab.GetComponentInChildren<RawImage>();
 
-            texturePreview.texture = texture;
+            texSettingsTab.texturePreview.texture = texture;
 
-            MinMaxSlider[] sliders = texSettingsTab.GetComponentsInChildren<MinMaxSlider>();
-            sliders[0].SetValues(-ChunkGenNetwork.Instance.maxWorldYChunks * ChunkGenNetwork.Instance.terrainDensityData.width, ChunkGenNetwork.Instance.maxWorldYChunks * ChunkGenNetwork.Instance.terrainDensityData.width, -ChunkGenNetwork.Instance.maxWorldYChunks * ChunkGenNetwork.Instance.terrainDensityData.width, ChunkGenNetwork.Instance.maxWorldYChunks * ChunkGenNetwork.Instance.terrainDensityData.width);
-            sliders[1].SetValues(0, 360, 0, 360);
+            texSettingsTab.heightSlider.SetValues(-ChunkGenNetwork.Instance.maxWorldYChunks * ChunkGenNetwork.Instance.terrainDensityData.width, ChunkGenNetwork.Instance.maxWorldYChunks * ChunkGenNetwork.Instance.terrainDensityData.width, -ChunkGenNetwork.Instance.maxWorldYChunks * ChunkGenNetwork.Instance.terrainDensityData.width, ChunkGenNetwork.Instance.maxWorldYChunks * ChunkGenNetwork.Instance.terrainDensityData.width);
+            texSettingsTab.slopeSlider.SetValues(0, 360, 0, 360);
 
-            Toggle[] toggles = texSettingsTab.GetComponentsInChildren<Toggle>();
-            toggles[0].isOn = false;
-            toggles[1].isOn = false;
+            texSettingsTab.heightToggle.isOn = false;
+            texSettingsTab.slopeToggle.isOn = false;
 
             TextureConfig textureConfig = new TextureConfig();
             textureConfig.texture = texture;
             textureConfig.useHeightRange = false;
             textureConfig.useSlopeRange = false;
-            textureConfig.heightRange = new HeightRange(sliders[0].Values.minValue, sliders[0].Values.maxValue);
-            textureConfig.slopeRange = new SlopeRange(sliders[1].Values.minValue, sliders[1].Values.maxValue);
+            textureConfig.heightRange = new HeightRange(texSettingsTab.heightSlider.Values.minValue, texSettingsTab.heightSlider.Values.maxValue);
+            textureConfig.slopeRange = new SlopeRange(texSettingsTab.slopeSlider.Values.minValue, texSettingsTab.slopeSlider.Values.maxValue);
             ChunkGenNetwork.Instance.terrainTextureData.biomeTextureConfigs[0].biomeTextures.Add(textureConfig);
+
+            foreach (BiomeTextureConfigs biomeTextureConfig in ChunkGenNetwork.Instance.terrainTextureData.biomeTextureConfigs)
+            {
+                int textureWidth = biomeTextureConfig.biomeTextures[0].texture.width;
+                int textureHeight = biomeTextureConfig.biomeTextures[0].texture.height;
+                int textureCount = biomeTextureConfig.MAX_TEXTURE_LAYERS;
+                TextureFormat textureFormat = biomeTextureConfig.biomeTextures[0].texture.format;
+                Texture2DArray textureArray = new(textureWidth, textureHeight, textureCount, textureFormat, true, false);
+                textureArray.wrapMode = TextureWrapMode.Repeat;
+                textureArray.filterMode = FilterMode.Bilinear;
+
+                float lowestStartHeight = float.MaxValue;
+                float greatestEndHeight = float.MinValue;
+
+                int textureListCount = biomeTextureConfig.biomeTextures.Count;
+                for (int i = 0; i < textureListCount; i++)
+                {
+                    Graphics.CopyTexture(biomeTextureConfig.biomeTextures[i].texture, 0, textureArray, i);
+                    ChunkGenNetwork.Instance.useHeights[i] = biomeTextureConfig.biomeTextures[i].useHeightRange ? 1 : 0;
+                    ChunkGenNetwork.Instance.heightStarts[i] = biomeTextureConfig.biomeTextures[i].heightRange.heightStart;
+                    ChunkGenNetwork.Instance.heightEnds[i] = biomeTextureConfig.biomeTextures[i].heightRange.heightEnd;
+                    ChunkGenNetwork.Instance.useSlopes[i] = biomeTextureConfig.biomeTextures[i].useSlopeRange ? 1 : 0;
+                    ChunkGenNetwork.Instance.slopeStarts[i] = biomeTextureConfig.biomeTextures[i].slopeRange.slopeStart;
+                    ChunkGenNetwork.Instance.slopeEnds[i] = biomeTextureConfig.biomeTextures[i].slopeRange.slopeEnd;
+
+                    if (ChunkGenNetwork.Instance.heightStarts[i] < lowestStartHeight)
+                        lowestStartHeight = ChunkGenNetwork.Instance.heightStarts[i] + 1;
+
+                    if (ChunkGenNetwork.Instance.heightEnds[i] > greatestEndHeight)
+                        greatestEndHeight = ChunkGenNetwork.Instance.heightEnds[i] - 1;
+                }
+                ChunkGenNetwork.Instance.textureArray = textureArray;
+                ChunkGenNetwork.Instance.terrainMaterial.SetTexture("_TextureArray", ChunkGenNetwork.Instance.textureArray);
+                ChunkGenNetwork.Instance.terrainMaterial.SetFloatArray("_UseHeightsArray", ChunkGenNetwork.Instance.useHeights);
+                ChunkGenNetwork.Instance.terrainMaterial.SetFloatArray("_HeightStartsArray", ChunkGenNetwork.Instance.heightStarts);
+                ChunkGenNetwork.Instance.terrainMaterial.SetFloatArray("_HeightEndsArray", ChunkGenNetwork.Instance.heightEnds);
+                ChunkGenNetwork.Instance.terrainMaterial.SetFloatArray("_UseSlopesArray", ChunkGenNetwork.Instance.useSlopes);
+                ChunkGenNetwork.Instance.terrainMaterial.SetFloatArray("_SlopeStartsArray", ChunkGenNetwork.Instance.slopeStarts);
+                ChunkGenNetwork.Instance.terrainMaterial.SetFloatArray("_SlopeEndsArray", ChunkGenNetwork.Instance.slopeEnds);
+                ChunkGenNetwork.Instance.terrainMaterial.SetInt("_LayerCount", textureListCount);
+                ChunkGenNetwork.Instance.terrainMaterial.SetFloat("_LowestStartHeight", lowestStartHeight);
+                ChunkGenNetwork.Instance.terrainMaterial.SetFloat("_GreatestEndHeight", greatestEndHeight);
+            }
+
             added = true;
             initialized = true;
             // ChunkGenNetwork.Instance.TextureSetup();
@@ -88,7 +116,7 @@ public class TextureSettingsTabController : MonoBehaviour
     public void UpdateHeightMinMaxTexture()
     {
         if (!initialized) return;
-        // ChunkGenNetwork.Instance.terrainTextureData.biomeTextureConfigs[0].biomeTextures[textureIndex].heightRange = new HeightRange(heightSlider.Values.minValue, heightSlider.Values.maxValue);
+        ChunkGenNetwork.Instance.terrainTextureData.biomeTextureConfigs[0].biomeTextures[textureIndex].heightRange = new HeightRange(heightSlider.Values.minValue, heightSlider.Values.maxValue);
 
         ChunkGenNetwork.Instance.heightStarts[textureIndex] = heightSlider.Values.minValue;
         ChunkGenNetwork.Instance.heightEnds[textureIndex] = heightSlider.Values.maxValue;
@@ -98,7 +126,7 @@ public class TextureSettingsTabController : MonoBehaviour
     public void UpdateHeightMinInputTexture()
     {
         if (!initialized) return;
-        // ChunkGenNetwork.Instance.terrainTextureData.biomeTextureConfigs[0].biomeTextures[textureIndex].heightRange = new HeightRange(heightSlider.Values.minValue, heightSlider.Values.maxValue);
+        ChunkGenNetwork.Instance.terrainTextureData.biomeTextureConfigs[0].biomeTextures[textureIndex].heightRange = new HeightRange(heightSlider.Values.minValue, heightSlider.Values.maxValue);
 
         heightSlider.SetValues(int.Parse(heightMinInput.text), heightSlider.Values.maxValue);
         ChunkGenNetwork.Instance.heightStarts[textureIndex] = int.Parse(heightMinInput.text);
@@ -107,7 +135,7 @@ public class TextureSettingsTabController : MonoBehaviour
     public void UpdateHeightMaxInputTexture()
     {
         if (!initialized) return;
-        // ChunkGenNetwork.Instance.terrainTextureData.biomeTextureConfigs[0].biomeTextures[textureIndex].heightRange = new HeightRange(heightSlider.Values.minValue, heightSlider.Values.maxValue);
+        ChunkGenNetwork.Instance.terrainTextureData.biomeTextureConfigs[0].biomeTextures[textureIndex].heightRange = new HeightRange(heightSlider.Values.minValue, heightSlider.Values.maxValue);
 
         heightSlider.SetValues(heightSlider.Values.minValue, int.Parse(heightMaxInput.text));
         ChunkGenNetwork.Instance.heightEnds[textureIndex] = int.Parse(heightMaxInput.text);
@@ -116,7 +144,7 @@ public class TextureSettingsTabController : MonoBehaviour
     public void UpdateSlopeMinMaxTexture()
     {
         if (!initialized) return;
-        // ChunkGenNetwork.Instance.terrainTextureData.biomeTextureConfigs[0].biomeTextures[textureIndex].slopeRange = new SlopeRange(slopeSlider.Values.minValue, slopeSlider.Values.maxValue);
+        ChunkGenNetwork.Instance.terrainTextureData.biomeTextureConfigs[0].biomeTextures[textureIndex].slopeRange = new SlopeRange(slopeSlider.Values.minValue, slopeSlider.Values.maxValue);
 
         ChunkGenNetwork.Instance.slopeStarts[textureIndex] = slopeSlider.Values.minValue;
         ChunkGenNetwork.Instance.slopeEnds[textureIndex] = slopeSlider.Values.maxValue;
@@ -126,7 +154,7 @@ public class TextureSettingsTabController : MonoBehaviour
     public void UpdateSlopeMinInputTexture()
     {
         if (!initialized) return;
-        // ChunkGenNetwork.Instance.terrainTextureData.biomeTextureConfigs[0].biomeTextures[textureIndex].heightRange = new HeightRange(heightSlider.Values.minValue, heightSlider.Values.maxValue);
+        ChunkGenNetwork.Instance.terrainTextureData.biomeTextureConfigs[0].biomeTextures[textureIndex].heightRange = new HeightRange(heightSlider.Values.minValue, heightSlider.Values.maxValue);
 
         slopeSlider.SetValues(int.Parse(slopeMinInput.text), slopeSlider.Values.maxValue);
         ChunkGenNetwork.Instance.slopeStarts[textureIndex] = int.Parse(slopeMinInput.text);
@@ -135,7 +163,7 @@ public class TextureSettingsTabController : MonoBehaviour
     public void UpdateSlopeMaxInputTexture()
     {
         if (!initialized) return;
-        // ChunkGenNetwork.Instance.terrainTextureData.biomeTextureConfigs[0].biomeTextures[textureIndex].heightRange = new HeightRange(heightSlider.Values.minValue, heightSlider.Values.maxValue);
+        ChunkGenNetwork.Instance.terrainTextureData.biomeTextureConfigs[0].biomeTextures[textureIndex].heightRange = new HeightRange(heightSlider.Values.minValue, heightSlider.Values.maxValue);
 
         slopeSlider.SetValues(slopeSlider.Values.minValue, int.Parse(slopeMaxInput.text));
         ChunkGenNetwork.Instance.slopeEnds[textureIndex] = int.Parse(slopeMaxInput.text);
@@ -144,7 +172,7 @@ public class TextureSettingsTabController : MonoBehaviour
     public void UpdateUseHeightTexture()
     {
         if (!initialized) return;
-        // ChunkGenNetwork.Instance.terrainTextureData.biomeTextureConfigs[0].biomeTextures[textureIndex].useHeightRange = heightToggle.isOn;
+        ChunkGenNetwork.Instance.terrainTextureData.biomeTextureConfigs[0].biomeTextures[textureIndex].useHeightRange = heightToggle.isOn;
 
         ChunkGenNetwork.Instance.useHeights[textureIndex] = heightToggle.isOn ? 1 : 0;
         ChunkGenNetwork.Instance.terrainMaterial.SetFloatArray("_UseHeightsArray", ChunkGenNetwork.Instance.useHeights);
@@ -152,7 +180,7 @@ public class TextureSettingsTabController : MonoBehaviour
     public void UpdateUseSlopeTexture()
     {
         if (!initialized) return;
-        // ChunkGenNetwork.Instance.terrainTextureData.biomeTextureConfigs[0].biomeTextures[textureIndex].useSlopeRange = slopeToggle.isOn;
+        ChunkGenNetwork.Instance.terrainTextureData.biomeTextureConfigs[0].biomeTextures[textureIndex].useSlopeRange = slopeToggle.isOn;
 
         ChunkGenNetwork.Instance.useSlopes[textureIndex] = slopeToggle.isOn ? 1 : 0;
         ChunkGenNetwork.Instance.terrainMaterial.SetFloatArray("_UseSlopesArray",  ChunkGenNetwork.Instance.useSlopes);
@@ -171,10 +199,11 @@ public class TextureSettingsTabController : MonoBehaviour
             RawImage texturePreview = gameObject.GetComponentInChildren<RawImage>();
 
             texturePreview.texture = texture;
-            UpdateTextureArray(texture);
+            Texture2DArray textureArray = UpdateTextureArray(texture);
+            ChunkGenNetwork.Instance.terrainMaterial.SetTexture("_TextureArray", textureArray);
         }
     }
-    private void UpdateTextureArray(Texture2D texture)
+    private Texture2DArray UpdateTextureArray(Texture2D texture)
     {
         Texture2DArray textureArray = ChunkGenNetwork.Instance.textureArray;
         Texture2D resizedTexture = ResizeTexture(texture, ChunkGenNetwork.Instance.terrainTextureData.maxTextureSize, ChunkGenNetwork.Instance.terrainTextureData.maxTextureSize, ChunkGenNetwork.Instance.terrainTextureData.textureFormat);
@@ -182,7 +211,7 @@ public class TextureSettingsTabController : MonoBehaviour
         {
             Graphics.CopyTexture(resizedTexture, 0, i, textureArray, textureIndex, i);
         }
-        ChunkGenNetwork.Instance.terrainMaterial.SetTexture("_TextureArray", textureArray);
+        return textureArray;
     }
     private Texture2D ResizeTexture(Texture2D sourceTexture, int width, int height, TextureFormat textureFormat)
     {
@@ -201,26 +230,35 @@ public class TextureSettingsTabController : MonoBehaviour
     public void RemoveTexture()
     {
         ChunkGenNetwork.Instance.terrainTextureData.biomeTextureConfigs[0].biomeTextures.RemoveAt(textureIndex);
-        UpdateTextures(textureIndex);
-        Destroy(gameObject);
-    }
-    public void UpdateTextures(int startIndex)
-    {
         foreach (BiomeTextureConfigs biomeTextureConfig in ChunkGenNetwork.Instance.terrainTextureData.biomeTextureConfigs)
         {
+            int textureWidth = biomeTextureConfig.biomeTextures[0].texture.width;
+            int textureHeight = biomeTextureConfig.biomeTextures[0].texture.height;
+            int textureCount = biomeTextureConfig.MAX_TEXTURE_LAYERS;
+            TextureFormat textureFormat = biomeTextureConfig.biomeTextures[0].texture.format;
+            Texture2DArray textureArray = new(textureWidth, textureHeight, textureCount, textureFormat, true, false);
+            textureArray.wrapMode = TextureWrapMode.Repeat;
+            textureArray.filterMode = FilterMode.Bilinear;
+            ChunkGenNetwork.Instance.useHeights = new float[biomeTextureConfig.MAX_TEXTURE_LAYERS];
+            ChunkGenNetwork.Instance.heightStarts = new float[biomeTextureConfig.MAX_TEXTURE_LAYERS];
+            ChunkGenNetwork.Instance.heightEnds = new float[biomeTextureConfig.MAX_TEXTURE_LAYERS];
+            ChunkGenNetwork.Instance.useSlopes = new float[biomeTextureConfig.MAX_TEXTURE_LAYERS];
+            ChunkGenNetwork.Instance.slopeStarts = new float[biomeTextureConfig.MAX_TEXTURE_LAYERS];
+            ChunkGenNetwork.Instance.slopeEnds = new float[biomeTextureConfig.MAX_TEXTURE_LAYERS];
+
             float lowestStartHeight = float.MaxValue;
             float greatestEndHeight = float.MinValue;
 
-            int textureListCount = textureList.GetComponentCount();
-            for (int i = startIndex; i < textureListCount; i++)
+            int textureListCount = biomeTextureConfig.biomeTextures.Count;
+            for (int i = 0; i < textureListCount; i++)
             {
-                Graphics.CopyTexture(biomeTextureConfig.biomeTextures[i+1].texture, 0, ChunkGenNetwork.Instance.textureArray, i);
-                ChunkGenNetwork.Instance.useHeights[i] = biomeTextureConfig.biomeTextures[i+1].useHeightRange ? 1 : 0;
-                ChunkGenNetwork.Instance.heightStarts[i] = biomeTextureConfig.biomeTextures[i+1].heightRange.heightStart;
-                ChunkGenNetwork.Instance.heightEnds[i] = biomeTextureConfig.biomeTextures[i+1].heightRange.heightEnd;
-                ChunkGenNetwork.Instance.useSlopes[i] = biomeTextureConfig.biomeTextures[i+1].useSlopeRange ? 1 : 0;
-                ChunkGenNetwork.Instance.slopeStarts[i] = biomeTextureConfig.biomeTextures[i+1].slopeRange.slopeStart;
-                ChunkGenNetwork.Instance.slopeEnds[i] = biomeTextureConfig.biomeTextures[i+1].slopeRange.slopeEnd;
+                Graphics.CopyTexture(biomeTextureConfig.biomeTextures[i].texture, 0, textureArray, i);
+                ChunkGenNetwork.Instance.useHeights[i] = biomeTextureConfig.biomeTextures[i].useHeightRange ? 1 : 0;
+                ChunkGenNetwork.Instance.heightStarts[i] = biomeTextureConfig.biomeTextures[i].heightRange.heightStart;
+                ChunkGenNetwork.Instance.heightEnds[i] = biomeTextureConfig.biomeTextures[i].heightRange.heightEnd;
+                ChunkGenNetwork.Instance.useSlopes[i] = biomeTextureConfig.biomeTextures[i].useSlopeRange ? 1 : 0;
+                ChunkGenNetwork.Instance.slopeStarts[i] = biomeTextureConfig.biomeTextures[i].slopeRange.slopeStart;
+                ChunkGenNetwork.Instance.slopeEnds[i] = biomeTextureConfig.biomeTextures[i].slopeRange.slopeEnd;
 
                 if (ChunkGenNetwork.Instance.heightStarts[i] < lowestStartHeight)
                     lowestStartHeight = ChunkGenNetwork.Instance.heightStarts[i] + 1;
@@ -228,7 +266,7 @@ public class TextureSettingsTabController : MonoBehaviour
                 if (ChunkGenNetwork.Instance.heightEnds[i] > greatestEndHeight)
                     greatestEndHeight = ChunkGenNetwork.Instance.heightEnds[i] - 1;
             }
-            // textureArray.Apply(false);
+            ChunkGenNetwork.Instance.textureArray = textureArray;
             ChunkGenNetwork.Instance.terrainMaterial.SetTexture("_TextureArray", ChunkGenNetwork.Instance.textureArray);
             ChunkGenNetwork.Instance.terrainMaterial.SetFloatArray("_UseHeightsArray", ChunkGenNetwork.Instance.useHeights);
             ChunkGenNetwork.Instance.terrainMaterial.SetFloatArray("_HeightStartsArray", ChunkGenNetwork.Instance.heightStarts);
@@ -240,6 +278,9 @@ public class TextureSettingsTabController : MonoBehaviour
             ChunkGenNetwork.Instance.terrainMaterial.SetFloat("_LowestStartHeight", lowestStartHeight);
             ChunkGenNetwork.Instance.terrainMaterial.SetFloat("_GreatestEndHeight", greatestEndHeight);
         }
+        transform.SetParent(null);
+        Destroy(gameObject);
+        textureIndexUpdater.UpdateAllIndices();
     }
     public Texture2D ProcessTextureFile(string path)
     {
@@ -249,12 +290,5 @@ public class TextureSettingsTabController : MonoBehaviour
         texture.LoadImage(fileData);
 
         return texture;
-    }
-    void OnApplicationQuit()
-    {
-        ChunkGenNetwork.Instance.terrainTextureData.biomeTextureConfigs[0].biomeTextures = biomeTextures;
-        // if (added) {
-        //     ChunkGenNetwork.Instance.terrainTextureData.biomeTextureConfigs[0].biomeTextures.RemoveAt(textureIndex);
-        // }
     }
 }

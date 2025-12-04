@@ -457,7 +457,7 @@ MonoBehaviour:
   m_CaretColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_CustomCaretColor: 0
   m_SelectionColor: {r: 0.65882355, g: 0.80784315, b: 1, a: 0.7529412}
-  m_Text: -384
+  m_Text: 384
   m_CaretBlinkRate: 0.85
   m_CaretWidth: 1
   m_ReadOnly: 0
@@ -891,7 +891,7 @@ MonoBehaviour:
   m_CaretColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_CustomCaretColor: 0
   m_SelectionColor: {r: 0.65882355, g: 0.80784315, b: 1, a: 0.7529412}
-  m_Text: 384
+  m_Text: 360
   m_CaretBlinkRate: 0.85
   m_CaretWidth: 1
   m_ReadOnly: 0
@@ -1194,7 +1194,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "384\u200B"
+  m_text: "360\u200B"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2521,8 +2521,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac0fbcbbcb1fa394b88488bfa52fc4f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  textureIndex: 0
+  heightToggle: {fileID: 298481207769877966}
+  heightSlider: {fileID: 6481524511925587222}
+  heightMinInput: {fileID: 7168254916667436671}
+  heightMaxInput: {fileID: 8963013351757551491}
+  slopeToggle: {fileID: 4707468115241118038}
+  slopeSlider: {fileID: 5229043434746239225}
+  slopeMinInput: {fileID: 3487376055100482061}
+  slopeMaxInput: {fileID: 1585328456678953068}
   textureList: {fileID: 3993018863266552542, guid: 2eb1c80c87ebda24eb64735cc0d17337, type: 3}
-  biomeTextures: []
+  texturePreview: {fileID: 5292589432236893111}
 --- !u!1 &7018704551229289145
 GameObject:
   m_ObjectHideFlags: 0
@@ -2588,7 +2597,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "-384\u200B"
+  m_text: "0\u200B"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2792,11 +2801,11 @@ MonoBehaviour:
   minText: {fileID: 5055940685581640761}
   maxText: {fileID: 4279822314281186405}
   textFormat: 0
-  minLimit: -512
-  maxLimit: 512
+  minLimit: -384
+  maxLimit: 384
   wholeNumbers: 1
-  minValue: -512
-  maxValue: 512
+  minValue: -384
+  maxValue: 384
   onValueChanged:
     m_PersistentCalls:
       m_Calls:
@@ -2976,7 +2985,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: -512
+  m_text: -384
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -3187,7 +3196,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 512
+  m_text: 384
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -3608,7 +3617,7 @@ MonoBehaviour:
   m_CaretColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_CustomCaretColor: 0
   m_SelectionColor: {r: 0.65882355, g: 0.80784315, b: 1, a: 0.7529412}
-  m_Text: -384
+  m_Text: 0
   m_CaretBlinkRate: 0.85
   m_CaretWidth: 1
   m_ReadOnly: 0
@@ -3702,7 +3711,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "-384\u200B"
+  m_text: "384\u200B"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -4382,7 +4391,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 9180466798404137338}
         m_TargetAssemblyTypeName: TextureSettingsTabController, Assembly-CSharp
-        m_MethodName: UpdateHeightMinMaxTexture
+        m_MethodName: UpdateHeightMinInputTexture
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -4626,3 +4635,14 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 4845231371533257783, guid: a5ea59d0b181f6547b0f7da7edb4b837, type: 3}
   m_PrefabInstance: {fileID: 7934771436588565953}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &5292589432236893111 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2841479550996604534, guid: a5ea59d0b181f6547b0f7da7edb4b837, type: 3}
+  m_PrefabInstance: {fileID: 7934771436588565953}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1344c3c82d62a2a41a3576d8abb8e3ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

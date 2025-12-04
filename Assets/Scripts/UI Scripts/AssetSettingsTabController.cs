@@ -312,9 +312,10 @@ public class AssetSettingsTabController : MonoBehaviour
     {
         if (!initialized) return;
         ClearAssets();
-        transform.parent.GetComponent<AssetIndexUpdater>().UpdateAllIndices();
         assetSpawnData.spawnableAssets.RemoveAt(assetIndex);
+        transform.SetParent(null);
         Destroy(gameObject);
+        assetIndexUpdater.UpdateAllIndices();
         assetIndexUpdater.StartCoroutine(assetIndexUpdater.AssetRespawnCoroutine());
         // RespawnAssets();
     }

@@ -117,6 +117,10 @@ public class ChunkGenNetwork : MonoBehaviour
     // Data structure pools
     public event Action OnTerrainReady;
     public bool IsTerrainReady { get; private set; }
+    // Reused Marching Cubes Native Array
+    public NativeArray<float3> vertexOffsetTable = new(MarchingCubesTables.vertexOffsetTable, Allocator.Persistent);
+    public NativeArray<int> edgeIndexTable = new(MarchingCubesTables.edgeIndexTable, Allocator.Persistent);
+    public NativeArray<int> triangleTable = new(MarchingCubesTables.triangleTable, Allocator.Persistent);
 
     public class ReadbackRequest
     {
@@ -651,10 +655,14 @@ public class ChunkGenNetwork : MonoBehaviour
     /// <summary>
     /// Clear out unnecessary data when quitting the application
     /// </summary>
-    void OnApplicationQuit()
+    void OnDisable()
     {
+        vertexOffsetTable.Dispose();
+        edgeIndexTable.Dispose();
+        triangleTable.Dispose();
         assetSpawnData.ResetSpawnPoints();
         assetSpawnData.RestoreToOriginalState();
+        terrainTextureData.RestoreToOriginalState();
         chunkDictionary.Clear();
         // fogRenderPassFeature.SetActive(false);
         SetFogActive(false);
@@ -689,6 +697,7 @@ public class ChunkGenNetwork : MonoBehaviour
     }
     public void TextureSetup()
     {
+        terrainTextureData.BackupOriginalState();
         foreach (BiomeTextureConfigs biomeTextureConfig in terrainTextureData.biomeTextureConfigs)
         {
             float textureScale = biomeTextureConfig.textureScale;
@@ -725,27 +734,18 @@ public class ChunkGenNetwork : MonoBehaviour
                 if (heightEnds[i] > greatestEndHeight)
                     greatestEndHeight = heightEnds[i] - 1;
                 // Initializing texture settings window to currently applied textures
-                GameObject texSettingsTab = Instantiate(textureSettingsTab, textureWindow.transform);
+                TextureSettingsTabController texSettingsTab = Instantiate(textureSettingsTab, textureWindow.transform).GetComponent<TextureSettingsTabController>();
 
-                RawImage texturePreview = texSettingsTab.GetComponentInChildren<RawImage>();
-                texturePreview.texture = biomeTextureConfig.biomeTextures[i].texture;
+                texSettingsTab.texturePreview.texture = biomeTextureConfig.biomeTextures[i].texture;
 
-                Toggle[] toggles = texSettingsTab.GetComponentsInChildren<Toggle>();
-                MinMaxSlider[] sliders = texSettingsTab.GetComponentsInChildren<MinMaxSlider>();
+                texSettingsTab.heightToggle.isOn = biomeTextureConfig.biomeTextures[i].useHeightRange;
 
-                Toggle heightToggle = toggles[0];
-                heightToggle.isOn = biomeTextureConfig.biomeTextures[i].useHeightRange;
+                texSettingsTab.heightSlider.SetValues(biomeTextureConfig.biomeTextures[i].heightRange.heightStart, biomeTextureConfig.biomeTextures[i].heightRange.heightEnd, -maxWorldYChunks * terrainDensityData.width, maxWorldYChunks * terrainDensityData.width);
 
-                MinMaxSlider heightRangeSlider = sliders[0];
-                heightRangeSlider.SetValues(biomeTextureConfig.biomeTextures[i].heightRange.heightStart, biomeTextureConfig.biomeTextures[i].heightRange.heightEnd, -maxWorldYChunks * terrainDensityData.width, maxWorldYChunks * terrainDensityData.width);
+                texSettingsTab.slopeToggle.isOn = biomeTextureConfig.biomeTextures[i].useSlopeRange;
 
-                Toggle slopeToggle = toggles[1];
-                slopeToggle.isOn = biomeTextureConfig.biomeTextures[i].useSlopeRange;
-
-                MinMaxSlider slopeRangeSlider = sliders[1];
-                slopeRangeSlider.SetValues(biomeTextureConfig.biomeTextures[i].slopeRange.slopeStart, biomeTextureConfig.biomeTextures[i].slopeRange.slopeEnd, 0, 360);
+                texSettingsTab.slopeSlider.SetValues(biomeTextureConfig.biomeTextures[i].slopeRange.slopeStart, biomeTextureConfig.biomeTextures[i].slopeRange.slopeEnd, 0, 360);
             }
-            // textureArray.Apply(false);
             terrainMaterial.SetFloat("_Scale", textureScale);
             terrainMaterial.SetTexture("_TextureArray", textureArray);
             terrainMaterial.SetFloatArray("_UseHeightsArray", useHeights);
