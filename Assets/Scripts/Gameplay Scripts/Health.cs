@@ -1,6 +1,7 @@
-using UnityEngine;
+using FishNet.Example.ColliderRollbacks;
 using FishNet.Object;
 using FishNet.Object.Synchronizing;
+using UnityEngine;
 
 public class Health : NetworkBehaviour
 {
@@ -10,10 +11,10 @@ public class Health : NetworkBehaviour
     public float maxHealth = 5f;
     public HealthBarUI healthBar;
 
-    private void Awake()
-    {
-        _currentHealth.OnChange += OnHealthChanged;
-    }
+    //private void Awake()
+    //{
+    //    _currentHealth.OnChange += OnHealthChanged;
+    //}
 
     public override void OnStartServer()
     {
@@ -24,29 +25,62 @@ public class Health : NetworkBehaviour
     public override void OnStartClient()
     {
         base.OnStartClient();
-        // When a client starts, set the UI to the current health.
-        healthBar?.SetHealth(_currentHealth.Value, maxHealth);
+        if (!base.IsOwner)
+            this.enabled = false;
+        else
+        {
+            // When a client starts, set the UI to the current health.
+            healthBar?.SetHealth(_currentHealth.Value, maxHealth);
+        }
     }
 
-    private void OnHealthChanged(float previous, float next, bool asServer)
+    private void Update()
     {
-        // Update the health bar UI whenever the health changes.
-        healthBar?.SetHealth(next, maxHealth);
+        if (!base.IsOwner || PlayerController.instance == null)
+            return;
+
+        if (Input.GetKeyDown(KeyCode.H))
+        {
+            TakeDamage(1, gameObject);
+            Debug.Log(_currentHealth.Value);
+        }
+        else if (Input.GetKeyDown(KeyCode.P))
+        {
+            Heal(1, gameObject);
+            Debug.Log(_currentHealth.Value);
+        }
+
     }
 
-    public void TakeDamage(float amount)
+    //private void OnHealthChanged(float previous, float next, bool asServer)
+    //{
+    //    // Update the health bar UI whenever the health changes.
+    //    healthBar?.SetHealth(next, maxHealth);
+    //}
+
+    [ServerRpc(RequireOwnership = false)]
+    public void TakeDamage(float amount, GameObject player)
     {
         if (!IsServerInitialized) return;
 
         float newHealth = Mathf.Clamp(_currentHealth.Value - amount, 0f, maxHealth);
         _currentHealth.Value = newHealth;
+        UpdateHealthBar(player);
     }
 
-    public void Heal(float amount)
+    [ObserversRpc]
+    public void UpdateHealthBar(GameObject player)
+    {
+        player.GetComponent<Health>().healthBar.SetHealth(_currentHealth.Value, maxHealth);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void Heal(float amount, GameObject player)
     {
         if (!IsServerInitialized) return;
 
         float newHealth = Mathf.Clamp(_currentHealth.Value + amount, 0f, maxHealth);
         _currentHealth.Value = newHealth;
+        UpdateHealthBar(player);
     }
 }

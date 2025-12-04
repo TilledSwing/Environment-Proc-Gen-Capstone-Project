@@ -58,6 +58,6 @@ public class WaterAgentHitbox : NetworkBehaviour
         // // Apply damage
         var health = root.GetComponent<Health>();
         if (health != null) 
-            health.TakeDamage(damage);
+            health.TakeDamage(damage, PlayerController.instance.gameObject);
     }
 }
