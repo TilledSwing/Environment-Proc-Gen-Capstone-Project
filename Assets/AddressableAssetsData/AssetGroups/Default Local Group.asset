@@ -15,6 +15,11 @@ MonoBehaviour:
   m_GroupName: Default Local Group
   m_GUID: 8e48f53c038a9a64e92b7be8b4c06274
   m_SerializeEntries:
+  - m_GUID: 1fe9091752d40fd48a27da35e86c155f
+    m_Address: Images/mainscreen
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: abf6335225e9add448b28bf5fcb465cd
     m_Address: Assets/Human_Mutant/Prefab/Human_Mutant.prefab
     m_ReadOnly: 0
