@@ -97,7 +97,7 @@ public class AssetSpawner : MonoBehaviour
         for (int i = 0; i < assetSpawnData.spawnableAssets.Count; i++)
         {
             if (emptyChunk && !assetSpawnData.spawnableAssets[i].undergroundAsset) continue;
-            if (assetSpawnFilters[i].underwaterAsset && chunkPos.y > terrainDensityData.waterLevel) continue;
+            if (assetSpawnFilters[i].underwaterAsset && chunkPos.y > terrainDensityData.waterLevel && terrainDensityData.water) continue;
             if (assetSpawnFilters[i].undergroundAsset)
             {
                 minDepthPoints = GetMinDepthChunkPoints(assetSpawnFilters[i].minDensity, heightsArray);
@@ -143,7 +143,7 @@ public class AssetSpawner : MonoBehaviour
                 if (assetSpawnFilters[i].useMaxSlope && slope > assetSpawnFilters[i].maxSlope + 0.01f) continue;
                 if (assetSpawnFilters[i].useMinHeight && height < assetSpawnFilters[i].minHeight - 0.01f) continue;
                 if (assetSpawnFilters[i].useMaxHeight && height > assetSpawnFilters[i].maxHeight + 0.01f) continue;
-                if (assetSpawnFilters[i].underwaterAsset && height > terrainDensityData.waterLevel - assetSpawnFilters[i].minDepth) continue;
+                if (assetSpawnFilters[i].underwaterAsset && height > terrainDensityData.waterLevel - assetSpawnFilters[i].minDepth && terrainDensityData.water) continue;
                 if (!assetSpawnFilters[i].underwaterAsset && height < terrainDensityData.waterLevel && !assetSpawnFilters[i].undergroundAsset) continue;
                 ComputeMarchingCubes.Vertex vert;
                 vert.position = spawnPoint;

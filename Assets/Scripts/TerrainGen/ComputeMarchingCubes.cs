@@ -441,7 +441,7 @@ public class ComputeMarchingCubes : MonoBehaviour
         JobHandle marchingCubesHandler = marchingCubesJob.Schedule(iterations, 16);
         marchingCubesHandler.Complete();
 
-        if (terrainDensityData.waterLevel > chunkPos.y && terrainDensityData.waterLevel < Mathf.RoundToInt(chunkPos.y + terrainDensityData.width))
+        if (terrainDensityData.waterLevel > chunkPos.y && terrainDensityData.waterLevel < Mathf.RoundToInt(chunkPos.y + terrainDensityData.width) && terrainDensityData.water)
         {
             waterGen.UpdateMesh();
         }

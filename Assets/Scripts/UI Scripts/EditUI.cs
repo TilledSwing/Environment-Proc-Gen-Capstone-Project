@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Threading.Tasks;
 using System;
+using HeathenEngineering.SteamworksIntegration.UI;
 public class EditUI : MonoBehaviour
 {
     public TerrainDensityData tdd;
@@ -21,10 +22,20 @@ public class EditUI : MonoBehaviour
     void Start()
     {
         UpdateSettings();
+        // tdd = ChunkGenNetwork.Instance.generationConfiguration.terrainConfigs[2].terrainDensityData;
+        // ng = tdd.noiseGenerators[0];
+        // asd = ChunkGenNetwork.Instance.generationConfiguration.terrainConfigs[2].assetSpawnData;
     }
 
     void Update()
     {
+    }
+
+    public void SetNewData()
+    {
+        tdd = ChunkGenNetwork.Instance.generationConfiguration.terrainConfigs[ChunkGenNetwork.Instance.presetDropdown.value].terrainDensityData;
+        ng = tdd.noiseGenerators[0];
+        asd = ChunkGenNetwork.Instance.generationConfiguration.terrainConfigs[ChunkGenNetwork.Instance.presetDropdown.value].assetSpawnData;
     }
 
     /// <summary>
@@ -49,9 +60,6 @@ public class EditUI : MonoBehaviour
         ChunkGenNetwork.Instance.isLoadingChunkVisibility = false;
         ChunkGenNetwork.Instance.isLoadingChunks = false;
         // Action Queues
-        ChunkGenNetwork.Instance.hasPendingMeshInits = false;
-        ChunkGenNetwork.Instance.pendingMeshInits = new();
-        ChunkGenNetwork.Instance.isLoadingMeshes = false;
         ChunkGenNetwork.Instance.hasPendingReadbacks = false;
         ChunkGenNetwork.Instance.pendingReadbacks = new();
         ChunkGenNetwork.Instance.isLoadingReadbacks = false;

@@ -13,9 +13,15 @@ MonoBehaviour:
   m_Name: GenerationConfiguration
   m_EditorClassIdentifier: 
   terrainConfigs:
-  - terrainDensityData: {fileID: 11400000, guid: 4bc939f839855ea45ade17dce060eea5, type: 2}
+  - name: Forest & Snow
+    terrainDensityData: {fileID: 11400000, guid: 4bc939f839855ea45ade17dce060eea5, type: 2}
     terrainTextureData: {fileID: 11400000, guid: f1603a815dc9cf041bd4a9e99c9988dc, type: 2}
     assetSpawnData: {fileID: 11400000, guid: 29949715b352478458342a45d2b907a0, type: 2}
-  - terrainDensityData: {fileID: 11400000, guid: e06a394be1f689448a0fc4d4a198b94d, type: 2}
+  - name: Desert
+    terrainDensityData: {fileID: 11400000, guid: e06a394be1f689448a0fc4d4a198b94d, type: 2}
     terrainTextureData: {fileID: 11400000, guid: a03d196ea8be0034185709f05345b6c4, type: 2}
     assetSpawnData: {fileID: 11400000, guid: 7523c1177c7107f438e9602592f13e9f, type: 2}
+  - name: Alien Planet
+    terrainDensityData: {fileID: 11400000, guid: 15bbff1c68d6f4349b3807d03cde17ea, type: 2}
+    terrainTextureData: {fileID: 11400000, guid: e48097e2206f03541aae962be6b2ffc7, type: 2}
+    assetSpawnData: {fileID: 11400000, guid: 2dc139ac326102649846abe98bbf5505, type: 2}

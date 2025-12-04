@@ -104,7 +104,7 @@ public class PlayerController : NetworkBehaviour
         isRunning = Input.GetKey(KeyCode.RightShift);
         isSubmerged = transform.position.y < waterLevel;
 
-        if (isSubmerged)
+        if (isSubmerged && ChunkGenNetwork.Instance.terrainDensityData.water)
         {
             gravity = 3.5f;
             jumpSpeed = 3.5f;
@@ -122,7 +122,7 @@ public class PlayerController : NetworkBehaviour
             walkingSpeed = 7.5f;
             runningSpeed = 20f;
         }
-        if (playerCamera.transform.position.y - 0.08f < waterLevel && !underwater)
+        if (playerCamera.transform.position.y - 0.08f < waterLevel && !underwater && ChunkGenNetwork.Instance.terrainDensityData.water)
         {
             underwater = true;
             GraphicsSettings.defaultRenderPipeline = ChunkGenNetwork.Instance.underwaterUrpAsset;
@@ -136,7 +136,7 @@ public class PlayerController : NetworkBehaviour
             // ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogDensity", 0.018f);
             // ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogOffset", -15f);
         }
-        else if(playerCamera.transform.position.y - 0.08f > waterLevel && underwater)
+        else if(playerCamera.transform.position.y - 0.08f > waterLevel && underwater && ChunkGenNetwork.Instance.terrainDensityData.water)
         {
             underwater = false;
             GraphicsSettings.defaultRenderPipeline = ChunkGenNetwork.Instance.mainUrpAsset;
