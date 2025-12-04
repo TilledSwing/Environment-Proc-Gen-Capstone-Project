@@ -64,6 +64,32 @@ public struct NoiseGeneratorSettings
     public float noiseScale;
 }
 
+/// <summary>
+/// Struct of the NoiseGenerator Object class so it can be serialized over the network.
+/// </summary>
+[System.Serializable]
+public struct AssetSpawnSettings
+{
+    public int maxPerChunk;
+    public bool rotateToFaceNormal;
+    public float spawnProbability;
+    public bool useMinSlope;
+    public int minSlope;
+    public bool useMaxSlope;
+    public int maxSlope;
+    public bool useMinHeight;
+    public int minHeight;
+    public bool useMaxHeight;
+    public int maxHeight;
+    public bool underwaterAsset;
+    public float minDepth;
+    public bool undergroundAsset;
+    public float minDensity;
+    public bool isValuable;
+    public int minValue;
+    public int maxValue;
+}
+
 public static class SeedSerializer
 {
     public static TerrainSettings SerializeTerrainDensity(TerrainDensityData settings)
@@ -86,6 +112,41 @@ public static class SeedSerializer
             terracing = settings.terracing,
             terraceHeight = settings.terraceHeight
         };
+    }
+
+    public static AssetSpawnSettings[] SerializeAssetData(AssetSpawnData assetData)
+    {
+        AssetSpawnSettings[] spawnSettings = new AssetSpawnSettings[assetData.spawnableAssets.Count];
+
+        for (int i = 0; i < spawnSettings.Length; i++)
+        {
+            var scriptableAssetData = assetData.spawnableAssets[i];
+            AssetSpawnSettings serializedSettings = new AssetSpawnSettings
+            {
+                maxPerChunk = scriptableAssetData.maxPerChunk,
+                rotateToFaceNormal = scriptableAssetData.rotateToFaceNormal,
+                spawnProbability = scriptableAssetData.spawnProbability,
+                useMinSlope = scriptableAssetData.useMinSlope,
+                minSlope = scriptableAssetData.minSlope,
+                useMaxSlope = scriptableAssetData.useMaxSlope,
+                maxSlope = scriptableAssetData.maxSlope,
+                useMinHeight = scriptableAssetData.useMinHeight,
+                minHeight = scriptableAssetData.minHeight,
+                useMaxHeight = scriptableAssetData.useMaxHeight,
+                maxHeight = scriptableAssetData.maxHeight,
+                underwaterAsset = scriptableAssetData.underwaterAsset,
+                minDepth = scriptableAssetData.minDepth,
+                undergroundAsset = scriptableAssetData.undergroundAsset,
+                minDensity = scriptableAssetData.minDensity,
+                isValuable = scriptableAssetData.isValuable,
+                minValue = scriptableAssetData.minValue,
+                maxValue = scriptableAssetData.maxValue
+            };
+
+            spawnSettings[i] = serializedSettings;
+        }
+
+        return spawnSettings;
     }
 
     private static NoiseGeneratorSettings SerializeNoiseDensity(NoiseGenerator settings)
@@ -155,6 +216,31 @@ public static class SeedSerializer
         deserializedDensity.terraceHeight = settings.terraceHeight;
 
         return deserializedDensity;
+    }
+
+    public static void DeserializeAndUpdateAssetData(AssetSpawnData assetData, AssetSpawnSettings[] settings)
+    {
+        for (int i = 0; i < settings.Length; i++)
+        {
+            assetData.spawnableAssets[i].maxPerChunk = settings[i].maxPerChunk;
+            assetData.spawnableAssets[i].rotateToFaceNormal = settings[i].rotateToFaceNormal;
+            assetData.spawnableAssets[i].spawnProbability = settings[i].spawnProbability;
+            assetData.spawnableAssets[i].useMinSlope = settings[i].useMinSlope;
+            assetData.spawnableAssets[i].minSlope = settings[i].minSlope;
+            assetData.spawnableAssets[i].useMaxSlope = settings[i].useMaxSlope;
+            assetData.spawnableAssets[i].maxSlope = settings[i].maxSlope;
+            assetData.spawnableAssets[i].useMinHeight = settings[i].useMinHeight;
+            assetData.spawnableAssets[i].minHeight = settings[i].minHeight;
+            assetData.spawnableAssets[i].useMaxHeight = settings[i].useMaxHeight;
+            assetData.spawnableAssets[i].maxHeight = settings[i].maxHeight;
+            assetData.spawnableAssets[i].underwaterAsset = settings[i].underwaterAsset;
+            assetData.spawnableAssets[i].minDepth = settings[i].minDepth;
+            assetData.spawnableAssets[i].undergroundAsset = settings[i].undergroundAsset;
+            assetData.spawnableAssets[i].minDensity = settings[i].minDensity;
+            assetData.spawnableAssets[i].isValuable = settings[i].isValuable;
+            assetData.spawnableAssets[i].minValue = settings[i].minValue;
+            assetData.spawnableAssets[i].maxValue = settings[i].maxValue;
+        }
     }
 
     private static NoiseGenerator DeserializeNoiseDensity(NoiseGeneratorSettings settings)

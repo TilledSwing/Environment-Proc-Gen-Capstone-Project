@@ -46,6 +46,7 @@ public class NetworkManager : NetworkBehaviour
     {
         UpdateClientMesh(target,
                         SeedSerializer.SerializeTerrainDensity(ChunkGenNetwork.Instance.terrainDensityData),
+                        SeedSerializer.SerializeAssetData(ChunkGenNetwork.Instance.assetSpawnData),
                         PlayerController.instance.terraformCenters,
                         PlayerController.instance.hitChunkPositions,
                         PlayerController.instance.terraformTypes);
@@ -53,7 +54,7 @@ public class NetworkManager : NetworkBehaviour
 
 
     [TargetRpc]
-    void UpdateClientMesh(NetworkConnection conn, TerrainSettings settings, List<Vector3> terraformCenters, List<Vector3Int> hitChunkPositions, List<int> terraformTypes)
+    void UpdateClientMesh(NetworkConnection conn, TerrainSettings settings, AssetSpawnSettings[] assetSettings, List<Vector3> terraformCenters, List<Vector3Int> hitChunkPositions, List<int> terraformTypes)
     {
         GameObject chunk = GameObject.Find("ChunkParent");
 
@@ -93,6 +94,8 @@ public class NetworkManager : NetworkBehaviour
         PlayerController.instance.waterLevel = terrainDensityDataNew.waterLevel;
 
         ChunkGenNetwork.Instance.assetSpawnData.ResetSpawnPoints();
+        // Get asset settings and set here
+        SeedSerializer.DeserializeAndUpdateAssetData(ChunkGenNetwork.Instance.assetSpawnData, assetSettings);
         ChunkGenNetwork.Instance.initialLoadComplete = false;
         ChunkGenNetwork.Instance.UpdateVisibleChunks();
 
