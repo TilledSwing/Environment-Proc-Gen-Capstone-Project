@@ -61,11 +61,12 @@ public class BroadcastRandomChange : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     void RandomTerrainGenServer()
     {
-        UpdateClientMeshObservers(SeedSerializer.SerializeTerrainDensity(ChunkGenNetwork.Instance.terrainDensityData));
+        UpdateClientMeshObservers(SeedSerializer.SerializeTerrainDensity(ChunkGenNetwork.Instance.terrainDensityData), 
+                                  SeedSerializer.SerializeAssetData(ChunkGenNetwork.Instance.assetSpawnData));
     }
 
     [ObserversRpc]
-    void UpdateClientMeshObservers(TerrainSettings settings)
+    void UpdateClientMeshObservers(TerrainSettings settings, AssetSpawnSettings[] assetSettings)
     {
         // The server already has the updated values
         if (base.IsServerStarted)
@@ -106,6 +107,7 @@ public class BroadcastRandomChange : NetworkBehaviour
         PlayerController.instance.waterLevel = terrainDensityDataNew.waterLevel;
 
         ChunkGenNetwork.Instance.assetSpawnData.ResetSpawnPoints();
+        SeedSerializer.DeserializeAndUpdateAssetData(ChunkGenNetwork.Instance.assetSpawnData, assetSettings);
         ChunkGenNetwork.Instance.initialLoadComplete = false;
         ChunkGenNetwork.Instance.UpdateVisibleChunks();
     }
