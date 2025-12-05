@@ -24,6 +24,7 @@ MonoBehaviour:
   height: 200
   isolevel: 0.5
   waterLevel: 30
+  water: 1
   lerp: 1
   terracing: 0
   terraceHeight: 2

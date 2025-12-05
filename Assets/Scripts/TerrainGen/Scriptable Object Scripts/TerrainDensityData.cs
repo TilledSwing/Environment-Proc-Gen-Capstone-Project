@@ -9,6 +9,7 @@ public class TerrainDensityData : ScriptableObject
     public int height = 100;
     public float isolevel = 0.5f;
     public int waterLevel = 35;
+    public bool water = true;
     public bool lerp = true;
     public bool terracing = false;
     public int terraceHeight = 2;

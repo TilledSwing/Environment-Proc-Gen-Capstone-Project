@@ -1,0 +1,178 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 706a95b2ea676fc44a907f69e74100cb, type: 3}
+  m_Name: PeaksAndValleysNoiseGenerator
+  m_EditorClassIdentifier: 
+  activated: 1
+  valueCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0.0017421544
+      value: 0.9982422
+      inSlope: 0.12546448
+      outSlope: 0.12546448
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.22957695
+    - serializedVersion: 3
+      time: 0.18197362
+      value: 0.94569516
+      inSlope: 0.11417986
+      outSlope: 0.11417986
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.48995852
+      outWeight: 0.532152
+    - serializedVersion: 3
+      time: 0.34439856
+      value: 0.78117967
+      inSlope: -1.161199
+      outSlope: -1.161199
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.6753045
+    - serializedVersion: 3
+      time: 0.41843793
+      value: 0.70568424
+      inSlope: -3.6778069
+      outSlope: -3.6778069
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.560699
+    - serializedVersion: 3
+      time: 0.45102778
+      value: 0.5860158
+      inSlope: -0.7339235
+      outSlope: -0.7339235
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 1
+      outWeight: 1
+    - serializedVersion: 3
+      time: 0.46024635
+      value: 0.48561838
+      inSlope: -0.5276396
+      outSlope: -0.5276396
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 1
+    - serializedVersion: 3
+      time: 0.50422484
+      value: 0.5084502
+      inSlope: 2.119672
+      outSlope: 2.119672
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 1
+    - serializedVersion: 3
+      time: 0.5159701
+      value: 0.549072
+      inSlope: 6.8233304
+      outSlope: 6.8233304
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.40332422
+      outWeight: 1
+    - serializedVersion: 3
+      time: 0.53537333
+      value: 0.62519574
+      inSlope: 4.5406904
+      outSlope: 4.5406904
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.46792078
+    - serializedVersion: 3
+      time: 0.60073847
+      value: 0.7276756
+      inSlope: 1.9672735
+      outSlope: 1.9672735
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.45501235
+    - serializedVersion: 3
+      time: 0.70418596
+      value: 0.8921572
+      inSlope: 1.1754143
+      outSlope: 1.1754143
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.86384493
+      outWeight: 1
+    - serializedVersion: 3
+      time: 0.85755646
+      value: 0.9517328
+      inSlope: -0.041820344
+      outSlope: -0.041820344
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.1827567
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  noiseGeneratorType: 7
+  selectedNoiseDimension: 1
+  noiseDimension: 0
+  selectedNoiseType: 0
+  noiseType: 0
+  selectedNoiseFractalType: 1
+  noiseFractalType: 1
+  selectedRotationType3D: 0
+  rotationType3D: 0
+  noiseSeed: 51877
+  noiseFractalOctaves: 3
+  noiseFractalLacunarity: 2
+  noiseFractalGain: 0.5
+  fractalWeightedStrength: 0
+  noiseFrequency: 0.01
+  domainWarpToggle: 1
+  selectedDomainWarpType: 0
+  domainWarpType: 0
+  selectedDomainWarpFractalType: 0
+  domainWarpFractalType: 4
+  domainWarpAmplitude: 50
+  domainWarpSeed: 78634
+  domainWarpFractalOctaves: 5
+  domainWarpFractalLacunarity: 2
+  domainWarpFractalGain: 0.5
+  domainWarpFrequency: 0.01
+  selectedCellularDistanceFunction: 1
+  cellularDistanceFunction: 1
+  selectedCellularReturnType: 1
+  cellularReturnType: 1
+  cellularJitter: 1
+  noiseScale: 0.2
+  remoteTexture: {fileID: 0}
+  noiseTypeOptions: 000000000100000002000000030000000400000005000000
+  rotationType3DOptions: 000000000100000002000000
+  noiseFractalTypeOptions: 00000000010000000200000003000000
+  domainWarpTypeOptions: 000000000100000002000000
+  domainWarpFractalTypeOptions: 000000000400000005000000
+  cellularDistanceFunctionOptions: 00000000010000000200000003000000
+  cellularReturnTypeOptions: 00000000010000000200000003000000040000000500000006000000

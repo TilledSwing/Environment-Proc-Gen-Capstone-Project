@@ -10,6 +10,7 @@ public class GenerationConfiguration : ScriptableObject
 [Serializable]
 public class TerrainConfig
 {
+    public string name;
     public TerrainDensityData terrainDensityData;
     public TerrainTextureData terrainTextureData;
     public AssetSpawnData assetSpawnData;

@@ -4,6 +4,7 @@ using FishNet.Serializing.Helping;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using Unity.AI.Navigation;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -89,6 +90,8 @@ public class ChunkGenNetwork : MonoBehaviour
     // Asset Window Stuff
     public GameObject assetWindow;
     public GameObject assetSettingsTab;
+    // Preset Dropdown
+    public TMP_Dropdown presetDropdown;
     // Chunk Variables
     public Dictionary<Vector3, TerrainChunk> chunkDictionary = new();
     public List<TerrainChunk> chunksVisibleLastUpdate = new();
@@ -105,9 +108,6 @@ public class ChunkGenNetwork : MonoBehaviour
     private MeshRenderer lightingBlockerRenderer;
     public Light lightChange;
     // Action Queues
-    public bool hasPendingMeshInits = false;
-    public Queue<Action> pendingMeshInits = new();
-    public bool isLoadingMeshes = false;
     public bool hasPendingReadbacks = false;
     public PriorityQueue<ReadbackRequest> pendingReadbacks = new();
     public bool isLoadingReadbacks = false;
@@ -117,6 +117,10 @@ public class ChunkGenNetwork : MonoBehaviour
     // Data structure pools
     public event Action OnTerrainReady;
     public bool IsTerrainReady { get; private set; }
+    // Reused Marching Cubes Native Array
+    public NativeArray<float3> vertexOffsetTable = new(MarchingCubesTables.vertexOffsetTable, Allocator.Persistent);
+    public NativeArray<int> edgeIndexTable = new(MarchingCubesTables.edgeIndexTable, Allocator.Persistent);
+    public NativeArray<int> triangleTable = new(MarchingCubesTables.triangleTable, Allocator.Persistent);
 
     public class ReadbackRequest
     {
@@ -151,25 +155,12 @@ public class ChunkGenNetwork : MonoBehaviour
         else
             Destroy(gameObject);
 
-        // Uncomment to see desert preset
-        
-        // terrainDensityData = generationConfiguration.terrainConfigs[1].terrainDensityData;
-        // terrainTextureData = generationConfiguration.terrainConfigs[1].terrainTextureData;
-        // assetSpawnData = generationConfiguration.terrainConfigs[1].assetSpawnData;
-
         chunkSize = terrainDensityData.width;
         chunksVisible = Mathf.RoundToInt(maxViewDst / chunkSize);
         lightingBlockerRenderer = lightingBlocker.GetComponent<MeshRenderer>();
         lightingBlockerRenderer.enabled = false;
         lightChange.intensity = 25f;
-        TextureSetup();
-        AssetSetup();
-        // Set seeds
-        foreach (NoiseGenerator noiseGenerator in terrainDensityData.noiseGenerators)
-        {
-            noiseGenerator.noiseSeed = UnityEngine.Random.Range(0, 100000);
-            noiseGenerator.domainWarpSeed = UnityEngine.Random.Range(0, 100000);
-        }
+
         // Fog Shader Inits
         fogRenderPassFeature = rendererData.rendererFeatures.Find(f => f is FogRenderPassFeature) as FogRenderPassFeature;
         
@@ -185,10 +176,58 @@ public class ChunkGenNetwork : MonoBehaviour
         waterMaterial.SetFloat("_fogActive", 0);
         SetFogActive(false);
 
-        // terrainDensityData.noiseSeed = UnityEngine.Random.Range(0, 100000);
-        // terrainDensityData.caveNoiseSeed = UnityEngine.Random.Range(0, 100000);
-        // terrainDensityData.domainWarpSeed = UnityEngine.Random.Range(0, 100000);
-        // terrainDensityData.caveDomainWarpSeed = UnityEngine.Random.Range(0, 100000);
+        assetSpawnData.ResetSpawnPoints();
+        InitializeGenerator();
+    }
+    public void InitializeGenerator()
+    {
+        terrainTextureData.RestoreToOriginalState();
+        assetSpawnData.RestoreToOriginalState();
+
+        // Uncomment to see desert preset
+        terrainDensityData = generationConfiguration.terrainConfigs[presetDropdown.value].terrainDensityData;
+        terrainTextureData = generationConfiguration.terrainConfigs[presetDropdown.value].terrainTextureData;
+        assetSpawnData = generationConfiguration.terrainConfigs[presetDropdown.value].assetSpawnData;
+
+        // Chunk Variables
+        chunkDictionary = new();
+        chunksVisibleLastUpdate = new();
+        chunkLoadQueue = new();
+        chunkLoadSet = new();
+        chunkHideQueue = new();
+        chunkShowQueue = new();
+        isLoadingChunkVisibility = false;
+        isLoadingChunks = false;
+        initialLoadComplete = false;
+        // Action Queues
+        hasPendingReadbacks = false;
+        pendingReadbacks = new();
+        isLoadingReadbacks = false;
+        hasPendingAssetInstantiations = false;
+        pendingAssetInstantiations = new();
+        isLoadingAssetInstantiations = false;
+
+        DestroyChunks();
+        assetSpawnData.ResetSpawnPoints();
+
+        TextureSetup();
+        AssetSetup();
+        
+        // Set seeds
+        foreach (NoiseGenerator noiseGenerator in terrainDensityData.noiseGenerators)
+        {
+            noiseGenerator.noiseSeed = UnityEngine.Random.Range(0, 100000);
+            noiseGenerator.domainWarpSeed = UnityEngine.Random.Range(0, 100000);
+        }
+
+        UpdateVisibleChunks();
+    }
+    public void DestroyChunks()
+    {
+        foreach (Transform chunk in GameObject.Find("ChunkParent").transform)
+        {
+            Destroy(chunk.gameObject);
+        }
     }
     // public void SetFogActive(bool active)
     // {
@@ -221,9 +260,6 @@ public class ChunkGenNetwork : MonoBehaviour
         isLoadingChunks = false;
         initialLoadComplete = false;
         // Action Queues
-        hasPendingMeshInits = false;
-        pendingMeshInits = new();
-        isLoadingMeshes = false;
         hasPendingReadbacks = false;
         pendingReadbacks = new();
         isLoadingReadbacks = false;
@@ -252,14 +288,6 @@ public class ChunkGenNetwork : MonoBehaviour
         {
             UpdateVisibleChunks();
         }
-        // if (!isLoadingChunks && chunkLoadQueue.Count > 0)
-        // {a
-        //     StartCoroutine(LoadChunksOverTime());
-        // }
-        // if (!isLoadingReadbacks && pendingReadbacks.Count > 0)
-        // {
-        //     StartCoroutine(LoadReadbacksOverTime());
-        // }
         if (!isLoadingAssetInstantiations && pendingAssetInstantiations.Count > 0)
         {
             StartCoroutine(LoadAssetInstantiationsOverTime());
@@ -274,8 +302,6 @@ public class ChunkGenNetwork : MonoBehaviour
     private void CheckInitialTerrainFinish()
     {
         if (initialLoadComplete &&
-        !hasPendingMeshInits &&
-        !isLoadingMeshes &&
         !hasPendingAssetInstantiations &&
         !isLoadingAssetInstantiations &&
         !hasPendingReadbacks &&
@@ -573,29 +599,6 @@ public class ChunkGenNetwork : MonoBehaviour
         isLoadingReadbacks = false;
     }
     /// <summary>
-    /// Coroutine for loading chunk mesh data asynchronously
-    /// </summary>
-    /// <returns>yield return</returns>
-    private IEnumerator LoadMeshesOverTime()
-    {
-        isLoadingMeshes = true;
-
-        int meshBatchCounter = 0;
-        while (pendingMeshInits.Count > 0)
-        {
-            pendingMeshInits.Dequeue()?.Invoke();
-
-            meshBatchCounter++;
-
-            // if (meshBatchCounter % 2 == 0)
-            // {
-            yield return new WaitForEndOfFrame();
-            // }
-        }
-
-        isLoadingMeshes = false;
-    }
-    /// <summary>
     /// Coroutine for loading chunks asynchronously
     /// </summary>
     /// <returns>yield return</returns>
@@ -651,10 +654,14 @@ public class ChunkGenNetwork : MonoBehaviour
     /// <summary>
     /// Clear out unnecessary data when quitting the application
     /// </summary>
-    void OnApplicationQuit()
+    void OnDisable()
     {
+        vertexOffsetTable.Dispose();
+        edgeIndexTable.Dispose();
+        triangleTable.Dispose();
         assetSpawnData.ResetSpawnPoints();
         assetSpawnData.RestoreToOriginalState();
+        terrainTextureData.RestoreToOriginalState();
         chunkDictionary.Clear();
         // fogRenderPassFeature.SetActive(false);
         SetFogActive(false);
@@ -689,6 +696,11 @@ public class ChunkGenNetwork : MonoBehaviour
     }
     public void TextureSetup()
     {
+        foreach (Transform texture in textureWindow.transform)
+        {
+            Destroy(texture.gameObject);
+        }
+        terrainTextureData.BackupOriginalState();
         foreach (BiomeTextureConfigs biomeTextureConfig in terrainTextureData.biomeTextureConfigs)
         {
             float textureScale = biomeTextureConfig.textureScale;
@@ -725,27 +737,19 @@ public class ChunkGenNetwork : MonoBehaviour
                 if (heightEnds[i] > greatestEndHeight)
                     greatestEndHeight = heightEnds[i] - 1;
                 // Initializing texture settings window to currently applied textures
-                GameObject texSettingsTab = Instantiate(textureSettingsTab, textureWindow.transform);
+                TextureSettingsTabController texSettingsTab = Instantiate(textureSettingsTab, textureWindow.transform).GetComponent<TextureSettingsTabController>();
+                texSettingsTab.textureIndex = i;
 
-                RawImage texturePreview = texSettingsTab.GetComponentInChildren<RawImage>();
-                texturePreview.texture = biomeTextureConfig.biomeTextures[i].texture;
+                texSettingsTab.texturePreview.texture = biomeTextureConfig.biomeTextures[i].texture;
 
-                Toggle[] toggles = texSettingsTab.GetComponentsInChildren<Toggle>();
-                MinMaxSlider[] sliders = texSettingsTab.GetComponentsInChildren<MinMaxSlider>();
+                texSettingsTab.heightToggle.isOn = biomeTextureConfig.biomeTextures[i].useHeightRange;
 
-                Toggle heightToggle = toggles[0];
-                heightToggle.isOn = biomeTextureConfig.biomeTextures[i].useHeightRange;
+                texSettingsTab.heightSlider.SetValues(biomeTextureConfig.biomeTextures[i].heightRange.heightStart, biomeTextureConfig.biomeTextures[i].heightRange.heightEnd, -maxWorldYChunks * terrainDensityData.width, maxWorldYChunks * terrainDensityData.width);
 
-                MinMaxSlider heightRangeSlider = sliders[0];
-                heightRangeSlider.SetValues(biomeTextureConfig.biomeTextures[i].heightRange.heightStart, biomeTextureConfig.biomeTextures[i].heightRange.heightEnd, -maxWorldYChunks * terrainDensityData.width, maxWorldYChunks * terrainDensityData.width);
+                texSettingsTab.slopeToggle.isOn = biomeTextureConfig.biomeTextures[i].useSlopeRange;
 
-                Toggle slopeToggle = toggles[1];
-                slopeToggle.isOn = biomeTextureConfig.biomeTextures[i].useSlopeRange;
-
-                MinMaxSlider slopeRangeSlider = sliders[1];
-                slopeRangeSlider.SetValues(biomeTextureConfig.biomeTextures[i].slopeRange.slopeStart, biomeTextureConfig.biomeTextures[i].slopeRange.slopeEnd, 0, 360);
+                texSettingsTab.slopeSlider.SetValues(biomeTextureConfig.biomeTextures[i].slopeRange.slopeStart, biomeTextureConfig.biomeTextures[i].slopeRange.slopeEnd, 0, 360);
             }
-            // textureArray.Apply(false);
             terrainMaterial.SetFloat("_Scale", textureScale);
             terrainMaterial.SetTexture("_TextureArray", textureArray);
             terrainMaterial.SetFloatArray("_UseHeightsArray", useHeights);
@@ -761,10 +765,16 @@ public class ChunkGenNetwork : MonoBehaviour
     }
     public void AssetSetup()
     {
+        foreach (Transform asset in assetWindow.transform)
+        {
+            Destroy(asset.gameObject);
+        }
         assetSpawnData.BackupOriginalState();
+        int count = 0;
         foreach(SpawnableAsset asset in assetSpawnData.spawnableAssets)
         {
             AssetSettingsTabController assSettingsTab = Instantiate(assetSettingsTab, assetWindow.transform).GetComponent<AssetSettingsTabController>();
+            assSettingsTab.assetIndex = count;
             assSettingsTab.canvasGroup = assetWindow.GetComponent<CanvasGroup>();
             assSettingsTab.assetSpawnData = assetSpawnData;
             // Header Settings
@@ -806,6 +816,7 @@ public class ChunkGenNetwork : MonoBehaviour
             assSettingsTab.valueRangeSlider.SetValues(assSettingsTab.valueRangeSlider.Values.minLimit, assSettingsTab.valueRangeSlider.Values.maxLimit, asset.minValue, asset.maxValue);
 
             assSettingsTab.initialized = true;
+            count++;
         }
     }
     /// <summary>
@@ -870,7 +881,7 @@ public class ChunkGenNetwork : MonoBehaviour
             // else if (viewerDstFromBound <= chunkSize * 6) marchingCubes.currentLOD = LOD.LOD3;
             // else if (viewerDstFromBound <= chunkSize * 8) marchingCubes.currentLOD = LOD.LOD6;
             // Set up water generator
-            if (terrainDensityData.waterLevel > chunkPos.y && terrainDensityData.waterLevel < Mathf.RoundToInt(chunkPos.y + terrainDensityData.width))
+            if (terrainDensityData.waterLevel > chunkPos.y && terrainDensityData.waterLevel < Mathf.RoundToInt(chunkPos.y + terrainDensityData.width) && terrainDensityData.water)
             {
                 waterPlaneGenerator = new GameObject("Water");
                 waterPlaneGenerator.transform.SetParent(chunk.transform);
@@ -925,7 +936,7 @@ public class ChunkGenNetwork : MonoBehaviour
                     meshCollider.enabled = visible;
                 }
             }
-            if (Instance.terrainDensityData.waterLevel > chunkPos.y && Instance.terrainDensityData.waterLevel < Mathf.RoundToInt(chunkPos.y + Instance.terrainDensityData.width))
+            if (Instance.terrainDensityData.waterLevel > chunkPos.y && Instance.terrainDensityData.waterLevel < Mathf.RoundToInt(chunkPos.y + Instance.terrainDensityData.width) && Instance.terrainDensityData.water)
             {
                 if (waterGen.meshRenderer != null && waterGen.meshRenderer.enabled != visible)
                 {

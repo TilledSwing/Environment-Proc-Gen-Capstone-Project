@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Threading.Tasks;
 using System;
+using HeathenEngineering.SteamworksIntegration.UI;
 public class EditUI : MonoBehaviour
 {
     public TerrainDensityData tdd;
@@ -21,10 +22,20 @@ public class EditUI : MonoBehaviour
     void Start()
     {
         UpdateSettings();
+        // tdd = ChunkGenNetwork.Instance.generationConfiguration.terrainConfigs[2].terrainDensityData;
+        // ng = tdd.noiseGenerators[0];
+        // asd = ChunkGenNetwork.Instance.generationConfiguration.terrainConfigs[2].assetSpawnData;
     }
 
     void Update()
     {
+    }
+
+    public void SetNewData()
+    {
+        tdd = ChunkGenNetwork.Instance.generationConfiguration.terrainConfigs[ChunkGenNetwork.Instance.presetDropdown.value].terrainDensityData;
+        ng = tdd.noiseGenerators[0];
+        asd = ChunkGenNetwork.Instance.generationConfiguration.terrainConfigs[ChunkGenNetwork.Instance.presetDropdown.value].assetSpawnData;
     }
 
     /// <summary>
@@ -49,9 +60,6 @@ public class EditUI : MonoBehaviour
         ChunkGenNetwork.Instance.isLoadingChunkVisibility = false;
         ChunkGenNetwork.Instance.isLoadingChunks = false;
         // Action Queues
-        ChunkGenNetwork.Instance.hasPendingMeshInits = false;
-        ChunkGenNetwork.Instance.pendingMeshInits = new();
-        ChunkGenNetwork.Instance.isLoadingMeshes = false;
         ChunkGenNetwork.Instance.hasPendingReadbacks = false;
         ChunkGenNetwork.Instance.pendingReadbacks = new();
         ChunkGenNetwork.Instance.isLoadingReadbacks = false;
@@ -97,6 +105,9 @@ public class EditUI : MonoBehaviour
         {
             case "LERPToggle":
                 toggle.isOn = tdd.lerp;
+                break;
+            case "WaterToggle":
+                toggle.isOn = tdd.water;
                 break;
             case "TerraceToggle":
                 toggle.isOn = tdd.terracing;
@@ -206,6 +217,7 @@ public class EditUI : MonoBehaviour
         ng.noiseScale = 0.6f;
         tdd.isolevel = 0.5f;
         tdd.waterLevel = 30;
+        tdd.water = true;
         tdd.lerp = true;
         tdd.terracing = false;
         tdd.terraceHeight = 2;
@@ -238,6 +250,13 @@ public class EditUI : MonoBehaviour
     {
         loadScreen.SetActive(true);
         tdd.lerp = marked;
+        Debug.Log("toggle changed");
+        StartCoroutine(ReloadWrapper());
+    }
+    public void OnWaterToggleChanged(bool marked)
+    {
+        loadScreen.SetActive(true);
+        tdd.water = marked;
         Debug.Log("toggle changed");
         StartCoroutine(ReloadWrapper());
     }

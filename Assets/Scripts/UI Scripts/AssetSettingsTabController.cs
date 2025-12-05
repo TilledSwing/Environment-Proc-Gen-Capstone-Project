@@ -52,17 +52,13 @@ public class AssetSettingsTabController : MonoBehaviour
     public int assetIndex;
     public bool initialized = false;
     public CanvasGroup canvasGroup;
-    private AssetIndexUpdater assetIndexUpdater;
+    public AssetIndexUpdater assetIndexUpdater;
 
     void Start()
     {
-        UpdateIndex();
+        // assetIndex = transform.GetSiblingIndex();
+        
         assetIndexUpdater = transform.parent.GetComponent<AssetIndexUpdater>();
-    }
-
-    public void UpdateIndex()
-    {
-        assetIndex = transform.GetSiblingIndex();
     }
 
     public void UpdateFaceAlignmentToggle()
@@ -312,9 +308,10 @@ public class AssetSettingsTabController : MonoBehaviour
     {
         if (!initialized) return;
         ClearAssets();
-        transform.parent.GetComponent<AssetIndexUpdater>().UpdateAllIndices();
         assetSpawnData.spawnableAssets.RemoveAt(assetIndex);
+        transform.SetParent(null);
         Destroy(gameObject);
+        assetIndexUpdater.UpdateAllIndices();
         assetIndexUpdater.StartCoroutine(assetIndexUpdater.AssetRespawnCoroutine());
         // RespawnAssets();
     }

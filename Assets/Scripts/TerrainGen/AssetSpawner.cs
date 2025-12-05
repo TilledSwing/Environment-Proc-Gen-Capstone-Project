@@ -44,10 +44,11 @@ public class AssetSpawner : MonoBehaviour
     {
         vertexBufferLength = chunkVertices.Length;
         if (vertexBufferLength <= 0) emptyChunk = true;
+        
         if (!assetSpawnData.assets.ContainsKey(chunkPos))
         {
             vertices = chunkVertices.ToList();
-            vertices.Sort();
+            // vertices.Sort(new ComputeMarchingCubes.VertexComparer());
             uint seed = Hash(chunkPos.x, chunkPos.y, chunkPos.z, terrainDensityData.noiseGenerators[0].noiseSeed);
             rng = new(seed);
             InitializeData();
@@ -96,7 +97,7 @@ public class AssetSpawner : MonoBehaviour
         for (int i = 0; i < assetSpawnData.spawnableAssets.Count; i++)
         {
             if (emptyChunk && !assetSpawnData.spawnableAssets[i].undergroundAsset) continue;
-            if (assetSpawnFilters[i].underwaterAsset && chunkPos.y > terrainDensityData.waterLevel) continue;
+            if (assetSpawnFilters[i].underwaterAsset && chunkPos.y > terrainDensityData.waterLevel && terrainDensityData.water) continue;
             if (assetSpawnFilters[i].undergroundAsset)
             {
                 minDepthPoints = GetMinDepthChunkPoints(assetSpawnFilters[i].minDensity, heightsArray);
@@ -142,7 +143,7 @@ public class AssetSpawner : MonoBehaviour
                 if (assetSpawnFilters[i].useMaxSlope && slope > assetSpawnFilters[i].maxSlope + 0.01f) continue;
                 if (assetSpawnFilters[i].useMinHeight && height < assetSpawnFilters[i].minHeight - 0.01f) continue;
                 if (assetSpawnFilters[i].useMaxHeight && height > assetSpawnFilters[i].maxHeight + 0.01f) continue;
-                if (assetSpawnFilters[i].underwaterAsset && height > terrainDensityData.waterLevel - assetSpawnFilters[i].minDepth) continue;
+                if (assetSpawnFilters[i].underwaterAsset && height > terrainDensityData.waterLevel - assetSpawnFilters[i].minDepth && terrainDensityData.water) continue;
                 if (!assetSpawnFilters[i].underwaterAsset && height < terrainDensityData.waterLevel && !assetSpawnFilters[i].undergroundAsset) continue;
                 ComputeMarchingCubes.Vertex vert;
                 vert.position = spawnPoint;
@@ -287,60 +288,60 @@ public class AssetSpawner : MonoBehaviour
     //         acceptedSpawnPoints[i].AddRange(tempAccepted);
     //     }
     // }
-    [BurstCompile]
-    private struct CreateSpawnPointsJob : IJobParallelFor
-    {
-        [ReadOnly] public NativeArray<ComputeMarchingCubes.Vertex> vertexArray;
-        [ReadOnly] public NativeArray<AssetSpawnFilters> assetSpawnFilters;
-        public NativeArray<ComputeMarchingCubes.Vertex> spawnPoints;
-        public int baseSeed;
-        public int3 chunkPos;
-        public int waterLevel;
-        public int maxAttempts;
-        public void Execute(int index)
-        {
-            int spawnableAssetIndex = index / maxAttempts;
-            int assetAttemptIndex = index % maxAttempts;
+    // [BurstCompile]
+    // private struct CreateSpawnPointsJob : IJobParallelFor
+    // {
+    //     [ReadOnly] public NativeArray<ComputeMarchingCubes.Vertex> vertexArray;
+    //     [ReadOnly] public NativeArray<AssetSpawnFilters> assetSpawnFilters;
+    //     public NativeArray<ComputeMarchingCubes.Vertex> spawnPoints;
+    //     public int baseSeed;
+    //     public int3 chunkPos;
+    //     public int waterLevel;
+    //     public int maxAttempts;
+    //     public void Execute(int index)
+    //     {
+    //         int spawnableAssetIndex = index / maxAttempts;
+    //         int assetAttemptIndex = index % maxAttempts;
 
-            uint seed = Hash(chunkPos.x, chunkPos.y, chunkPos.z, spawnableAssetIndex, baseSeed);
-            Unity.Mathematics.Random rng = new(seed + (uint)assetAttemptIndex);
-            float roll = rng.NextFloat();
+    //         uint seed = Hash(chunkPos.x, chunkPos.y, chunkPos.z, spawnableAssetIndex, baseSeed);
+    //         Unity.Mathematics.Random rng = new(seed + (uint)assetAttemptIndex);
+    //         float roll = rng.NextFloat();
 
-            if (assetSpawnFilters[spawnableAssetIndex].spawnProbability < roll) return;
+    //         if (assetSpawnFilters[spawnableAssetIndex].spawnProbability < roll) return;
 
-            int randomIndex = rng.NextInt(0, vertexArray.Length);
-            float3 spawnPoint = vertexArray[randomIndex].position;
-            float3 spawnPointNormal = vertexArray[randomIndex].normal;
+    //         int randomIndex = rng.NextInt(0, vertexArray.Length);
+    //         float3 spawnPoint = vertexArray[randomIndex].position;
+    //         float3 spawnPointNormal = vertexArray[randomIndex].normal;
 
-            if (!assetSpawnFilters[spawnableAssetIndex].rotateToFaceNormal)
-            {
-                spawnPoint.y -= 0.75f;
-            }
-            else
-            {
-                spawnPoint.y -= 0.1f;
-            }
+    //         if (!assetSpawnFilters[spawnableAssetIndex].rotateToFaceNormal)
+    //         {
+    //             spawnPoint.y -= 0.75f;
+    //         }
+    //         else
+    //         {
+    //             spawnPoint.y -= 0.1f;
+    //         }
 
-            float height = spawnPoint.y;
-            float slope = math.degrees(math.acos(math.clamp(math.dot(math.normalize(spawnPointNormal), math.up()), -1f, 1f)));
+    //         float height = spawnPoint.y;
+    //         float slope = math.degrees(math.acos(math.clamp(math.dot(math.normalize(spawnPointNormal), math.up()), -1f, 1f)));
 
-            if (assetSpawnFilters[spawnableAssetIndex].useMinSlope && slope < assetSpawnFilters[spawnableAssetIndex].minSlope) return;
-            if (assetSpawnFilters[spawnableAssetIndex].useMaxSlope && slope > assetSpawnFilters[spawnableAssetIndex].maxSlope) return;
-            if (assetSpawnFilters[spawnableAssetIndex].useMinHeight && height < assetSpawnFilters[spawnableAssetIndex].minHeight) return;
-            if (assetSpawnFilters[spawnableAssetIndex].useMaxHeight && height > assetSpawnFilters[spawnableAssetIndex].maxHeight) return;
-            if (assetSpawnFilters[spawnableAssetIndex].underwaterAsset && height > waterLevel - 3) return;
-            if (!assetSpawnFilters[spawnableAssetIndex].underwaterAsset && height < waterLevel) return;
-            ComputeMarchingCubes.Vertex vert;
-            vert.position = spawnPoint;
-            vert.normal = spawnPointNormal;
-            spawnPoints[(spawnableAssetIndex * maxAttempts) + assetAttemptIndex] = vert;
-        }
-        public static uint Hash(int x, int y, int z, int spawnableAssetIndex, int baseSeed)
-        {
-            uint hash = (uint)(x * 73856093) ^ (uint)(y * 19349663) ^ (uint)(z * 83492791) ^ (uint)(spawnableAssetIndex * 1013904223) ^ (uint)baseSeed;
-            return hash;
-        }
-    }
+    //         if (assetSpawnFilters[spawnableAssetIndex].useMinSlope && slope < assetSpawnFilters[spawnableAssetIndex].minSlope) return;
+    //         if (assetSpawnFilters[spawnableAssetIndex].useMaxSlope && slope > assetSpawnFilters[spawnableAssetIndex].maxSlope) return;
+    //         if (assetSpawnFilters[spawnableAssetIndex].useMinHeight && height < assetSpawnFilters[spawnableAssetIndex].minHeight) return;
+    //         if (assetSpawnFilters[spawnableAssetIndex].useMaxHeight && height > assetSpawnFilters[spawnableAssetIndex].maxHeight) return;
+    //         if (assetSpawnFilters[spawnableAssetIndex].underwaterAsset && height > waterLevel - 3) return;
+    //         if (!assetSpawnFilters[spawnableAssetIndex].underwaterAsset && height < waterLevel) return;
+    //         ComputeMarchingCubes.Vertex vert;
+    //         vert.position = spawnPoint;
+    //         vert.normal = spawnPointNormal;
+    //         spawnPoints[(spawnableAssetIndex * maxAttempts) + assetAttemptIndex] = vert;
+    //     }
+    //     public static uint Hash(int x, int y, int z, int spawnableAssetIndex, int baseSeed)
+    //     {
+    //         uint hash = (uint)(x * 73856093) ^ (uint)(y * 19349663) ^ (uint)(z * 83492791) ^ (uint)(spawnableAssetIndex * 1013904223) ^ (uint)baseSeed;
+    //         return hash;
+    //     }
+    // }
     public struct AssetSpawnFilters
     {
         public bool rotateToFaceNormal;

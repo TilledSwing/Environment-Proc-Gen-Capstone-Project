@@ -515,6 +515,8 @@ MonoBehaviour:
   flightSpeed: 6
   editorPlayer: 1
   gameStarted: 0
+  characterController: {fileID: 0}
+  moveDirection: {x: 0, y: 0, z: 0}
   terraformCenters: []
   hitChunkPositions: []
   terraformTypes: 
@@ -1490,6 +1492,10 @@ PrefabInstance:
     - target: {fileID: 4196491627730360002, guid: 324486698f8e86d41b143978af75a6d3, type: 3}
       propertyPath: m_Name
       value: flashlight
+      objectReference: {fileID: 0}
+    - target: {fileID: 4196491627730360002, guid: 324486698f8e86d41b143978af75a6d3, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -43,28 +43,34 @@ public class ComputeMarchingCubes : MonoBehaviour
     public event Action<Mesh> OnMeshGenerated;
     private Mesh generatedMesh;
 
-    public struct Vertex : IComparable<Vertex>
+    public struct Vertex
     {
         public float3 position;
         public float3 normal;
-        public int CompareTo(Vertex other)
+    }
+
+    public struct VertexComparer : IComparer<Vertex>
+    {
+        public int Compare(Vertex a, Vertex b)
         {
-            int cmp = position.x.CompareTo(other.position.x);
+            int cmp;
+
+            cmp = a.position.x < b.position.x ? -1 : (a.position.x > b.position.x ? 1 : 0);
             if (cmp != 0) return cmp;
 
-            cmp = position.y.CompareTo(other.position.y);
+            cmp = a.position.y < b.position.y ? -1 : (a.position.y > b.position.y ? 1 : 0);
             if (cmp != 0) return cmp;
 
-            cmp = position.z.CompareTo(other.position.z);
+            cmp = a.position.z < b.position.z ? -1 : (a.position.z > b.position.z ? 1 : 0);
             if (cmp != 0) return cmp;
 
-            cmp = normal.x.CompareTo(other.normal.x);
+            cmp = a.normal.x < b.normal.x ? -1 : (a.normal.x > b.normal.x ? 1 : 0);
             if (cmp != 0) return cmp;
 
-            cmp = normal.y.CompareTo(other.normal.y);
+            cmp = a.normal.y < b.normal.y ? -1 : (a.normal.y > b.normal.y ? 1 : 0);
             if (cmp != 0) return cmp;
 
-            return normal.z.CompareTo(other.normal.z);
+            return a.normal.z < b.normal.z ? -1 : (a.normal.z > b.normal.z ? 1 : 0);
         }
     }
 
@@ -82,13 +88,6 @@ public class ComputeMarchingCubes : MonoBehaviour
         initialLoadComplete = true;
         // StartCoroutine(GenerateMesh());
     }
-    // void Update()
-    // {
-    //     if(rendering)
-    //     {
-    //         Graphics.DrawProceduralIndirect(ChunkGenNetwork.Instance.terrainMaterial, new Bounds(chunkPos + (new Vector3(0.5f, 0.5f, 0.5f) * terrainDensityData.width), Vector3.one * terrainDensityData.width), MeshTopology.Triangles, vertexBuffer);
-    //     }
-    // }
     public void Regen()
     {
         SetTerrainSettings();
@@ -343,32 +342,25 @@ public class ComputeMarchingCubes : MonoBehaviour
     /// <param name="vertexCount">The amount of items in the vertex array</param>
     /// <param name="vertexArray">An array of vertices given by marching cubes</param>
     /// <param name="terraforming">Whether the user is terraforming</param>
-    public void SetMeshValuesPerformant(int vertexCount, Triangle[] vertexArray, bool terraforming)
+    public void SetMeshValuesPerformant(int vertexCount, NativeList<Triangle> vertexArray, bool terraforming)
     {
         Mesh.MeshDataArray meshDataArray = Mesh.AllocateWritableMeshData(1);
         Mesh.MeshData meshData = meshDataArray[0];
 
-        List<Triangle> validTriangles = new();
-        for(int i = 0; i < vertexCount; i++)
-        {
-            Triangle t = vertexArray[i];
-            if (!(math.all(t.v1.position == float3.zero) && math.all(t.v2.position == float3.zero) && math.all(t.v3.position == float3.zero))) 
-                validTriangles.Add(t);
-        }
-
-        meshData.SetVertexBufferParams(validTriangles.Count * 3,
-        new VertexAttributeDescriptor(VertexAttribute.Position),
-        new VertexAttributeDescriptor(VertexAttribute.Normal));
+        meshData.SetVertexBufferParams(vertexCount * 3,
+                                       new VertexAttributeDescriptor(VertexAttribute.Position),
+                                       new VertexAttributeDescriptor(VertexAttribute.Normal)
+                                      );
 
         var vertexBuffer = meshData.GetVertexData<Vertex>(0);
 
-        meshData.SetIndexBufferParams(validTriangles.Count * 3, IndexFormat.UInt32);
+        meshData.SetIndexBufferParams(vertexCount * 3, IndexFormat.UInt32);
         var indexBuffer = meshData.GetIndexData<int>();
         
-        for (int i = 0; i < validTriangles.Count; i++)
+        for (int i = 0; i < vertexCount; i++)
         {
             int start = i * 3;
-            Triangle t = validTriangles[i];
+            Triangle t = vertexArray[i];
             
             if (math.all(t.v1.position == float3.zero) && math.all(t.v2.position == float3.zero) && math.all(t.v3.position == float3.zero)) continue;
 
@@ -381,37 +373,31 @@ public class ComputeMarchingCubes : MonoBehaviour
             indexBuffer[start + 2] = start + 2;
         }
 
+        vertexArray.Dispose();
+
         meshData.subMeshCount = 1;
-        meshData.SetSubMesh(0, new SubMeshDescriptor(0, validTriangles.Count * 3, MeshTopology.Triangles));
+        meshData.SetSubMesh(0, new SubMeshDescriptor(0, vertexCount * 3, MeshTopology.Triangles));
 
         if (!terraforming)
         {
             assetSpawner.chunkVertices = new NativeArray<Vertex>(vertexBuffer.Length, Allocator.Persistent);
             assetSpawner.chunkVertices.CopyFrom(vertexBuffer);
+            VertexSortJob vertexSortJob = new VertexSortJob { vertexArray = assetSpawner.chunkVertices };
+            vertexSortJob.Run();
             assetSpawner.heightsArray = heightsArray;
         }
 
+        vertexBuffer.Dispose();
+        indexBuffer.Dispose();
+
         Mesh mesh = new Mesh();
-        // Mesh.ApplyAndDisposeWritableMeshData(meshDataArray, mesh, MeshUpdateFlags.Default);
         Mesh.ApplyAndDisposeWritableMeshData(meshDataArray, mesh, MeshUpdateFlags.DontRecalculateBounds | MeshUpdateFlags.DontValidateIndices);
-        // mesh.bounds = new Bounds(chunkPos + (new Vector3(0.5f, 0.5f, 0.5f) * terrainDensityData.width), Vector3.one * terrainDensityData.width);
 
-        // if (lodData.lod == ChunkGenNetwork.LOD.LOD1)
-        // {
-        //     lod1Mesh = mesh;
-        //     meshCollider.sharedMesh = mesh;
-        // }
-        // if (lodData.lod == ChunkGenNetwork.LOD.LOD2) lod2Mesh = mesh;
-        // if (lodData.lod == ChunkGenNetwork.LOD.LOD3) lod3Mesh = mesh;
-        // if (lodData.lod == ChunkGenNetwork.LOD.LOD6) lod6Mesh = mesh;
-
-        // if (lodData.lod == currentLOD)
-        // {
         meshFilter.mesh = mesh;
         meshCollider.sharedMesh = mesh;
         OnMeshGenerated?.Invoke(generatedMesh);
 
-        mesh.bounds = new Bounds(chunkPos + (new Vector3(0.5f, 0.5f, 0.5f) * terrainDensityData.width), Vector3.one * terrainDensityData.width);
+        mesh.bounds = bounds;
 
         if (!terraforming)
         {
@@ -428,7 +414,6 @@ public class ComputeMarchingCubes : MonoBehaviour
             //     grass.bounds = mesh.bounds;
             // }
         }
-        // }
     }
 
     public void MarchingCubesJobHandler(float[] heights, bool terraforming)
@@ -437,17 +422,14 @@ public class ComputeMarchingCubes : MonoBehaviour
 
         NativeList<Triangle> triangleArray = new(iterations, Allocator.Persistent);
         NativeArray<float> heightsArray = new(heights, Allocator.Persistent);
-        NativeArray<float3> vertexOffsetTable = new(MarchingCubesTables.vertexOffsetTable, Allocator.Persistent);
-        NativeArray<int> edgeIndexTable = new(MarchingCubesTables.edgeIndexTable, Allocator.Persistent);
-        NativeArray<int> triangleTable = new(MarchingCubesTables.triangleTable, Allocator.Persistent);
 
         MarchingCubesJob marchingCubesJob = new MarchingCubesJob
         {
             triangleArray = triangleArray.AsParallelWriter(),
             heightsArray = heightsArray,
-            vertexOffsetTable = vertexOffsetTable,
-            edgeIndexTable = edgeIndexTable,
-            triangleTable = triangleTable,
+            vertexOffsetTable = ChunkGenNetwork.Instance.vertexOffsetTable,
+            edgeIndexTable = ChunkGenNetwork.Instance.edgeIndexTable,
+            triangleTable = ChunkGenNetwork.Instance.triangleTable,
             chunkSize = terrainDensityData.width,
             chunkPos = new int3(chunkPos.x, chunkPos.y, chunkPos.z),
             isolevel = terrainDensityData.isolevel,
@@ -455,21 +437,20 @@ public class ComputeMarchingCubes : MonoBehaviour
             resolution = ChunkGenNetwork.Instance.resolution,
         };
 
+
         JobHandle marchingCubesHandler = marchingCubesJob.Schedule(iterations, 16);
         marchingCubesHandler.Complete();
 
-        if (terrainDensityData.waterLevel > chunkPos.y && terrainDensityData.waterLevel < Mathf.RoundToInt(chunkPos.y + terrainDensityData.width))
+        if (terrainDensityData.waterLevel > chunkPos.y && terrainDensityData.waterLevel < Mathf.RoundToInt(chunkPos.y + terrainDensityData.width) && terrainDensityData.water)
         {
             waterGen.UpdateMesh();
         }
 
-        NativeArray<Triangle> triangleArrayCopy = triangleArray.AsArray();
-        SetMeshValuesPerformant(triangleArray.Length, triangleArrayCopy.ToArray(), terraforming);
-        triangleArray.Dispose();
+        // NativeArray<Triangle> triangleArrayCopy = triangleArray.AsArray();
+        // SetMeshValuesPerformant(triangleArray.Length, triangleArrayCopy.ToArray(), terraforming);
+        SetMeshValuesPerformant(triangleArray.Length, triangleArray, terraforming);
+        // triangleArray.Dispose();
         heightsArray.Dispose();
-        vertexOffsetTable.Dispose();
-        edgeIndexTable.Dispose();
-        triangleTable.Dispose();
     }
     [BurstCompile]
     private struct MarchingCubesJob : IJobParallelFor
@@ -615,14 +596,43 @@ public class ComputeMarchingCubes : MonoBehaviour
             }
         }
     }
-    // Releases height buffers when the application is closed/stopped
-    void OnDestroy()
+    [BurstCompile]
+    private struct VertexSortJob : IJob
     {
-        if (heightsBuffer != null && heightsBuffer.IsValid())
+        public NativeArray<Vertex> vertexArray;
+        public void Execute()
         {
-            heightsBuffer.Release();
+            vertexArray.Sort(new VertexComparer());
+        }
+
+        public struct VertexComparer : IComparer<Vertex>
+        {
+            public int Compare(Vertex a, Vertex b)
+            {
+                int cmp;
+
+                cmp = a.position.x < b.position.x ? -1 : (a.position.x > b.position.x ? 1 : 0);
+                if (cmp != 0) return cmp;
+
+                cmp = a.position.y < b.position.y ? -1 : (a.position.y > b.position.y ? 1 : 0);
+                if (cmp != 0) return cmp;
+
+                cmp = a.position.z < b.position.z ? -1 : (a.position.z > b.position.z ? 1 : 0);
+                if (cmp != 0) return cmp;
+
+                cmp = a.normal.x < b.normal.x ? -1 : (a.normal.x > b.normal.x ? 1 : 0);
+                if (cmp != 0) return cmp;
+
+                cmp = a.normal.y < b.normal.y ? -1 : (a.normal.y > b.normal.y ? 1 : 0);
+                if (cmp != 0) return cmp;
+
+                return a.normal.z < b.normal.z ? -1 : (a.normal.z > b.normal.z ? 1 : 0);
+            }
         }
     }
+    /// <summary>
+    /// Release associated buffers
+    /// </summary>
     void OnDisable()
     {
         if (heightsBuffer != null && heightsBuffer.IsValid())
@@ -699,10 +709,7 @@ public class ComputeMarchingCubes : MonoBehaviour
 
                 if (vertexCount > 0)
                 {
-                    SetMeshValuesPerformant(vertexCount, vertexArray, terraforming);
-                    // ChunkGenNetwork.Instance.pendingMeshInits.Enqueue(() =>
-                    //     SetMeshValuesPerformant(vertexCount, vertexArray, terraforming)
-                    // );
+                    // SetMeshValuesPerformant(vertexCount, vertexArray, terraforming);
                 }
             }), bounds.SqrDistance(ChunkGenNetwork.Instance.viewerPos));
         }), bounds.SqrDistance(ChunkGenNetwork.Instance.viewerPos));
@@ -729,9 +736,6 @@ public class ComputeMarchingCubes : MonoBehaviour
         vertexBuffer.SetCounterValue(0);
         marchingCubesComputeShader.Dispatch(marchingKernel, Mathf.CeilToInt(terrainDensityData.width / ChunkGenNetwork.Instance.resolution / 4f), Mathf.CeilToInt(terrainDensityData.width / ChunkGenNetwork.Instance.resolution / 4f), Mathf.CeilToInt(terrainDensityData.width / ChunkGenNetwork.Instance.resolution / 4f));
 
-        // ChunkGenNetwork.Instance.terrainMaterial.SetBuffer("_Triangles", vertexBuffer);
-        // Graphics.DrawProceduralIndirect(ChunkGenNetwork.Instance.terrainMaterial, new Bounds(chunkPos + (new Vector3(0.5f, 0.5f, 0.5f) * terrainDensityData.width), Vector3.one * terrainDensityData.width), MeshTopology.Triangles, vertexBuffer);
-        // rendering = true;
         ComputeBuffer vertexCountBuffer = ComputeBufferPoolManager.Instance.GetComputeBuffer("VertexCountBuffer", 1, sizeof(int), ComputeBufferType.Raw);
         ComputeBuffer.CopyCount(vertexBuffer, vertexCountBuffer, 0);
 
@@ -752,79 +756,6 @@ public class ComputeMarchingCubes : MonoBehaviour
             waterGen.UpdateMesh();
         }
 
-        SetMeshValuesPerformant(vertexCount, vertexArray, terraforming);
-        // ChunkGenNetwork.Instance.pendingMeshInits.Enqueue(() =>
-        //     SetMeshValuesPerformant(vertexCount, vertexArray, terraforming)
-        // );
+        // SetMeshValuesPerformant(vertexCount, vertexArray, terraforming);
     }
-    // Old mesh setup code saved for reference
-
-    // public void SetMeshValues(int vertexCount, Triangle[] vertexArray, bool terraforming)
-    // {
-    //     vertices.Clear();
-    //     triangles.Clear();
-    //     verticesNormals.Clear();
-    //     vertices.Capacity = vertexCount * 3;
-    //     verticesNormals.Capacity = vertexCount * 3;
-    //     triangles.Capacity = vertexCount * 3;
-    //     for (int i = 0; i < vertexCount; i++)
-    //     {
-    //         Triangle t = vertexArray[i];
-    //         vertices.Add(t.v1.position);
-    //         vertices.Add(t.v2.position);
-    //         vertices.Add(t.v3.position);
-
-    //         Vertex v1;
-    //         v1.position = t.v1.position;
-    //         v1.normal = t.v1.normal;
-    //         verticesNormals.Add(v1);
-    //         Vertex v2;
-    //         v2.position = t.v2.position;
-    //         v2.normal = t.v2.normal;
-    //         verticesNormals.Add(v2);
-    //         Vertex v3;
-    //         v3.position = t.v3.position;
-    //         v3.normal = t.v3.normal;
-    //         verticesNormals.Add(v3);
-
-    //         triangles.Add(i * 3);
-    //         triangles.Add(i * 3 + 1);
-    //         triangles.Add(i * 3 + 2);
-    //     }
-    //     SetupMesh(terraforming);
-    // }
-
-    // public void SetupMesh(bool terraforming)
-    // {
-    //     Mesh mesh = new Mesh();
-    //     mesh.indexFormat = IndexFormat.UInt32;
-    //     mesh.SetVertices(vertices);
-    //     mesh.SetTriangles(triangles, 0);
-    //     List<Vector3> normals = new List<Vector3>(verticesNormals.Count);
-    //     for (int i = 0; i < verticesNormals.Count; i++)
-    //     {
-    //         normals.Add(verticesNormals[i].normal);
-    //     }
-    //     mesh.SetNormals(normals);
-    //     mesh.RecalculateBounds();
-
-
-    //     meshFilter.mesh = mesh;
-    //     meshCollider.sharedMesh = mesh;
-
-    //     assetSpawner.worldVertices = verticesNormals.ToArray();
-    //     if (!terraforming)
-    //     {
-    //         assetSpawner.SpawnAssets();
-    //     }
-
-    //     if (Mathf.RoundToInt(chunkPos.y / terrainDensityData.width) == 0)
-    //     {
-    //         waterGen.UpdateMesh();
-    //     }
-
-    //     vertices.Clear();
-    //     triangles.Clear();
-    //     verticesNormals.Clear();
-    // }
 }

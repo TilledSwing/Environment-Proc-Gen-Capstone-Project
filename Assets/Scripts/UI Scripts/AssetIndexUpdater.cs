@@ -8,7 +8,7 @@ public class AssetIndexUpdater : MonoBehaviour
         int count = 0;
         foreach(Transform child in transform)
         {
-            child.GetComponent<AssetSettingsTabController>().assetIndex = count;
+            child.GetComponent<AssetSettingsTabController>().assetIndex = child.GetSiblingIndex();
             count++;
         }
     }

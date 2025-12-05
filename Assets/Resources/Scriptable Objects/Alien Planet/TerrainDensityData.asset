@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c29ee72cee6fb9144bd844ec6a8f7ebb, type: 3}
+  m_Name: TerrainDensityData
+  m_EditorClassIdentifier: 
+  noiseGenerators:
+  - {fileID: 11400000, guid: 57ae92c6fd6fac241b4562c8d681d960, type: 2}
+  - {fileID: 11400000, guid: 4b3d61f5fc4187044aa4dac05725deef, type: 2}
+  - {fileID: 11400000, guid: 8c27e19831c57f74789b5d0be9d52e61, type: 2}
+  - {fileID: 11400000, guid: ca58bd11f877e0a4aa3d32c32ca31d4e, type: 2}
+  - {fileID: 11400000, guid: 55f66ea88a65fc34cbfd35706539a4ff, type: 2}
+  - {fileID: 11400000, guid: b0c9c4d40bd950444be761234972acb7, type: 2}
+  - {fileID: 11400000, guid: 8d292f8bfb7000144a49af6608c4498b, type: 2}
+  width: 24
+  height: 200
+  isolevel: 0.5
+  waterLevel: 30
+  water: 0
+  lerp: 1
+  terracing: 0
+  terraceHeight: 2

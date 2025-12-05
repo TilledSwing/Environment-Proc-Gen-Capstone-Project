@@ -39,9 +39,6 @@ public class BroadcastRandomChange : NetworkBehaviour
         // queueUpdateDistanceThreshold = 15f;
         ChunkGenNetwork.Instance.isLoadingChunks = false;
         // Action Queues
-        ChunkGenNetwork.Instance.hasPendingMeshInits = false;
-        ChunkGenNetwork.Instance.pendingMeshInits = new();
-        ChunkGenNetwork.Instance.isLoadingMeshes = false;
         ChunkGenNetwork.Instance.hasPendingReadbacks = false;
         ChunkGenNetwork.Instance.pendingReadbacks = new();
         ChunkGenNetwork.Instance.isLoadingReadbacks = false;
@@ -96,9 +93,6 @@ public class BroadcastRandomChange : NetworkBehaviour
         // queueUpdateDistanceThreshold = 15f;
         ChunkGenNetwork.Instance.isLoadingChunks = false;
         // Action Queues
-        ChunkGenNetwork.Instance.hasPendingMeshInits = false;
-        ChunkGenNetwork.Instance.pendingMeshInits = new();
-        ChunkGenNetwork.Instance.isLoadingMeshes = false;
         ChunkGenNetwork.Instance.hasPendingReadbacks = false;
         ChunkGenNetwork.Instance.pendingReadbacks = new();
         ChunkGenNetwork.Instance.isLoadingReadbacks = false;

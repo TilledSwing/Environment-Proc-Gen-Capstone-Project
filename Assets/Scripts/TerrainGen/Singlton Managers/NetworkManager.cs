@@ -32,7 +32,7 @@ public class NetworkManager : NetworkBehaviour
         ChunkGenNetwork.Instance.hudCanvas.SetActive(true);
         ChunkGenNetwork.Instance.chatContainer.SetActive(true);
         ChunkGenNetwork.Instance.lobbyContainer.SetActive(true);
-        ChunkGenNetwork.Instance.lightChange.intensity = 1.5f;
+        // ChunkGenNetwork.Instance.lightChange.intensity = 5f;
 
         PlayerController.instance.waterLevel = ChunkGenNetwork.Instance.terrainDensityData.waterLevel;
 
@@ -78,9 +78,6 @@ public class NetworkManager : NetworkBehaviour
         // queueUpdateDistanceThreshold = 15f;
         ChunkGenNetwork.Instance.isLoadingChunks = false;
         // Action Queues
-        ChunkGenNetwork.Instance.hasPendingMeshInits = false;
-        ChunkGenNetwork.Instance.pendingMeshInits = new();
-        ChunkGenNetwork.Instance.isLoadingMeshes = false;
         ChunkGenNetwork.Instance.hasPendingReadbacks = false;
         ChunkGenNetwork.Instance.pendingReadbacks = new();
         ChunkGenNetwork.Instance.isLoadingReadbacks = false;
@@ -107,7 +104,7 @@ public class NetworkManager : NetworkBehaviour
 
     private IEnumerator ApplyTerraforms(List<Vector3> terraformCenters, List<Vector3Int> hitChunkPositions, List<int> terraformTypes)
     {
-        while (!ChunkGenNetwork.Instance.initialLoadComplete || ChunkGenNetwork.Instance.hasPendingMeshInits || ChunkGenNetwork.Instance.isLoadingMeshes || ChunkGenNetwork.Instance.hasPendingAssetInstantiations ||
+        while (!ChunkGenNetwork.Instance.initialLoadComplete || ChunkGenNetwork.Instance.hasPendingAssetInstantiations ||
                 ChunkGenNetwork.Instance.isLoadingAssetInstantiations || ChunkGenNetwork.Instance.hasPendingReadbacks || ChunkGenNetwork.Instance.isLoadingReadbacks || ChunkGenNetwork.Instance.isLoadingChunks ||
                 PlayerController.instance == null || ChunkGenNetwork.Instance.assetSpawnData.assets.Count == 0)
         { 
