@@ -1,4 +1,3 @@
-using System;
 using Unity.VisualScripting;
 using UnityEngine;
 using static NoiseGenerator;
@@ -155,20 +154,10 @@ public static class SeedSerializer
 
     private static NoiseGeneratorSettings SerializeNoiseDensity(NoiseGenerator settings)
     {
-        float[] textur = new float[0];
-         try
-        {
-            textur = SplineCurveFunctions.CurveToArray(settings.valueCurve);
-        }
-        catch (Exception e)
-        {
-            textur = new float[0];
-        }
         return new NoiseGeneratorSettings
         {
             activated = settings.activated,
-           
-            remoteTexture = textur,
+            remoteTexture = SplineCurveFunctions.CurveToArray(settings.valueCurve),
             noiseGeneratorType = (int)settings.noiseGeneratorType,
             // Noise and Fractal Settings
             selectedNoiseDimension = settings.selectedNoiseDimension,
