@@ -9,6 +9,7 @@ using GameKit.Dependencies.Utilities;
 using LiteNetLib.Utils;
 using static NoiseGenerator;
 using System.Threading;
+using System.Linq;
 /// <summary>
 /// This class will act as a manager script that will facilitate all DB operations
 /// </summary>
@@ -84,6 +85,13 @@ public class DBManager : MonoBehaviour
                 Debug.Log("Raw Response: " + request.downloadHandler.text);
                 PHPSaveTerrainResponse response = JsonUtility.FromJson<PHPSaveTerrainResponse>(request.downloadHandler.text);
                 loadedTerrainId = response.terrainId;
+                var key = responseList.FirstOrDefault(x => x.Value == terrainName).Key;
+
+                if (key != 0) // Default(int) is 0 if not found
+                {
+                    responseList.Remove(key);
+                }
+                responseList.Add(response.terrainId, terrainName);
             }
             else
                 Debug.Log("request failed: " + request.error + " response code: " + request.responseCode);

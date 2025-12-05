@@ -16,27 +16,20 @@ public class SteamValidation : MonoBehaviour
     /// <summary>
     /// On the initilization of the app this method will look for the steam manager and then retreive user information
     /// </summary>
-
-    [RuntimeInitializeOnLoadMethod]
-    [System.Obsolete]
-    public static void OnRuntimeMethodLoad()
+    private  void Awake()
     {
-        //Checks if the steam manager is open. If it is not it will simply return
-        if (!SteamManager.Initialized)
+        if (!SteamAPI.Init())
         {
-            Debug.Log("Your steam engine is not open, please open it and re-run the program to utilize steam functionality.");
-            return; //Ensure steam is open
+            Debug.Log("Please open your steam engine");
+            return;
         }
-
-        //Retreive user information
         steamProfileName = SteamFriends.GetPersonaName();
-        CSteamID csteamID = SteamUser.GetSteamID();
-        steamID = csteamID.m_SteamID;
+        steamID = SteamUser.GetSteamID().m_SteamID;
         IsInitialized = true;
         //Sanity print to ensure it is working
         Debug.Log("Logged in user is: " + steamProfileName + ", and you Steam ID is: " + steamID);
 
-        DBManager db = GameObject.FindObjectOfType<DBManager>();
+        DBManager db = GameObject.FindFirstObjectByType<DBManager>();
         db.checkRegisteredUser(steamID, steamProfileName);
         db.retreiveTerrainNames();
     }

@@ -83,7 +83,7 @@ public class EnemySpawner : NetworkBehaviour
     public void RequestSpawnEnemy()
     {
         SpawnLandEnemies_FilteredByAgent();
-        SpawnWaterEnemies_FilteredByAgent();
+        // SpawnWaterEnemies_FilteredByAgent();
     }
 
     private struct Tri
