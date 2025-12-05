@@ -1,4 +1,3 @@
-using FishNet.Example.ColliderRollbacks;
 using FishNet.Object;
 using FishNet.Object.Synchronizing;
 using UnityEngine;
@@ -43,6 +42,10 @@ public class Health : NetworkBehaviour
         {
             TakeDamage(1, gameObject);
             Debug.Log(_currentHealth.Value);
+            if (_currentHealth.Value - 1 <= 0)
+            {
+                BroadcastPlayerDeath(LocalConnection.ClientId);
+            }
         }
         else if (Input.GetKeyDown(KeyCode.P))
         {
@@ -50,6 +53,13 @@ public class Health : NetworkBehaviour
             Debug.Log(_currentHealth.Value);
         }
 
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void BroadcastPlayerDeath(int clientConnectionID)
+    {
+        ChatBroadcast.instance.ChatBroadcastPlayerDeath(clientConnectionID);
+        LobbyBroadcast.instance.PlayerDeath(clientConnectionID);
     }
 
     //private void OnHealthChanged(float previous, float next, bool asServer)

@@ -65,6 +65,18 @@ public class LobbyBroadcast : MonoBehaviour
         }
     }
 
+    public void PlayerDeath(int clientConnectionID)
+    {
+        string deadName = connectedPlayers[clientConnectionID] + " (DEAD)";
+        connectedPlayers[clientConnectionID] = deadName;
+        string[] curPlayerList = connectedPlayers.Values.ToArray();
+
+        PlayerList playerList = new PlayerList() { connectedPlayers = curPlayerList };
+
+        // Send to the new client with a small delay to ensure handler is registered
+        StartCoroutine(DelayedPlayerBroadcast(playerList));
+    }
+
     private void OnRemoteJoin(NetworkConnection connection, PlayerName name, Channel channel)
     {
         Debug.Log("This is the connection id: " + connection.ClientId.ToString());

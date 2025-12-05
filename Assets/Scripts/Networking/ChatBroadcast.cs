@@ -8,6 +8,7 @@ using FishNet.Transporting;
 
 public class ChatBroadcast : MonoBehaviour
 {
+    public static ChatBroadcast instance;
     public Transform chatHolder;
     public GameObject msgElement;
     public TMP_InputField playerMsg;
@@ -19,6 +20,7 @@ public class ChatBroadcast : MonoBehaviour
     /// </summary>
     private void OnEnable()
     {
+        instance = this;
         InstanceFinder.ClientManager.RegisterBroadcast<Message>(OnMessageReceived);
         InstanceFinder.ServerManager.RegisterBroadcast<Message>(OnClientMessageReceived);
     }
@@ -103,6 +105,17 @@ public class ChatBroadcast : MonoBehaviour
         string toMessage = LobbyBroadcast.instance.connectedPlayers[connection.ClientId] + ": " + givenMessage.message;
         Message updatedMessage = new Message { message = toMessage };
         InstanceFinder.ServerManager.Broadcast(updatedMessage);
+    }
+
+    /// <summary>
+    /// Broadcasts to the chat the player that just died.
+    /// </summary>
+    /// <param name="clientConnectionID">The connection ID of the player that died.</param>
+    public void ChatBroadcastPlayerDeath(int clientConnectionID)
+    {
+        string toMessage = "Player: " + LobbyBroadcast.instance.connectedPlayers[clientConnectionID] + " has died!";
+        Message message = new Message { message = toMessage };
+        InstanceFinder.ServerManager.Broadcast(message);
     }
 
     /// <summary>
