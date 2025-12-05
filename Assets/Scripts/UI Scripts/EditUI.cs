@@ -106,6 +106,9 @@ public class EditUI : MonoBehaviour
             case "LERPToggle":
                 toggle.isOn = tdd.lerp;
                 break;
+            case "WaterToggle":
+                toggle.isOn = tdd.water;
+                break;
             case "TerraceToggle":
                 toggle.isOn = tdd.terracing;
                 break;
@@ -214,6 +217,7 @@ public class EditUI : MonoBehaviour
         ng.noiseScale = 0.6f;
         tdd.isolevel = 0.5f;
         tdd.waterLevel = 30;
+        tdd.water = true;
         tdd.lerp = true;
         tdd.terracing = false;
         tdd.terraceHeight = 2;
@@ -246,6 +250,13 @@ public class EditUI : MonoBehaviour
     {
         loadScreen.SetActive(true);
         tdd.lerp = marked;
+        Debug.Log("toggle changed");
+        StartCoroutine(ReloadWrapper());
+    }
+    public void OnWaterToggleChanged(bool marked)
+    {
+        loadScreen.SetActive(true);
+        tdd.water = marked;
         Debug.Log("toggle changed");
         StartCoroutine(ReloadWrapper());
     }
