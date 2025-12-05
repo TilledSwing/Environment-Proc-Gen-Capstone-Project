@@ -189,7 +189,7 @@ public class ChunkGenNetwork : MonoBehaviour
 
         // Uncomment to see desert preset
         // Unity.Mathematics.Random rng = new((uint)UnityEngine.Random.Range(0, 100000));
-        // int rand = rng.NextInt(0, 2);
+        // int rand = rng.NextInt(0, generationConfiguration.terrainConfigs.Count);
         terrainDensityData = generationConfiguration.terrainConfigs[presetDropdown.value].terrainDensityData;
         terrainTextureData = generationConfiguration.terrainConfigs[presetDropdown.value].terrainTextureData;
         assetSpawnData = generationConfiguration.terrainConfigs[presetDropdown.value].assetSpawnData;
