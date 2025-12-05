@@ -59,7 +59,7 @@ public class DBManager : MonoBehaviour
     /// <param name="steamId"></param>
     /// <param name="steamName"></param>
     /// <returns></returns>
-    IEnumerator SaveTerrainData(string terrainName) //int seed, int width, int height, float noiseScale, float isolevel, bool lerp
+    public IEnumerator SaveTerrainData(string terrainName) //int seed, int width, int height, float noiseScale, float isolevel, bool lerp
     {
         //Set up connection
         string url = "http://localhost/sqlconnect/saveTerrain.php";
@@ -234,7 +234,7 @@ public class DBManager : MonoBehaviour
     /// Once a user selects the Load tab and clicks the saved terrain they wish to load, this method is called and all the terrain data information is loaded
     /// </summary>
     /// <returns></returns>
-    IEnumerator LoadTerrainData()
+    public IEnumerator LoadTerrainData()
     {
         Debug.Log($"Loading terrain {loadedTerrainId}");
         string url = "http://localhost/sqlconnect/loadTerrainData.php";

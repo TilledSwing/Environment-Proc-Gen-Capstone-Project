@@ -10027,6 +10027,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8171214292103335467, guid: 2eb1c80c87ebda24eb64735cc0d17337, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1419437071}
+    - targetCorrespondingSourceObject: {fileID: 8171214292103335467, guid: 2eb1c80c87ebda24eb64735cc0d17337, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2016854075}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2eb1c80c87ebda24eb64735cc0d17337, type: 3}
 --- !u!224 &616234407 stripped
@@ -11626,21 +11629,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 717467453}
-        m_TargetAssemblyTypeName: LoadManager, Assembly-CSharp
+      - m_Target: {fileID: 717467455}
+        m_TargetAssemblyTypeName: GameLoadManager, Assembly-CSharp
         m_MethodName: LoadButton2
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 1463313936}
-        m_TargetAssemblyTypeName: BroadcastRandomChange, Assembly-CSharp
-        m_MethodName: RandomTerrainGenServer
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -11833,7 +11824,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 717467454}
-  - component: {fileID: 717467453}
+  - component: {fileID: 717467455}
   m_Layer: 0
   m_Name: LoadHandler
   m_TagString: Untagged
@@ -11841,21 +11832,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &717467453
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 717467452}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b58135c1da81ec74083dedbff0894405, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  button: {fileID: 0}
-  db: {fileID: 0}
-  loadPanel: {fileID: 2016854074}
 --- !u!4 &717467454
 Transform:
   m_ObjectHideFlags: 0
@@ -11871,6 +11847,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &717467455
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 717467452}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bae66239e8cd35b4cb1dd4677dfe8192, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncManager: {fileID: 1463313931}
+  db: {fileID: 0}
+  loadPanel: {fileID: 2016854074}
 --- !u!1 &723138626
 GameObject:
   m_ObjectHideFlags: 0
@@ -14527,7 +14518,6 @@ RectTransform:
   m_Children:
   - {fileID: 1993020672}
   - {fileID: 21128726}
-  - {fileID: 2016854075}
   m_Father: {fileID: 1705151102}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -25155,21 +25145,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 717467453}
-        m_TargetAssemblyTypeName: LoadManager, Assembly-CSharp
+      - m_Target: {fileID: 717467455}
+        m_TargetAssemblyTypeName: GameLoadManager, Assembly-CSharp
         m_MethodName: LoadButton4
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 1463313936}
-        m_TargetAssemblyTypeName: BroadcastRandomChange, Assembly-CSharp
-        m_MethodName: RandomTerrainGenServer
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -27298,21 +27276,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 717467453}
-        m_TargetAssemblyTypeName: LoadManager, Assembly-CSharp
+      - m_Target: {fileID: 717467455}
+        m_TargetAssemblyTypeName: GameLoadManager, Assembly-CSharp
         m_MethodName: LoadButton3
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 1463313936}
-        m_TargetAssemblyTypeName: BroadcastRandomChange, Assembly-CSharp
-        m_MethodName: RandomTerrainGenServer
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -30017,21 +29983,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 717467453}
-        m_TargetAssemblyTypeName: LoadManager, Assembly-CSharp
+      - m_Target: {fileID: 717467455}
+        m_TargetAssemblyTypeName: GameLoadManager, Assembly-CSharp
         m_MethodName: LoadButton1
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 1463313936}
-        m_TargetAssemblyTypeName: BroadcastRandomChange, Assembly-CSharp
-        m_MethodName: RandomTerrainGenServer
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -34688,8 +34642,8 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
-      - m_Target: {fileID: 717467453}
-        m_TargetAssemblyTypeName: LoadManager, Assembly-CSharp
+      - m_Target: {fileID: 717467455}
+        m_TargetAssemblyTypeName: GameLoadManager, Assembly-CSharp
         m_MethodName: PopulateList
         m_Mode: 1
         m_Arguments:
@@ -37543,12 +37497,12 @@ RectTransform:
   - {fileID: 1349953868}
   - {fileID: 1353381553}
   - {fileID: 322334650}
-  m_Father: {fileID: 845529186}
+  m_Father: {fileID: 616234407}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 859, y: -306}
-  m_SizeDelta: {x: 541.3998, y: 482.71002}
+  m_AnchoredPosition: {x: 859, y: -278.50003}
+  m_SizeDelta: {x: 560.3998, y: 496.21002}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2016854076
 MonoBehaviour:
