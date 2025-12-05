@@ -62,7 +62,7 @@ public class Health : NetworkBehaviour
     {
         ChatBroadcast.instance.ChatBroadcastPlayerDeath(conn.ClientId);
         LobbyBroadcast.instance.PlayerDeath(conn.ClientId);
-        DisableDeadPlayer(conn, deadPlayer);
+        DisableDeadPlayer(deadPlayer);
         SetDeadPlayer(conn);
 
         bool gameEnded = true;
@@ -77,11 +77,10 @@ public class Health : NetworkBehaviour
     }
 
     [ObserversRpc]
-    public void DisableDeadPlayer(NetworkConnection conn, GameObject player)
+    public void DisableDeadPlayer(GameObject player)
     {
-        // Disable the dead player for other clients.
-        if (LocalConnection != conn)
-            player.GetComponent<Health>().playerBody.SetActive(false);
+        // Set to the dead color
+        player.GetComponent<Health>().playerBody.GetComponent<Renderer>().material.color = Color.white;
     }
 
     [TargetRpc]
