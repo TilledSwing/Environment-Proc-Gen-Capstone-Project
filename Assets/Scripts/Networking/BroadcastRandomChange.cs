@@ -59,7 +59,7 @@ public class BroadcastRandomChange : NetworkBehaviour
     }
 
     [ServerRpc(RequireOwnership = false)]
-    void RandomTerrainGenServer()
+    public void RandomTerrainGenServer()
     {
         UpdateClientMeshObservers(SeedSerializer.SerializeTerrainDensity(ChunkGenNetwork.Instance.terrainDensityData), 
                                   SeedSerializer.SerializeAssetData(ChunkGenNetwork.Instance.assetSpawnData));
