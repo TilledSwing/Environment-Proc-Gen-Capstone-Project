@@ -1,5 +1,6 @@
+using FishNet;
+using FishNet.Managing.Scened;
 using FishNet.Object;
-using UnityEngine;
 
 public class SyncMoney : NetworkBehaviour
 {

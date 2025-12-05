@@ -22,7 +22,6 @@ public class ScanController : MonoBehaviour
         // Wait for the player instance to be active.
         if (PlayerController.instance == null)
             return;
-        
 
         if (!PlayerController.instance.gameStarted && !PlayerController.instance.editorPlayer)
             return;

@@ -61,6 +61,16 @@ public class Health : NetworkBehaviour
         ChatBroadcast.instance.ChatBroadcastPlayerDeath(clientConnectionID);
         LobbyBroadcast.instance.PlayerDeath(clientConnectionID);
         DisableDeadPlayer(clientConnectionID, deadPlayer);
+
+        bool gameEnded = true;
+        foreach (string playerName in LobbyBroadcast.instance.connectedPlayers.Values)
+        {
+            if (!playerName.EndsWith("(DEAD)"))
+                gameEnded = false;
+        }
+
+        if (gameEnded)
+            EndGame();
     }
 
     [ObserversRpc]
@@ -72,6 +82,12 @@ public class Health : NetworkBehaviour
             player.SetActive(false);
         else
             PlayerController.instance.dead = true;
+    }
+
+    [ObserversRpc]
+    public void EndGame()
+    {
+        Application.Quit();
     }
 
     //private void OnHealthChanged(float previous, float next, bool asServer)
