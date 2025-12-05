@@ -9,6 +9,7 @@ using UnityEngine.UI;
 
 public class InteractController : MonoBehaviour
 {
+    public static InteractController instance;
     Camera playerCamera;
     public float interactDst;
     public LayerMask interactLayerMask;
@@ -16,15 +17,19 @@ public class InteractController : MonoBehaviour
     private GameObject objectiveCounterText;
     private TextMeshProUGUI text;
     public int objectiveGoal;
-    private int objectiveCounter = 0;
+    //private int objectiveCounter = 0;
     public bool lastRayState = false;
     public ScanObject currentObj;
     Renderer meshRenderer;
     Material[] originalMaterials;
     Material[] materials;
 
+    [SerializeField]
+    private SyncMoney syncMoney;
+
     void Awake()
     {
+        instance = this;
         playerCamera = Camera.main;
         // objectiveCounterText = GameObject.Find("Objective Counter");
         // text = objectiveCounterText.GetComponent<TextMeshProUGUI>();
@@ -86,7 +91,8 @@ public class InteractController : MonoBehaviour
                 int value = hit.transform.gameObject.GetComponent<ValuableProperties>().value;
                 // objectiveCounter += value;
                 // text.text = "$" + objectiveCounter;
-                StartCoroutine(EaseValueAdd(value, 0.5f));
+                syncMoney.AddMoney(value);
+                //StartCoroutine(EaseValueAdd(value, 0.5f));
                 foreach (Material material in materials)
                 {
                     StartCoroutine(FadeOutDitherAndDestroy(material, hit.collider.gameObject, 0.5f));
@@ -141,11 +147,12 @@ public class InteractController : MonoBehaviour
         }
         Destroy(gameObject);
     }
-    IEnumerator EaseValueAdd(int value, float duration)
+
+    public IEnumerator EaseValueAdd(int startValue, int value, float duration)
     {
         float t = 0;
-        int startValue = objectiveCounter;
-        int endValue = objectiveCounter + value;
+        //int startValue = objectiveCounter;
+        int endValue = startValue + value;
         while (t < duration)
         {
             t += Time.deltaTime;
@@ -154,7 +161,8 @@ public class InteractController : MonoBehaviour
             text.text = "$" + currentCounter;
             yield return null;
         }
-        objectiveCounter = endValue;
-        text.text = "$" + objectiveCounter;
+        text.text = "$" + endValue;
+        //objectiveCounter = endValue;
+        //text.text = "$" + objectiveCounter;
     }
 }

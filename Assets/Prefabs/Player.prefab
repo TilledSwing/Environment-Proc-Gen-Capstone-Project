@@ -438,6 +438,7 @@ GameObject:
   - component: {fileID: 591542628726547992}
   - component: {fileID: 2249550695658749378}
   - component: {fileID: 7099153950261604624}
+  - component: {fileID: -1095399779223879566}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -521,6 +522,7 @@ MonoBehaviour:
   waterLevel: 0
   cameraYOffset: 0.4
   playerCamera: {fileID: 0}
+  dead: 0
   characterController: {fileID: 3675121155168622157}
   moveDirection: {x: 0, y: 0, z: 0}
 --- !u!114 &2695194995097390186
@@ -704,6 +706,7 @@ MonoBehaviour:
   objectiveGoal: 10
   lastRayState: 0
   currentObj: {fileID: 0}
+  syncMoney: {fileID: -1095399779223879566}
 --- !u!114 &2263669559389862659
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -813,6 +816,21 @@ MonoBehaviour:
   _networkObjectCache: {fileID: 1324032884783071196}
   maxHealth: 5
   healthBar: {fileID: 3489481041360168541}
+--- !u!114 &-1095399779223879566
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3941859824757792008}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31073b0e5b7db82458f321116f8c8ec0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _componentIndexCache: 255
+  _addedNetworkObject: {fileID: 1324032884783071196}
+  _networkObjectCache: {fileID: 0}
 --- !u!1 &4549703791969745218
 GameObject:
   m_ObjectHideFlags: 0
