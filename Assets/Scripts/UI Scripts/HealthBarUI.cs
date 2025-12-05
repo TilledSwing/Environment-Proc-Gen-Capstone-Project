@@ -50,6 +50,6 @@ public class HealthBarUI : NetworkBehaviour
         float normalized = current / max;
         healthSlider.value = normalized;
 
-        fillImage.color = (normalized <= 0.33f) ? lowHealthColor : highHealthColor;
+        fillImage.color = (normalized <= 0.5f) ? lowHealthColor : highHealthColor;
     }
 }
