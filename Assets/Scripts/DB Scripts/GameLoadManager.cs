@@ -51,30 +51,32 @@ public class GameLoadManager : MonoBehaviour
     {
         Debug.Log("LoadButton1 code called");
         db.loadedTerrainId = keyList[0];
-        loadActualTerrain();
+        StartCoroutine(loadActualTerrain());
     }
     public void LoadButton2()
     {
         Debug.Log("LoadButton2 code called");
         db.loadedTerrainId = keyList[1];
-        loadActualTerrain();
+        StartCoroutine(loadActualTerrain());
     }
     public void LoadButton3()
     {
         Debug.Log("LoadButton3 code called");
         db.loadedTerrainId = keyList[2];
-        loadActualTerrain();
+        StartCoroutine(loadActualTerrain());
     }
     public void LoadButton4()
     {
         Debug.Log("LoadButton4 code called");
         db.loadedTerrainId = keyList[3];
-        loadActualTerrain();
+        StartCoroutine(loadActualTerrain());
     }
 
-    public IEnumerable loadActualTerrain()
+    public IEnumerator loadActualTerrain()
     {
-         yield return StartCoroutine(db.LoadTerrainData());
+        Debug.Log("Calling load terrain");
+        yield return StartCoroutine(db.LoadTerrainData());
+        Debug.Log("Terrain Loaded");
         var broadcastChange = syncManager.GetComponent<BroadcastRandomChange>();
         broadcastChange.RandomTerrainGenServer();
     }
