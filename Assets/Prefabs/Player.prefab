@@ -816,7 +816,7 @@ MonoBehaviour:
   _networkObjectCache: {fileID: 1324032884783071196}
   maxHealth: 5
   healthBar: {fileID: 3489481041360168541}
-  playerBody: {fileID: 3941859824757792008}
+  playerBody: {fileID: 8935483582062294650}
 --- !u!114 &-1095399779223879566
 MonoBehaviour:
   m_ObjectHideFlags: 0
