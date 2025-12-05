@@ -515,8 +515,6 @@ MonoBehaviour:
   flightSpeed: 6
   editorPlayer: 1
   gameStarted: 0
-  characterController: {fileID: 0}
-  moveDirection: {x: 0, y: 0, z: 0}
   terraformCenters: []
   hitChunkPositions: []
   terraformTypes: 
@@ -818,6 +816,7 @@ MonoBehaviour:
   _networkObjectCache: {fileID: 1324032884783071196}
   maxHealth: 5
   healthBar: {fileID: 3489481041360168541}
+  playerBody: {fileID: 3941859824757792008}
 --- !u!114 &-1095399779223879566
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1,6 +1,5 @@
 using Steamworks;
 using System;
-using System.Windows.Forms;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -79,6 +78,7 @@ public class GameMenuManager : MonoBehaviour
     public void QuitGameScene()
     {
         BootstrapManager.LeaveLobby();
-        SceneManager.LoadScene("MainMenu");
+        UnityEngine.Application.Quit();
+        //SceneManager.LoadScene("MainMenu");
     }
 }

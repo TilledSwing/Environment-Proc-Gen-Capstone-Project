@@ -16,6 +16,7 @@ public struct TerrainSettings
     public bool lerp;
     public bool terracing;
     public int terraceHeight;
+    public bool water;
 }
 
 /// <summary>
@@ -110,7 +111,8 @@ public static class SeedSerializer
             waterLevel = settings.waterLevel,
             lerp = settings.lerp,
             terracing = settings.terracing,
-            terraceHeight = settings.terraceHeight
+            terraceHeight = settings.terraceHeight,
+            water = settings.water
         };
     }
 
@@ -214,6 +216,7 @@ public static class SeedSerializer
         deserializedDensity.lerp = settings.lerp;
         deserializedDensity.terracing = settings.terracing;
         deserializedDensity.terraceHeight = settings.terraceHeight;
+        deserializedDensity.water = settings.water;
 
         return deserializedDensity;
     }

@@ -1,3 +1,4 @@
+using FishNet.Connection;
 using FishNet.Object;
 using FishNet.Object.Synchronizing;
 using UnityEngine;
@@ -9,6 +10,7 @@ public class Health : NetworkBehaviour
 
     public float maxHealth = 5f;
     public HealthBarUI healthBar;
+    public GameObject playerBody;
 
     //private void Awake()
     //{
@@ -44,7 +46,7 @@ public class Health : NetworkBehaviour
             Debug.Log(_currentHealth.Value);
             if (_currentHealth.Value - 1 <= 0)
             {
-                BroadcastPlayerDeath(LocalConnection.ClientId, gameObject);
+                BroadcastPlayerDeath(LocalConnection, gameObject);
             }
         }
         else if (Input.GetKeyDown(KeyCode.P))
@@ -56,11 +58,12 @@ public class Health : NetworkBehaviour
     }
 
     [ServerRpc(RequireOwnership = false)]
-    public void BroadcastPlayerDeath(int clientConnectionID, GameObject deadPlayer)
+    public void BroadcastPlayerDeath(NetworkConnection conn, GameObject deadPlayer)
     {
-        ChatBroadcast.instance.ChatBroadcastPlayerDeath(clientConnectionID);
-        LobbyBroadcast.instance.PlayerDeath(clientConnectionID);
-        DisableDeadPlayer(clientConnectionID, deadPlayer);
+        ChatBroadcast.instance.ChatBroadcastPlayerDeath(conn.ClientId);
+        LobbyBroadcast.instance.PlayerDeath(conn.ClientId);
+        DisableDeadPlayer(conn, deadPlayer);
+        SetDeadPlayer(conn);
 
         bool gameEnded = true;
         foreach (string playerName in LobbyBroadcast.instance.connectedPlayers.Values)
@@ -74,14 +77,17 @@ public class Health : NetworkBehaviour
     }
 
     [ObserversRpc]
-    public void DisableDeadPlayer(int clientConnectionID, GameObject player)
+    public void DisableDeadPlayer(NetworkConnection conn, GameObject player)
     {
-
         // Disable the dead player for other clients.
-        if (LocalConnection.ClientId != clientConnectionID)
-            player.SetActive(false);
-        else
-            PlayerController.instance.dead = true;
+        if (LocalConnection != conn)
+            player.GetComponent<Health>().playerBody.SetActive(false);
+    }
+
+    [TargetRpc]
+    public void SetDeadPlayer(NetworkConnection conn)
+    {
+        PlayerController.instance.dead = true;
     }
 
     [ObserversRpc]
