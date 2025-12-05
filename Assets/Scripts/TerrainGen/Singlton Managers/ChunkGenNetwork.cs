@@ -157,7 +157,7 @@ public class ChunkGenNetwork : MonoBehaviour
 
         lightingBlockerRenderer = lightingBlocker.GetComponent<MeshRenderer>();
         lightingBlockerRenderer.enabled = false;
-        lightChange.intensity = 25f;
+        lightChange.intensity = 15f;
 
         vertexOffsetTable = new(MarchingCubesTables.vertexOffsetTable, Allocator.Persistent);
         edgeIndexTable = new(MarchingCubesTables.edgeIndexTable, Allocator.Persistent);
@@ -190,12 +190,12 @@ public class ChunkGenNetwork : MonoBehaviour
         // Uncomment to see desert preset
         // Unity.Mathematics.Random rng = new((uint)UnityEngine.Random.Range(0, 100000));
         // int rand = rng.NextInt(0, 2);
-        // terrainDensityData = generationConfiguration.terrainConfigs[presetDropdown.value].terrainDensityData;
-        // terrainTextureData = generationConfiguration.terrainConfigs[presetDropdown.value].terrainTextureData;
-        // assetSpawnData = generationConfiguration.terrainConfigs[presetDropdown.value].assetSpawnData;
-        terrainDensityData = generationConfiguration.terrainConfigs[0].terrainDensityData;
-        terrainTextureData = generationConfiguration.terrainConfigs[0].terrainTextureData;
-        assetSpawnData = generationConfiguration.terrainConfigs[0].assetSpawnData;
+        terrainDensityData = generationConfiguration.terrainConfigs[presetDropdown.value].terrainDensityData;
+        terrainTextureData = generationConfiguration.terrainConfigs[presetDropdown.value].terrainTextureData;
+        assetSpawnData = generationConfiguration.terrainConfigs[presetDropdown.value].assetSpawnData;
+        // terrainDensityData = generationConfiguration.terrainConfigs[0].terrainDensityData;
+        // terrainTextureData = generationConfiguration.terrainConfigs[0].terrainTextureData;
+        // assetSpawnData = generationConfiguration.terrainConfigs[0].assetSpawnData;
 
         chunkSize = terrainDensityData.width;
         chunksVisible = Mathf.RoundToInt(maxViewDst / chunkSize);

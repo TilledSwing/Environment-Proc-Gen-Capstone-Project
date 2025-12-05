@@ -2076,7 +2076,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Texture: {fileID: 2800000, guid: 757a94e3f2d62b94eb19df0163e28809, type: 3}
+  m_Texture: {fileID: 2800000, guid: 6dad039d6150d1e45a81843e0f22c3b3, type: 3}
   m_UVRect:
     serializedVersion: 2
     x: 0
@@ -2532,6 +2532,7 @@ MonoBehaviour:
   slopeMaxInput: {fileID: 1585328456678953068}
   textureList: {fileID: 3993018863266552542, guid: 2eb1c80c87ebda24eb64735cc0d17337, type: 3}
   texturePreview: {fileID: 5292589432236893111}
+  textureIndexUpdater: {fileID: 0}
 --- !u!1 &7018704551229289145
 GameObject:
   m_ObjectHideFlags: 0
