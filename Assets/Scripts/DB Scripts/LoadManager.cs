@@ -11,9 +11,10 @@ public class LoadManager : MonoBehaviour
     public Button button;
     public Dictionary<int, string> loadList = new();
     public DBManager db;
+    public GameObject loadPanel;
     List<int> keyList = new();
 
-    void Start()
+    public void PopulateList()
     {
         db = FindFirstObjectByType<DBManager>();
         loadList = db.responseList;
@@ -27,22 +28,17 @@ public class LoadManager : MonoBehaviour
         {
             list.Add("Blank");
         }
-
-        switch(button.name)
+        int i = 0;
+        foreach (Transform child in loadPanel.transform)
         {
-            case "LoadOne":
-                button.GetComponentInChildren<TMP_Text>().text = list[0];
-                break;
-            case "LoadTwo":
-                button.GetComponentInChildren<TMP_Text>().text = list[1];
-                break;
-            case "LoadThree":
-                button.GetComponentInChildren<TMP_Text>().text = list[2];
-                break;
-            case "LoadFour":
-                button.GetComponentInChildren<TMP_Text>().text = list[3];
-                break;
+            TMP_Text buttonText = child.GetComponentInChildren<TMP_Text>();
+            if (buttonText != null && i < 4)
+            {
+                buttonText.text = list[i];
+                i++;
+            }
         }
+
 
         foreach(KeyValuePair<int, string> entry in loadList)
         {
