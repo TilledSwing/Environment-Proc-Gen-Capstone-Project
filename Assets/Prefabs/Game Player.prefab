@@ -704,7 +704,7 @@ MonoBehaviour:
   objectiveGoal: 10
   lastRayState: 0
   currentObj: {fileID: 0}
-  syncMoney: {fileID: 0}
+  syncMoney: {fileID: 9210748632949776517}
 --- !u!114 &2263669559389862659
 MonoBehaviour:
   m_ObjectHideFlags: 0
