@@ -44,12 +44,8 @@ public class Health : NetworkBehaviour
         {
             TakeDamage(1, gameObject);
             Debug.Log(_currentHealth.Value);
-            if (_currentHealth.Value - 1 <= 0)
-            {
-                BroadcastPlayerDeath(LocalConnection, gameObject);
-            }
         }
-        else if (Input.GetKeyDown(KeyCode.P))
+        else if (Input.GetKeyDown(KeyCode.P) && !PlayerController.instance.dead)
         {
             Heal(1, gameObject);
             Debug.Log(_currentHealth.Value);
@@ -105,6 +101,7 @@ public class Health : NetworkBehaviour
     public void TakeDamage(float amount, GameObject player)
     {
         if (!IsServerInitialized) return;
+        if (PlayerController.instance.dead) return;
 
         float newHealth = Mathf.Clamp(_currentHealth.Value - amount, 0f, maxHealth);
         _currentHealth.Value = newHealth;
@@ -115,6 +112,10 @@ public class Health : NetworkBehaviour
     public void UpdateHealthBar(GameObject player)
     {
         player.GetComponent<Health>().healthBar.SetHealth(_currentHealth.Value, maxHealth);
+        if (_currentHealth.Value <= 0)
+        {
+            BroadcastPlayerDeath(LocalConnection, gameObject);
+        }
     }
 
     [ServerRpc(RequireOwnership = false)]
