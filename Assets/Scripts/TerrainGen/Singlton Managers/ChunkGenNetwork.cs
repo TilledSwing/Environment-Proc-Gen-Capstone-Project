@@ -118,9 +118,9 @@ public class ChunkGenNetwork : MonoBehaviour
     public event Action OnTerrainReady;
     public bool IsTerrainReady { get; private set; }
     // Reused Marching Cubes Native Array
-    public NativeArray<float3> vertexOffsetTable = new(MarchingCubesTables.vertexOffsetTable, Allocator.Persistent);
-    public NativeArray<int> edgeIndexTable = new(MarchingCubesTables.edgeIndexTable, Allocator.Persistent);
-    public NativeArray<int> triangleTable = new(MarchingCubesTables.triangleTable, Allocator.Persistent);
+    public NativeArray<float3> vertexOffsetTable;
+    public NativeArray<int> edgeIndexTable;
+    public NativeArray<int> triangleTable;
 
     public class ReadbackRequest
     {
@@ -155,11 +155,13 @@ public class ChunkGenNetwork : MonoBehaviour
         else
             Destroy(gameObject);
 
-        chunkSize = terrainDensityData.width;
-        chunksVisible = Mathf.RoundToInt(maxViewDst / chunkSize);
         lightingBlockerRenderer = lightingBlocker.GetComponent<MeshRenderer>();
         lightingBlockerRenderer.enabled = false;
         lightChange.intensity = 25f;
+
+        vertexOffsetTable = new(MarchingCubesTables.vertexOffsetTable, Allocator.Persistent);
+        edgeIndexTable = new(MarchingCubesTables.edgeIndexTable, Allocator.Persistent);
+        triangleTable = new(MarchingCubesTables.triangleTable, Allocator.Persistent);
 
         // Fog Shader Inits
         fogRenderPassFeature = rendererData.rendererFeatures.Find(f => f is FogRenderPassFeature) as FogRenderPassFeature;
@@ -176,18 +178,27 @@ public class ChunkGenNetwork : MonoBehaviour
         waterMaterial.SetFloat("_fogActive", 0);
         SetFogActive(false);
 
-        assetSpawnData.ResetSpawnPoints();
         InitializeGenerator();
     }
     public void InitializeGenerator()
     {
-        terrainTextureData.RestoreToOriginalState();
-        assetSpawnData.RestoreToOriginalState();
+        // if (terrainTextureData != null)
+        //     terrainTextureData.RestoreToOriginalState();
+        // if (assetSpawnData != null)
+        //     assetSpawnData.RestoreToOriginalState();
 
         // Uncomment to see desert preset
-        terrainDensityData = generationConfiguration.terrainConfigs[presetDropdown.value].terrainDensityData;
-        terrainTextureData = generationConfiguration.terrainConfigs[presetDropdown.value].terrainTextureData;
-        assetSpawnData = generationConfiguration.terrainConfigs[presetDropdown.value].assetSpawnData;
+        // Unity.Mathematics.Random rng = new((uint)UnityEngine.Random.Range(0, 100000));
+        // int rand = rng.NextInt(0, 2);
+        // terrainDensityData = generationConfiguration.terrainConfigs[presetDropdown.value].terrainDensityData;
+        // terrainTextureData = generationConfiguration.terrainConfigs[presetDropdown.value].terrainTextureData;
+        // assetSpawnData = generationConfiguration.terrainConfigs[presetDropdown.value].assetSpawnData;
+        terrainDensityData = generationConfiguration.terrainConfigs[0].terrainDensityData;
+        terrainTextureData = generationConfiguration.terrainConfigs[0].terrainTextureData;
+        assetSpawnData = generationConfiguration.terrainConfigs[0].assetSpawnData;
+
+        chunkSize = terrainDensityData.width;
+        chunksVisible = Mathf.RoundToInt(maxViewDst / chunkSize);
 
         // Chunk Variables
         chunkDictionary = new();
@@ -656,14 +667,29 @@ public class ChunkGenNetwork : MonoBehaviour
     /// </summary>
     void OnDisable()
     {
+        // vertexOffsetTable.Dispose();
+        // edgeIndexTable.Dispose();
+        // triangleTable.Dispose();
+        // assetSpawnData.ResetSpawnPoints();
+        // assetSpawnData.RestoreToOriginalState();
+        // terrainTextureData.RestoreToOriginalState();
+        // chunkDictionary.Clear();
+        // // fogRenderPassFeature.SetActive(false);
+        // SetFogActive(false);
+        // GraphicsSettings.defaultRenderPipeline = mainUrpAsset;
+        // QualitySettings.renderPipeline = mainUrpAsset;
+    }
+    void OnApplicationQuit()
+    {
         vertexOffsetTable.Dispose();
         edgeIndexTable.Dispose();
         triangleTable.Dispose();
+
         assetSpawnData.ResetSpawnPoints();
         assetSpawnData.RestoreToOriginalState();
         terrainTextureData.RestoreToOriginalState();
         chunkDictionary.Clear();
-        // fogRenderPassFeature.SetActive(false);
+        
         SetFogActive(false);
         GraphicsSettings.defaultRenderPipeline = mainUrpAsset;
         QualitySettings.renderPipeline = mainUrpAsset;

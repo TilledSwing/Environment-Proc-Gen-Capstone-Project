@@ -17,10 +17,6 @@ MonoBehaviour:
     terrainDensityData: {fileID: 11400000, guid: 4bc939f839855ea45ade17dce060eea5, type: 2}
     terrainTextureData: {fileID: 11400000, guid: 1fa52b57a0c85a34eb28c4f99612d21f, type: 2}
     assetSpawnData: {fileID: 11400000, guid: ac92efdaf283ed346bf2f132639a35ad, type: 2}
-  - name: Desert
-    terrainDensityData: {fileID: 11400000, guid: e06a394be1f689448a0fc4d4a198b94d, type: 2}
-    terrainTextureData: {fileID: 11400000, guid: a03d196ea8be0034185709f05345b6c4, type: 2}
-    assetSpawnData: {fileID: 11400000, guid: 7523c1177c7107f438e9602592f13e9f, type: 2}
   - name: Alien Planet
     terrainDensityData: {fileID: 11400000, guid: 15bbff1c68d6f4349b3807d03cde17ea, type: 2}
     terrainTextureData: {fileID: 11400000, guid: e48097e2206f03541aae962be6b2ffc7, type: 2}
