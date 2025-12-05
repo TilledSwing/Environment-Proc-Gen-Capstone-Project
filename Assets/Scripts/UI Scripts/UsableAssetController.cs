@@ -30,6 +30,7 @@ public class UseableAssetController : MonoBehaviour
         spawnableAsset.name = name;
 
         ChunkGenNetwork.Instance.assetSpawnData.spawnableAssets.Add(spawnableAsset);
+        assetTab.assetIndex = assetTab.transform.GetSiblingIndex();
 
         assetGrid.SetActive(false);
         assetTab.initialized = true;

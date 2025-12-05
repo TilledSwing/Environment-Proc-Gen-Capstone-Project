@@ -182,10 +182,10 @@ public class ChunkGenNetwork : MonoBehaviour
     }
     public void InitializeGenerator()
     {
-        // if (terrainTextureData != null)
-        //     terrainTextureData.RestoreToOriginalState();
-        // if (assetSpawnData != null)
-        //     assetSpawnData.RestoreToOriginalState();
+        if (terrainTextureData != null)
+            terrainTextureData.RestoreToOriginalState();
+        if (assetSpawnData != null)
+            assetSpawnData.RestoreToOriginalState();
 
         // Uncomment to see desert preset
         // Unity.Mathematics.Random rng = new((uint)UnityEngine.Random.Range(0, 100000));

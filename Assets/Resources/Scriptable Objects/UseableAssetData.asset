@@ -49,6 +49,24 @@ MonoBehaviour:
   - obj: {fileID: 4076257425805142985, guid: ed840f491f852754796378ea5eff6478, type: 3}
     icon: {fileID: 2800000, guid: 83f88be2df527424981199367958b8f7, type: 3}
     name: Jade Moai Statue
+  - obj: {fileID: 3213710386523625942, guid: f60b33603339f0a429e847e7585340b7, type: 3}
+    icon: {fileID: 2800000, guid: ab869a6143d2fef42befced32763dfed, type: 3}
+    name: Soft Purple Coral 1
   - obj: {fileID: 1207449177372228529, guid: 46ca9bca5d4d6824c9973375d741a3df, type: 3}
     icon: {fileID: 2800000, guid: 179fe279d344c254fa8d0a473e2b4049, type: 3}
     name: Blue Light Plant 1
+  - obj: {fileID: 1054618401918965907, guid: cc64fe42ba41ea543864ec276b0cbdb6, type: 3}
+    icon: {fileID: 2800000, guid: 66ec27077127c264587622cf3e4e25f7, type: 3}
+    name: Red Tube Coral 1
+  - obj: {fileID: 5136415128443246973, guid: 7983db21fa8f20e47b3ed364ba720f6a, type: 3}
+    icon: {fileID: 2800000, guid: a99fd5aa09b623f4ea18ab77a5df75c5, type: 3}
+    name: Red Tube Coral 2
+  - obj: {fileID: 4171888362470575491, guid: ed61ac8c7bcc42d40a38fd0e3fd8ce66, type: 3}
+    icon: {fileID: 2800000, guid: 9a25eb2ecf50ff94a8ae2b043027b34a, type: 3}
+    name: Soft Green Coral 1
+  - obj: {fileID: 4420668661467323114, guid: 123517c611236ec40860a451cac823d7, type: 3}
+    icon: {fileID: 2800000, guid: bab6eae80d2ed09459476032c92dface, type: 3}
+    name: Red Cup Coral 1
+  - obj: {fileID: 8288004276746468229, guid: db00f383998e6da438cdcb50bbd6e0df, type: 3}
+    icon: {fileID: 2800000, guid: 56ce27d877b73cc4085a174e9d9268d3, type: 3}
+    name: Yellow Fan Coral 1

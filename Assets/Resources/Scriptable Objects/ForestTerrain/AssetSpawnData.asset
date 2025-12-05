@@ -17,8 +17,8 @@ MonoBehaviour:
     name: Green Oak Tree 1
     icon: {fileID: 2800000, guid: 2c55d834fa8ca2244a0352ca83934dd0, type: 3}
     spawnedAssets: []
-    maxPerChunk: 4
-    rotateToFaceNormal: 0
+    maxPerChunk: 10
+    rotateToFaceNormal: 1
     spawnProbability: 0.5
     useMinSlope: 0
     minSlope: 0

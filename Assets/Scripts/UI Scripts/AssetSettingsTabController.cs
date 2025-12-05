@@ -64,7 +64,7 @@ public class AssetSettingsTabController : MonoBehaviour
     public void UpdateFaceAlignmentToggle()
     {
         if (!initialized) return;
-        assetSpawnData.spawnableAssets[assetIndex].rotateToFaceNormal = rotateToFaceNormalToggle.isOn;
+        ChunkGenNetwork.Instance.assetSpawnData.spawnableAssets[assetIndex].rotateToFaceNormal = rotateToFaceNormalToggle.isOn;
         RespawnAssets();
     }
 
@@ -74,14 +74,14 @@ public class AssetSettingsTabController : MonoBehaviour
         if (!initialized) return;
         spawnProbInput.text = float.Parse(spawnProbInput.text).ToString("F2");
         spawnProbSlider.value = float.Parse(spawnProbInput.text);
-        assetSpawnData.spawnableAssets[assetIndex].spawnProbability = float.Parse(spawnProbInput.text);
+        ChunkGenNetwork.Instance.assetSpawnData.spawnableAssets[assetIndex].spawnProbability = float.Parse(spawnProbInput.text);
         RespawnAssets();
     }
 
     public void UpdateSpawnProbabilitySlider()
     {
         if (!initialized) return;
-        assetSpawnData.spawnableAssets[assetIndex].spawnProbability = spawnProbSlider.value;
+        ChunkGenNetwork.Instance.assetSpawnData.spawnableAssets[assetIndex].spawnProbability = spawnProbSlider.value;
         RespawnAssets();
     }
 
@@ -90,14 +90,14 @@ public class AssetSettingsTabController : MonoBehaviour
     {
         if (!initialized) return;
         maxPerChunkSlider.value = int.Parse(maxPerChunkInput.text);
-        assetSpawnData.spawnableAssets[assetIndex].maxPerChunk = int.Parse(maxPerChunkInput.text);
+        ChunkGenNetwork.Instance.assetSpawnData.spawnableAssets[assetIndex].maxPerChunk = int.Parse(maxPerChunkInput.text);
         RespawnAssets();
     }
 
     public void UpdateMaxPerChunkSlider()
     {
         if (!initialized) return;
-        assetSpawnData.spawnableAssets[assetIndex].maxPerChunk = (int)maxPerChunkSlider.value;
+        ChunkGenNetwork.Instance.assetSpawnData.spawnableAssets[assetIndex].maxPerChunk = (int)maxPerChunkSlider.value;
         RespawnAssets();
     }
 
@@ -105,7 +105,7 @@ public class AssetSettingsTabController : MonoBehaviour
     public void UpdateUseMinHeightToggle()
     {
         if (!initialized) return;
-        assetSpawnData.spawnableAssets[assetIndex].useMinHeight = useMinHeightToggle.isOn;
+        ChunkGenNetwork.Instance.assetSpawnData.spawnableAssets[assetIndex].useMinHeight = useMinHeightToggle.isOn;
         RespawnAssets();
     }
 
@@ -113,7 +113,7 @@ public class AssetSettingsTabController : MonoBehaviour
     {
         if (!initialized) return;
         minHeightSlider.value = int.Parse(minHeightInput.text);
-        assetSpawnData.spawnableAssets[assetIndex].minHeight = int.Parse(minHeightInput.text);
+        ChunkGenNetwork.Instance.assetSpawnData.spawnableAssets[assetIndex].minHeight = int.Parse(minHeightInput.text);
 
         if (!useMinHeightToggle.isOn) return;
         RespawnAssets();
@@ -122,7 +122,7 @@ public class AssetSettingsTabController : MonoBehaviour
     public void UpdateMinHeightSlider()
     {
         if (!initialized) return;
-        assetSpawnData.spawnableAssets[assetIndex].minHeight = (int)minHeightSlider.value;
+        ChunkGenNetwork.Instance.assetSpawnData.spawnableAssets[assetIndex].minHeight = (int)minHeightSlider.value;
 
         if (!useMinHeightToggle.isOn) return;
         RespawnAssets();
@@ -132,7 +132,7 @@ public class AssetSettingsTabController : MonoBehaviour
     public void UpdateUseMaxHeightToggle()
     {
         if (!initialized) return;
-        assetSpawnData.spawnableAssets[assetIndex].useMaxHeight = useMaxHeightToggle.isOn;
+        ChunkGenNetwork.Instance.assetSpawnData.spawnableAssets[assetIndex].useMaxHeight = useMaxHeightToggle.isOn;
         RespawnAssets();
     }
 
@@ -140,7 +140,7 @@ public class AssetSettingsTabController : MonoBehaviour
     {
         if (!initialized) return;
         maxHeightSlider.value = int.Parse(maxHeightInput.text);
-        assetSpawnData.spawnableAssets[assetIndex].maxHeight = int.Parse(maxHeightInput.text);
+        ChunkGenNetwork.Instance.assetSpawnData.spawnableAssets[assetIndex].maxHeight = int.Parse(maxHeightInput.text);
 
         if (!useMaxHeightToggle.isOn) return;
         RespawnAssets();
@@ -149,7 +149,7 @@ public class AssetSettingsTabController : MonoBehaviour
     public void UpdateMaxHeightSlider()
     {
         if (!initialized) return;
-        assetSpawnData.spawnableAssets[assetIndex].maxHeight = (int)maxHeightSlider.value;
+        ChunkGenNetwork.Instance.assetSpawnData.spawnableAssets[assetIndex].maxHeight = (int)maxHeightSlider.value;
 
         if (!useMaxHeightToggle.isOn) return;
         RespawnAssets();
@@ -159,7 +159,7 @@ public class AssetSettingsTabController : MonoBehaviour
     public void UpdateUseMinSlopeToggle()
     {
         if (!initialized) return;
-        assetSpawnData.spawnableAssets[assetIndex].useMinSlope = useMinSlopeToggle.isOn;
+        ChunkGenNetwork.Instance.assetSpawnData.spawnableAssets[assetIndex].useMinSlope = useMinSlopeToggle.isOn;
         RespawnAssets();
     }
 
@@ -167,7 +167,7 @@ public class AssetSettingsTabController : MonoBehaviour
     {
         if (!initialized) return;
         minSlopeSlider.value = int.Parse(minSlopeInput.text);
-        assetSpawnData.spawnableAssets[assetIndex].minSlope = int.Parse(minSlopeInput.text);
+        ChunkGenNetwork.Instance.assetSpawnData.spawnableAssets[assetIndex].minSlope = int.Parse(minSlopeInput.text);
 
         if (!useMinSlopeToggle.isOn) return;
         RespawnAssets();
@@ -176,7 +176,7 @@ public class AssetSettingsTabController : MonoBehaviour
     public void UpdateMinSlopeSlider()
     {
         if (!initialized) return;
-        assetSpawnData.spawnableAssets[assetIndex].minSlope = (int)minSlopeSlider.value;
+        ChunkGenNetwork.Instance.assetSpawnData.spawnableAssets[assetIndex].minSlope = (int)minSlopeSlider.value;
 
         if (!useMinSlopeToggle.isOn) return;
         RespawnAssets();
@@ -186,7 +186,7 @@ public class AssetSettingsTabController : MonoBehaviour
     public void UpdateUseMaxSlopeToggle()
     {
         if (!initialized) return;
-        assetSpawnData.spawnableAssets[assetIndex].useMaxSlope = useMaxSlopeToggle.isOn;
+        ChunkGenNetwork.Instance.assetSpawnData.spawnableAssets[assetIndex].useMaxSlope = useMaxSlopeToggle.isOn;
         RespawnAssets();
     }
 
@@ -194,7 +194,7 @@ public class AssetSettingsTabController : MonoBehaviour
     {
         if (!initialized) return;
         maxSlopeSlider.value = int.Parse(maxSlopeInput.text);
-        assetSpawnData.spawnableAssets[assetIndex].maxSlope = int.Parse(maxSlopeInput.text);
+        ChunkGenNetwork.Instance.assetSpawnData.spawnableAssets[assetIndex].maxSlope = int.Parse(maxSlopeInput.text);
 
         if (!useMaxSlopeToggle.isOn) return;
         RespawnAssets();
@@ -203,7 +203,7 @@ public class AssetSettingsTabController : MonoBehaviour
     public void UpdateMaxSlopeSlider()
     {
         if (!initialized) return;
-        assetSpawnData.spawnableAssets[assetIndex].maxSlope = (int)maxSlopeSlider.value;
+        ChunkGenNetwork.Instance.assetSpawnData.spawnableAssets[assetIndex].maxSlope = (int)maxSlopeSlider.value;
 
         if (!useMaxSlopeToggle.isOn) return;
         RespawnAssets();
@@ -213,7 +213,7 @@ public class AssetSettingsTabController : MonoBehaviour
     public void UpdateUnderwaterToggle()
     {
         if (!initialized) return;
-        assetSpawnData.spawnableAssets[assetIndex].underwaterAsset = underwaterToggle.isOn;
+        ChunkGenNetwork.Instance.assetSpawnData.spawnableAssets[assetIndex].underwaterAsset = underwaterToggle.isOn;
         RespawnAssets();
     }
 
@@ -222,7 +222,7 @@ public class AssetSettingsTabController : MonoBehaviour
         if (!initialized) return;
         minDepthInput.text = float.Parse(minDepthInput.text).ToString("F2");
         minDepthSlider.value = float.Parse(minDepthInput.text);
-        assetSpawnData.spawnableAssets[assetIndex].minDepth = float.Parse(minDepthInput.text);
+        ChunkGenNetwork.Instance.assetSpawnData.spawnableAssets[assetIndex].minDepth = float.Parse(minDepthInput.text);
 
         if (!underwaterToggle.isOn) return;
         RespawnAssets();
@@ -231,7 +231,7 @@ public class AssetSettingsTabController : MonoBehaviour
     public void UpdateMinDepthSlider()
     {
         if (!initialized) return;
-        assetSpawnData.spawnableAssets[assetIndex].minDepth = minDepthSlider.value;
+        ChunkGenNetwork.Instance.assetSpawnData.spawnableAssets[assetIndex].minDepth = minDepthSlider.value;
 
         if (!underwaterToggle.isOn) return;
         RespawnAssets();
@@ -241,7 +241,7 @@ public class AssetSettingsTabController : MonoBehaviour
     public void UpdateUndergroundToggle()
     {
         if (!initialized) return;
-        assetSpawnData.spawnableAssets[assetIndex].undergroundAsset = undergroundToggle.isOn;
+        ChunkGenNetwork.Instance.assetSpawnData.spawnableAssets[assetIndex].undergroundAsset = undergroundToggle.isOn;
         RespawnAssets();
     }
 
@@ -250,7 +250,7 @@ public class AssetSettingsTabController : MonoBehaviour
         if (!initialized) return;
         minDensityInput.text = float.Parse(minDensityInput.text).ToString("F2");
         minDensitySlider.value = float.Parse(minDensityInput.text);
-        assetSpawnData.spawnableAssets[assetIndex].minDensity = float.Parse(minDensityInput.text);
+        ChunkGenNetwork.Instance.assetSpawnData.spawnableAssets[assetIndex].minDensity = float.Parse(minDensityInput.text);
 
         if (!undergroundToggle.isOn) return;
         RespawnAssets();
@@ -259,7 +259,7 @@ public class AssetSettingsTabController : MonoBehaviour
     public void UpdateMinDensitySlider()
     {
         if (!initialized) return;
-        assetSpawnData.spawnableAssets[assetIndex].minDensity = minDensitySlider.value;
+        ChunkGenNetwork.Instance.assetSpawnData.spawnableAssets[assetIndex].minDensity = minDensitySlider.value;
 
         if (!undergroundToggle.isOn) return;
         RespawnAssets();
@@ -269,7 +269,7 @@ public class AssetSettingsTabController : MonoBehaviour
     public void UpdateValueableToggle()
     {
         if (!initialized) return;
-        assetSpawnData.spawnableAssets[assetIndex].isValuable = valueableToggle.isOn;
+        ChunkGenNetwork.Instance.assetSpawnData.spawnableAssets[assetIndex].isValuable = valueableToggle.isOn;
         RespawnAssets();
     }
 
@@ -277,7 +277,7 @@ public class AssetSettingsTabController : MonoBehaviour
     {
         if (!initialized) return;
         valueRangeSlider.SetValues(int.Parse(minValueInput.text), valueRangeSlider.Values.maxValue);
-        assetSpawnData.spawnableAssets[assetIndex].minValue = int.Parse(minValueInput.text);
+        ChunkGenNetwork.Instance.assetSpawnData.spawnableAssets[assetIndex].minValue = int.Parse(minValueInput.text);
 
         if (!valueableToggle.isOn) return;
         RespawnAssets();
@@ -287,7 +287,7 @@ public class AssetSettingsTabController : MonoBehaviour
     {
         if (!initialized) return;
         valueRangeSlider.SetValues(valueRangeSlider.Values.minValue, int.Parse(maxValueInput.text));
-        assetSpawnData.spawnableAssets[assetIndex].maxValue = int.Parse(maxValueInput.text);
+        ChunkGenNetwork.Instance.assetSpawnData.spawnableAssets[assetIndex].maxValue = int.Parse(maxValueInput.text);
 
         if (!valueableToggle.isOn) return;
         RespawnAssets();
@@ -296,8 +296,8 @@ public class AssetSettingsTabController : MonoBehaviour
     public void UpdateValueRangeSlider()
     {
         if (!initialized) return;
-        assetSpawnData.spawnableAssets[assetIndex].minValue = (int)valueRangeSlider.Values.minValue;
-        assetSpawnData.spawnableAssets[assetIndex].maxValue = (int)valueRangeSlider.Values.maxValue;
+        ChunkGenNetwork.Instance.assetSpawnData.spawnableAssets[assetIndex].minValue = (int)valueRangeSlider.Values.minValue;
+        ChunkGenNetwork.Instance.assetSpawnData.spawnableAssets[assetIndex].maxValue = (int)valueRangeSlider.Values.maxValue;
 
         if (!valueableToggle.isOn) return;
         RespawnAssets();
@@ -308,7 +308,7 @@ public class AssetSettingsTabController : MonoBehaviour
     {
         if (!initialized) return;
         ClearAssets();
-        assetSpawnData.spawnableAssets.RemoveAt(assetIndex);
+        ChunkGenNetwork.Instance.assetSpawnData.spawnableAssets.RemoveAt(assetIndex);
         transform.SetParent(null);
         Destroy(gameObject);
         assetIndexUpdater.UpdateAllIndices();
