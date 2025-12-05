@@ -24,10 +24,10 @@ public class TextureSettingsTabController : MonoBehaviour
     public RawImage texturePreview;
     bool added = false;
     bool initialized = false;
-    private TextureIndexUpdater textureIndexUpdater;
+    public TextureIndexUpdater textureIndexUpdater;
     void Start()
     {
-        textureIndex = transform.GetSiblingIndex();
+        // textureIndex = transform.GetSiblingIndex();
 
         textureIndexUpdater = transform.parent.GetComponent<TextureIndexUpdater>();
 
@@ -47,6 +47,7 @@ public class TextureSettingsTabController : MonoBehaviour
             // Texture2D texture = ProcessTextureFile(path);
 
             TextureSettingsTabController texSettingsTab = Instantiate(ChunkGenNetwork.Instance.textureSettingsTab, ChunkGenNetwork.Instance.textureWindow.transform).GetComponent<TextureSettingsTabController>();
+            texSettingsTab.textureIndex = texSettingsTab.transform.GetSiblingIndex();
             initialized = false;
 
             texSettingsTab.texturePreview.texture = texture;

@@ -181,6 +181,9 @@ public class ChunkGenNetwork : MonoBehaviour
     }
     public void InitializeGenerator()
     {
+        terrainTextureData.RestoreToOriginalState();
+        assetSpawnData.RestoreToOriginalState();
+
         // Uncomment to see desert preset
         terrainDensityData = generationConfiguration.terrainConfigs[presetDropdown.value].terrainDensityData;
         terrainTextureData = generationConfiguration.terrainConfigs[presetDropdown.value].terrainTextureData;
@@ -735,6 +738,7 @@ public class ChunkGenNetwork : MonoBehaviour
                     greatestEndHeight = heightEnds[i] - 1;
                 // Initializing texture settings window to currently applied textures
                 TextureSettingsTabController texSettingsTab = Instantiate(textureSettingsTab, textureWindow.transform).GetComponent<TextureSettingsTabController>();
+                texSettingsTab.textureIndex = i;
 
                 texSettingsTab.texturePreview.texture = biomeTextureConfig.biomeTextures[i].texture;
 
@@ -766,9 +770,11 @@ public class ChunkGenNetwork : MonoBehaviour
             Destroy(asset.gameObject);
         }
         assetSpawnData.BackupOriginalState();
+        int count = 0;
         foreach(SpawnableAsset asset in assetSpawnData.spawnableAssets)
         {
             AssetSettingsTabController assSettingsTab = Instantiate(assetSettingsTab, assetWindow.transform).GetComponent<AssetSettingsTabController>();
+            assSettingsTab.assetIndex = count;
             assSettingsTab.canvasGroup = assetWindow.GetComponent<CanvasGroup>();
             assSettingsTab.assetSpawnData = assetSpawnData;
             // Header Settings
@@ -810,6 +816,7 @@ public class ChunkGenNetwork : MonoBehaviour
             assSettingsTab.valueRangeSlider.SetValues(assSettingsTab.valueRangeSlider.Values.minLimit, assSettingsTab.valueRangeSlider.Values.maxLimit, asset.minValue, asset.maxValue);
 
             assSettingsTab.initialized = true;
+            count++;
         }
     }
     /// <summary>

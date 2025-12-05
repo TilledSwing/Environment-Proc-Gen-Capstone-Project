@@ -25830,8 +25830,8 @@ MonoBehaviour:
     resolution: 6
   generationConfiguration: {fileID: 11400000, guid: a75488b0b243f294d935326c1a604eb1, type: 2}
   terrainDensityData: {fileID: 11400000, guid: 4bc939f839855ea45ade17dce060eea5, type: 2}
-  assetSpawnData: {fileID: 11400000, guid: 29949715b352478458342a45d2b907a0, type: 2}
-  terrainTextureData: {fileID: 11400000, guid: f1603a815dc9cf041bd4a9e99c9988dc, type: 2}
+  assetSpawnData: {fileID: 11400000, guid: ac92efdaf283ed346bf2f132639a35ad, type: 2}
+  terrainTextureData: {fileID: 11400000, guid: 1fa52b57a0c85a34eb28c4f99612d21f, type: 2}
   marchingCubesComputeShader: {fileID: 7200000, guid: d2f49f4c36241c7468a0705fa73f69a5, type: 3}
   terrainDensityComputeShader: {fileID: 7200000, guid: 1caae6b81357a864095f47aab860122c, type: 3}
   terrainNoiseComputeShader: {fileID: 7200000, guid: 93b6fb759617148499ec115b8092bb44, type: 3}
@@ -32157,7 +32157,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6900848069994136417, guid: 00d7fa3e1ef56864a9266157b59fdaf2, type: 3}
       propertyPath: m_Value
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7095017730615430411, guid: 00d7fa3e1ef56864a9266157b59fdaf2, type: 3}
       propertyPath: m_AnchorMax.y

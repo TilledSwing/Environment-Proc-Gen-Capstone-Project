@@ -5,8 +5,8 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "AssetSpawnData", menuName = "Scriptable Objects/AssetSpawnData")]
 public class AssetSpawnData : ScriptableObject
 {
-    private List<SpawnableAsset> spawnableAssetsBackup;
-    public List<SpawnableAsset> spawnableAssets = new();
+    private List<SpawnableAsset> spawnableAssetsBackup = new();
+    public List<SpawnableAsset> spawnableAssets;
     public Dictionary<Vector3Int, List<ComputeMarchingCubes.Vertex>> assets = new();
 
     public void ResetSpawnPoints() {
@@ -28,7 +28,13 @@ public class AssetSpawnData : ScriptableObject
 
     public void RestoreToOriginalState()
     {
+        if (spawnableAssetsBackup.Count == 0)
+        {
+            return;
+        }
+        
         spawnableAssets = new();
+
         foreach (SpawnableAsset spawnableAsset in spawnableAssetsBackup)
         {
             spawnableAssets.Add(spawnableAsset.Clone());

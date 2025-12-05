@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "TerrainTextureData", menuName = "Scriptable Objects/TerrainTextureData")]
 public class TerrainTextureData : ScriptableObject
 {
-    private List<BiomeTextureConfigs> biomeTextureConfigsBackup;
+    private List<BiomeTextureConfigs> biomeTextureConfigsBackup = new();
     public List<BiomeTextureConfigs> biomeTextureConfigs;
     public TextureFormat textureFormat;
     public int maxTextureSize;
@@ -22,7 +23,13 @@ public class TerrainTextureData : ScriptableObject
 
     public void RestoreToOriginalState()
     {
+        if(biomeTextureConfigsBackup.Count == 0)
+        {
+            return;
+        }
+        
         biomeTextureConfigs = new();
+
         foreach (BiomeTextureConfigs biomeTextureConfig in biomeTextureConfigsBackup)
         {
             biomeTextureConfigs.Add(biomeTextureConfig.Clone());

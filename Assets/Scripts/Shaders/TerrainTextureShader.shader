@@ -201,8 +201,11 @@ Shader "Custom/TerrainTextureShader"
                     else if(_UseHeightsArray[i] == 1) {
                         weight = saturate(heightWeight);
                     }
-                    else {
+                    else if(_UseSlopesArray[i] == 1) {
                         weight = saturate(slopeWeight);
+                    }
+                    else {
+                        weight = 0;
                     }
 
                     if(weight > 0.001) {

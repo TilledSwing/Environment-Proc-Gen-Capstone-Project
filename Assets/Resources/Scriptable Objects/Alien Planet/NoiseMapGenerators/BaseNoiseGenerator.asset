@@ -28,7 +28,7 @@ MonoBehaviour:
   noiseFractalType: 1
   selectedRotationType3D: 0
   rotationType3D: 0
-  noiseSeed: 50269
+  noiseSeed: 8071
   noiseFractalOctaves: 5
   noiseFractalLacunarity: 2
   noiseFractalGain: 0.5
@@ -40,7 +40,7 @@ MonoBehaviour:
   selectedDomainWarpFractalType: 0
   domainWarpFractalType: 0
   domainWarpAmplitude: 1
-  domainWarpSeed: 6595
+  domainWarpSeed: 97543
   domainWarpFractalOctaves: 5
   domainWarpFractalLacunarity: 2
   domainWarpFractalGain: 0.5
@@ -51,6 +51,7 @@ MonoBehaviour:
   cellularReturnType: 1
   cellularJitter: 1
   noiseScale: 0.6
+  remoteTexture: {fileID: 0}
   noiseTypeOptions: 000000000100000002000000030000000400000005000000
   rotationType3DOptions: 000000000100000002000000
   noiseFractalTypeOptions: 00000000010000000200000003000000

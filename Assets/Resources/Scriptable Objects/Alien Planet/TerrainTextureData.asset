@@ -20,44 +20,8 @@ MonoBehaviour:
     - texture: {fileID: 2800000, guid: b4a372abad8966048a3a8e57feedcc63, type: 3}
       useHeightRange: 1
       heightRange:
-        heightStart: -500
-        heightEnd: -230
-      useSlopeRange: 0
-      slopeRange:
-        slopeStart: 0
-        slopeEnd: 0
-    - texture: {fileID: 2800000, guid: 8cd2530c54be62c4c993bda2f7080993, type: 3}
-      useHeightRange: 1
-      heightRange:
-        heightStart: -240
-        heightEnd: 0
-      useSlopeRange: 0
-      slopeRange:
-        slopeStart: 0
-        slopeEnd: 0
-    - texture: {fileID: 2800000, guid: ac9569eb787e1af4ca584d15a29060d3, type: 3}
-      useHeightRange: 1
-      heightRange:
-        heightStart: -15
-        heightEnd: 35
-      useSlopeRange: 0
-      slopeRange:
-        slopeStart: 0
-        slopeEnd: 0
-    - texture: {fileID: 2800000, guid: 36bd7599ee9a4154d8974465a9fbf527, type: 3}
-      useHeightRange: 1
-      heightRange:
-        heightStart: 30
-        heightEnd: 60
-      useSlopeRange: 0
-      slopeRange:
-        slopeStart: 0
-        slopeEnd: 0
-    - texture: {fileID: 2800000, guid: e6387bc135e2c154f98c6db07942f4c4, type: 3}
-      useHeightRange: 1
-      heightRange:
-        heightStart: 45
-        heightEnd: 65
+        heightStart: -384
+        heightEnd: -100
       useSlopeRange: 0
       slopeRange:
         slopeStart: 0
@@ -65,20 +29,11 @@ MonoBehaviour:
     - texture: {fileID: 2800000, guid: 37bdf190e8f22514cbfb200ad7d7659a, type: 3}
       useHeightRange: 1
       heightRange:
-        heightStart: 50
-        heightEnd: 75
+        heightStart: -125
+        heightEnd: 10
       useSlopeRange: 0
       slopeRange:
         slopeStart: 0
         slopeEnd: 0
-    - texture: {fileID: 2800000, guid: 6c70b02d0da087e469660d504ddadb91, type: 3}
-      useHeightRange: 1
-      heightRange:
-        heightStart: 60
-        heightEnd: 80
-      useSlopeRange: 0
-      slopeRange:
-        slopeStart: 0
-        slopeEnd: 360
   textureFormat: 4
   maxTextureSize: 1024

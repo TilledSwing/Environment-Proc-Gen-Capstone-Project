@@ -2,7 +2,6 @@ using UnityEngine;
 
 public class UseableAssetController : MonoBehaviour
 {
-    public AssetSpawnData assetSpawnData;
     public UseableAssetData assetData;
     public GameObject assetSettingsTab;
     public GameObject assetList;
@@ -18,7 +17,7 @@ public class UseableAssetController : MonoBehaviour
     public void AddAsset()
     {
         AssetSettingsTabController assetTab = Instantiate(assetSettingsTab, assetList.transform).GetComponent<AssetSettingsTabController>();
-        assetTab.assetSpawnData = assetSpawnData;
+        assetTab.assetSpawnData = ChunkGenNetwork.Instance.assetSpawnData;
         assetTab.canvasGroup = assetList.GetComponent<CanvasGroup>();
 
         Texture icon = assetData.useableAssets[assetIndex].icon;
@@ -30,7 +29,7 @@ public class UseableAssetController : MonoBehaviour
         spawnableAsset.icon = icon;
         spawnableAsset.name = name;
 
-        assetSpawnData.spawnableAssets.Add(spawnableAsset);
+        ChunkGenNetwork.Instance.assetSpawnData.spawnableAssets.Add(spawnableAsset);
 
         assetGrid.SetActive(false);
         assetTab.initialized = true;
