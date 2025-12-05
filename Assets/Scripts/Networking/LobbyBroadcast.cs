@@ -82,7 +82,7 @@ public class LobbyBroadcast : MonoBehaviour
         Debug.Log("This is the connection id: " + connection.ClientId.ToString());
         if (nameField != null && connection.ClientId.ToString() == "0")
             connectedPlayers.Add(connection.ClientId, name.connectedPlayer + " (Host)");
-        else if (nameField == null && BootstrapManager.IsHost())
+        else if (nameField == null && BootstrapManager.IsHost(name.connectedPlayer))
             connectedPlayers.Add(connection.ClientId, name.connectedPlayer + " (Host)");
         else
             connectedPlayers.Add(connection.ClientId, name.connectedPlayer);

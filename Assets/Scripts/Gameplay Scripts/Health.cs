@@ -44,7 +44,7 @@ public class Health : NetworkBehaviour
             Debug.Log(_currentHealth.Value);
             if (_currentHealth.Value - 1 <= 0)
             {
-                BroadcastPlayerDeath(LocalConnection.ClientId);
+                BroadcastPlayerDeath(LocalConnection.ClientId, gameObject);
             }
         }
         else if (Input.GetKeyDown(KeyCode.P))
@@ -56,10 +56,22 @@ public class Health : NetworkBehaviour
     }
 
     [ServerRpc(RequireOwnership = false)]
-    public void BroadcastPlayerDeath(int clientConnectionID)
+    public void BroadcastPlayerDeath(int clientConnectionID, GameObject deadPlayer)
     {
         ChatBroadcast.instance.ChatBroadcastPlayerDeath(clientConnectionID);
         LobbyBroadcast.instance.PlayerDeath(clientConnectionID);
+        DisableDeadPlayer(clientConnectionID, deadPlayer);
+    }
+
+    [ObserversRpc]
+    public void DisableDeadPlayer(int clientConnectionID, GameObject player)
+    {
+
+        // Disable the dead player for other clients.
+        if (LocalConnection.ClientId != clientConnectionID)
+            player.SetActive(false);
+        else
+            PlayerController.instance.dead = true;
     }
 
     //private void OnHealthChanged(float previous, float next, bool asServer)

@@ -107,12 +107,12 @@ public class BootstrapManager : MonoBehaviour
         return SteamFriends.GetPersonaName().ToString();
     }
 
-    public static bool IsHost()
+    public static bool IsHost(string steamName)
     {
-        return instance._networkManager.IsServerStarted;
-        //string suffix = "'s PEGG lobby";
-        //string hostLobbyName = SteamMatchmaking.GetLobbyData(new CSteamID(CurrentLobbyID), "name");
-        //return steamName.Equals(hostLobbyName.Substring(0, hostLobbyName.Length - suffix.Length));
+        //return instance._networkManager.IsServerStarted;
+        string suffix = "'s PEGG lobby";
+        string hostLobbyName = SteamMatchmaking.GetLobbyData(new CSteamID(CurrentLobbyID), "name");
+        return steamName.Equals(hostLobbyName.Substring(0, hostLobbyName.Length - suffix.Length));
     }
 
     public static void DisablePreGameLobby()

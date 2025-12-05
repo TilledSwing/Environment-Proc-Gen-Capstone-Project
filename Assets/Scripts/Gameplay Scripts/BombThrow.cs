@@ -31,6 +31,9 @@ public class BombThrow : NetworkBehaviour
 
         if (!PlayerController.instance.gameStarted && !PlayerController.instance.editorPlayer)
             return;
+
+        if (PlayerController.instance.dead)
+            return;
         
         //Debug.Log("In Bomb Throw Update");
         // Block input if in a chat message block. Ensures that typing words with certain letters or numbers won't trigger input events.

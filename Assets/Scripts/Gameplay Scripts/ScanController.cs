@@ -27,6 +27,9 @@ public class ScanController : MonoBehaviour
         if (!PlayerController.instance.gameStarted && !PlayerController.instance.editorPlayer)
             return;
 
+        if (PlayerController.instance.dead)
+            return;
+
         // Block input if in a chat message block. Ensures that typing words with certain letters or numbers won't trigger input events.
         if (EventSystem.current.currentSelectedGameObject != null &&
             EventSystem.current.currentSelectedGameObject.GetComponent<TMP_InputField>() != null)

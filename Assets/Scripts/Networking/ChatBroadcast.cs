@@ -113,7 +113,7 @@ public class ChatBroadcast : MonoBehaviour
     /// <param name="clientConnectionID">The connection ID of the player that died.</param>
     public void ChatBroadcastPlayerDeath(int clientConnectionID)
     {
-        string toMessage = "Player: " + LobbyBroadcast.instance.connectedPlayers[clientConnectionID] + " has died!";
+        string toMessage = "Player: '" + LobbyBroadcast.instance.connectedPlayers[clientConnectionID] + "' has died!";
         Message message = new Message { message = toMessage };
         InstanceFinder.ServerManager.Broadcast(message);
     }

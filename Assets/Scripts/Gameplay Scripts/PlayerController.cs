@@ -38,6 +38,7 @@ public class PlayerController : NetworkBehaviour
     private bool isFlightMode = false;
     private bool isSubmerged = false;
     private bool underwater = false;
+    public bool dead = false;
 
     public CharacterController characterController;
     public Vector3 moveDirection = Vector3.zero;
@@ -161,8 +162,8 @@ public class PlayerController : NetworkBehaviour
             canMove = isCursorVisible;
         }
 
-        // Allows player to switch between walking and flying mode. Only available in editor mode.
-        if (editorPlayer && Input.GetKeyDown(KeyCode.M))
+        // Allows player to switch between walking and flying mode. Only available in editor mode or after the player dies in game mode.
+        if ((editorPlayer || dead) && Input.GetKeyDown(KeyCode.M))
             isFlightMode = !isFlightMode;
 
         // We are grounded, so recalculate move direction based on axis

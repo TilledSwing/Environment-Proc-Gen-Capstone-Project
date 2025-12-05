@@ -30,6 +30,10 @@ public class PlayerFlashlightOrient : NetworkBehaviour
             return;
 
         SendFlashLightRotationServer(gameObject, PlayerController.instance.playerCamera.transform.rotation);
+
+        if (PlayerController.instance.dead)
+            return;
+
         // Check if flashlight hits enemy
         if (Time.time - lastFreezeTime < freezeCooldown)
             return;
