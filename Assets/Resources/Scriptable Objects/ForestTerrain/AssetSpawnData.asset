@@ -17,8 +17,8 @@ MonoBehaviour:
     name: Green Oak Tree 1
     icon: {fileID: 2800000, guid: 2c55d834fa8ca2244a0352ca83934dd0, type: 3}
     spawnedAssets: []
-    maxPerChunk: 10
-    rotateToFaceNormal: 1
+    maxPerChunk: 4
+    rotateToFaceNormal: 0
     spawnProbability: 0.5
     useMinSlope: 0
     minSlope: 0
@@ -61,7 +61,7 @@ MonoBehaviour:
     name: Green Spruce Tree 1
     icon: {fileID: 2800000, guid: 6ebf6d3282883884fbe73a36837fc550, type: 3}
     spawnedAssets: []
-    maxPerChunk: 8
+    maxPerChunk: 6
     rotateToFaceNormal: 0
     spawnProbability: 0.8
     useMinSlope: 0

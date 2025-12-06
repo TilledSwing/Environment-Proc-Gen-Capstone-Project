@@ -40,7 +40,7 @@ public class ChunkGenNetwork : MonoBehaviour
     //public GameObject flashlight;
     // Viewer Settings
     public int maxWorldYChunks = 10;
-    public float maxViewDst = 100;
+    public float maxViewDst;
     public Transform viewer;
     public Vector3 viewerPos;
     public float updateDistanceThreshold = 5f;
@@ -177,6 +177,8 @@ public class ChunkGenNetwork : MonoBehaviour
         waterMaterial.SetColor("_fogColor", lowerFogColor);
         waterMaterial.SetFloat("_fogActive", 0);
         SetFogActive(false);
+        viewerPos = viewer.position;
+        lastUpdateViewerPos = viewerPos;
 
         InitializeGenerator();
     }
@@ -394,7 +396,8 @@ public class ChunkGenNetwork : MonoBehaviour
                     }
                     else
                     {
-                        if (!initialLoadComplete)
+                        Bounds bounds = new Bounds((viewedChunkCoord * chunkSize) + (new Vector3(0.5f, 0.5f, 0.5f) * chunkSize), Vector3.one * chunkSize);
+                        if (!initialLoadComplete && bounds.SqrDistance(viewerPos) <= maxViewDst * maxViewDst)
                         {
                             // Generate immediately during first load
                             TerrainChunk chunk = new TerrainChunk(viewedChunkCoord, chunkSize, GameObject.Find("ChunkParent").transform, terrainDensityData, assetSpawnData, terrainTextureData,
@@ -407,11 +410,11 @@ public class ChunkGenNetwork : MonoBehaviour
                             {
                                 chunksVisibleLastUpdate.Add(chunk);
                                 // chunkShowQueue.Enqueue(chunk);
-                            }
+                            // }
                             // else
                             // {
                             //     chunkHideQueue.Enqueue(dictChunk);
-                            // }
+                            }
                         }
                         else
                         {
@@ -426,7 +429,7 @@ public class ChunkGenNetwork : MonoBehaviour
                                 float angle = Vector3.Angle(movementDir, toChunk);
                                 if (angle > 60f) continue;
 
-                                Bounds bounds = new Bounds((viewedChunkCoord * chunkSize) + (new Vector3(0.5f, 0.5f, 0.5f) * chunkSize), Vector3.one * chunkSize);
+                                bounds = new Bounds((viewedChunkCoord * chunkSize) + (new Vector3(0.5f, 0.5f, 0.5f) * chunkSize), Vector3.one * chunkSize);
                                 float viewerDstFromBound = bounds.SqrDistance(viewerPos);
                                 chunkLoadQueue.Enqueue(viewedChunkCoord, viewerDstFromBound);
                                 chunkLoadSet.Add(viewedChunkCoord);
