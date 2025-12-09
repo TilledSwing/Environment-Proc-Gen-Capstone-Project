@@ -57,9 +57,11 @@ public class PlayerController : NetworkBehaviour
 
             Transform eye1 = transform.Find("Visor");
             Transform eye2 = transform.Find("Visor (1)");
+            Transform gameTag = transform.Find("GameTag");
 
             eye1.gameObject.SetActive(false);
             eye2.gameObject.SetActive(false);
+            gameTag.gameObject.SetActive(false);
 
             if (base.IsServerStarted)
             {

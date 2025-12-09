@@ -793,6 +793,7 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 1324032884783071196}
   _networkObjectCache: {fileID: 1324032884783071196}
   flashlight: {fileID: 7641844106616359319}
+  nameTag: {fileID: 6708386476203434984}
   flashlightRange: 10
   enemyLayer:
     serializedVersion: 2

@@ -16,8 +16,9 @@ public class SyncMoney : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void AddMoney(int moneyAmount)
     {
-        UpdateMoneyCounter(accumMoney, moneyAmount);
+        int prevMoney = accumMoney;
         accumMoney += moneyAmount;
+        UpdateMoneyCounter(prevMoney, moneyAmount);
     }
 
     [ObserversRpc]
