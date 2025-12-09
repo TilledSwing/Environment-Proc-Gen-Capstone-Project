@@ -13,6 +13,7 @@ public class GlobalNavMeshUpdater : MonoBehaviour
     public NavMeshSurface landSurface;
     public NavMeshSurface waterSurface;
     public WaterLinkManager linkManager;  
+    public GameObject spawner;
 
     private bool isBuildingLandNavMesh = false;
     private bool isBuildingWaterNavMesh = false;
@@ -41,10 +42,7 @@ public class GlobalNavMeshUpdater : MonoBehaviour
             return;
         }
         Instance = this;
-        if (ChunkGenNetwork.Instance != null)
-        {
-            ChunkGenNetwork.Instance.OnTerrainReady += StartNavMeshBuilds;
-        }
+        
         
         landSurface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
         landSurface.overrideVoxelSize = true;
@@ -61,14 +59,9 @@ public class GlobalNavMeshUpdater : MonoBehaviour
 
     private void OnDestroy()
     {
-        // Always unsubscribe to avoid memory leaks
-        if (ChunkGenNetwork.Instance != null)
-        {
-            ChunkGenNetwork.Instance.OnTerrainReady -= StartNavMeshBuilds;
-        }
 
         if (landNavMeshInstance.valid)
-        landNavMeshInstance.Remove();
+            landNavMeshInstance.Remove();
 
         if (waterNavMeshInstance.valid)
             waterNavMeshInstance.Remove();
@@ -81,19 +74,30 @@ public class GlobalNavMeshUpdater : MonoBehaviour
             Destroy(waterSurface.navMeshData);
     }
 
-    public void StartNavMeshBuilds()
+    public void StartBuildsAndSpawnEnemies()
     {
         Debug.Log("Invoke repeating called");
-        InvokeRepeating(nameof(ProcessNavMeshUpdates), .1f, navMeshUpdateInterval);
+        InvokeRepeating(nameof(ProcessNavMeshUpdates), 10f, navMeshUpdateInterval);
     }
 
     public void ProcessNavMeshUpdates()
     {
-        // if (!isBuildingLandNavMesh && landNavMeshNeedsRebuild)
-        //     StartCoroutine(RebuildLandNavMeshBatched());
+        if (!isBuildingLandNavMesh && landNavMeshNeedsRebuild)
+            StartCoroutine(RebuildLandNavMeshBatched());
 
         // if (!isBuildingWaterNavMesh && waterNavMeshNeedsRebuild)
         //     StartCoroutine(RebuildAndLinkWaterCoroutine(waterSources, 1.5f));
+    }
+    public void InitialLandSpawnCall()
+    {
+        StartCoroutine(BuildAndSpawnLand());
+    }
+    private IEnumerator BuildAndSpawnLand()
+    {
+        yield return StartCoroutine(RebuildLandNavMeshBatched());
+        var eSpawn = spawner.GetComponent<EnemySpawner>();
+        eSpawn.RequestSpawnEnemy();
+        StartBuildsAndSpawnEnemies();
     }
     /// <summary>
     /// Adds a chunk to the list of chunks to be included in the next navmesh rebuild
@@ -101,7 +105,7 @@ public class GlobalNavMeshUpdater : MonoBehaviour
     /// <param name="chunk"></param>
     public void AddChunkForNavMeshUpdate(ChunkGenNetwork.TerrainChunk chunk)
     {
-        // addLandChunk(chunk);
+        addLandChunk(chunk);
         // if (chunk.isWater)
         //     addWaterChunk(chunk);
     }
@@ -195,6 +199,7 @@ public class GlobalNavMeshUpdater : MonoBehaviour
 
         return float.NegativeInfinity; // no hit
     }
+
     /// <summary>
     /// Adds a land chunk to the list of chunks to be included in the next navmesh rebuild
     /// </summary>
