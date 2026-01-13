@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Rendering;
+using UnityEngine.InputSystem;
 
 // Template by Bobsi Unity - Youtube
 // Modified by Jacob Ormsby
@@ -11,6 +12,9 @@ using UnityEngine.Rendering;
 public class PlayerController : NetworkBehaviour
 {
     public static PlayerController instance;
+    public InputSystem_Actions playerInputActions;
+    private InputAction wasd;
+    private InputAction flight;
 
     [Header("Base setup")]
     public float walkingSpeed = 7.5f;
@@ -78,6 +82,27 @@ public class PlayerController : NetworkBehaviour
         }
     }
 
+    void Awake()
+    {
+        playerInputActions = new InputSystem_Actions();
+    }
+
+    void OnEnable()
+    {
+        wasd = playerInputActions.Player.Move;
+        wasd.Enable();
+
+        flight = playerInputActions.Player.Flight;
+        flight.Enable();
+        flight.performed += Flight;
+    }
+
+    void OnDisable()
+    {
+        wasd.Disable();
+        flight.Disable();
+    }
+
     void Start()
     {
         characterController = GetComponent<CharacterController>();
@@ -104,18 +129,18 @@ public class PlayerController : NetworkBehaviour
         bool isRunning = false;
 
         // Press S to run
-        isRunning = Input.GetKey(KeyCode.RightShift);
+        isRunning = Input.GetKey(KeyCode.LeftShift);
         isSubmerged = transform.position.y < waterLevel;
 
         if (isSubmerged && ChunkGenNetwork.Instance.terrainDensityData.water)
         {
             gravity = 3.5f;
-            jumpSpeed = 3.5f;
+            jumpSpeed = 5.0f;
 
             if (!isFlightMode)
             {
-                walkingSpeed = 3.5f;
-                runningSpeed = 5.0f;
+                walkingSpeed = 6.5f;
+                runningSpeed = 12.0f;
             }
         }
         else
@@ -165,15 +190,15 @@ public class PlayerController : NetworkBehaviour
         }
 
         // Allows player to switch between walking and flying mode. Only available in editor mode or after the player dies in game mode.
-        if ((editorPlayer || dead) && Input.GetKeyDown(KeyCode.M))
-            isFlightMode = !isFlightMode;
+        // if ((editorPlayer || dead) && Input.GetKeyDown(KeyCode.M))
+        //     isFlightMode = !isFlightMode;
 
         // We are grounded, so recalculate move direction based on axis
         Vector3 forward = transform.TransformDirection(Vector3.forward);
         Vector3 right = transform.TransformDirection(Vector3.right);
 
-        float curSpeedX = canMove ? (isRunning ? runningSpeed : walkingSpeed) * Input.GetAxis("Vertical") : 0;
-        float curSpeedY = canMove ? (isRunning ? runningSpeed : walkingSpeed) * Input.GetAxis("Horizontal") : 0;
+        float curSpeedX = canMove ? (isRunning ? runningSpeed : walkingSpeed) * wasd.ReadValue<Vector2>().y : 0;
+        float curSpeedY = canMove ? (isRunning ? runningSpeed : walkingSpeed) * wasd.ReadValue<Vector2>().x : 0;
         float movementDirectionY = moveDirection.y;
         moveDirection = (forward * curSpeedX) + (right * curSpeedY);
 
@@ -210,7 +235,7 @@ public class PlayerController : NetworkBehaviour
             {
                 moveDirection.y = flightSpeed;
             }
-            else if (Input.GetKey(KeyCode.LeftShift) && canMove)
+            else if (Input.GetKey(KeyCode.LeftControl) && canMove)
             {
                 moveDirection.y = -flightSpeed;
             }
@@ -227,5 +252,12 @@ public class PlayerController : NetworkBehaviour
             playerCamera.transform.localRotation = Quaternion.Euler(rotationX, 0, 0);
             transform.rotation *= Quaternion.Euler(0, Input.GetAxis("Mouse X") * lookSpeed, 0);
         }
+    }
+
+    private void Flight(InputAction.CallbackContext context)
+    {
+        Debug.Log("Flight toggled");
+        if (editorPlayer || dead)
+            isFlightMode = !isFlightMode;
     }
 }
