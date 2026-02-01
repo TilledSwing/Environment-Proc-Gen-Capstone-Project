@@ -1,6 +1,3 @@
-//using FishNet.Connection;
-//using FishNet.Object;
-using FishNet.Serializing.Helping;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,14 +5,9 @@ using TMPro;
 using Unity.AI.Navigation;
 using Unity.Collections;
 using Unity.Mathematics;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.AI;
-using UnityEngine.Experimental.GlobalIllumination;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
-using UnityEngine.UI;
-using UnityEngine.UI.Extensions;
 
 public class ChunkGenNetwork : MonoBehaviour
 {
@@ -37,7 +29,6 @@ public class ChunkGenNetwork : MonoBehaviour
     // Chat & Lobby
     public GameObject chatContainer;
     public GameObject lobbyContainer;
-    //public GameObject flashlight;
     // Viewer Settings
     public int maxWorldYChunks = 10;
     public float maxViewDst;
@@ -51,13 +42,6 @@ public class ChunkGenNetwork : MonoBehaviour
     public int mapSize;
     public int resolution;
     public int maxYChunksVisible;
-    public LODData[] lodData =
-    {
-        new LODData { lod = LOD.LOD1, resolution = 1 },
-        new LODData { lod = LOD.LOD2, resolution = 2 },
-        new LODData { lod = LOD.LOD3, resolution = 3 },
-        new LODData { lod = LOD.LOD6, resolution = 6 }
-    };
     // Scriptable Object References
     public GenerationConfiguration generationConfiguration;
     public TerrainDensityData terrainDensityData;
@@ -103,6 +87,7 @@ public class ChunkGenNetwork : MonoBehaviour
     public float queueUpdateDistanceThreshold = 15f;
     public bool isLoadingChunks = false;
     public bool initialLoadComplete = false;
+    public Texture2D[] noiseGeneratorTextureArray;
     // Lighting Blocker
     public GameObject lightingBlocker;
     private MeshRenderer lightingBlockerRenderer;
@@ -135,19 +120,6 @@ public class ChunkGenNetwork : MonoBehaviour
             this.readbackRequest = readbackRequest;
         }
     }
-    public enum LOD
-    {
-        LOD1 = 1,
-        LOD2 = 2,
-        LOD3 = 3,
-        LOD6 = 6
-    }
-    [Serializable]
-    public class LODData
-    {
-        public LOD lod;
-        public int resolution;
-    }
     void Awake()
     {
         if (Instance == null)
@@ -166,14 +138,13 @@ public class ChunkGenNetwork : MonoBehaviour
         // Fog Shader Inits
         fogRenderPassFeature = rendererData.rendererFeatures.Find(f => f is FogRenderPassFeature) as FogRenderPassFeature;
         
-        // Tester Comment
-        // fogOffset = maxViewDst - 20f;
-        // fogMat.SetFloat("_fogOffset", fogOffset);
-        // fogMat.SetFloat("_fogDensity", fogDensity);
+        fogMat.SetFloat("_fogOffset", fogOffset);
+        fogMat.SetFloat("_fogDensity", fogDensity);
         fogMat.SetColor("_upperFogColor", upperFogColor);
         fogMat.SetColor("_lowerFogColor", lowerFogColor);
-        // waterMaterial.SetFloat("_fogOffset", fogOffset);
-        // waterMaterial.SetFloat("_fogDensity", fogDensity);
+
+        waterMaterial.SetFloat("_fogOffset", fogOffset);
+        waterMaterial.SetFloat("_fogDensity", fogDensity);
         waterMaterial.SetColor("_fogColor", lowerFogColor);
         waterMaterial.SetFloat("_fogActive", 0);
         SetFogActive(false);
@@ -233,8 +204,12 @@ public class ChunkGenNetwork : MonoBehaviour
             noiseGenerator.domainWarpSeed = UnityEngine.Random.Range(0, 100000);
         }
 
+        noiseGeneratorTextureArray = CreateNoiseCurveTextures();
         UpdateVisibleChunks();
     }
+    /// <summary>
+    /// Destroy all chunks
+    /// </summary>
     public void DestroyChunks()
     {
         foreach (Transform chunk in GameObject.Find("ChunkParent").transform)
@@ -242,13 +217,10 @@ public class ChunkGenNetwork : MonoBehaviour
             Destroy(chunk.gameObject);
         }
     }
-    // public void SetFogActive(bool active)
-    // {
-    //     if (fogRenderPassFeature != null)
-    //     {
-    //         fogRenderPassFeature.SetActive(active);
-    //     }
-    // }
+    /// <summary>
+    /// Toggle fog effect
+    /// </summary>
+    /// <param name="active">Set whether thhe fog should be active or inactive</param>
     public void SetFogActive(bool active)
     {
         fogMat.SetFloat("_fogOffset", active ? fogOffset : 1000);
@@ -333,7 +305,6 @@ public class ChunkGenNetwork : MonoBehaviour
     {
         for (int i = 0; i < chunksVisibleLastUpdate.Count; i++)
         {
-            // chunkHideQueue.Enqueue(chunksVisibleLastUpdate[i]);
             chunksVisibleLastUpdate[i].SetVisible(false);
         }
         chunksVisibleLastUpdate.Clear();
@@ -383,16 +354,11 @@ public class ChunkGenNetwork : MonoBehaviour
 
                     if (chunkDictionary.TryGetValue(viewedChunkCoord, out TerrainChunk dictChunk))
                     {
-                        dictChunk.UpdateChunk(maxViewDst, terrainDensityData.width);
+                        dictChunk.UpdateChunk(maxViewDst);
                         if (dictChunk.IsVisible())
                         {
                             chunksVisibleLastUpdate.Add(dictChunk);
-                            // chunkShowQueue.Enqueue(dictChunk);
                         }
-                        // else
-                        // {
-                        //     chunkHideQueue.Enqueue(dictChunk);
-                        // }
                     }
                     else
                     {
@@ -402,18 +368,13 @@ public class ChunkGenNetwork : MonoBehaviour
                             // Generate immediately during first load
                             TerrainChunk chunk = new TerrainChunk(viewedChunkCoord, chunkSize, GameObject.Find("ChunkParent").transform, terrainDensityData, assetSpawnData, terrainTextureData,
                                                          marchingCubesComputeShader, terrainDensityComputeShader, terrainNoiseComputeShader, terraformComputeShader,
-                                                         terrainMaterial, waterMaterial, initialLoadComplete);
+                                                         terrainMaterial, waterMaterial, initialLoadComplete, noiseGeneratorTextureArray);
                             chunkDictionary.Add(viewedChunkCoord, chunk);
-                            chunk.UpdateChunk(maxViewDst, terrainDensityData.width);
+                            chunk.UpdateChunk(maxViewDst);
 
                             if (chunk.IsVisible())
                             {
                                 chunksVisibleLastUpdate.Add(chunk);
-                                // chunkShowQueue.Enqueue(chunk);
-                            // }
-                            // else
-                            // {
-                            //     chunkHideQueue.Enqueue(dictChunk);
                             }
                         }
                         else
@@ -455,13 +416,8 @@ public class ChunkGenNetwork : MonoBehaviour
         {
             StartCoroutine(LoadReadbacksOverTime());
         }
-        // if (!isLoadingMeshes)
-        // {
-        //     StartCoroutine(LoadMeshesOverTime());
-        // }
         if (!isLoadingAssetInstantiations)
         {
-            // Debug.Log("Spawning");
             StartCoroutine(LoadAssetInstantiationsOverTime());
         }
     }
@@ -502,20 +458,14 @@ public class ChunkGenNetwork : MonoBehaviour
             {
                 var chunk = new TerrainChunk(coord, chunkSize, GameObject.Find("ChunkParent").transform, terrainDensityData, assetSpawnData, terrainTextureData,
                                             marchingCubesComputeShader, terrainDensityComputeShader,
-                                            terrainNoiseComputeShader,
-                                            terraformComputeShader,
-                                            terrainMaterial, waterMaterial, initialLoadComplete);
+                                            terrainNoiseComputeShader, terraformComputeShader,
+                                            terrainMaterial, waterMaterial, initialLoadComplete, noiseGeneratorTextureArray);
                 chunkDictionary.Add(coord, chunk);
-                chunk.UpdateChunk(maxViewDst, chunkSize);
+                chunk.UpdateChunk(maxViewDst);
                 if (chunk.IsVisible())
                 {
                     chunksVisibleLastUpdate.Add(chunk);
-                    // chunkShowQueue.Enqueue(chunk);
                 }
-                // else
-                // {
-                //     chunkHideQueue.Enqueue(chunk);
-                // }
                 chunkBatchCounter++;
             }
 
@@ -593,7 +543,7 @@ public class ChunkGenNetwork : MonoBehaviour
                 }
             }
 
-            // 1 readback per 20 fps with a min and max of 2 and 8
+            // 1 readback per 20 fps with a min and max of 2 and 6
             int maxActiveReadbacks = Mathf.Clamp(Mathf.RoundToInt(1f / Time.smoothDeltaTime / 20f), 2, 6);
 
             while (activeRequests.Count <= maxActiveReadbacks && pendingReadbacks.Count > 0)
@@ -666,22 +616,25 @@ public class ChunkGenNetwork : MonoBehaviour
         return chunkAndNeighbors;
     }
     /// <summary>
+    /// Create the textures used for density calculation from animation curves
+    /// </summary>
+    /// <returns>An array of the textures used in density calculation</returns>
+    public Texture2D[] CreateNoiseCurveTextures()
+    {
+        Texture2D[] textureArray = new Texture2D[terrainDensityData.noiseGenerators.Length];
+        
+        int i = 0;
+        foreach (NoiseGenerator noiseGenerator in terrainDensityData.noiseGenerators)
+        {
+            textureArray[i] = SplineCurveFunctions.ArrayToTexture(SplineCurveFunctions.CurveToArray(noiseGenerator.valueCurve));
+            i++;
+        }
+
+        return textureArray;
+    }
+    /// <summary>
     /// Clear out unnecessary data when quitting the application
     /// </summary>
-    void OnDisable()
-    {
-        // vertexOffsetTable.Dispose();
-        // edgeIndexTable.Dispose();
-        // triangleTable.Dispose();
-        // assetSpawnData.ResetSpawnPoints();
-        // assetSpawnData.RestoreToOriginalState();
-        // terrainTextureData.RestoreToOriginalState();
-        // chunkDictionary.Clear();
-        // // fogRenderPassFeature.SetActive(false);
-        // SetFogActive(false);
-        // GraphicsSettings.defaultRenderPipeline = mainUrpAsset;
-        // QualitySettings.renderPipeline = mainUrpAsset;
-    }
     void OnApplicationQuit()
     {
         vertexOffsetTable.Dispose();
@@ -697,32 +650,9 @@ public class ChunkGenNetwork : MonoBehaviour
         GraphicsSettings.defaultRenderPipeline = mainUrpAsset;
         QualitySettings.renderPipeline = mainUrpAsset;
     }
-    Bounds CalculateLoadedChunkBounds()
-    {
-        bool initialized = false;
-        Bounds total = new Bounds();
-
-        foreach (var kvp in chunkDictionary)
-        {
-            TerrainChunk chunk = kvp.Value;
-            if (chunk?.marchingCubes?.meshFilter?.mesh == null) continue;
-
-            Renderer r = chunk.marchingCubes.meshFilter.GetComponent<Renderer>();
-            if (r == null) continue;
-
-            if (!initialized)
-            {
-                total = r.bounds;
-                initialized = true;
-            }
-            else
-            {
-                total.Encapsulate(r.bounds);
-            }
-        }
-
-        return total;
-    }
+    /// <summary>
+    /// Initialize all texture data
+    /// </summary>
     public void TextureSetup()
     {
         foreach (Transform texture in textureWindow.transform)
@@ -792,6 +722,9 @@ public class ChunkGenNetwork : MonoBehaviour
             terrainMaterial.SetFloat("_GreatestEndHeight", greatestEndHeight);
         }
     }
+    /// <summary>
+    /// Initialize assset UI data
+    /// </summary>
     public void AssetSetup()
     {
         foreach (Transform asset in assetWindow.transform)
@@ -870,7 +803,7 @@ public class ChunkGenNetwork : MonoBehaviour
         public TerrainChunk(Vector3Int chunkCoord, int chunkSize, Transform parent, TerrainDensityData terrainDensityData, AssetSpawnData assetSpawnData, TerrainTextureData terrainTextureData,
                             ComputeShader marchingCubesComputeShader, ComputeShader terrainDensityComputeShader, ComputeShader terrainNoiseComputeShader,
                             ComputeShader terraformComputeShader,
-                            Material terrainMaterial, Material waterMaterial, bool initialLoadComplete)
+                            Material terrainMaterial, Material waterMaterial, bool initialLoadComplete, Texture2D[] noiseGeneratorTextureArray)
         {
             chunkPos = chunkCoord * chunkSize;
             bounds = new Bounds(chunkPos + (new Vector3(0.5f, 0.5f, 0.5f) * chunkSize), Vector3.one * chunkSize);
@@ -882,8 +815,6 @@ public class ChunkGenNetwork : MonoBehaviour
             meshRenderer = chunk.AddComponent<MeshRenderer>();
             // Chunk texture
             meshRenderer.sharedMaterial = terrainMaterial;
-            // meshRenderer.material.SetFloat("_UnderwaterTexHeightEnd", terrainDensityData.waterLevel - 15f);
-            // meshRenderer.material.SetFloat("_Tex1HeightStart", terrainDensityData.waterLevel - 18f);
             // Set up the chunk's AssetSpawn script
             assetSpawner = chunk.AddComponent<AssetSpawner>();
             assetSpawner.chunkPos = chunkPos;
@@ -903,12 +834,7 @@ public class ChunkGenNetwork : MonoBehaviour
             marchingCubes.terraformComputeShader = terraformComputeShader;
             marchingCubes.terrainDensityData = terrainDensityData;
             marchingCubes.initialLoadComplete = initialLoadComplete;
-
-            // float viewerDstFromBound = bounds.SqrDistance(viewerPos);
-            // if (viewerDstFromBound <= chunkSize * 2) marchingCubes.currentLOD = LOD.LOD1;
-            // else if (viewerDstFromBound <= chunkSize * 4) marchingCubes.currentLOD = LOD.LOD2;
-            // else if (viewerDstFromBound <= chunkSize * 6) marchingCubes.currentLOD = LOD.LOD3;
-            // else if (viewerDstFromBound <= chunkSize * 8) marchingCubes.currentLOD = LOD.LOD6;
+            marchingCubes.noiseGeneratorTextureArray = noiseGeneratorTextureArray;
             // Set up water generator
             if (terrainDensityData.waterLevel > chunkPos.y && terrainDensityData.waterLevel < Mathf.RoundToInt(chunkPos.y + terrainDensityData.width) && terrainDensityData.water)
             {
@@ -928,7 +854,6 @@ public class ChunkGenNetwork : MonoBehaviour
             if( terrainDensityData.waterLevel > bounds.min.y)
             {
                 isWater = true;
-                // waterPlaneGenerator.AddComponent<DitherFadeController>();
             }
             chunk.transform.SetParent(parent);
             Instance.chunkHideQueue.Enqueue(this);
@@ -940,15 +865,10 @@ public class ChunkGenNetwork : MonoBehaviour
         /// </summary>
         /// <param name="maxViewDst">The maximum view distance of the player</param>
         /// <param name="chunkSize">The chunk size</param>
-        public void UpdateChunk(float maxViewDst, int chunkSize)
+        public void UpdateChunk(float maxViewDst)
         {
             float viewerDstFromBound = bounds.SqrDistance(Instance.viewerPos);
-            // if (viewerDstFromBound <= chunkSize * 2) marchingCubes.UpdateMesh(LOD.LOD1);
-            // else if (viewerDstFromBound <= chunkSize * 4) marchingCubes.UpdateMesh(LOD.LOD2);
-            // else if (viewerDstFromBound <= chunkSize * 6) marchingCubes.UpdateMesh(LOD.LOD3);
-            // else if (viewerDstFromBound <= chunkSize * 8) marchingCubes.UpdateMesh(LOD.LOD6);
             bool visible = viewerDstFromBound <= (maxViewDst * maxViewDst);
-            // this.visible = visible;
             SetVisible(visible);
         }
         /// <summary>
@@ -997,9 +917,7 @@ public class ChunkGenNetwork : MonoBehaviour
         /// <returns>If the chunk is visible or not</returns>
         public bool IsVisible()
         {
-            // return chunk.activeSelf;
             return meshRenderer.enabled;
-            // return visible;
         }
 
         private void HandleMeshReady(Mesh mesh)

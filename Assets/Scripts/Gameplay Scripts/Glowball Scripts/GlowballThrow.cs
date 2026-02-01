@@ -1,21 +1,13 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.Rendering;
 using FishNet.Object;
-using FishNet.Connection;
 
 public class GlowballThrow : NetworkBehaviour
 {
     Camera playerCamera;
     public GameObject glowball;
     public float throwForce = 20f;
-
-    //void Start()
-    //{
-    //    playerCamera = Camera.main;
-    //}
-
 
     public override void OnStartClient()
     {

@@ -1,11 +1,8 @@
-using System;
-using JetBrains.Annotations;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using TMPro;
 using FishNet.Object;
-using FishNet.Connection;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Burst;
@@ -23,13 +20,6 @@ public class Terraforming : NetworkBehaviour
     public float terraformUpdateTic = 0.2f;
     float time = 0f;
     bool firstClick = true;
-    //void Start()
-    //{
-    //    playerCamera = Camera.main;
-    //    terrainLayer = LayerMask.GetMask("Terrain Layer");
-    //    // terrainDensityData = Resources.Load<TerrainDensityData1>("TerrainDensityData1");
-    //    // chunkGen = FindFirstObjectByType<ChunkGenNetwork>();
-    //}
 
     public override void OnStartClient()
     {
@@ -92,8 +82,6 @@ public class Terraforming : NetworkBehaviour
         {
             if (hit.distance <= terraformMinDst || math.abs(hit.point.y - terraformRadius) >= terrainDensityData.width * (mode ? ChunkGenNetwork.Instance.maxWorldYChunks : ChunkGenNetwork.Instance.maxWorldYChunks + 1))
                 return;
-            // if (Vector3.Dot(playerCamera.transform.forward.normalized, Vector3.up) < -Mathf.Sin(45f * Mathf.Deg2Rad) && !mode)
-            // {
             // Trying to avoid player clipping
             if (hit.distance < 1.5f && Vector3.Dot(playerCamera.transform.forward.normalized, Vector3.up) < -Mathf.Sin(0f * Mathf.Deg2Rad) && !mode)
             {
@@ -105,7 +93,6 @@ public class Terraforming : NetworkBehaviour
                 }
                 else
                 {
-                    // PlayerController.instance.moveDirection.y = 0;
                     PlayerController.instance.characterController.Move(-ray.direction * 0.23f);
                 }
             }
@@ -126,7 +113,6 @@ public class Terraforming : NetworkBehaviour
         int terraformType = terraformMode == false ? 1 : 2;
         PlayerController.instance.terraformTypes.Add(terraformType);
 
-        // Debug.LogWarning(PlayerController.instance.terraformCenters.Count);
         TerraformClient(terraformCenter, hitChunkPos, terraformMode);
     }
 
@@ -135,7 +121,12 @@ public class Terraforming : NetworkBehaviour
     {
         TerraformClientLocal(terraformCenter, hitChunkPos, terraformMode);  
     }
-
+    /// <summary>
+    /// Handles terraforming logic
+    /// </summary>
+    /// <param name="terraformCenter">Center point of the terraformation</param>
+    /// <param name="hitChunkPos">The position of the chunk that terraform center is</param>
+    /// <param name="terraformMode">Create/Destroy terraform mode</param>
     public void TerraformClientLocal(Vector3 terraformCenter, Vector3Int hitChunkPos, bool terraformMode)
     {
         ChunkGenNetwork.TerrainChunk[] chunkAndNeighbors = ChunkGenNetwork.Instance.GetChunkAndNeighbors(new Vector3Int(Mathf.CeilToInt(hitChunkPos.x / terrainDensityData.width), Mathf.CeilToInt(hitChunkPos.y / terrainDensityData.width), Mathf.CeilToInt(hitChunkPos.z / terrainDensityData.width)));
@@ -154,28 +145,9 @@ public class Terraforming : NetworkBehaviour
                 int threadSizeY = Mathf.CeilToInt((end.y - start.y) + 1f);
                 int threadSizeZ = Mathf.CeilToInt((end.z - start.z) + 1f);
 
-                // int terraformKernel = marchingCubes.terraformComputeShader.FindKernel("Terraform");
-                // marchingCubes.terraformComputeShader.SetBuffer(terraformKernel, "HeightsBuffer", marchingCubes.heightsBuffer);
-                // marchingCubes.terraformComputeShader.SetInt("ChunkSize", terrainDensityData.width);
-                // marchingCubes.terraformComputeShader.SetVector("ChunkPos", (Vector3)chunkPos);
-                // marchingCubes.terraformComputeShader.SetVector("TerraformOffset", (Vector3)start);
-                // marchingCubes.terraformComputeShader.SetVector("TerraformCenter", terraformCenter);
-                // marchingCubes.terraformComputeShader.SetFloat("TerraformRadius", terraformRadius);
-                // marchingCubes.terraformComputeShader.SetFloat("TerraformStrength", terraformStrength);
-                // marchingCubes.terraformComputeShader.SetBool("TerraformMode", terraformMode);
-                // marchingCubes.terraformComputeShader.SetInt("MaxWorldYChunks", ChunkGenNetwork.Instance.maxWorldYChunks);
-
-                // marchingCubes.terraformComputeShader.Dispatch(terraformKernel, threadSizeX, threadSizeY, threadSizeZ);
-
-                // int size = (terrainDensityData.width + 1) * (terrainDensityData.width + 1) * (terrainDensityData.width + 1);
-
-                // marchingCubes.heightsBuffer.GetData(marchingCubes.heightsArray, 0, 0, size);
-
-                NativeArray<float> heightsArray = new(marchingCubes.heightsArray, Allocator.Persistent);
-
                 TerraformJob terraformJob = new TerraformJob
                 {
-                    heightsArray = heightsArray,
+                    heightsArray = marchingCubes.heightsArray,
                     xSize = threadSizeX,
                     ySize = threadSizeY,
                     TerraformCenter = terraformCenter,
@@ -190,16 +162,18 @@ public class Terraforming : NetworkBehaviour
                 JobHandle terraformHandler = terraformJob.Schedule(threadSizeX * threadSizeY * threadSizeZ, 16);
                 terraformHandler.Complete();
 
-                marchingCubes.heightsArray = heightsArray.ToArray();
-                heightsArray.Dispose();
+                // marchingCubes.heightsArray = heightsArray.ToArray();
+                // heightsArray.Dispose();
 
                 marchingCubes.MarchingCubesJobHandler(marchingCubes.heightsArray, true);
             }
         }
     }
-
+    /// <summary>
+    /// Burst Compiled job for fast real-time terraforming
+    /// </summary>
     [BurstCompile]
-    private struct TerraformJob : IJobParallelFor
+    public struct TerraformJob : IJobParallelFor
     {
         [NativeDisableParallelForRestriction]
         public NativeArray<float> heightsArray;
@@ -240,7 +214,12 @@ public class Terraforming : NetworkBehaviour
                 }
             }
         }
-
+        /// <summary>
+        /// Method for flattening a 3D array index into a 1D array index
+        /// </summary>
+        /// <param name="id">3D index</param>
+        /// <param name="size">3D array dimensions</param>
+        /// <returns>Flattened index</returns>
         int FlattenIndex(float3 id, int size)
         {
             return (int)(id.z * (size + 1) * (size + 1) + id.y * (size + 1) + id.x);

@@ -1,9 +1,5 @@
-using FishNet.Connection;
-using FishNet.Example.ColliderRollbacks;
 using FishNet.Object;
 using System.Collections;
-using Unity.Burst;
-using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
@@ -23,14 +19,6 @@ public class BombLogic : NetworkBehaviour
         creationTime = Time.time;
         StartCoroutine(DelayedExplosion(explosionDelay, explosionRadius));
     }
-
-    //public override void OnStartClient()
-    //{
-    //    base.OnStartClient();
-    //    if (!base.IsOwner)
-    //        this.enabled = false;
-    //}
-
     void Update()
     {
         if (!hit)
@@ -46,14 +34,9 @@ public class BombLogic : NetworkBehaviour
             Destroy(gameObject);
         }
     }
-    /// <summary>
-    /// Have the glow ball "stick" in place when it collides with something
-    /// </summary>
-    /// <param name="collision"></param>
     void OnCollisionEnter(Collision collision)
     {
         hit = true;
-        // StartCoroutine(DelayedExplosion(explosionDelay, explosionRadius));
     }
     IEnumerator DelayedExplosion(float explosionDelay, float explosionRadius)
     {
@@ -95,7 +78,11 @@ public class BombLogic : NetworkBehaviour
         SoundManager.Instance.PlaySFXAtPoint("BombExplosion", terraformCenter);
         BombTerraformLocal(terraformCenter, hitChunkPos);
     }
-
+    /// <summary>
+    /// Handles bomb logic
+    /// </summary>
+    /// <param name="terraformCenter">Center point of the terraformation</param>
+    /// <param name="hitChunkPos">>The position of the chunk that terraform center is</param>
     public void BombTerraformLocal(Vector3 terraformCenter, Vector3Int hitChunkPos)
     {
         Debug.LogWarning("BombTerraform called");
@@ -115,28 +102,9 @@ public class BombLogic : NetworkBehaviour
                 int threadSizeY = Mathf.CeilToInt((end.y - start.y) + 1f);
                 int threadSizeZ = Mathf.CeilToInt((end.z - start.z) + 1f);
 
-                // int terraformKernel = marchingCubes.terraformComputeShader.FindKernel("Terraform");
-                // marchingCubes.terraformComputeShader.SetBuffer(terraformKernel, "HeightsBuffer", marchingCubes.heightsBuffer);
-                // marchingCubes.terraformComputeShader.SetInt("ChunkSize", terrainDensityData.width);
-                // marchingCubes.terraformComputeShader.SetVector("ChunkPos", (Vector3)chunkPos);
-                // marchingCubes.terraformComputeShader.SetVector("TerraformOffset", (Vector3)start);
-                // marchingCubes.terraformComputeShader.SetVector("TerraformCenter", terraformCenter);
-                // marchingCubes.terraformComputeShader.SetFloat("TerraformRadius", explosionRadius);
-                // marchingCubes.terraformComputeShader.SetFloat("TerraformStrength", terraformStrength);
-                // marchingCubes.terraformComputeShader.SetBool("TerraformMode", true);
-                // marchingCubes.terraformComputeShader.SetInt("MaxWorldYChunks", ChunkGenNetwork.Instance.maxWorldYChunks);
-
-                // marchingCubes.terraformComputeShader.Dispatch(terraformKernel, threadSizeX, threadSizeY, threadSizeZ);
-
-                // int size = (terrainDensityData.width + 1) * (terrainDensityData.width + 1) * (terrainDensityData.width + 1);
-
-                // marchingCubes.heightsBuffer.GetData(marchingCubes.heightsArray, 0, 0, size);
-
-                NativeArray<float> heightsArray = new(marchingCubes.heightsArray, Allocator.Persistent);
-
-                TerraformJob terraformJob = new TerraformJob
+                Terraforming.TerraformJob terraformJob = new Terraforming.TerraformJob
                 {
-                    heightsArray = heightsArray,
+                    heightsArray = marchingCubes.heightsArray,
                     xSize = threadSizeX,
                     ySize = threadSizeY,
                     TerraformCenter = terraformCenter,
@@ -151,8 +119,8 @@ public class BombLogic : NetworkBehaviour
                 JobHandle terraformHandler = terraformJob.Schedule(threadSizeX * threadSizeY * threadSizeZ, 16);
                 terraformHandler.Complete();
 
-                marchingCubes.heightsArray = heightsArray.ToArray();
-                heightsArray.Dispose();
+                // marchingCubes.heightsArray = heightsArray.ToArray();
+                // heightsArray.Dispose();
 
                 marchingCubes.MarchingCubesJobHandler(marchingCubes.heightsArray, true);
             }
@@ -162,55 +130,6 @@ public class BombLogic : NetworkBehaviour
         foreach (Collider collider in colliders)
         {
             Destroy(collider.gameObject);
-        }
-    }
-
-    [BurstCompile]
-    private struct TerraformJob : IJobParallelFor
-    {
-        [NativeDisableParallelForRestriction]
-        public NativeArray<float> heightsArray;
-        public int xSize;
-        public int ySize;
-        public float3 TerraformCenter;
-        public float3 TerraformOffset;
-        public float TerraformRadius;
-        public float TerraformStrength;
-        public int chunkSize;
-        public float3 chunkPos;
-        public bool terraformMode;
-        public void Execute(int index)
-        {
-            int x = index % xSize;
-            int y = index / xSize % ySize;
-            int z = index / (xSize * ySize);
-            float3 id = new float3(x, y, z);
-
-            float3 localVoxelPos = TerraformOffset + id;
-
-            if (localVoxelPos.x >= chunkSize + 1 || localVoxelPos.y >= chunkSize + 1 || localVoxelPos.z >= chunkSize + 1)
-                return;
-                
-            float3 worldVoxelPos = localVoxelPos + chunkPos;
-            float dstToCenter = math.length(worldVoxelPos - TerraformCenter);
-
-            float density = heightsArray[FlattenIndex(localVoxelPos, chunkSize)];
-            float strength = TerraformStrength * (float)(1.0 + math.abs(density / 3.0));
-            float falloff = (float)(1.0 - (dstToCenter / TerraformRadius));
-
-            if(dstToCenter < TerraformRadius) {
-                if(terraformMode) {
-                    heightsArray[FlattenIndex(localVoxelPos, chunkSize)] -= strength * falloff;
-                }
-                else if(!terraformMode) {
-                    heightsArray[FlattenIndex(localVoxelPos, chunkSize)] += strength * falloff;
-                }
-            }
-        }
-
-        int FlattenIndex(float3 id, int size)
-        {
-            return (int)(id.z * (size + 1) * (size + 1) + id.y * (size + 1) + id.x);
         }
     }
 }

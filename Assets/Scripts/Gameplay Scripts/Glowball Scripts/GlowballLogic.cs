@@ -37,6 +37,5 @@ public class GlowballLogic : MonoBehaviour
         ManualAssetIdentification asset = new ManualAssetIdentification(ManualAssetId.GlowBall, transform.position.x, transform.position.y, transform.position.z);
         gameObject.transform.SetParent(collision.gameObject.transform);
         hit = true;
-        //Debug.Log("Hit " + collision.gameObject.name);
     }
 }
