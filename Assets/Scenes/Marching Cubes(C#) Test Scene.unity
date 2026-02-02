@@ -14199,7 +14199,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &908728616
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16176,18 +16176,6 @@ MonoBehaviour:
       - m_Target: {fileID: 96751032}
         m_TargetAssemblyTypeName: EditUI, Assembly-CSharp
         m_MethodName: UpdateSettings
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 2091506631}
-        m_TargetAssemblyTypeName: AssetRegenManager, Assembly-CSharp
-        m_MethodName: RespawnAssets
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -24779,7 +24767,6 @@ MonoBehaviour:
   vertexBufferLength: 0
   terrainDensityData: {fileID: 11400000, guid: 4bc939f839855ea45ade17dce060eea5, type: 2}
   assetSpawnData: {fileID: 11400000, guid: ab99a77c69cf7db40993f26b05db1132, type: 2}
-  heightsArray: []
   chunkPos: {x: 0, y: 0, z: 0}
   assetLayer:
     serializedVersion: 2
@@ -27163,15 +27150,6 @@ MonoBehaviour:
   mapSize: 11
   resolution: 1
   maxYChunksVisible: 8
-  lodData:
-  - lod: 1
-    resolution: 1
-  - lod: 2
-    resolution: 2
-  - lod: 3
-    resolution: 3
-  - lod: 6
-    resolution: 6
   generationConfiguration: {fileID: 11400000, guid: a75488b0b243f294d935326c1a604eb1, type: 2}
   terrainDensityData: {fileID: 11400000, guid: 4bc939f839855ea45ade17dce060eea5, type: 2}
   assetSpawnData: {fileID: 11400000, guid: ac92efdaf283ed346bf2f132639a35ad, type: 2}
@@ -27202,6 +27180,7 @@ MonoBehaviour:
   queueUpdateDistanceThreshold: 12
   isLoadingChunks: 0
   initialLoadComplete: 0
+  noiseGeneratorTextureArray: []
   lightingBlocker: {fileID: 762416109}
   lightChange: {fileID: 410087040}
   hasPendingReadbacks: 0

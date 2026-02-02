@@ -1,11 +1,7 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 using System.Collections;
-using System.Threading.Tasks;
-using System;
-using HeathenEngineering.SteamworksIntegration.UI;
 public class EditUI : MonoBehaviour
 {
     public TerrainDensityData tdd;
@@ -43,43 +39,11 @@ public class EditUI : MonoBehaviour
     /// </summary>
     public IEnumerator Reload()
     {
-
-        // destroys all children
-        GameObject chunk = GameObject.Find("ChunkParent");
-        while (chunk.transform.childCount > 0)
-        {
-            DestroyImmediate(chunk.transform.GetChild(0).gameObject);
-        }
-
-        ChunkGenNetwork.Instance.chunkDictionary = new();
-        ChunkGenNetwork.Instance.chunksVisibleLastUpdate = new();
-        ChunkGenNetwork.Instance.chunkLoadQueue = new();
-        ChunkGenNetwork.Instance.chunkLoadSet = new();
-        ChunkGenNetwork.Instance.chunkHideQueue = new();
-        ChunkGenNetwork.Instance.chunkShowQueue = new();
-        ChunkGenNetwork.Instance.isLoadingChunkVisibility = false;
-        ChunkGenNetwork.Instance.isLoadingChunks = false;
-        // Action Queues
-        ChunkGenNetwork.Instance.hasPendingReadbacks = false;
-        ChunkGenNetwork.Instance.pendingReadbacks = new();
-        ChunkGenNetwork.Instance.isLoadingReadbacks = false;
-        ChunkGenNetwork.Instance.hasPendingAssetInstantiations = false;
-        ChunkGenNetwork.Instance.pendingAssetInstantiations = new();
-        ChunkGenNetwork.Instance.isLoadingAssetInstantiations = false;
-        
-        ChunkGenNetwork.Instance.assetSpawnData.ResetSpawnPoints();
-        ChunkGenNetwork.Instance.initialLoadComplete = false;
-        ChunkGenNetwork.Instance.UpdateVisibleChunks();
-
         yield return null;
+
+        ChunkGenNetwork.Instance.InitializeGenerator();
 
         UpdateSettings();
-    }
-
-    private IEnumerator ReloadWrapper()
-    {
-        yield return null;
-        yield return StartCoroutine(Reload());
         loadScreen.SetActive(false);
     }
 
@@ -90,7 +54,7 @@ public class EditUI : MonoBehaviour
     {
         loadScreen.SetActive(true);
         Debug.Log("deselected slider");
-        StartCoroutine(ReloadWrapper());
+        StartCoroutine(Reload());
     }
 
     /// <summary>
@@ -212,7 +176,6 @@ public class EditUI : MonoBehaviour
         ng.cellularReturnType = NoiseGenerator.fnl_cellular_return_type.Distance;
         ng.cellularJitter = 1;
         // Terrain Values
-        // ng.width = 24;
         tdd.height = 250;
         ng.noiseScale = 0.6f;
         tdd.isolevel = 0.5f;
@@ -222,7 +185,7 @@ public class EditUI : MonoBehaviour
         tdd.terracing = false;
         tdd.terraceHeight = 2;
 
-        StartCoroutine(ReloadWrapper());
+        StartCoroutine(Reload());
     }
 
     /// <summary>
@@ -231,17 +194,9 @@ public class EditUI : MonoBehaviour
     public void RegenerateButton()
     {
         loadScreen.SetActive(true);
-        Regen();
         ResetButton();
         
     }
-
-    public void Regen()
-    {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-    }
-
-
     /// <summary>
     /// Methods to change the different parameters of the TDD with the UI toggles
     /// </summary>
@@ -251,28 +206,28 @@ public class EditUI : MonoBehaviour
         loadScreen.SetActive(true);
         tdd.lerp = marked;
         Debug.Log("toggle changed");
-        StartCoroutine(ReloadWrapper());
+        StartCoroutine(Reload());
     }
     public void OnWaterToggleChanged(bool marked)
     {
         loadScreen.SetActive(true);
         tdd.water = marked;
         Debug.Log("toggle changed");
-        StartCoroutine(ReloadWrapper());
+        StartCoroutine(Reload());
     }
     public void OnTerraceToggleChanged(bool marked)
     {
         loadScreen.SetActive(true);
         tdd.terracing = marked;
         Debug.Log("toggle changed");
-        StartCoroutine(ReloadWrapper());
+        StartCoroutine(Reload());
     }
     public void OnDWToggleChanged(bool marked)
     {
         loadScreen.SetActive(true);
         ng.domainWarpToggle = marked;
         Debug.Log("toggle changed");
-        StartCoroutine(ReloadWrapper());
+        StartCoroutine(Reload());
     }
 
     /// <summary>
