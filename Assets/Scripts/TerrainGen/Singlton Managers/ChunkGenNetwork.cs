@@ -81,8 +81,7 @@ public class ChunkGenNetwork : MonoBehaviour
     public List<TerrainChunk> chunksVisibleLastUpdate = new();
     public PriorityQueue<Vector3Int> chunkLoadQueue = new();
     public HashSet<Vector3Int> chunkLoadSet = new();
-    public Queue<TerrainChunk> chunkHideQueue = new();
-    public Queue<TerrainChunk> chunkShowQueue = new();
+    public Queue<Action> chunkVisibilityQueue = new();
     public bool isLoadingChunkVisibility = false;
     public float queueUpdateDistanceThreshold = 15f;
     public bool isLoadingChunks = false;
@@ -99,6 +98,7 @@ public class ChunkGenNetwork : MonoBehaviour
     public bool hasPendingAssetInstantiations = false;
     public Queue<Action> pendingAssetInstantiations = new();
     public bool isLoadingAssetInstantiations = false;
+    public Queue<Action> marchingCubesJobQueue = new();
     // Data structure pools
     public event Action OnTerrainReady;
     public bool IsTerrainReady { get; private set; }
@@ -106,7 +106,7 @@ public class ChunkGenNetwork : MonoBehaviour
     public NativeArray<float3> vertexOffsetTable;
     public NativeArray<int> edgeIndexTable;
     public NativeArray<int> triangleTable;
-
+    
     public class ReadbackRequest
     {
         public Bounds bounds;
@@ -178,8 +178,6 @@ public class ChunkGenNetwork : MonoBehaviour
         chunksVisibleLastUpdate = new();
         chunkLoadQueue = new();
         chunkLoadSet = new();
-        chunkHideQueue = new();
-        chunkShowQueue = new();
         isLoadingChunkVisibility = false;
         isLoadingChunks = false;
         initialLoadComplete = false;
@@ -239,8 +237,6 @@ public class ChunkGenNetwork : MonoBehaviour
         chunksVisibleLastUpdate = new();
         chunkLoadQueue = new();
         chunkLoadSet = new();
-        chunkHideQueue = new();
-        chunkShowQueue = new();
         isLoadingChunkVisibility = false;
         isLoadingChunks = false;
         initialLoadComplete = false;
@@ -281,7 +277,16 @@ public class ChunkGenNetwork : MonoBehaviour
         {
             CheckInitialTerrainFinish();
         }
-
+        // float start = Time.realtimeSinceStartup;
+        // while (chunkVisibilityQueue.Count > 0 && Time.realtimeSinceStartup - start < 0.003f) // 3ms
+        // {
+        //     chunkVisibilityQueue.Dequeue()?.Invoke();
+        // }
+        float start = Time.realtimeSinceStartup;
+        while (marchingCubesJobQueue.Count > 0 && Time.realtimeSinceStartup - start < 0.003f) // 3ms
+        {
+            marchingCubesJobQueue.Dequeue()?.Invoke();
+        }
     }
 
     private void CheckInitialTerrainFinish()
@@ -485,25 +490,9 @@ public class ChunkGenNetwork : MonoBehaviour
     {
         isLoadingChunkVisibility = true;
 
-        int maxPerFrame = 8;
-        while (chunkHideQueue.Count > 0 || chunkShowQueue.Count > 0)
-        {
-            int processedChunks = 0;
-            while (processedChunks <= maxPerFrame && chunkHideQueue.Count > 0)
-            {
-                TerrainChunk chunk = chunkHideQueue.Dequeue();
-                chunk.SetVisible(false);
-                processedChunks++;
-            }
-            while (processedChunks <= maxPerFrame && chunkShowQueue.Count > 0)
-            {
-                TerrainChunk chunk = chunkShowQueue.Dequeue();
-                chunk.SetVisible(true);
-                processedChunks++;
-            }
 
-            yield return null;
-        }
+
+        yield return null;
 
         isLoadingChunkVisibility = false;
     }
@@ -856,7 +845,6 @@ public class ChunkGenNetwork : MonoBehaviour
                 isWater = true;
             }
             chunk.transform.SetParent(parent);
-            Instance.chunkHideQueue.Enqueue(this);
 
             SetVisible(false);
         }
@@ -909,7 +897,6 @@ public class ChunkGenNetwork : MonoBehaviour
                     }
                 }
             }
-
         }
         /// <summary>
         /// Check chunk visibility

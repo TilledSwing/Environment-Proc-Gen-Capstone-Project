@@ -254,9 +254,13 @@ public class ComputeMarchingCubes : MonoBehaviour
                 // {
                 //     heightsArray[i] = rawData[i];
                 // }
-                heightsArray = dataRequest.GetData<float>();
+                NativeArray<float> raw = dataRequest.GetData<float>();
 
-                MarchingCubesJobHandler(heightsArray, false);
+                heightsArray = new NativeArray<float>(raw.Length, Allocator.Persistent);
+
+                heightsArray.CopyFrom(raw);
+
+                ChunkGenNetwork.Instance.marchingCubesJobQueue.Enqueue(() => MarchingCubesJobHandler(heightsArray, false));
             }), bounds.SqrDistance(ChunkGenNetwork.Instance.viewerPos));
         }
 
@@ -288,7 +292,7 @@ public class ComputeMarchingCubes : MonoBehaviour
             int start = i * 3;
             Triangle t = vertexArray[i];
             
-            if (math.all(t.v1.position == float3.zero) && math.all(t.v2.position == float3.zero) && math.all(t.v3.position == float3.zero)) continue;
+            // if (math.all(t.v1.position == float3.zero) && math.all(t.v2.position == float3.zero) && math.all(t.v3.position == float3.zero)) continue;
 
             vertexBuffer[start] = t.v1;
             vertexBuffer[start + 1] = t.v2;
@@ -312,9 +316,6 @@ public class ComputeMarchingCubes : MonoBehaviour
             vertexSortJob.Run();
             assetSpawner.heightsArray = heightsArray;
         }
-
-        vertexBuffer.Dispose();
-        indexBuffer.Dispose();
 
         Mesh mesh = new Mesh();
         Mesh.ApplyAndDisposeWritableMeshData(meshDataArray, mesh, MeshUpdateFlags.DontRecalculateBounds | MeshUpdateFlags.DontValidateIndices);
@@ -351,12 +352,11 @@ public class ComputeMarchingCubes : MonoBehaviour
         int iterations = Mathf.CeilToInt(terrainDensityData.width / ChunkGenNetwork.Instance.resolution) * Mathf.CeilToInt(terrainDensityData.width / ChunkGenNetwork.Instance.resolution) * Mathf.CeilToInt(terrainDensityData.width / ChunkGenNetwork.Instance.resolution);
 
         NativeList<Triangle> triangleArray = new(iterations, Allocator.Persistent);
-        NativeArray<float> heightsArray = new(heights, Allocator.Persistent);
 
         MarchingCubesJob marchingCubesJob = new MarchingCubesJob
         {
             triangleArray = triangleArray.AsParallelWriter(),
-            heightsArray = heightsArray,
+            heightsArray = heights,
             vertexOffsetTable = ChunkGenNetwork.Instance.vertexOffsetTable,
             edgeIndexTable = ChunkGenNetwork.Instance.edgeIndexTable,
             triangleTable = ChunkGenNetwork.Instance.triangleTable,
@@ -367,7 +367,6 @@ public class ComputeMarchingCubes : MonoBehaviour
             resolution = ChunkGenNetwork.Instance.resolution,
         };
 
-
         JobHandle marchingCubesHandler = marchingCubesJob.Schedule(iterations, 16);
         marchingCubesHandler.Complete();
 
@@ -377,7 +376,6 @@ public class ComputeMarchingCubes : MonoBehaviour
         }
 
         SetMeshValuesPerformant(triangleArray.Length, triangleArray, terraforming);
-        heightsArray.Dispose();
     }
     /// <summary>
     /// Marching Cubes Burst Compiled Multithreaded job

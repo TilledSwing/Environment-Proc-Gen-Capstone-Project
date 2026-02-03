@@ -33,8 +33,6 @@ public class BroadcastRandomChange : NetworkBehaviour
         ChunkGenNetwork.Instance.chunksVisibleLastUpdate = new();
         ChunkGenNetwork.Instance.chunkLoadQueue = new();
         ChunkGenNetwork.Instance.chunkLoadSet = new();
-        ChunkGenNetwork.Instance.chunkHideQueue = new();
-        ChunkGenNetwork.Instance.chunkShowQueue = new();
         ChunkGenNetwork.Instance.isLoadingChunkVisibility = false;
         // queueUpdateDistanceThreshold = 15f;
         ChunkGenNetwork.Instance.isLoadingChunks = false;
@@ -88,8 +86,6 @@ public class BroadcastRandomChange : NetworkBehaviour
         ChunkGenNetwork.Instance.chunksVisibleLastUpdate = new();
         ChunkGenNetwork.Instance.chunkLoadQueue = new();
         ChunkGenNetwork.Instance.chunkLoadSet = new();
-        ChunkGenNetwork.Instance.chunkHideQueue = new();
-        ChunkGenNetwork.Instance.chunkShowQueue = new();
         ChunkGenNetwork.Instance.isLoadingChunkVisibility = false;
         // queueUpdateDistanceThreshold = 15f;
         ChunkGenNetwork.Instance.isLoadingChunks = false;
