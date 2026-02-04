@@ -49,7 +49,6 @@ public class ComputeMarchingCubes : MonoBehaviour
 
     void Start()
     {
-        // heightsArray = new((terrainDensityData.width + 1) * (terrainDensityData.width + 1) * (terrainDensityData.width + 1), Allocator.Persistent);
         SetTerrainSettings();
         GenerateMesh();
         initialLoadComplete = true;
@@ -328,10 +327,13 @@ public class ComputeMarchingCubes : MonoBehaviour
             vertexBuffer[start + 1] = t.v2;
             vertexBuffer[start + 2] = t.v3;
 
-            indexBuffer[start] = start;
-            indexBuffer[start + 1] = start + 1;
-            indexBuffer[start + 2] = start + 2;
+            // indexBuffer[start] = start;
+            // indexBuffer[start + 1] = start + 1;
+            // indexBuffer[start + 2] = start + 2;
         }
+
+        NativeSlice<int> slice = ChunkGenNetwork.Instance.staticMaxSizeVertexIndexArray.Slice(0, vertexCount * 3);
+        slice.CopyTo(indexBuffer);
 
         vertexArray.Dispose();
 
@@ -340,11 +342,11 @@ public class ComputeMarchingCubes : MonoBehaviour
 
         if (!terraforming)
         {
-            assetSpawner.chunkVertices = new NativeArray<Vertex>(vertexBuffer.Length, Allocator.Persistent);
-            assetSpawner.chunkVertices.CopyFrom(vertexBuffer);
+            assetSpawner.chunkVertices = new NativeArray<Vertex>(vertexBuffer, Allocator.Persistent);
+            assetSpawner.heightsArray = new NativeArray<float>(heightsArray, Allocator.Persistent);
+
             VertexSortJob vertexSortJob = new VertexSortJob { vertexArray = assetSpawner.chunkVertices };
             vertexSortJob.Run();
-            assetSpawner.heightsArray = new NativeArray<float>(heightsArray, Allocator.Persistent);
         }
 
         Mesh mesh = new Mesh();
@@ -352,9 +354,9 @@ public class ComputeMarchingCubes : MonoBehaviour
 
         meshFilter.mesh = mesh;
         meshCollider.sharedMesh = mesh;
-        OnMeshGenerated?.Invoke(generatedMesh);
-
         mesh.bounds = bounds;
+
+        OnMeshGenerated?.Invoke(generatedMesh);
 
         if (!terraforming)
         {

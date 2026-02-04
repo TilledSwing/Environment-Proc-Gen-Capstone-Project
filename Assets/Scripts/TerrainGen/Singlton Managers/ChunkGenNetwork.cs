@@ -108,6 +108,17 @@ public class ChunkGenNetwork : MonoBehaviour
     public NativeArray<float3> vertexOffsetTable;
     public NativeArray<int> edgeIndexTable;
     public NativeArray<int> triangleTable;
+
+    public NativeArray<int> staticMaxSizeVertexIndexArray;
+    public void CreateVertexIndexArray()
+    {
+        int size = (terrainDensityData.width + 1) * (terrainDensityData.width + 1) * (terrainDensityData.width + 1);
+        staticMaxSizeVertexIndexArray = new NativeArray<int>(size, Allocator.Persistent);
+        for (int i = 0; i < size; i++)
+        {
+            staticMaxSizeVertexIndexArray[i] = i;
+        }
+    }
     
     public class ReadbackRequest
     {
@@ -207,6 +218,7 @@ public class ChunkGenNetwork : MonoBehaviour
         }
 
         noiseGeneratorTextureArray = CreateNoiseCurveTextures();
+        CreateVertexIndexArray();
         UpdateVisibleChunks();
     }
     /// <summary>
@@ -618,6 +630,13 @@ public class ChunkGenNetwork : MonoBehaviour
 
         return textureArray;
     }
+    void OnDisable()
+    {
+        if(staticMaxSizeVertexIndexArray.IsCreated)
+        {
+            staticMaxSizeVertexIndexArray.Dispose();
+        }
+    }
     /// <summary>
     /// Clear out unnecessary data when quitting the application
     /// </summary>
@@ -626,6 +645,11 @@ public class ChunkGenNetwork : MonoBehaviour
         vertexOffsetTable.Dispose();
         edgeIndexTable.Dispose();
         triangleTable.Dispose();
+
+        if(staticMaxSizeVertexIndexArray.IsCreated)
+        {
+            staticMaxSizeVertexIndexArray.Dispose();
+        }
 
         assetSpawnData.ResetSpawnPoints();
         assetSpawnData.RestoreToOriginalState();
