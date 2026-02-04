@@ -82,6 +82,8 @@ public class ChunkGenNetwork : MonoBehaviour
     public PriorityQueue<Vector3Int> chunkLoadQueue = new();
     public HashSet<Vector3Int> chunkLoadSet = new();
     public Queue<Action> chunkVisibilityQueue = new();
+    public HashSet<TerrainChunk> chunksToHide = new();
+    public HashSet<TerrainChunk> chunksToShow = new();
     public bool isLoadingChunkVisibility = false;
     public float queueUpdateDistanceThreshold = 15f;
     public bool isLoadingChunks = false;
@@ -129,7 +131,7 @@ public class ChunkGenNetwork : MonoBehaviour
 
         lightingBlockerRenderer = lightingBlocker.GetComponent<MeshRenderer>();
         lightingBlockerRenderer.enabled = false;
-        lightChange.intensity = 15f;
+        lightChange.intensity = 12f;
 
         vertexOffsetTable = new(MarchingCubesTables.vertexOffsetTable, Allocator.Persistent);
         edgeIndexTable = new(MarchingCubesTables.edgeIndexTable, Allocator.Persistent);
@@ -277,15 +279,15 @@ public class ChunkGenNetwork : MonoBehaviour
         {
             CheckInitialTerrainFinish();
         }
-        // float start = Time.realtimeSinceStartup;
-        // while (chunkVisibilityQueue.Count > 0 && Time.realtimeSinceStartup - start < 0.003f) // 3ms
-        // {
-        //     chunkVisibilityQueue.Dequeue()?.Invoke();
-        // }
         float start = Time.realtimeSinceStartup;
         while (marchingCubesJobQueue.Count > 0 && Time.realtimeSinceStartup - start < 0.003f) // 3ms
         {
             marchingCubesJobQueue.Dequeue()?.Invoke();
+        }
+        start = Time.realtimeSinceStartup;
+        while (chunkVisibilityQueue.Count > 0 && Time.realtimeSinceStartup - start < 0.003f) // 3ms
+        {
+            chunkVisibilityQueue.Dequeue()?.Invoke();
         }
     }
 
@@ -308,9 +310,11 @@ public class ChunkGenNetwork : MonoBehaviour
     /// </summary>
     public void UpdateVisibleChunks()
     {
-        for (int i = 0; i < chunksVisibleLastUpdate.Count; i++)
+        chunksToHide.Clear();
+        chunksToShow.Clear();
+        foreach (TerrainChunk chunk in chunksVisibleLastUpdate)
         {
-            chunksVisibleLastUpdate[i].SetVisible(false);
+            chunksToHide.Add(chunk);
         }
         chunksVisibleLastUpdate.Clear();
 
@@ -413,10 +417,6 @@ public class ChunkGenNetwork : MonoBehaviour
         {
             StartCoroutine(LoadChunksOverTime());
         }
-        // if (!isLoadingChunkVisibility)
-        // {
-        //     StartCoroutine(LoadChunkVisibilityOverTime());
-        // }
         if (!isLoadingReadbacks)
         {
             StartCoroutine(LoadReadbacksOverTime());
@@ -424,6 +424,15 @@ public class ChunkGenNetwork : MonoBehaviour
         if (!isLoadingAssetInstantiations)
         {
             StartCoroutine(LoadAssetInstantiationsOverTime());
+        }
+
+        foreach (TerrainChunk chunkToHide in chunksToHide)
+        {
+            chunkVisibilityQueue.Enqueue(() => chunkToHide.SetVisible(false));
+        }
+        foreach (TerrainChunk chunkToShow in chunksToShow)
+        {
+            chunkVisibilityQueue.Enqueue(() => chunkToShow.SetVisible(true));
         }
     }
     /// <summary>
@@ -481,20 +490,6 @@ public class ChunkGenNetwork : MonoBehaviour
         }
 
         isLoadingChunks = false;
-    }
-    /// <summary>
-    /// Coroutine for loading chunks visibility asynchronously
-    /// </summary>
-    /// <returns>yield return</returns>
-    private IEnumerator LoadChunkVisibilityOverTime()
-    {
-        isLoadingChunkVisibility = true;
-
-
-
-        yield return null;
-
-        isLoadingChunkVisibility = false;
     }
     /// <summary>
     /// Coroutine for loading gpu readbacks asynchronously
@@ -845,8 +840,6 @@ public class ChunkGenNetwork : MonoBehaviour
                 isWater = true;
             }
             chunk.transform.SetParent(parent);
-
-            SetVisible(false);
         }
         /// <summary>
         /// Update the visibility of the chunk
@@ -857,7 +850,18 @@ public class ChunkGenNetwork : MonoBehaviour
         {
             float viewerDstFromBound = bounds.SqrDistance(Instance.viewerPos);
             bool visible = viewerDstFromBound <= (maxViewDst * maxViewDst);
-            SetVisible(visible);
+            this.visible = visible;
+            if (visible)
+            {
+                if (Instance.chunksToHide.Contains(this))
+                {
+                    Instance.chunksToHide.Remove(this);
+                }
+                else
+                {
+                    Instance.chunksToShow.Add(this);
+                }
+            }
         }
         /// <summary>
         /// Set the visibility of the chunk
@@ -904,7 +908,7 @@ public class ChunkGenNetwork : MonoBehaviour
         /// <returns>If the chunk is visible or not</returns>
         public bool IsVisible()
         {
-            return meshRenderer.enabled;
+            return visible;
         }
 
         private void HandleMeshReady(Mesh mesh)
