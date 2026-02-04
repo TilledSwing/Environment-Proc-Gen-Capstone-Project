@@ -49,10 +49,40 @@ public class ComputeMarchingCubes : MonoBehaviour
 
     void Start()
     {
-        heightsArray = new((terrainDensityData.width + 1) * (terrainDensityData.width + 1) * (terrainDensityData.width + 1), Allocator.Persistent);
+        // heightsArray = new((terrainDensityData.width + 1) * (terrainDensityData.width + 1) * (terrainDensityData.width + 1), Allocator.Persistent);
         SetTerrainSettings();
         GenerateMesh();
         initialLoadComplete = true;
+    }
+    /// <summary>
+    /// Release associated buffers
+    /// </summary>
+    void OnDisable()
+    {
+        if (heightsBuffer != null && heightsBuffer.IsValid())
+        {
+            heightsBuffer.Release();
+        }
+
+        if(heightsArray.IsCreated)
+        {
+            heightsArray.Dispose();
+        }
+    }
+    /// <summary>
+    /// Release associated buffers
+    /// </summary>
+    void OnApplicationQuit()
+    {
+        if (heightsBuffer != null && heightsBuffer.IsValid())
+        {
+            heightsBuffer.Release();
+        }
+
+        if(heightsArray.IsCreated)
+        {
+            heightsArray.Dispose();
+        }
     }
     public void Regen()
     {
@@ -314,7 +344,7 @@ public class ComputeMarchingCubes : MonoBehaviour
             assetSpawner.chunkVertices.CopyFrom(vertexBuffer);
             VertexSortJob vertexSortJob = new VertexSortJob { vertexArray = assetSpawner.chunkVertices };
             vertexSortJob.Run();
-            assetSpawner.heightsArray = heightsArray;
+            assetSpawner.heightsArray = new NativeArray<float>(heightsArray, Allocator.Persistent);
         }
 
         Mesh mesh = new Mesh();
@@ -563,21 +593,6 @@ public class ComputeMarchingCubes : MonoBehaviour
 
                 return a.normal.z < b.normal.z ? -1 : (a.normal.z > b.normal.z ? 1 : 0);
             }
-        }
-    }
-    /// <summary>
-    /// Release associated buffers
-    /// </summary>
-    void OnDisable()
-    {
-        if (heightsBuffer != null && heightsBuffer.IsValid())
-        {
-            heightsBuffer.Release();
-        }
-
-        if(heightsArray != null)
-        {
-            heightsArray.Dispose();
         }
     }
     /// <summary>

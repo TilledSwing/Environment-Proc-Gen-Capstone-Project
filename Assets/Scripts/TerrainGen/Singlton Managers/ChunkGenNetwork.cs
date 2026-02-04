@@ -129,6 +129,8 @@ public class ChunkGenNetwork : MonoBehaviour
         else
             Destroy(gameObject);
 
+        NativeLeakDetection.Mode = NativeLeakDetectionMode.EnabledWithStackTrace;
+        
         lightingBlockerRenderer = lightingBlocker.GetComponent<MeshRenderer>();
         lightingBlockerRenderer.enabled = false;
         lightChange.intensity = 12f;

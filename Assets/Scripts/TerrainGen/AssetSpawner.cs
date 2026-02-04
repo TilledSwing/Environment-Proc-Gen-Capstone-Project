@@ -49,10 +49,30 @@ public class AssetSpawner : MonoBehaviour
             AssetSpawnHandler(rng);
         }
     }
+    /// <summary>
+    /// Release associated buffers
+    /// </summary>
     private void OnDisable()
     {
-        if (chunkVertices != null) {
+        if (chunkVertices.IsCreated) {
             chunkVertices.Dispose();
+        }
+        if (heightsArray.IsCreated)
+        {
+            heightsArray.Dispose();
+        }
+    }
+    /// <summary>
+    /// Release associated buffers
+    /// </summary>
+    private void OnApplicationQuit()
+    {
+        if (chunkVertices.IsCreated) {
+            chunkVertices.Dispose();
+        }
+        if (heightsArray.IsCreated)
+        {
+            heightsArray.Dispose();
         }
     }
     /// <summary>
@@ -176,7 +196,6 @@ public class AssetSpawner : MonoBehaviour
                 if (vert.position.Equals(float3.zero) || vert.normal.Equals(float3.zero)) continue;
                 spawnPoints[i].Add(vert);
             }
-            minDepthPoints.Dispose();
         }
 
         float spacingSquared = assetSpacing * assetSpacing;
@@ -228,6 +247,7 @@ public class AssetSpawner : MonoBehaviour
 
             acceptedSpawnPoints[i].AddRange(tempAccepted);
         }
+        minDepthPoints.Dispose();
     }
     /// <summary>
     /// Simple hashing function
