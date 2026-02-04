@@ -135,11 +135,17 @@ public class ChunkGenNetwork : MonoBehaviour
     }
     void Awake()
     {
+        // Make a singleton
         if (Instance == null)
             Instance = this;
         else
             Destroy(gameObject);
 
+        // VSYNC ON
+        QualitySettings.vSyncCount = 1;   // wait for monitor refresh
+        Application.targetFrameRate = -1; // let vsync control it
+
+        // DATA LEAK STACK TRACES ENABLED
         NativeLeakDetection.Mode = NativeLeakDetectionMode.EnabledWithStackTrace;
         
         lightingBlockerRenderer = lightingBlocker.GetComponent<MeshRenderer>();

@@ -1,15 +1,10 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using Unity.Mathematics;
 using UnityEngine;
 
 public class WaterPlaneGenerator : MonoBehaviour
 {
     private List<Vector3> vertices = new List<Vector3>();
     private List<int> triangles = new List<int>();
-    private List<Vector2> uvs = new List<Vector2>();
     public MeshFilter meshFilter;
     public MeshRenderer meshRenderer;
     public Vector3Int chunkPos;
@@ -29,7 +24,6 @@ public class WaterPlaneGenerator : MonoBehaviour
         mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
         mesh.vertices = vertices.ToArray();
         mesh.triangles = triangles.ToArray();
-        mesh.uv = uvs.ToArray();
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
 
@@ -42,8 +36,6 @@ public class WaterPlaneGenerator : MonoBehaviour
     private void GenerateWaterPlane() {
         vertices.Clear();
         triangles.Clear();
-        uvs.Clear();
-
         for (int x = 0; x < terrainDensityData.width; x++)
         {
             for (int z = 0; z < terrainDensityData.width; z++)
@@ -56,13 +48,9 @@ public class WaterPlaneGenerator : MonoBehaviour
 
                 vertices.Add(vertex00);
                 vertices.Add(vertex10);
+
                 vertices.Add(vertex01);
                 vertices.Add(vertex11);
-
-                uvs.Add(new Vector2(x, z));
-                uvs.Add(new Vector2(x + 1, z));
-                uvs.Add(new Vector2(x, z + 1));
-                uvs.Add(new Vector2(x + 1, z + 1));
 
                 triangles.Add(vertCount + 3);
                 triangles.Add(vertCount + 1);

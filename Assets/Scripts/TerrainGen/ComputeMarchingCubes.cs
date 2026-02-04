@@ -63,7 +63,7 @@ public class ComputeMarchingCubes : MonoBehaviour
             heightsBuffer.Release();
         }
 
-        if(heightsArray.IsCreated)
+        if (heightsArray.IsCreated)
         {
             heightsArray.Dispose();
         }
@@ -78,7 +78,7 @@ public class ComputeMarchingCubes : MonoBehaviour
             heightsBuffer.Release();
         }
 
-        if(heightsArray.IsCreated)
+        if (heightsArray.IsCreated)
         {
             heightsArray.Dispose();
         }
@@ -296,54 +296,39 @@ public class ComputeMarchingCubes : MonoBehaviour
         // return heightsBuffer;
     }
     /// <summary>
-    /// Sets up a mesh given a vertex array and count using lower level api for better performance
+    /// Sets up a mesh given a triangle array and count using lower level api for better performance
     /// </summary>
-    /// <param name="vertexCount">The amount of items in the vertex array</param>
-    /// <param name="vertexArray">An array of vertices given by marching cubes</param>
+    /// <param name="triangleCount">The amount of items in the triangle array</param>
+    /// <param name="triangleArray">An array of triangles given by marching cubes</param>
     /// <param name="terraforming">Whether the user is terraforming</param>
-    public void SetMeshValuesPerformant(int vertexCount, NativeList<Triangle> vertexArray, bool terraforming)
+    public void SetMeshValuesPerformant(int triangleCount, NativeList<Triangle> triangleArray, bool terraforming)
     {
         Mesh.MeshDataArray meshDataArray = Mesh.AllocateWritableMeshData(1);
         Mesh.MeshData meshData = meshDataArray[0];
 
-        meshData.SetVertexBufferParams(vertexCount * 3,
+        meshData.SetVertexBufferParams(triangleCount * 3,
                                        new VertexAttributeDescriptor(VertexAttribute.Position),
                                        new VertexAttributeDescriptor(VertexAttribute.Normal)
                                       );
-
         var vertexBuffer = meshData.GetVertexData<Vertex>(0);
-
-        meshData.SetIndexBufferParams(vertexCount * 3, IndexFormat.UInt32);
-        var indexBuffer = meshData.GetIndexData<int>();
-        
-        for (int i = 0; i < vertexCount; i++)
-        {
-            int start = i * 3;
-            Triangle t = vertexArray[i];
-            
-            // if (math.all(t.v1.position == float3.zero) && math.all(t.v2.position == float3.zero) && math.all(t.v3.position == float3.zero)) continue;
-
-            vertexBuffer[start] = t.v1;
-            vertexBuffer[start + 1] = t.v2;
-            vertexBuffer[start + 2] = t.v3;
-
-            // indexBuffer[start] = start;
-            // indexBuffer[start + 1] = start + 1;
-            // indexBuffer[start + 2] = start + 2;
-        }
-
-        NativeSlice<int> slice = ChunkGenNetwork.Instance.staticMaxSizeVertexIndexArray.Slice(0, vertexCount * 3);
-        slice.CopyTo(indexBuffer);
-
+        var vertexArray = triangleArray.AsArray().Reinterpret<Vertex>(sizeof(float) * 18);
+        vertexBuffer.CopyFrom(vertexArray);
         vertexArray.Dispose();
 
+        meshData.SetIndexBufferParams(triangleCount * 3, IndexFormat.UInt32);
+        var indexBuffer = meshData.GetIndexData<int>();
+        NativeSlice<int> slice = ChunkGenNetwork.Instance.staticMaxSizeVertexIndexArray.Slice(0, triangleCount * 3);
+        slice.CopyTo(indexBuffer);
+
+        triangleArray.Dispose();
+
         meshData.subMeshCount = 1;
-        meshData.SetSubMesh(0, new SubMeshDescriptor(0, vertexCount * 3, MeshTopology.Triangles));
+        meshData.SetSubMesh(0, new SubMeshDescriptor(0, triangleCount * 3, MeshTopology.Triangles));
 
         if (!terraforming)
         {
             assetSpawner.chunkVertices = new NativeArray<Vertex>(vertexBuffer, Allocator.Persistent);
-            assetSpawner.heightsArray = new NativeArray<float>(heightsArray, Allocator.Persistent);
+            assetSpawner.heightsArray = heightsArray;
 
             VertexSortJob vertexSortJob = new VertexSortJob { vertexArray = assetSpawner.chunkVertices };
             vertexSortJob.Run();
@@ -564,7 +549,7 @@ public class ComputeMarchingCubes : MonoBehaviour
     /// Burst Compiled Job for sorting a vertex array by position and normal
     /// </summary>
     [BurstCompile]
-    private struct VertexSortJob : IJob
+    public struct VertexSortJob : IJob
     {
         public NativeArray<Vertex> vertexArray;
         public void Execute()

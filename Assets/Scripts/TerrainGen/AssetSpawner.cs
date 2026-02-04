@@ -16,7 +16,6 @@ public class AssetSpawner : MonoBehaviour
     public List<List<ComputeMarchingCubes.Vertex>> spawnPoints;
     public List<List<ComputeMarchingCubes.Vertex>> acceptedSpawnPoints;
     public NativeArray<ComputeMarchingCubes.Vertex> chunkVertices;
-    // public float[] heightsArray;
     public NativeArray<float> heightsArray;
     public NativeList<float3> minDepthPoints;
     public Vector3Int chunkPos;
@@ -57,10 +56,6 @@ public class AssetSpawner : MonoBehaviour
         if (chunkVertices.IsCreated) {
             chunkVertices.Dispose();
         }
-        if (heightsArray.IsCreated)
-        {
-            heightsArray.Dispose();
-        }
     }
     /// <summary>
     /// Release associated buffers
@@ -69,10 +64,6 @@ public class AssetSpawner : MonoBehaviour
     {
         if (chunkVertices.IsCreated) {
             chunkVertices.Dispose();
-        }
-        if (heightsArray.IsCreated)
-        {
-            heightsArray.Dispose();
         }
     }
     /// <summary>
