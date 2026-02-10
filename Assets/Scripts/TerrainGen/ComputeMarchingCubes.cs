@@ -9,6 +9,7 @@ using UnityEngine.Rendering;
 
 public class ComputeMarchingCubes : MonoBehaviour
 {
+    public ChunkGenNetwork.TerrainChunk owner;
     public ComputeShader marchingCubesComputeShader;
     public ComputeShader terrainDensityComputeShader;
     public ComputeShader terrainNoiseComputeShader;
@@ -27,9 +28,6 @@ public class ComputeMarchingCubes : MonoBehaviour
     public NativeArray<float> heightsArray;
     public bool initialLoadComplete = false;
     public bool edited = false;
-    public bool rendering = false;
-    public event Action<Mesh> OnMeshGenerated;
-    private Mesh generatedMesh;
     /// <summary>
     /// Struct for vertex data
     /// </summary>
@@ -88,7 +86,6 @@ public class ComputeMarchingCubes : MonoBehaviour
     {
         SetTerrainSettings();
         GenerateMesh();
-        OnMeshGenerated?.Invoke(generatedMesh);
 
     }
     /// <summary>
@@ -269,7 +266,6 @@ public class ComputeMarchingCubes : MonoBehaviour
         }
         else
         {
-            float dst = ChunkGenNetwork.Instance.CalculateViewerDstFromBound(chunkCoord);
             ChunkGenNetwork.Instance.pendingReadbacks.Enqueue(new ChunkGenNetwork.ReadbackRequest(chunkCoord, heightsBuffer, (AsyncGPUReadbackRequest dataRequest) =>
             {
                 if (dataRequest.hasError)
@@ -291,8 +287,8 @@ public class ComputeMarchingCubes : MonoBehaviour
 
                 heightsArray.CopyFrom(raw);
 
-                ChunkGenNetwork.Instance.marchingCubesJobQueue.Enqueue(() => MarchingCubesJobHandler(heightsArray, false));
-            }), dst);
+                ChunkGenNetwork.Instance.marchingCubesJobQueue.Enqueue(new ChunkGenNetwork.MCQueueObject(owner, false));
+            }));
         }
 
         // return heightsBuffer;
@@ -342,8 +338,6 @@ public class ComputeMarchingCubes : MonoBehaviour
         meshFilter.mesh = mesh;
         meshCollider.sharedMesh = mesh;
         mesh.RecalculateBounds();
-
-        OnMeshGenerated?.Invoke(generatedMesh);
 
         if (!terraforming)
         {
