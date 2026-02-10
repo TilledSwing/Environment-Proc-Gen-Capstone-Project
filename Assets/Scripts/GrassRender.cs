@@ -18,7 +18,6 @@ public class GrassRender : MonoBehaviour
     {
         grassPositionKernel = grassPositionComputeShader.FindKernel("GrassCompute");
         chunkSize = ChunkGenNetwork.Instance.terrainDensityData.width;
-        // chunkSize = 10;
         grassPositionComputeShader.SetInt("ChunkSize", chunkSize);
         grassPositionComputeShader.SetVector("ChunkPos", (Vector3)chunkPos);
         grassPositionComputeShader.SetInt("GrassDensity", grassDensity);
@@ -26,11 +25,14 @@ public class GrassRender : MonoBehaviour
         grassPositionBuffer.SetData(grassPositions);
         grassPositionComputeShader.SetBuffer(grassPositionKernel, "GrassPositionsBuffer", grassPositionBuffer);
         grassPositionComputeShader.Dispatch(grassPositionKernel, Mathf.CeilToInt(grassPositions.Length * grassDensity / 8), Mathf.CeilToInt(grassPositions.Length * grassDensity / 8), 1);
+        
         grassMaterial.enableInstancing = true;
+        grassMaterial.SetFloat("_MinHeight", ChunkGenNetwork.Instance.terrainDensityData.waterLevel);
         rp = new RenderParams(grassMaterial)
         {
             matProps = new MaterialPropertyBlock(),
-            worldBounds = bounds
+            worldBounds = bounds,
+            layer = 0
         };
         rp.matProps.SetBuffer("_Positions", grassPositionBuffer);
     }

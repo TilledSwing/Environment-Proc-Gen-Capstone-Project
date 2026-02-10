@@ -26,6 +26,7 @@ public class ComputeMarchingCubes : MonoBehaviour
     // public float[] heightsArray;
     public NativeArray<float> heightsArray;
     public bool initialLoadComplete = false;
+    public bool edited = false;
     public bool rendering = false;
     public event Action<Mesh> OnMeshGenerated;
     private Mesh generatedMesh;
@@ -366,6 +367,7 @@ public class ComputeMarchingCubes : MonoBehaviour
     /// <param name="terraforming">Boolean indicating whether this is a terraforming call</param>
     public void MarchingCubesJobHandler(NativeArray<float> heights, bool terraforming)
     {
+        if (terraforming) edited = true;
         int iterations = Mathf.CeilToInt(terrainDensityData.width / ChunkGenNetwork.Instance.resolution) * Mathf.CeilToInt(terrainDensityData.width / ChunkGenNetwork.Instance.resolution) * Mathf.CeilToInt(terrainDensityData.width / ChunkGenNetwork.Instance.resolution);
 
         NativeList<Triangle> triangleArray = new(iterations, Allocator.Persistent);

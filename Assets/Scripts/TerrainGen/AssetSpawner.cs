@@ -23,6 +23,7 @@ public class AssetSpawner : MonoBehaviour
     public LayerMask interactLayer;
     public int assetSpacing = 8;
     public bool assetsSet = false;
+    public bool assetsHiddenEarly = false;
     public bool emptyChunk = false;
     public bool minDepthPointsCalculated = false;
     Unity.Mathematics.Random rng;
@@ -112,7 +113,7 @@ public class AssetSpawner : MonoBehaviour
                 MinDepthPointsJob minDepthJob = new MinDepthPointsJob
                 {
                     depthResult = depthResult.AsParallelWriter(),
-                    depth = assetSpawnFilters[i].minDepth,
+                    depth = assetSpawnFilters[i].minDensity,
                     heightsArray = heightsNativeArray,
                     chunkSize = terrainDensityData.width,
                     chunkPos = new int3(chunkPos.x, chunkPos.y, chunkPos.z),
@@ -239,6 +240,7 @@ public class AssetSpawner : MonoBehaviour
             acceptedSpawnPoints[i].AddRange(tempAccepted);
         }
         minDepthPoints.Dispose();
+        minDepthPointsCalculated = false;
     }
     /// <summary>
     /// Simple hashing function
@@ -319,9 +321,27 @@ public class AssetSpawner : MonoBehaviour
             }
         }
         assetsSet = true;
+        // if (assetsHiddenEarly)
+        // {
+        //     for (int i = 0; i < spawnedAssets.Count; i++)
+        //     {
+        //         foreach (Asset asset in spawnedAssets[i])
+        //         {
+        //             if (asset.meshRenderer != null && asset.meshRenderer.enabled)
+        //             {
+        //                 asset.meshRenderer.enabled = false;
+        //                 if (asset.meshCollider != null && asset.meshCollider.enabled)
+        //                 {
+        //                     asset.meshCollider.enabled = false;
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
     }
     public void AssetInstantiation(int i, int j, Unity.Mathematics.Random rng)
     {
+        if (gameObject == null) return;
         float randomRotationDeg = rng.NextFloat(0f, 360f);
         Quaternion randomYRotation = Quaternion.Euler(0f, randomRotationDeg, 0f);
         GameObject assetToSpawn;

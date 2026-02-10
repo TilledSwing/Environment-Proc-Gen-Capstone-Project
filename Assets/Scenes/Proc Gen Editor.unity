@@ -24777,6 +24777,7 @@ MonoBehaviour:
   assetSpacing: 10
   assetsSet: 0
   emptyChunk: 0
+  minDepthPointsCalculated: 0
 --- !u!1 &1652846912
 GameObject:
   m_ObjectHideFlags: 0

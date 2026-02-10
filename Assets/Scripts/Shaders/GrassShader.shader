@@ -2,15 +2,84 @@ Shader "Custom/GrassShader"
 {
     Properties
     {
-        
+        _MinHeight("Min Height", Float) = 30.0
+        _MaxHeight("Max Height", Float) = 60.0
     }
     SubShader
     {
+        // Pass
+        // {
+        //     Name "DepthOnly"
+        //     Tags { "LightMode" = "DepthOnly" }
+
+        //     Cull Back
+        //     ZWrite On
+        //     ColorMask 0
+
+        //     HLSLPROGRAM
+        //     #pragma vertex vert
+        //     #pragma fragment frag
+        //     #pragma multi_compile_instancing
+
+        //     #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+
+        //     struct Attributes
+        //     {
+        //         // The positionOS variable contains the vertex positions in object space.
+        //         float4 positionOS : POSITION;
+        //         uint instanceID : SV_InstanceID;
+        //     };
+
+        //     struct Varyings
+        //     {
+        //         // The positions in this struct must have the SV_POSITION semantic.
+        //         float4 positionHCS : SV_POSITION;
+        //         float3 worldPos : TEXCOORD0;
+        //         float minHeightCutoff : TEXCOORD1;
+        //         float maxHeightCutoff : TEXCOORD2;
+        //     };
+
+        //     struct Vertex
+        //     {
+        //         float3 position;
+        //         float3 normal;
+        //     };
+
+        //     StructuredBuffer<Vertex> _Positions;
+        //     float _MinHeight;
+        //     float _MaxHeight;
+
+        //     Varyings vert(Attributes IN)
+        //     {
+        //         Varyings OUT;
+        //         uint instanceID = IN.instanceID;
+        //         float3 instanceOffset = _Positions[instanceID].position;
+
+        //         float3 worldPos = IN.positionOS.xyz * 2 + instanceOffset;
+        //         OUT.positionHCS = TransformWorldToHClip(worldPos);
+        //         OUT.worldPos = worldPos;
+
+        //         OUT.minHeightCutoff = instanceOffset.y - (_MinHeight + 0);
+        //         OUT.maxHeightCutoff = (_MaxHeight - 8) - instanceOffset.y;
+
+        //         return OUT;
+        //     }
+
+        //     float4 frag(Varyings IN) : SV_Target
+        //     {
+        //         clip(IN.minHeightCutoff);
+        //         clip(IN.maxHeightCutoff);
+
+        //         return 0;
+        //     }
+        //     ENDHLSL
+        // }
         Pass
             {
-            Tags { "RenderType"="Transparent" "Queue"="Transparent" "RenderPipeline"="UniversalPipeline" "Lightmode"="UniversalForward"}
+            Tags { "RenderType"="Opaque" "Queue"="Opaque" "RenderPipeline"="UniversalPipeline" "Lightmode"="UniversalForward"}
             LOD 200
             Cull Off
+            ZWrite Off
 
             HLSLPROGRAM
             // This line defines the name of the vertex shader.
@@ -52,6 +121,8 @@ Shader "Custom/GrassShader"
                 float3 worldNormal : TEXCOORD1;
                 float fogFactor : TEXCOORD2;
                 float4 shadowCoord : TEXCOORD3;
+                float minHeightCutoff : TEXCOORD4;
+                float maxHeightCutoff : TEXCOORD5;
             };
 
             struct Vertex
@@ -61,7 +132,8 @@ Shader "Custom/GrassShader"
             };
 
             StructuredBuffer<Vertex> _Positions;
-            
+            float _MinHeight;
+            float _MaxHeight;
 
             Varyings vert(Attributes IN)
             {
@@ -80,11 +152,17 @@ Shader "Custom/GrassShader"
                 OUT.shadowCoord = GetShadowCoord(vertexInput);
                 #endif
 
+                OUT.minHeightCutoff = instanceOffset.y - (_MinHeight + 0);
+                OUT.maxHeightCutoff = (_MaxHeight - 8) - instanceOffset.y;
+
                 return OUT;
             }
 
             float4 frag(Varyings IN) : SV_Target
             {
+                clip(IN.minHeightCutoff);
+                clip(IN.maxHeightCutoff);
+
                 InputData inputData = (InputData)0;
                 inputData.positionWS = IN.worldPos;
                 inputData.normalWS = IN.worldNormal;

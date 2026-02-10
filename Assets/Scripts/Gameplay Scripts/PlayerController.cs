@@ -148,7 +148,7 @@ public class PlayerController : NetworkBehaviour
             gravity = 20.0f;
             jumpSpeed = 8.0f;
             walkingSpeed = 7.5f;
-            runningSpeed = 20f;
+            runningSpeed = 30f;
         }
         if (playerCamera.transform.position.y - 0.08f < waterLevel && !underwater && ChunkGenNetwork.Instance.terrainDensityData.water)
         {

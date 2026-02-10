@@ -261,7 +261,7 @@ MonoBehaviour:
     spawnedAssets: []
     maxPerChunk: 2
     rotateToFaceNormal: 0
-    spawnProbability: 0.1
+    spawnProbability: 0.02
     useMinSlope: 0
     minSlope: 0
     useMaxSlope: 0
