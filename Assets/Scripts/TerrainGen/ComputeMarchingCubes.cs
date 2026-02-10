@@ -19,8 +19,8 @@ public class ComputeMarchingCubes : MonoBehaviour
     public TerrainDensityData terrainDensityData;
     public WaterPlaneGenerator waterGen;
     public AssetSpawner assetSpawner;
+    public Vector3Int chunkCoord;
     public Vector3Int chunkPos;
-    public Bounds bounds;
     public ComputeBuffer heightsBuffer;
     public ComputeBuffer vertexBuffer;
     // public float[] heightsArray;
@@ -269,7 +269,8 @@ public class ComputeMarchingCubes : MonoBehaviour
         }
         else
         {
-            ChunkGenNetwork.Instance.pendingReadbacks.Enqueue(new ChunkGenNetwork.ReadbackRequest(bounds, heightsBuffer, (AsyncGPUReadbackRequest dataRequest) =>
+            float dst = ChunkGenNetwork.Instance.CalculateViewerDstFromBound(chunkCoord);
+            ChunkGenNetwork.Instance.pendingReadbacks.Enqueue(new ChunkGenNetwork.ReadbackRequest(chunkCoord, heightsBuffer, (AsyncGPUReadbackRequest dataRequest) =>
             {
                 if (dataRequest.hasError)
                 {
@@ -291,7 +292,7 @@ public class ComputeMarchingCubes : MonoBehaviour
                 heightsArray.CopyFrom(raw);
 
                 ChunkGenNetwork.Instance.marchingCubesJobQueue.Enqueue(() => MarchingCubesJobHandler(heightsArray, false));
-            }), bounds.SqrDistance(ChunkGenNetwork.Instance.viewerPos));
+            }), dst);
         }
 
         // return heightsBuffer;
@@ -336,11 +337,11 @@ public class ComputeMarchingCubes : MonoBehaviour
         }
 
         Mesh mesh = new Mesh();
-        Mesh.ApplyAndDisposeWritableMeshData(meshDataArray, mesh, MeshUpdateFlags.DontRecalculateBounds | MeshUpdateFlags.DontValidateIndices);
+        Mesh.ApplyAndDisposeWritableMeshData(meshDataArray, mesh, MeshUpdateFlags.DontValidateIndices);
 
         meshFilter.mesh = mesh;
         meshCollider.sharedMesh = mesh;
-        mesh.bounds = bounds;
+        mesh.RecalculateBounds();
 
         OnMeshGenerated?.Invoke(generatedMesh);
 

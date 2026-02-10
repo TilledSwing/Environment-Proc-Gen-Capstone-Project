@@ -90,7 +90,7 @@ public class BombLogic : NetworkBehaviour
         foreach (ChunkGenNetwork.TerrainChunk terrainChunk in chunkAndNeighbors)
         {
             if (terrainChunk == null) continue;
-            if (Mathf.Sqrt(terrainChunk.bounds.SqrDistance(terraformCenter)) <= explosionRadius)
+            if (ChunkGenNetwork.Instance.CalculateViewerDstFromBound(terrainChunk.chunkCoord) <= explosionRadius)
             {
                 ComputeMarchingCubes marchingCubes = terrainChunk.marchingCubes;
                 Vector3Int chunkPos = terrainChunk.chunkPos;

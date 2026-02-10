@@ -38,32 +38,6 @@ public class PlayerFlashlightOrient : NetworkBehaviour
 
             if (PlayerController.instance.dead)
                 return;
-
-            // Check if flashlight hits enemy
-            if (Time.time - lastFreezeTime < freezeCooldown)
-                return;
-            Ray ray = new Ray(PlayerController.instance.playerCamera.transform.position, PlayerController.instance.playerCamera.transform.forward);
-            if (Physics.Raycast(ray, out RaycastHit hit, flashlightRange, enemyLayer))
-            {
-                var enemy = hit.collider.GetComponentInParent<LandEnemyAILogic>();
-                if (enemy != null)
-                {
-                    // Tell the server to freeze this enemy
-                    FreezeEnemyServer(enemy.gameObject);
-                    lastFreezeTime = Time.time;
-
-                }
-            }
-        }
-    }
-
-    [ServerRpc(RequireOwnership = false)]
-    private void FreezeEnemyServer(GameObject enemyObj)
-    {
-        LandEnemyAILogic enemy = enemyObj.GetComponent<LandEnemyAILogic>();
-        if (enemy != null)
-        {
-            enemy.SetFrozen(true);
         }
     }
     [ServerRpc(RequireOwnership = false)]

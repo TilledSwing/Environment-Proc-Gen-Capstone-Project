@@ -133,7 +133,7 @@ public class Terraforming : NetworkBehaviour
         foreach (ChunkGenNetwork.TerrainChunk terrainChunk in chunkAndNeighbors)
         {
             if (terrainChunk == null) continue;
-            if (terrainChunk.bounds.SqrDistance(terraformCenter) <= terraformRadius * terraformRadius)
+            if (ChunkGenNetwork.Instance.CalculateViewerDstFromBound(terrainChunk.chunkCoord) <= terraformRadius * terraformRadius)
             {
                 ComputeMarchingCubes marchingCubes = terrainChunk.marchingCubes;
                 Vector3Int chunkPos = terrainChunk.chunkPos;
