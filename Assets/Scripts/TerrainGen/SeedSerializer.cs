@@ -26,7 +26,6 @@ public struct TerrainSettings
 [System.Serializable]
 public struct NoiseGeneratorSettings
 {
-    public bool activated;
     public float[] remoteTexture;
     public int noiseGeneratorType;
     // Noise and Fractal Settings
@@ -156,7 +155,6 @@ public static class SeedSerializer
     {
         return new NoiseGeneratorSettings
         {
-            activated = settings.activated,
             remoteTexture = SplineCurveFunctions.CurveToArray(settings.valueCurve),
             noiseGeneratorType = (int)settings.noiseGeneratorType,
             // Noise and Fractal Settings
@@ -251,7 +249,6 @@ public static class SeedSerializer
     {
         var deserializedNoise = ScriptableObject.CreateInstance<NoiseGenerator>();
 
-        deserializedNoise.activated = settings.activated;
         deserializedNoise.remoteTexture = SplineCurveFunctions.ArrayToTexture(settings.remoteTexture);
         deserializedNoise.noiseGeneratorType = (NoiseGeneratorType)settings.noiseGeneratorType;
         // Noise and Fractal Settings

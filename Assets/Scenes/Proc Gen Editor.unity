@@ -14182,109 +14182,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 904453925}
   m_CullTransparentMesh: 1
---- !u!1 &908728615
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 908728618}
-  - component: {fileID: 908728617}
-  - component: {fileID: 908728616}
-  m_Layer: 0
-  m_Name: EnemyPrefabLoader
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!114 &908728616
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 908728615}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 26b716c41e9b56b4baafaf13a523ba2e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  <IsNested>k__BackingField: 0
-  <ComponentIndex>k__BackingField: 0
-  <PredictedSpawn>k__BackingField: {fileID: 0}
-  <PredictedOwner>k__BackingField: {fileID: 0}
-  NetworkBehaviours: []
-  InitializedParentNetworkBehaviour: {fileID: 0}
-  InitializedNestedNetworkObjects: []
-  RuntimeParentNetworkBehaviour: {fileID: 0}
-  RuntimeChildNetworkBehaviours: []
-  _isNetworked: 1
-  _isSpawnable: 1
-  _isGlobal: 0
-  _initializeOrder: 0
-  _preventDespawnOnDisconnect: 0
-  _defaultDespawnType: 0
-  NetworkObserver: {fileID: 0}
-  _enablePrediction: 0
-  _predictionType: 0
-  _graphicalObject: {fileID: 0}
-  _detachGraphicalObject: 0
-  _enableStateForwarding: 1
-  _networkTransform: {fileID: 0}
-  _ownerInterpolation: 1
-  _ownerSmoothedProperties: 255
-  _adaptiveInterpolation: 3
-  _spectatorSmoothedProperties: 255
-  _spectatorInterpolation: 2
-  _enableTeleport: 0
-  _teleportThreshold: 1
-  <PrefabId>k__BackingField: 65535
-  <SpawnableCollectionId>k__BackingField: 0
-  <AssetPathHash>k__BackingField: 0
-  <SceneId>k__BackingField: 1879013244
-  SerializedTransformProperties:
-    Position: {x: 0, y: 0, z: 0}
-    Rotation: {x: 0, y: 0, z: 0, w: 0}
-    Scale: {x: 0, y: 0, z: 0}
-    IsValid: 0
---- !u!114 &908728617
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 908728615}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7c32cc82650f6ae468dbda26723fe2cc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _componentIndexCache: 255
-  _addedNetworkObject: {fileID: 908728616}
-  _networkObjectCache: {fileID: 0}
-  landEnemyCount: 20
-  waterEnemyCount: 7
-  minDistance: 25
-  landNavMeshSurface: {fileID: 0}
-  waterNavMeshSurface: {fileID: 0}
---- !u!4 &908728618
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 908728615}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 68.188065, y: -36, z: 38.862232}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &910861283
 GameObject:
   m_ObjectHideFlags: 0
@@ -24776,6 +24673,7 @@ MonoBehaviour:
     m_Bits: 0
   assetSpacing: 10
   assetsSet: 0
+  assetsHiddenEarly: 0
   emptyChunk: 0
   minDepthPointsCalculated: 0
 --- !u!1 &1652846912
@@ -27103,10 +27001,6 @@ GameObject:
   - component: {fileID: 1838274977}
   - component: {fileID: 1838274976}
   - component: {fileID: 1838274979}
-  - component: {fileID: 1838274980}
-  - component: {fileID: 1838274981}
-  - component: {fileID: 1838274983}
-  - component: {fileID: 1838274984}
   m_Layer: 0
   m_Name: NetworkChunkManager
   m_TagString: Untagged
@@ -27150,15 +27044,12 @@ MonoBehaviour:
   useFixedMapSize: 0
   mapSize: 11
   resolution: 1
-  maxYChunksVisible: 8
   generationConfiguration: {fileID: 11400000, guid: a75488b0b243f294d935326c1a604eb1, type: 2}
   terrainDensityData: {fileID: 11400000, guid: 4bc939f839855ea45ade17dce060eea5, type: 2}
   assetSpawnData: {fileID: 11400000, guid: ac92efdaf283ed346bf2f132639a35ad, type: 2}
   terrainTextureData: {fileID: 11400000, guid: 1fa52b57a0c85a34eb28c4f99612d21f, type: 2}
   marchingCubesComputeShader: {fileID: 7200000, guid: d2f49f4c36241c7468a0705fa73f69a5, type: 3}
   terrainDensityComputeShader: {fileID: 7200000, guid: 1caae6b81357a864095f47aab860122c, type: 3}
-  terrainNoiseComputeShader: {fileID: 7200000, guid: 93b6fb759617148499ec115b8092bb44, type: 3}
-  terraformComputeShader: {fileID: 7200000, guid: e41356404106d3e4487dd76d300e0a73, type: 3}
   terrainMaterial: {fileID: 2100000, guid: d644a1ee14ca32a44b080e9c6de5ed62, type: 2}
   waterMaterial: {fileID: 2100000, guid: 804af839dce47f748a2151ac2e3113a9, type: 2}
   grassPositionComputeShader: {fileID: 7200000, guid: f2f43ed31c15f4c499751ac8fe425ce1, type: 3}
@@ -27177,6 +27068,8 @@ MonoBehaviour:
   assetWindow: {fileID: 1020663068}
   assetSettingsTab: {fileID: 6267577448233224302, guid: df6bf163c048da44e862dc6585eda648, type: 3}
   presetDropdown: {fileID: 524126295}
+  chunkParent: {fileID: 0}
+  chunksVisibleLastUpdate: 
   isLoadingChunkVisibility: 0
   queueUpdateDistanceThreshold: 12
   isLoadingChunks: 0
@@ -27220,101 +27113,6 @@ MonoBehaviour:
   - {fileID: 1412412059}
   - {fileID: 1996798503}
   - {fileID: 1838910251}
---- !u!114 &1838274980
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1838274975}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 824ae9696e7161a429d9625587ec266e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  landSurface: {fileID: 1838274984}
-  waterSurface: {fileID: 1838274981}
-  linkManager: {fileID: 1838274983}
-  spawner: {fileID: 0}
-  changedWaterChunks: []
-  chunkHeight: 0
-  planeWidth: 0
---- !u!114 &1838274981
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1838274975}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a5ac11cc976e418e8d13136b07e1f52, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SerializedVersion: 0
-  m_AgentTypeID: -334000983
-  m_CollectObjects: 0
-  m_Size: {x: 10, y: 10, z: 10}
-  m_Center: {x: 0, y: 2, z: 0}
-  m_LayerMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_UseGeometry: 0
-  m_DefaultArea: 0
-  m_GenerateLinks: 0
-  m_IgnoreNavMeshAgent: 1
-  m_IgnoreNavMeshObstacle: 1
-  m_OverrideTileSize: 0
-  m_TileSize: 256
-  m_OverrideVoxelSize: 1
-  m_VoxelSize: 0.5
-  m_MinRegionArea: 2
-  m_NavMeshData: {fileID: 23800000, guid: f2555714e7ee7f444a845958361a4e35, type: 2}
-  m_BuildHeightMesh: 0
---- !u!114 &1838274983
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1838274975}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d80607a63933f324d9764f12fe55dd1f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &1838274984
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1838274975}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a5ac11cc976e418e8d13136b07e1f52, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SerializedVersion: 0
-  m_AgentTypeID: 1479372276
-  m_CollectObjects: 0
-  m_Size: {x: 10, y: 10, z: 10}
-  m_Center: {x: 0, y: 2, z: 0}
-  m_LayerMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_UseGeometry: 0
-  m_DefaultArea: 0
-  m_GenerateLinks: 0
-  m_IgnoreNavMeshAgent: 1
-  m_IgnoreNavMeshObstacle: 1
-  m_OverrideTileSize: 0
-  m_TileSize: 256
-  m_OverrideVoxelSize: 0
-  m_VoxelSize: 0.14
-  m_MinRegionArea: 2
-  m_NavMeshData: {fileID: 0}
-  m_BuildHeightMesh: 0
 --- !u!1 &1838910247 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4054564025817941334, guid: 4718757af3964764998de4140e2427ac, type: 3}
@@ -34507,5 +34305,4 @@ SceneRoots:
   - {fileID: 1523709554}
   - {fileID: 1611538830}
   - {fileID: 1152764973}
-  - {fileID: 908728618}
   - {fileID: 1115038388}

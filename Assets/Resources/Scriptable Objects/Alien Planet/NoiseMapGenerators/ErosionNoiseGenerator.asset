@@ -12,7 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 706a95b2ea676fc44a907f69e74100cb, type: 3}
   m_Name: ErosionNoiseGenerator
   m_EditorClassIdentifier: 
-  activated: 1
   valueCurve:
     serializedVersion: 2
     m_Curve:
@@ -118,7 +117,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  noiseGeneratorType: 8
+  noiseGeneratorType: 5
   selectedNoiseDimension: 1
   noiseDimension: 0
   selectedNoiseType: 0

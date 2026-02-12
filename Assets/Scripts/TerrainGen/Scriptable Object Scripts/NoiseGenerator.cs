@@ -3,7 +3,6 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "NoiseGenerator", menuName = "Scriptable Objects/NoiseGenerator")]
 public class NoiseGenerator : ScriptableObject
 {
-    public bool activated;
     public AnimationCurve valueCurve;
     public NoiseGeneratorType noiseGeneratorType;
     // Noise and Fractal Settings
@@ -48,14 +47,11 @@ public class NoiseGenerator : ScriptableObject
     public enum NoiseGeneratorType
     {
         BaseGenerator = 0,
-        LargeCaveGenerator = 1,
-        CaveDetail1Generator = 2,
-        CaveDetail2Generator = 3,
-        ContinentalnessGenerator = 4,
-        TemperatureMapGenerator = 5,
-        HumidityMapGenerator = 6,
-        PeaksAndValleysMapGenerator = 7,
-        ErosionMapGenerator = 8
+        ContinentalnessGenerator = 1,
+        PeaksAndValleysMapGenerator = 2,
+        ErosionMapGenerator = 3,
+        LargeCaveGenerator = 4,
+        CaveDetailGenerator = 5,
     }
     public enum fnl_noise_dimension
     {

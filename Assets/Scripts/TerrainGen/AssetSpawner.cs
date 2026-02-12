@@ -9,6 +9,7 @@ using UnityEngine;
 
 public class AssetSpawner : MonoBehaviour
 {
+    public ChunkGenNetwork.TerrainChunk owner;
     public int vertexBufferLength;
     public List<List<Asset>> spawnedAssets;
     public TerrainDensityData terrainDensityData;
@@ -311,62 +312,46 @@ public class AssetSpawner : MonoBehaviour
         {
             ComputeMarchingCubes.Vertex[] points = acceptedSpawnPoints[i].ToArray();
             if (points == null || points.Length == 0) continue;
-            for (int j = 0; j < acceptedSpawnPoints[i].Count; j++)
+            for (int j = 0; j < points.Length; j++)
             {
                 int indexI = i;
                 int indexJ = j;
-                ChunkGenNetwork.Instance.pendingAssetInstantiations.Enqueue(() =>
-                    AssetInstantiation(indexI, indexJ, rng)
-                );
+                uint seed = rng.NextUInt();
+                ChunkGenNetwork.Instance.pendingAssetInstantiations.Enqueue(new ChunkGenNetwork.AssetInstantiation(owner, indexI, indexJ, seed));
             }
         }
         assetsSet = true;
-        // if (assetsHiddenEarly)
-        // {
-        //     for (int i = 0; i < spawnedAssets.Count; i++)
-        //     {
-        //         foreach (Asset asset in spawnedAssets[i])
-        //         {
-        //             if (asset.meshRenderer != null && asset.meshRenderer.enabled)
-        //             {
-        //                 asset.meshRenderer.enabled = false;
-        //                 if (asset.meshCollider != null && asset.meshCollider.enabled)
-        //                 {
-        //                     asset.meshCollider.enabled = false;
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
     }
-    public void AssetInstantiation(int i, int j, Unity.Mathematics.Random rng)
+    public void AssetInstantiation(int i, int j, uint seed)
     {
         if (gameObject == null) return;
+        Unity.Mathematics.Random rng = new(seed);
         float randomRotationDeg = rng.NextFloat(0f, 360f);
         Quaternion randomYRotation = Quaternion.Euler(0f, randomRotationDeg, 0f);
-        GameObject assetToSpawn;
-        if (assetSpawnData.spawnableAssets[i].rotateToFaceNormal)
-        {
-            Quaternion normal = Quaternion.FromToRotation(Vector3.up, acceptedSpawnPoints[i][j].normal);
-            assetToSpawn = Instantiate(assetSpawnData.spawnableAssets[i].asset, acceptedSpawnPoints[i][j].position, normal * randomYRotation);
-            assetToSpawn.transform.SetParent(gameObject.transform);
-            spawnedAssets[i].Add(new Asset(assetToSpawn, assetToSpawn.GetComponent<MeshRenderer>(), assetToSpawn.GetComponent<MeshCollider>()));
-        }
+
+        Vector3 n = acceptedSpawnPoints[i][j].normal;
+        if (!math.all(math.isfinite(n)) || math.lengthsq(n) < 0.0001f)
+            n = Vector3.up;
         else
-        {
-            assetToSpawn = Instantiate(assetSpawnData.spawnableAssets[i].asset, acceptedSpawnPoints[i][j].position, randomYRotation);
-            assetToSpawn.transform.SetParent(gameObject.transform);
-            spawnedAssets[i].Add(new Asset(assetToSpawn, assetToSpawn.GetComponent<MeshRenderer>(), assetToSpawn.GetComponent<MeshCollider>()));
-        }
-        if (assetSpawnData.spawnableAssets[i].isValuable)
+            n = math.normalize(n);
+        Quaternion normal = Quaternion.FromToRotation(Vector3.up, n);
+        SpawnableAsset spawnableAsset = assetSpawnData.spawnableAssets[i];
+        bool rotateToFaceNormal = spawnableAsset.rotateToFaceNormal;
+        GameObject assetToSpawn;
+        
+        assetToSpawn = Instantiate(spawnableAsset.asset, acceptedSpawnPoints[i][j].position, rotateToFaceNormal ? randomYRotation * normal : randomYRotation);
+        assetToSpawn.transform.SetParent(gameObject.transform);
+        spawnedAssets[i].Add(new Asset(assetToSpawn, assetToSpawn.GetComponent<MeshRenderer>(), assetToSpawn.GetComponent<MeshCollider>()));
+        
+        if (spawnableAsset.isValuable)
         {
             assetToSpawn.layer = LayerMask.NameToLayer("Interact Layer");
             ValuableProperties properties = assetToSpawn.AddComponent<ValuableProperties>();
-            properties.value = rng.NextInt(assetSpawnData.spawnableAssets[i].minValue, assetSpawnData.spawnableAssets[i].maxValue);
+            properties.value = rng.NextInt(spawnableAsset.minValue, spawnableAsset.maxValue);
             assetToSpawn.AddComponent<ScanObject>();
             assetToSpawn.transform.rotation = Quaternion.Euler(rng.NextFloat(0f, 360f), assetToSpawn.transform.rotation.y, rng.NextFloat(0f, 360f));
         }
-        assetSpawnData.spawnableAssets[i].spawnedAssets.Add(new Asset(assetToSpawn, assetToSpawn.GetComponent<MeshRenderer>(), assetToSpawn.GetComponent<MeshCollider>()));
+        spawnableAsset.spawnedAssets.Add(new Asset(assetToSpawn, assetToSpawn.GetComponent<MeshRenderer>(), assetToSpawn.GetComponent<MeshCollider>()));
     }
     public List<float3> GetMinDepthChunkPoints(float minDepth, NativeArray<float> heightsArray)
     {

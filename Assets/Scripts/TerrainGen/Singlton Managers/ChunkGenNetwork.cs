@@ -49,8 +49,6 @@ public class ChunkGenNetwork : MonoBehaviour
     // Compute Shader References
     public ComputeShader marchingCubesComputeShader;
     public ComputeShader terrainDensityComputeShader;
-    public ComputeShader terrainNoiseComputeShader;
-    public ComputeShader terraformComputeShader;
     // Material References
     public Material terrainMaterial;
     public Material waterMaterial;
@@ -84,7 +82,7 @@ public class ChunkGenNetwork : MonoBehaviour
     public List<long> chunksVisibleLastUpdate = new();
     HashSet<long> visitedThisUpdate = new();
     List<long> chunksToDestroy = new();
-    public Queue<Vector3Int> chunkLoadQueue = new();
+    public PriorityQueue<Vector3Int> chunkLoadQueue = new();
     public HashSet<long> chunkLoadSet = new();
     public Queue<ChunkVisibility> chunkVisibilityQueue = new();
     public HashSet<long> chunksToHide = new();
@@ -100,10 +98,10 @@ public class ChunkGenNetwork : MonoBehaviour
     public Light lightChange;
     // Action Queues
     public bool hasPendingReadbacks = false;
-    public Queue<ReadbackRequest> pendingReadbacks = new();
+    public PriorityQueue<ReadbackRequest> pendingReadbacks = new();
     public bool isLoadingReadbacks = false;
     public bool hasPendingAssetInstantiations = false;
-    public Queue<Action> pendingAssetInstantiations = new();
+    public Queue<AssetInstantiation> pendingAssetInstantiations = new();
     public bool isLoadingAssetInstantiations = false;
     public Queue<MCQueueObject> marchingCubesJobQueue = new();
     // Reused Marching Cubes Native Array
@@ -141,6 +139,20 @@ public class ChunkGenNetwork : MonoBehaviour
             this.terraforming = terraforming;
         }
     }
+    public struct AssetInstantiation
+    {
+        public TerrainChunk terrainChunk;
+        public int i;
+        public int j;
+        public uint seed;
+        public AssetInstantiation(TerrainChunk terrainChunk, int i, int j, uint seed)
+        {
+            this.terrainChunk = terrainChunk;
+            this.i = i;
+            this.j = j;
+            this.seed = seed;
+        }
+    }
     public class ReadbackRequest
     {
         public Vector3Int chunkCoord;
@@ -163,8 +175,8 @@ public class ChunkGenNetwork : MonoBehaviour
             Destroy(gameObject);
 
         // VSYNC ON
-        QualitySettings.vSyncCount = 1;   // wait for monitor refresh
-        Application.targetFrameRate = -1; // let vsync control it
+        // QualitySettings.vSyncCount = 1;   // wait for monitor refresh
+        // Application.targetFrameRate = -1; // let vsync control it
 
         // DATA LEAK STACK TRACES ENABLED
         NativeLeakDetection.Mode = NativeLeakDetectionMode.EnabledWithStackTrace;
@@ -274,15 +286,15 @@ public class ChunkGenNetwork : MonoBehaviour
     {
         return ((long)(x & 0x1FFFFF) << 42) | ((long)(y & 0x1FFFFF) << 21) | ((long)(z & 0x1FFFFF));
     }
-    public float CalculateViewerDstFromBound(Vector3Int chunkCoord)
+    public float CalculateDstFromBound(Vector3Int chunkCoord, Vector3 fromPos)
     {
         float x = chunkCoord.x * chunkSize;
         float y = chunkCoord.y * chunkSize;
         float z = chunkCoord.z * chunkSize;
 
-        float vx = viewerPos.x - x;
-        float vy = viewerPos.y - y;
-        float vz = viewerPos.z - z;
+        float vx = fromPos.x - x;
+        float vy = fromPos.y - y;
+        float vz = fromPos.z - z;
 
         float dx = (vx < 0f ? -vx : vx) - chunkSize;
         dx = dx > 0f ? dx : 0f;
@@ -291,9 +303,9 @@ public class ChunkGenNetwork : MonoBehaviour
         float dz = (vz < 0f ? -vz : vz) - chunkSize;
         dz = dz > 0f ? dz : 0f;
 
-        float viewerDstFromBound = dx*dx + dy*dy + dz*dz;
+        float dstFromBound = dx*dx + dy*dy + dz*dz;
 
-        return viewerDstFromBound;
+        return dstFromBound;
     }
     public bool WasVisited(int currentX, int currentY, int currentZ, int centerX, int centerY, int centerZ)
     {
@@ -362,6 +374,29 @@ public class ChunkGenNetwork : MonoBehaviour
         }
 
         float start = Time.realtimeSinceStartup;
+        // while (chunkLoadQueue.Count > 0 && Time.realtimeSinceStartup - start < 0.003f)
+        // {
+        //     Vector3Int coord = chunkLoadQueue.Dequeue();
+        //     long packedCoord = PackChunkCoord(coord.x, coord.y, coord.z);
+        //     chunkLoadSet.Remove(packedCoord);
+            
+        //     // float viewerDstFromBound = CalculateDstFromBound(coord, viewerPos);
+        //     Bounds bounds = new Bounds(coord * chunkSize + (new Vector3(0.5f, 0.5f, 0.5f) * terrainDensityData.width), Vector3.one * terrainDensityData.width);
+        //     float viewerDstFromBound = bounds.SqrDistance(viewerPos);
+
+        //     if (!chunkDictionary.TryGetValue(packedCoord, out TerrainChunk dictChunk) && viewerDstFromBound <= maxViewDstSqr)
+        //     {
+        //         var chunk = new TerrainChunk(packedCoord, coord, chunkSize, chunkParent, terrainDensityData, assetSpawnData, terrainTextureData,
+        //                                     marchingCubesComputeShader, terrainDensityComputeShader,
+        //                                     terrainNoiseComputeShader, terraformComputeShader,
+        //                                     terrainMaterial, waterMaterial, initialLoadComplete, noiseGeneratorTextureArray);
+        //         chunkDictionary.Add(packedCoord, chunk);
+        //         chunk.UpdateChunk(maxViewDst, viewerDstFromBound);
+        //         if (chunk.visible)
+        //             chunksVisibleLastUpdate.Add(packedCoord);
+        //     }
+        // }
+        // start = Time.realtimeSinceStartup;
         while (marchingCubesJobQueue.Count > 0 && Time.realtimeSinceStartup - start < 0.003f) // 3ms
         {
             MCQueueObject mcJob = marchingCubesJobQueue.Dequeue();
@@ -423,9 +458,9 @@ public class ChunkGenNetwork : MonoBehaviour
                             continue;
                     }
 
-                    // Bounds bounds = new Bounds((viewedChunkCoord * chunkSize) + (new Vector3(0.5f, 0.5f, 0.5f) * chunkSize), Vector3.one * chunkSize);
-                    // float viewerDstFromBound = bounds.SqrDistance(viewerPos);
-                    float viewerDstFromBound = CalculateViewerDstFromBound(viewedChunkCoord);
+                    Bounds bounds = new Bounds((viewedChunkCoord * chunkSize) + (new Vector3(0.5f, 0.5f, 0.5f) * chunkSize), Vector3.one * chunkSize);
+                    float viewerDstFromBound = bounds.SqrDistance(viewerPos);
+                    // float viewerDstFromBound = CalculateDstFromBound(viewedChunkCoord, viewerPos);
 
                     if (chunkDictionary.TryGetValue(chunkCoordId, out TerrainChunk dictChunk))
                     {
@@ -439,8 +474,7 @@ public class ChunkGenNetwork : MonoBehaviour
                         {
                             // Generate immediately during first load
                             TerrainChunk chunk = new TerrainChunk(chunkCoordId, viewedChunkCoord, chunkSize, chunkParent, terrainDensityData, assetSpawnData, terrainTextureData,
-                                                         marchingCubesComputeShader, terrainDensityComputeShader, terrainNoiseComputeShader, terraformComputeShader,
-                                                         terrainMaterial, waterMaterial, initialLoadComplete, noiseGeneratorTextureArray);
+                                                         marchingCubesComputeShader, terrainDensityComputeShader, terrainMaterial, waterMaterial, initialLoadComplete, noiseGeneratorTextureArray);
                             chunkDictionary.Add(chunkCoordId, chunk);
                             chunk.UpdateChunk(maxViewDst, viewerDstFromBound);
 
@@ -460,7 +494,7 @@ public class ChunkGenNetwork : MonoBehaviour
                                 float angle = Vector3.Angle(movementDir, toChunk);
                                 if (angle > 60f) continue;
 
-                                chunkLoadQueue.Enqueue(viewedChunkCoord);
+                                chunkLoadQueue.Enqueue(viewedChunkCoord, viewerDstFromBound);
                                 chunkLoadSet.Add(chunkCoordId);
                             }
                         }
@@ -500,8 +534,8 @@ public class ChunkGenNetwork : MonoBehaviour
         foreach (var coord in chunksToDestroy)
         {
             TerrainChunk chunk = chunkDictionary[coord];
-            // Destroy(chunk.chunk);
-            chunk.Destroy(); 
+            Destroy(chunk.chunk);
+            // chunk.Destroy(); 
             chunkDictionary.Remove(coord);
             assetSpawnData.assets.Remove(chunk.chunkPos);
         }
@@ -528,31 +562,25 @@ public class ChunkGenNetwork : MonoBehaviour
 
         while (chunkLoadQueue.Count > 0)
         {   
-            // float startTime = Time.realtimeSinceStartup;
+            Vector3Int coord = chunkLoadQueue.Dequeue();
+            long packedCoord = PackChunkCoord(coord.x, coord.y, coord.z);
+            chunkLoadSet.Remove(packedCoord);
+            
+            // float viewerDstFromBound = CalculateDstFromBound(coord, viewerPos);
+            Bounds bounds = new Bounds(coord * chunkSize + (new Vector3(0.5f, 0.5f, 0.5f) * terrainDensityData.width), Vector3.one * terrainDensityData.width);
+            float viewerDstFromBound = bounds.SqrDistance(viewerPos);
 
-            // while (chunkLoadQueue.Count > 0 && Time.realtimeSinceStartup - startTime < 0.003f)
-            // {
-                Vector3Int coord = chunkLoadQueue.Dequeue();
-                long packedCoord = PackChunkCoord(coord.x, coord.y, coord.z);
-                chunkLoadSet.Remove(packedCoord);
-                
-                float viewerDstFromBound = CalculateViewerDstFromBound(coord);
-
-                if (!chunkDictionary.TryGetValue(packedCoord, out TerrainChunk dictChunk) && viewerDstFromBound <= maxViewDstSqr)
-                {
-                    var chunk = new TerrainChunk(packedCoord, coord, chunkSize, chunkParent, terrainDensityData, assetSpawnData, terrainTextureData,
-                                                marchingCubesComputeShader, terrainDensityComputeShader,
-                                                terrainNoiseComputeShader, terraformComputeShader,
-                                                terrainMaterial, waterMaterial, initialLoadComplete, noiseGeneratorTextureArray);
-                    chunkDictionary.Add(packedCoord, chunk);
-                    chunk.UpdateChunk(maxViewDst, viewerDstFromBound);
-                    if (chunk.visible)
-                        chunksVisibleLastUpdate.Add(packedCoord);
-                    chunkBatchCounter++;
-                }
-            // }
-
-            // yield return null;
+            if (!chunkDictionary.TryGetValue(packedCoord, out TerrainChunk dictChunk) && viewerDstFromBound <= maxViewDstSqr)
+            {
+                var chunk = new TerrainChunk(packedCoord, coord, chunkSize, chunkParent, terrainDensityData, assetSpawnData, terrainTextureData,
+                                            marchingCubesComputeShader, terrainDensityComputeShader, 
+                                            terrainMaterial, waterMaterial, initialLoadComplete, noiseGeneratorTextureArray);
+                chunkDictionary.Add(packedCoord, chunk);
+                chunk.UpdateChunk(maxViewDst, viewerDstFromBound);
+                if (chunk.visible)
+                    chunksVisibleLastUpdate.Add(packedCoord);
+                chunkBatchCounter++;
+            }
 
             if (chunkBatchCounter % 4 == 0)
             {
@@ -584,7 +612,7 @@ public class ChunkGenNetwork : MonoBehaviour
             }
 
             // 1 readback per 20 fps with a min and max of 2 and 6
-            int maxActiveReadbacks = Mathf.Clamp(Mathf.RoundToInt(1f / Time.smoothDeltaTime / 20f), 2, 6);
+            int maxActiveReadbacks = Mathf.Clamp(Mathf.RoundToInt(1f / Time.smoothDeltaTime / 10f), 2, 6);
 
             while (activeRequests.Count <= maxActiveReadbacks && pendingReadbacks.Count > 0)
             {
@@ -594,7 +622,6 @@ public class ChunkGenNetwork : MonoBehaviour
                     activeRequests.Add(AsyncGPUReadback.Request(pendingReadback.buffer, pendingReadback.readbackRequest));
             }
 
-            // Allow 2 dispatched per frame
             if(++count % 4 == 0) 
                 yield return null;
         }
@@ -614,13 +641,12 @@ public class ChunkGenNetwork : MonoBehaviour
         int assetInstantiationBatchCounter = 0;
         while (pendingAssetInstantiations.Count > 0)
         {
-            pendingAssetInstantiations.Dequeue()?.Invoke();
+            AssetInstantiation assetInstantiation = pendingAssetInstantiations.Dequeue();
+            assetInstantiation.terrainChunk.assetSpawner.AssetInstantiation(assetInstantiation.i, assetInstantiation.j, assetInstantiation.seed);
 
-            assetInstantiationBatchCounter++;
-
-            if (assetInstantiationBatchCounter % 50 == 0)
+            if (++assetInstantiationBatchCounter % 50 == 0)
             {
-                yield return new WaitForEndOfFrame();
+                yield return null;
             }
         }
 
@@ -856,7 +882,7 @@ public class ChunkGenNetwork : MonoBehaviour
         public bool visible = false;
         public TerrainChunk(long chunkId, Vector3Int chunkCoord, int chunkSize, Transform parent, TerrainDensityData terrainDensityData, AssetSpawnData assetSpawnData, 
                             TerrainTextureData terrainTextureData, ComputeShader marchingCubesComputeShader, ComputeShader terrainDensityComputeShader, 
-                            ComputeShader terrainNoiseComputeShader, ComputeShader terraformComputeShader, Material terrainMaterial, Material waterMaterial, 
+                            Material terrainMaterial, Material waterMaterial, 
                             bool initialLoadComplete, Texture2D[] noiseGeneratorTextureArray)
         {
             this.chunkId = chunkId;
@@ -885,8 +911,6 @@ public class ChunkGenNetwork : MonoBehaviour
             marchingCubes.assetSpawner = assetSpawner;
             marchingCubes.marchingCubesComputeShader = marchingCubesComputeShader;
             marchingCubes.terrainDensityComputeShader = terrainDensityComputeShader;
-            marchingCubes.terrainNoiseComputeShader = terrainNoiseComputeShader;
-            marchingCubes.terraformComputeShader = terraformComputeShader;
             marchingCubes.terrainDensityData = terrainDensityData;
             marchingCubes.initialLoadComplete = initialLoadComplete;
             marchingCubes.noiseGeneratorTextureArray = noiseGeneratorTextureArray;

@@ -135,7 +135,7 @@ public class MarchingCubes : MonoBehaviour
             largeCaveDomainWarp = domainWarpGenerator;
             largeCaveNoiseScale = noiseGenerator.noiseScale;
         }
-        if (noiseGenerator.noiseGeneratorType == NoiseGenerator.NoiseGeneratorType.CaveDetail1Generator)
+        if (noiseGenerator.noiseGeneratorType == NoiseGenerator.NoiseGeneratorType.CaveDetailGenerator)
         {
             caveDetailNoiseGenerator = generator;
             caveDetailDomainWarp = domainWarpGenerator;
@@ -146,18 +146,6 @@ public class MarchingCubes : MonoBehaviour
             continentalnessNoiseGenerator = generator;
             continentalnessDomainWarp = domainWarpGenerator;
             continentalnessNoiseScale = noiseGenerator.noiseScale;
-        }
-        if (noiseGenerator.noiseGeneratorType == NoiseGenerator.NoiseGeneratorType.TemperatureMapGenerator)
-        {
-            temperatureNoiseGenerator = generator;
-            temperatureDomainWarp = domainWarpGenerator;
-            temperatureNoiseScale = noiseGenerator.noiseScale;
-        }
-        if (noiseGenerator.noiseGeneratorType == NoiseGenerator.NoiseGeneratorType.HumidityMapGenerator)
-        {
-            humidityNoiseGenerator = generator;
-            humidityDomainWarp = domainWarpGenerator;
-            humidityNoiseScale = noiseGenerator.noiseScale;
         }
         if (noiseGenerator.noiseGeneratorType == NoiseGenerator.NoiseGeneratorType.PeaksAndValleysMapGenerator)
         {

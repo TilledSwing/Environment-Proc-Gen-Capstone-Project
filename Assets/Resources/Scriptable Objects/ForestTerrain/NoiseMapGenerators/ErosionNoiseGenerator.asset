@@ -12,7 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 706a95b2ea676fc44a907f69e74100cb, type: 3}
   m_Name: ErosionNoiseGenerator
   m_EditorClassIdentifier: 
-  activated: 1
   valueCurve:
     serializedVersion: 2
     m_Curve:
@@ -118,7 +117,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  noiseGeneratorType: 8
+  noiseGeneratorType: 3
   selectedNoiseDimension: 1
   noiseDimension: 0
   selectedNoiseType: 0
@@ -127,7 +126,7 @@ MonoBehaviour:
   noiseFractalType: 1
   selectedRotationType3D: 0
   rotationType3D: 0
-  noiseSeed: 30705
+  noiseSeed: 82414
   noiseFractalOctaves: 3
   noiseFractalLacunarity: 2
   noiseFractalGain: 0.5
@@ -139,7 +138,7 @@ MonoBehaviour:
   selectedDomainWarpFractalType: 0
   domainWarpFractalType: 4
   domainWarpAmplitude: 30
-  domainWarpSeed: 62666
+  domainWarpSeed: 37888
   domainWarpFractalOctaves: 5
   domainWarpFractalLacunarity: 2
   domainWarpFractalGain: 0.5
@@ -150,6 +149,7 @@ MonoBehaviour:
   cellularReturnType: 1
   cellularJitter: 1
   noiseScale: 0.3
+  remoteTexture: {fileID: 0}
   noiseTypeOptions: 000000000100000002000000030000000400000005000000
   rotationType3DOptions: 000000000100000002000000
   noiseFractalTypeOptions: 00000000010000000200000003000000

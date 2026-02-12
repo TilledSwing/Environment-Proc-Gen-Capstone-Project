@@ -409,7 +409,6 @@ public struct DBTerrainSettings
 [System.Serializable]
 public struct DBNoiseGeneratorSettings
 {
-    public bool activated;
     public float[] remoteTexture;
     public int noiseGeneratorType;
     // Noise and Fractal Settings
@@ -476,7 +475,6 @@ public struct DBNoiseGeneratorSettings
         {
             return new DBNoiseGeneratorSettings
             {
-                activated = settings.activated,
                 remoteTexture = SplineCurveFunctions.CurveToArray(settings.valueCurve),
                 noiseGeneratorType = (int)settings.noiseGeneratorType,
                 // Noise and Fractal Settings
@@ -545,7 +543,6 @@ public struct DBNoiseGeneratorSettings
         {
             var deserializedNoise = ScriptableObject.CreateInstance<NoiseGenerator>();
 
-            deserializedNoise.activated = settings.activated;
             deserializedNoise.remoteTexture = SplineCurveFunctions.ArrayToTexture(settings.remoteTexture);
             deserializedNoise.noiseGeneratorType = (NoiseGeneratorType)settings.noiseGeneratorType;
             // Noise and Fractal Settings
