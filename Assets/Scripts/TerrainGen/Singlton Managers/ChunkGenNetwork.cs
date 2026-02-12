@@ -274,7 +274,7 @@ public class ChunkGenNetwork : MonoBehaviour
 
         noiseGeneratorTextureArray = CreateNoiseCurveTextures();
         CreateVertexIndexArray();
-        waterMesh = WaterPlaneGenerator.PlaneGeneratorJobHandler(terrainDensityData.width, terrainDensityData.waterLevel);
+        waterMesh = WaterPlaneGenerator.PlaneGeneratorJobHandler(terrainDensityData.width, terrainDensityData.waterLevel - terrainDensityData.width);
         UpdateVisibleChunks();
     }
     /// <summary>
@@ -413,7 +413,10 @@ public class ChunkGenNetwork : MonoBehaviour
         {
             MCQueueObject mcJob = marchingCubesJobQueue.Dequeue();
             TerrainChunk terrainChunk = mcJob.terrainChunk;
-            terrainChunk.marchingCubes.MarchingCubesJobHandler(terrainChunk.marchingCubes.heightsArray, mcJob.terraforming);
+            if (terrainChunk.chunk != null)
+            {
+                terrainChunk.marchingCubes.MarchingCubesJobHandler(terrainChunk.marchingCubes.heightsArray, mcJob.terraforming);
+            }
         }
         start = Time.realtimeSinceStartup;
         while (chunkVisibilityQueue.Count > 0 && Time.realtimeSinceStartup - start < 0.003f) // 3ms
@@ -934,7 +937,7 @@ public class ChunkGenNetwork : MonoBehaviour
                 waterMeshRenderer = waterPlaneGenerator.AddComponent<MeshRenderer>();
                 waterMeshRenderer.sharedMaterial = waterMaterial;
                 waterGenMeshFilter.mesh = Instance.waterMesh;
-                waterPlaneGenerator.transform.position = new Vector3Int(chunkPos.x, chunkPos.y - chunkSize, chunkPos.z);
+                waterPlaneGenerator.transform.position = chunkPos;
             }
             chunk.transform.SetParent(parent);
         }

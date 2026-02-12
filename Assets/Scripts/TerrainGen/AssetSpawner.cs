@@ -332,14 +332,12 @@ public class AssetSpawner : MonoBehaviour
         Vector3 n = acceptedSpawnPoints[i][j].normal;
         if (!math.all(math.isfinite(n)) || math.lengthsq(n) < 0.0001f)
             n = Vector3.up;
-        else
-            n = math.normalize(n);
         Quaternion normal = Quaternion.FromToRotation(Vector3.up, n);
         SpawnableAsset spawnableAsset = assetSpawnData.spawnableAssets[i];
         bool rotateToFaceNormal = spawnableAsset.rotateToFaceNormal;
         GameObject assetToSpawn;
         
-        assetToSpawn = Instantiate(spawnableAsset.asset, acceptedSpawnPoints[i][j].position, rotateToFaceNormal ? randomYRotation * normal : randomYRotation);
+        assetToSpawn = Instantiate(spawnableAsset.asset, acceptedSpawnPoints[i][j].position, rotateToFaceNormal ? normal * randomYRotation : randomYRotation);
         assetToSpawn.transform.SetParent(gameObject.transform);
         spawnedAssets[i].Add(new Asset(assetToSpawn, assetToSpawn.GetComponent<MeshRenderer>(), assetToSpawn.GetComponent<MeshCollider>()));
         
