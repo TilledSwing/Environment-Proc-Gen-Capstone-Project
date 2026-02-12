@@ -27039,6 +27039,7 @@ MonoBehaviour:
   viewer: {fileID: 1588582780}
   viewerPos: {x: 0, y: 0, z: 0}
   updateDistanceThreshold: 12
+  chunkLoadPriorityAngle: 60
   chunkSize: 0
   chunksVisible: 0
   useFixedMapSize: 0
@@ -27050,8 +27051,14 @@ MonoBehaviour:
   terrainTextureData: {fileID: 11400000, guid: 1fa52b57a0c85a34eb28c4f99612d21f, type: 2}
   marchingCubesComputeShader: {fileID: 7200000, guid: d2f49f4c36241c7468a0705fa73f69a5, type: 3}
   terrainDensityComputeShader: {fileID: 7200000, guid: 1caae6b81357a864095f47aab860122c, type: 3}
+  baseDensityKernel: 0
+  continentalnessDensityKernel: 0
+  peaksAndValleysDensityKernel: 0
+  erosionDensityKernel: 0
+  largeCaveDensityKernel: 0
   terrainMaterial: {fileID: 2100000, guid: d644a1ee14ca32a44b080e9c6de5ed62, type: 2}
   waterMaterial: {fileID: 2100000, guid: 804af839dce47f748a2151ac2e3113a9, type: 2}
+  waterMesh: {fileID: 0}
   grassPositionComputeShader: {fileID: 7200000, guid: f2f43ed31c15f4c499751ac8fe425ce1, type: 3}
   grassMesh: {fileID: 3679985272907197249, guid: 64f6b014b6a06c44eb912584f647433f, type: 3}
   grassMaterial: {fileID: 2100000, guid: bdfda37c10344e84ebfde33ef935cf28, type: 2}

@@ -12,6 +12,7 @@ using UnityEngine.Rendering.Universal;
 public class ChunkGenNetwork : MonoBehaviour
 {
     public static ChunkGenNetwork Instance;
+    private Transform mainCameraTransform;
     // Fog Render Feature Stuff
     public Material fogMat;
     public float fogDensity;
@@ -35,6 +36,8 @@ public class ChunkGenNetwork : MonoBehaviour
     public Transform viewer;
     public Vector3 viewerPos;
     public float updateDistanceThreshold = 5f;
+    public float chunkLoadPriorityAngle;
+    private float convertedChunkLoadPriorityAngle;
     private Vector3 lastUpdateViewerPos;
     public int chunkSize;
     public int chunksVisible;
@@ -83,6 +86,7 @@ public class ChunkGenNetwork : MonoBehaviour
     // Chunk Variables
     public Transform chunkParent;
     float maxViewDstSqr;
+    Vector3 chunkVec;
     Vector3 halfChunkVec;
     float halfChunkSize;
     public Dictionary<long, TerrainChunk> chunkDictionary = new();
@@ -186,10 +190,14 @@ public class ChunkGenNetwork : MonoBehaviour
         // DATA LEAK STACK TRACES ENABLED
         NativeLeakDetection.Mode = NativeLeakDetectionMode.EnabledWithStackTrace;
         
+        mainCameraTransform = Camera.main.transform;
         chunkParent = GameObject.Find("ChunkParent").transform;
         maxViewDstSqr = maxViewDst * maxViewDst;
-        halfChunkVec = Vector3.one * chunkSize * 0.5f;
+        chunkVec = Vector3.one * chunkSize;
+        halfChunkVec = new Vector3(0.5f, 0.5f, 0.5f) * chunkSize;
         halfChunkSize = chunkSize * 0.5f;
+        // float cos = Mathf.Cos(chunkLoadPriorityAngle);
+        // convertedChunkLoadPriorityAngle = cos * cos;
 
         baseDensityKernel = terrainDensityComputeShader.FindKernel("BaseDensity");
         continentalnessDensityKernel = terrainDensityComputeShader.FindKernel("ContinentalnessDensity");
@@ -452,6 +460,10 @@ public class ChunkGenNetwork : MonoBehaviour
             lightingBlockerRenderer.enabled = false;
         }
 
+        Vector3 cameraForwardVector = mainCameraTransform.forward;
+        Vector3 movementVector = Vector3.Normalize(viewerPos - lastUpdateViewerPos); 
+        Vector3 movementDir = movementVector.sqrMagnitude > 0.01f ? movementVector : cameraForwardVector; 
+
         for (int xOffset = -chunksVisible; xOffset <= chunksVisible; xOffset++)
         {
             for (int yOffset = -chunksVisible; yOffset <= chunksVisible; yOffset++)
@@ -503,12 +515,21 @@ public class ChunkGenNetwork : MonoBehaviour
                             if (!chunkLoadSet.Contains(chunkCoordId))
                             {
                                 Vector3 chunkCenter = (viewedChunkCoord * chunkSize) + halfChunkVec;
-                                Vector3 toChunk = (chunkCenter - viewerPos).normalized;
+                                // Vector3 toChunk = chunkCenter - viewerPos;
 
-                                Vector3 movementVector = (viewerPos - lastUpdateViewerPos).normalized;
-                                Vector3 movementDir = movementVector.sqrMagnitude > 0.01f ? movementVector : Camera.main.transform.forward;
+                                // Vector3 movementVector = viewerPos - lastUpdateViewerPos;
+                                // if (movementVector.sqrMagnitude <= 0.01f)
+                                //     movementVector = cameraForwardVector;
 
-                                float angle = Vector3.Angle(movementDir, toChunk);
+                                // float dot = Vector3.Dot(movementVector, toChunk);
+                                // float mvSqrMag = movementVector.sqrMagnitude;
+                                // float tcSqrMag = toChunk.sqrMagnitude;
+
+                                // if (dot * dot < mvSqrMag * tcSqrMag * convertedChunkLoadPriorityAngle)
+                                //     continue;
+
+                                Vector3 toChunk = Vector3.Normalize(chunkCenter - viewerPos); 
+                                float angle = Vector3.Angle(movementDir, toChunk); 
                                 if (angle > 60f) continue;
 
                                 chunkLoadQueue.Enqueue(viewedChunkCoord, viewerDstFromBound);
@@ -584,7 +605,7 @@ public class ChunkGenNetwork : MonoBehaviour
             chunkLoadSet.Remove(packedCoord);
             
             // float viewerDstFromBound = CalculateDstFromBound(coord, viewerPos);
-            Bounds bounds = new Bounds(coord * chunkSize + (new Vector3(0.5f, 0.5f, 0.5f) * terrainDensityData.width), Vector3.one * terrainDensityData.width);
+            Bounds bounds = new Bounds(coord * chunkSize + (new Vector3(0.5f, 0.5f, 0.5f) * chunkSize), Vector3.one * chunkSize);
             float viewerDstFromBound = bounds.SqrDistance(viewerPos);
 
             if (!chunkDictionary.TryGetValue(packedCoord, out TerrainChunk dictChunk) && viewerDstFromBound <= maxViewDstSqr)

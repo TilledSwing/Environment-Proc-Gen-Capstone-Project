@@ -8,13 +8,6 @@ using UnityEngine.Rendering;
 
 public class WaterPlaneGenerator : MonoBehaviour
 {
-    private List<Vector3> vertices = new List<Vector3>();
-    private List<int> triangles = new List<int>();
-    public MeshFilter meshFilter;
-    public MeshRenderer meshRenderer;
-    public Vector3Int chunkPos;
-    public ComputeMarchingCubes marchingCubes;
-    public TerrainDensityData terrainDensityData;
     public struct Vertex
     {
         public float3 position;
