@@ -49,9 +49,16 @@ public class ChunkGenNetwork : MonoBehaviour
     // Compute Shader References
     public ComputeShader marchingCubesComputeShader;
     public ComputeShader terrainDensityComputeShader;
+    // Kernels
+    public int baseDensityKernel;
+    public int continentalnessDensityKernel;
+    public int peaksAndValleysDensityKernel;
+    public int erosionDensityKernel;
+    public int largeCaveDensityKernel;
     // Material References
     public Material terrainMaterial;
     public Material waterMaterial;
+    public Mesh waterMesh;
     // Grass Stuff
     public ComputeShader grassPositionComputeShader;
     public Mesh grassMesh;
@@ -80,7 +87,6 @@ public class ChunkGenNetwork : MonoBehaviour
     float halfChunkSize;
     public Dictionary<long, TerrainChunk> chunkDictionary = new();
     public List<long> chunksVisibleLastUpdate = new();
-    HashSet<long> visitedThisUpdate = new();
     List<long> chunksToDestroy = new();
     public PriorityQueue<Vector3Int> chunkLoadQueue = new();
     public HashSet<long> chunkLoadSet = new();
@@ -108,7 +114,6 @@ public class ChunkGenNetwork : MonoBehaviour
     public NativeArray<float3> vertexOffsetTable;
     public NativeArray<int> edgeIndexTable;
     public NativeArray<int> triangleTable;
-
     public NativeArray<int> staticMaxSizeVertexIndexArray;
     public void CreateVertexIndexArray()
     {
@@ -175,8 +180,8 @@ public class ChunkGenNetwork : MonoBehaviour
             Destroy(gameObject);
 
         // VSYNC ON
-        // QualitySettings.vSyncCount = 1;   // wait for monitor refresh
-        // Application.targetFrameRate = -1; // let vsync control it
+        QualitySettings.vSyncCount = 1;   // wait for monitor refresh
+        Application.targetFrameRate = -1; // let vsync control it
 
         // DATA LEAK STACK TRACES ENABLED
         NativeLeakDetection.Mode = NativeLeakDetectionMode.EnabledWithStackTrace;
@@ -185,6 +190,12 @@ public class ChunkGenNetwork : MonoBehaviour
         maxViewDstSqr = maxViewDst * maxViewDst;
         halfChunkVec = Vector3.one * chunkSize * 0.5f;
         halfChunkSize = chunkSize * 0.5f;
+
+        baseDensityKernel = terrainDensityComputeShader.FindKernel("BaseDensity");
+        continentalnessDensityKernel = terrainDensityComputeShader.FindKernel("ContinentalnessDensity");
+        peaksAndValleysDensityKernel = terrainDensityComputeShader.FindKernel("PeaksAndValleysDensity");
+        erosionDensityKernel = terrainDensityComputeShader.FindKernel("ErosionDensity");
+        largeCaveDensityKernel = terrainDensityComputeShader.FindKernel("LargeCaveDensity");
 
         lightingBlockerRenderer = lightingBlocker.GetComponent<MeshRenderer>();
         lightingBlockerRenderer.enabled = false;
@@ -263,6 +274,7 @@ public class ChunkGenNetwork : MonoBehaviour
 
         noiseGeneratorTextureArray = CreateNoiseCurveTextures();
         CreateVertexIndexArray();
+        waterMesh = WaterPlaneGenerator.PlaneGeneratorJobHandler(terrainDensityData.width, terrainDensityData.waterLevel);
         UpdateVisibleChunks();
     }
     /// <summary>
@@ -473,8 +485,10 @@ public class ChunkGenNetwork : MonoBehaviour
                         if (!initialLoadComplete && viewerDstFromBound <= maxViewDstSqr)
                         {
                             // Generate immediately during first load
-                            TerrainChunk chunk = new TerrainChunk(chunkCoordId, viewedChunkCoord, chunkSize, chunkParent, terrainDensityData, assetSpawnData, terrainTextureData,
-                                                         marchingCubesComputeShader, terrainDensityComputeShader, terrainMaterial, waterMaterial, initialLoadComplete, noiseGeneratorTextureArray);
+                            TerrainChunk chunk = new TerrainChunk(chunkCoordId, viewedChunkCoord, chunkSize, chunkParent, 
+                                                                  terrainDensityData, assetSpawnData, terrainDensityComputeShader, 
+                                                                  terrainMaterial, waterMaterial, initialLoadComplete, 
+                                                                  noiseGeneratorTextureArray);
                             chunkDictionary.Add(chunkCoordId, chunk);
                             chunk.UpdateChunk(maxViewDst, viewerDstFromBound);
 
@@ -572,8 +586,7 @@ public class ChunkGenNetwork : MonoBehaviour
 
             if (!chunkDictionary.TryGetValue(packedCoord, out TerrainChunk dictChunk) && viewerDstFromBound <= maxViewDstSqr)
             {
-                var chunk = new TerrainChunk(packedCoord, coord, chunkSize, chunkParent, terrainDensityData, assetSpawnData, terrainTextureData,
-                                            marchingCubesComputeShader, terrainDensityComputeShader, 
+                var chunk = new TerrainChunk(packedCoord, coord, chunkSize, chunkParent, terrainDensityData, assetSpawnData, terrainDensityComputeShader, 
                                             terrainMaterial, waterMaterial, initialLoadComplete, noiseGeneratorTextureArray);
                 chunkDictionary.Add(packedCoord, chunk);
                 chunk.UpdateChunk(maxViewDst, viewerDstFromBound);
@@ -872,7 +885,7 @@ public class ChunkGenNetwork : MonoBehaviour
         public ComputeMarchingCubes marchingCubes;
         public AssetSpawner assetSpawner;
         public GameObject waterPlaneGenerator;
-        public WaterPlaneGenerator waterGen;
+        public MeshRenderer waterMeshRenderer;
         public long chunkId;
         public Vector3Int chunkCoord;
         public Vector3Int chunkPos;
@@ -881,8 +894,7 @@ public class ChunkGenNetwork : MonoBehaviour
         public MeshRenderer meshRenderer;
         public bool visible = false;
         public TerrainChunk(long chunkId, Vector3Int chunkCoord, int chunkSize, Transform parent, TerrainDensityData terrainDensityData, AssetSpawnData assetSpawnData, 
-                            TerrainTextureData terrainTextureData, ComputeShader marchingCubesComputeShader, ComputeShader terrainDensityComputeShader, 
-                            Material terrainMaterial, Material waterMaterial, 
+                            ComputeShader terrainDensityComputeShader, Material terrainMaterial, Material waterMaterial, 
                             bool initialLoadComplete, Texture2D[] noiseGeneratorTextureArray)
         {
             this.chunkId = chunkId;
@@ -909,7 +921,6 @@ public class ChunkGenNetwork : MonoBehaviour
             marchingCubes.chunkCoord = chunkCoord;
             marchingCubes.chunkPos = chunkPos;
             marchingCubes.assetSpawner = assetSpawner;
-            marchingCubes.marchingCubesComputeShader = marchingCubesComputeShader;
             marchingCubes.terrainDensityComputeShader = terrainDensityComputeShader;
             marchingCubes.terrainDensityData = terrainDensityData;
             marchingCubes.initialLoadComplete = initialLoadComplete;
@@ -920,15 +931,10 @@ public class ChunkGenNetwork : MonoBehaviour
                 waterPlaneGenerator = new GameObject("Water");
                 waterPlaneGenerator.transform.SetParent(chunk.transform);
                 MeshFilter waterGenMeshFilter = waterPlaneGenerator.AddComponent<MeshFilter>();
-                MeshRenderer waterMat = waterPlaneGenerator.AddComponent<MeshRenderer>();
-                waterMat.sharedMaterial = waterMaterial;
-                waterGen = waterPlaneGenerator.AddComponent<WaterPlaneGenerator>();
-                waterGen.meshFilter = waterGenMeshFilter;
-                waterGen.meshRenderer = waterMat;
-                waterGen.terrainDensityData = terrainDensityData;
-                waterGen.chunkPos = chunkPos;
-                waterGen.marchingCubes = marchingCubes;
-                marchingCubes.waterGen = waterGen;
+                waterMeshRenderer = waterPlaneGenerator.AddComponent<MeshRenderer>();
+                waterMeshRenderer.sharedMaterial = waterMaterial;
+                waterGenMeshFilter.mesh = Instance.waterMesh;
+                waterPlaneGenerator.transform.position = new Vector3Int(chunkPos.x, chunkPos.y - chunkSize, chunkPos.z);
             }
             chunk.transform.SetParent(parent);
         }
@@ -963,9 +969,9 @@ public class ChunkGenNetwork : MonoBehaviour
             }
             if (Instance.terrainDensityData.waterLevel > chunkPos.y && Instance.terrainDensityData.waterLevel < Mathf.RoundToInt(chunkPos.y + Instance.terrainDensityData.width) && Instance.terrainDensityData.water)
             {
-                if (waterGen.meshRenderer != null && waterGen.meshRenderer.enabled != visible)
+                if (waterMeshRenderer != null && waterMeshRenderer.enabled != visible)
                 {
-                    waterGen.meshRenderer.enabled = visible;
+                    waterMeshRenderer.enabled = visible;
                 }
             }
             if (assetSpawner.assetsSet)

@@ -1,5 +1,10 @@
 using System.Collections.Generic;
+using Unity.Burst;
+using Unity.Collections;
+using Unity.Jobs;
+using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class WaterPlaneGenerator : MonoBehaviour
 {
@@ -10,55 +15,84 @@ public class WaterPlaneGenerator : MonoBehaviour
     public Vector3Int chunkPos;
     public ComputeMarchingCubes marchingCubes;
     public TerrainDensityData terrainDensityData;
-
-    public void UpdateMesh()
+    public struct Vertex
     {
-        GenerateWaterPlane();
-        SetupMesh();
+        public float3 position;
     }
-    /// <summary>
-    /// Set up the MeshFilter's mesh with the given vertices and triangle
-    /// </summary>
-    private void SetupMesh() {
-        Mesh mesh = new Mesh();
-        mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
-        mesh.vertices = vertices.ToArray();
-        mesh.triangles = triangles.ToArray();
-        mesh.RecalculateNormals();
-        mesh.RecalculateBounds();
-
-        meshFilter.mesh = mesh;
-    }
-    /// <summary>
-    /// [Needs to be updated to new mesh setup api]
-    /// Generate a simple water plane square at the water level
-    /// </summary>
-    private void GenerateWaterPlane() {
-        vertices.Clear();
-        triangles.Clear();
-        for (int x = 0; x < terrainDensityData.width; x++)
+    public static Mesh PlaneGeneratorJobHandler(int size, int height)
+    {
+        int vertSize = size * size * 4;
+        int indexSize = size * size * 6;
+        NativeList<Vertex> vertexArray = new(vertSize, Allocator.Persistent);
+        NativeList<int> indexArray = new(indexSize, Allocator.Persistent);
+        PlaneGeneratorJob planeGeneratorJob = new PlaneGeneratorJob
         {
-            for (int z = 0; z < terrainDensityData.width; z++)
+            vertexArray = vertexArray.AsParallelWriter(),
+            indexArray = indexArray.AsParallelWriter(),
+            waterLevel = height,
+            chunkSize = size,
+        };
+
+        planeGeneratorJob.Run();
+
+        Mesh.MeshDataArray meshDataArray = Mesh.AllocateWritableMeshData(1);
+        Mesh.MeshData meshData = meshDataArray[0];
+
+        meshData.SetVertexBufferParams(vertexArray.Length, new VertexAttributeDescriptor(VertexAttribute.Position));
+        var vertexBuffer = meshData.GetVertexData<Vertex>(0);
+        vertexBuffer.CopyFrom(vertexArray.AsArray());
+
+        meshData.SetIndexBufferParams(indexArray.Length, IndexFormat.UInt32);
+        var indexBuffer = meshData.GetIndexData<int>();
+        indexBuffer.CopyFrom(indexArray.AsArray());
+
+        meshData.subMeshCount = 1;
+        meshData.SetSubMesh(0, new SubMeshDescriptor(0, indexArray.Length, MeshTopology.Triangles));
+
+        Mesh mesh = new Mesh();
+        Mesh.ApplyAndDisposeWritableMeshData(meshDataArray, mesh, MeshUpdateFlags.DontValidateIndices);
+        vertexArray.Dispose();
+        indexArray.Dispose();
+
+        mesh.RecalculateBounds();
+        mesh.RecalculateNormals();
+
+        return mesh;
+    }
+    [BurstCompile]
+    public struct PlaneGeneratorJob : IJob
+    {
+        public NativeList<Vertex>.ParallelWriter vertexArray;
+        public NativeList<int>.ParallelWriter indexArray;
+        public int waterLevel;
+        public int chunkSize;
+        public void Execute()
+        {
+            int vertCount = 0;
+            for (int x = 0; x < chunkSize; x++)
             {
-                Vector3 vertex00 = new Vector3(chunkPos.x + x, terrainDensityData.waterLevel, chunkPos.z + z);
-                Vector3 vertex10 = new Vector3(chunkPos.x + x + 1, terrainDensityData.waterLevel, chunkPos.z + z);
-                Vector3 vertex01 = new Vector3(chunkPos.x + x, terrainDensityData.waterLevel, chunkPos.z + z + 1);
-                Vector3 vertex11 = new Vector3(chunkPos.x + x + 1, terrainDensityData.waterLevel, chunkPos.z + z + 1);
-                int vertCount = vertices.Count;
+                for (int z = 0; z < chunkSize; z++)
+                {
+                    Vertex vertex00 = new Vertex{position = new float3(x, waterLevel, z)};
+                    Vertex vertex10 = new Vertex{position = new float3(x + 1, waterLevel, z)};
+                    Vertex vertex01 = new Vertex{position = new float3(x, waterLevel, z + 1)};
+                    Vertex vertex11 = new Vertex{position = new float3(x + 1, waterLevel, z + 1)};
 
-                vertices.Add(vertex00);
-                vertices.Add(vertex10);
+                    vertexArray.AddNoResize(vertex00);
+                    vertexArray.AddNoResize(vertex10);
 
-                vertices.Add(vertex01);
-                vertices.Add(vertex11);
+                    vertexArray.AddNoResize(vertex01);
+                    vertexArray.AddNoResize(vertex11);
 
-                triangles.Add(vertCount + 3);
-                triangles.Add(vertCount + 1);
-                triangles.Add(vertCount);
+                    indexArray.AddNoResize(vertCount + 3);
+                    indexArray.AddNoResize(vertCount + 1);
+                    indexArray.AddNoResize(vertCount);
 
-                triangles.Add(vertCount + 2);
-                triangles.Add(vertCount + 3);
-                triangles.Add(vertCount);
+                    indexArray.AddNoResize(vertCount + 2);
+                    indexArray.AddNoResize(vertCount + 3);
+                    indexArray.AddNoResize(vertCount);
+                    vertCount += 4;
+                }
             }
         }
     }

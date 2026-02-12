@@ -51,6 +51,7 @@ SamplerState samplerLinearClamp
 };
 
 // Compute total density of terrain use provided noise data
+/* =========================================== BASE DENSITY KERNELS =========================================== */
 [numthreads(4,4,4)]
 void BaseDensity (uint3 id : SV_DispatchThreadID)
 {
@@ -61,12 +62,11 @@ void BaseDensity (uint3 id : SV_DispatchThreadID)
 
     float3 floatID = float3(id.x, id.y, id.z);
     float terrainNoise = SampleNoise(NoiseSettings[BASE_INDEX], floatID, ChunkPos);
-    float continentalnessNoise = SampleNoise(NoiseSettings[CONTINENTALNESS_INDEX], floatID, ChunkPos);
     float baseTerrainHeight = lerp(0.4, 1, (terrainNoise+1)/2);
 
     HeightsBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)] = baseTerrainHeight;
 }
-
+/* =========================================== CONTINENTALNESS DENSITY KERNELS =========================================== */
 [numthreads(4,4,4)]
 void ContinentalnessDensity (uint3 id : SV_DispatchThreadID)
 {
@@ -84,7 +84,7 @@ void ContinentalnessDensity (uint3 id : SV_DispatchThreadID)
 
     HeightsBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)] = adjustedBaseTerrainHeight;
 }
-
+/* =========================================== PEAKSANDVALLEYS DENSITY KERNELS =========================================== */
 [numthreads(4,4,4)]
 void PeaksAndValleysDensity (uint3 id : SV_DispatchThreadID)
 {
@@ -101,7 +101,7 @@ void PeaksAndValleysDensity (uint3 id : SV_DispatchThreadID)
 
     HeightsBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)] = adjustedBaseTerrainHeight;
 }
-
+/* =========================================== EROSION DENSITY KERNELS =========================================== */
 [numthreads(4,4,4)]
 void ErosionDensity (uint3 id : SV_DispatchThreadID)
 {
@@ -118,7 +118,7 @@ void ErosionDensity (uint3 id : SV_DispatchThreadID)
 
     HeightsBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)] = adjustedBaseTerrainHeight;
 }
-
+/* =========================================== LARGECAVE DENSITY KERNELS =========================================== */
 [numthreads(4,4,4)]
 void LargeCaveDensity (uint3 id : SV_DispatchThreadID)
 {

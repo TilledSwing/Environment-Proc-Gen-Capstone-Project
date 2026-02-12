@@ -11,7 +11,6 @@ using UnityEngine.Rendering;
 public class ComputeMarchingCubes : MonoBehaviour
 {
     public ChunkGenNetwork.TerrainChunk owner;
-    public ComputeShader marchingCubesComputeShader;
     public ComputeShader terrainDensityComputeShader;
     public MeshFilter meshFilter;
     public MeshCollider meshCollider;
@@ -76,7 +75,7 @@ public class ComputeMarchingCubes : MonoBehaviour
     void Start()
     {
         SetTerrainSettings();
-        GenerateMesh();
+        SetHeights();
         initialLoadComplete = true;
     }
     /// <summary>
@@ -112,7 +111,7 @@ public class ComputeMarchingCubes : MonoBehaviour
     public void Regen()
     {
         SetTerrainSettings();
-        GenerateMesh();
+        SetHeights();
 
     }
     /// <summary>
@@ -129,20 +128,16 @@ public class ComputeMarchingCubes : MonoBehaviour
         terrainDensityComputeShader.SetFloat("isolevel", terrainDensityData.isolevel);
         terrainDensityComputeShader.SetInt("MaxWorldYChunks", ChunkGenNetwork.Instance.maxWorldYChunks);
     }
-    public void GenerateMesh()
-    {
-        SetHeights();
-    }
     /// <summary>
     /// Set up the density values for the chunk using compute shaders
     /// </summary>
     public void SetHeights()
     {
-        int baseDensityKernel = terrainDensityComputeShader.FindKernel("BaseDensity");
-        int continentalnessDensityKernel = terrainDensityComputeShader.FindKernel("ContinentalnessDensity");
-        int peaksAndValleysDensityKernel = terrainDensityComputeShader.FindKernel("PeaksAndValleysDensity");
-        int erosionDensityKernel = terrainDensityComputeShader.FindKernel("ErosionDensity");
-        int largeCaveDensityKernel = terrainDensityComputeShader.FindKernel("LargeCaveDensity");
+        int baseDensityKernel = ChunkGenNetwork.Instance.baseDensityKernel;
+        int continentalnessDensityKernel = ChunkGenNetwork.Instance.continentalnessDensityKernel;
+        int peaksAndValleysDensityKernel = ChunkGenNetwork.Instance.peaksAndValleysDensityKernel;
+        int erosionDensityKernel = ChunkGenNetwork.Instance.erosionDensityKernel;
+        int largeCaveDensityKernel = ChunkGenNetwork.Instance.largeCaveDensityKernel;
         int threadSize = Mathf.CeilToInt(terrainDensityData.width / 4f) + 1;
         int voxelSize = (terrainDensityData.width + 1) * (terrainDensityData.width + 1) * (terrainDensityData.width + 1);
 
@@ -382,11 +377,6 @@ public class ComputeMarchingCubes : MonoBehaviour
 
         JobHandle marchingCubesHandler = marchingCubesJob.Schedule(iterations, 16);
         marchingCubesHandler.Complete();
-
-        if (terrainDensityData.waterLevel > chunkPos.y && terrainDensityData.waterLevel < Mathf.RoundToInt(chunkPos.y + terrainDensityData.width) && terrainDensityData.water)
-        {
-            waterGen.UpdateMesh();
-        }
 
         SetMeshValuesPerformant(triangleArray.Length, triangleArray, terraforming);
     }
