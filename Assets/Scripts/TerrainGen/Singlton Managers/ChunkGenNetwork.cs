@@ -184,8 +184,8 @@ public class ChunkGenNetwork : MonoBehaviour
             Destroy(gameObject);
 
         // VSYNC ON
-        QualitySettings.vSyncCount = 1;   // wait for monitor refresh
-        Application.targetFrameRate = -1; // let vsync control it
+        // QualitySettings.vSyncCount = 1;   // wait for monitor refresh
+        // Application.targetFrameRate = -1; // let vsync control it
 
         // DATA LEAK STACK TRACES ENABLED
         NativeLeakDetection.Mode = NativeLeakDetectionMode.EnabledWithStackTrace;
