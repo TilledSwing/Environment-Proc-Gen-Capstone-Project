@@ -57,7 +57,7 @@ public class ComputeMarchingCubes : MonoBehaviour
             heightsBuffer.Release();
         }
 
-        if (heightsArray.IsCreated)
+        if (heightsArray != null && heightsArray.IsCreated)
         {
             heightsArray.Dispose();
         }
@@ -72,7 +72,7 @@ public class ComputeMarchingCubes : MonoBehaviour
             heightsBuffer.Release();
         }
 
-        if (heightsArray.IsCreated)
+        if (heightsArray != null && heightsArray.IsCreated)
         {
             heightsArray.Dispose();
         }
@@ -110,6 +110,7 @@ public class ComputeMarchingCubes : MonoBehaviour
         int threadSize = Mathf.CeilToInt(terrainDensityData.width / 4f) + 1;
         int voxelSize = (terrainDensityData.width + 1) * (terrainDensityData.width + 1) * (terrainDensityData.width + 1);
         heightsBuffer = new ComputeBuffer(voxelSize, sizeof(float));
+        // heightsBuffer = ComputeBufferPoolManager.Instance.GetComputeBuffer("HeightsBuffer", voxelSize, sizeof(float));
 
         int i = 0;
         foreach (NoiseGenerator noiseGenerator in terrainDensityData.noiseGenerators)
@@ -173,6 +174,8 @@ public class ComputeMarchingCubes : MonoBehaviour
         {
             float[] tempHeightsArray = new float[voxelSize];
             heightsBuffer.GetData(tempHeightsArray, 0, 0, voxelSize);
+            heightsBuffer.Release();
+            // ComputeBufferPoolManager.Instance.ReturnComputeBuffer("HeightsBuffer", heightsBuffer);
             heightsArray = new(tempHeightsArray, Allocator.Persistent);
             MarchingCubesJobHandler(heightsArray, false);
         }
@@ -191,6 +194,8 @@ public class ComputeMarchingCubes : MonoBehaviour
                 NativeArray<float> raw = dataRequest.GetData<float>();
                 heightsArray = new NativeArray<float>(raw.Length, Allocator.Persistent);
                 heightsArray.CopyFrom(raw);
+                heightsBuffer.Release();
+                // ComputeBufferPoolManager.Instance.ReturnComputeBuffer("HeightsBuffer", heightsBuffer);
 
                 ChunkGenNetwork.Instance.marchingCubesJobQueue.Enqueue(new ChunkGenNetwork.MCQueueObject(owner, false));
             }), dst);
