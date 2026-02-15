@@ -27039,7 +27039,6 @@ MonoBehaviour:
   viewer: {fileID: 1588582780}
   viewerPos: {x: 0, y: 0, z: 0}
   updateDistanceThreshold: 12
-  chunkLoadPriorityAngle: 60
   chunkSize: 0
   chunksVisible: 0
   useFixedMapSize: 0
@@ -27049,7 +27048,6 @@ MonoBehaviour:
   terrainDensityData: {fileID: 11400000, guid: 4bc939f839855ea45ade17dce060eea5, type: 2}
   assetSpawnData: {fileID: 11400000, guid: ac92efdaf283ed346bf2f132639a35ad, type: 2}
   terrainTextureData: {fileID: 11400000, guid: 1fa52b57a0c85a34eb28c4f99612d21f, type: 2}
-  marchingCubesComputeShader: {fileID: 7200000, guid: d2f49f4c36241c7468a0705fa73f69a5, type: 3}
   terrainDensityComputeShader: {fileID: 7200000, guid: 1caae6b81357a864095f47aab860122c, type: 3}
   baseDensityKernel: 0
   continentalnessDensityKernel: 0

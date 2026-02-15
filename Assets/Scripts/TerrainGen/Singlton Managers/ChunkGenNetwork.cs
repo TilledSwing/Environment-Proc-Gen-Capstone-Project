@@ -207,6 +207,15 @@ public class ChunkGenNetwork : MonoBehaviour
         public int cellularReturnType;
         public float cellularJitter;
     }
+    public enum Axis
+    {
+        POSXAXIS = 0,
+        POSYAXIS = 1,
+        POSZAXIS = 2,
+        NEGXAXIS = 3,
+        NEGYAXIS = 4,
+        NEGZAXIS = 5,
+    }
     void Awake()
     {
         // Make a singleton
@@ -468,10 +477,6 @@ public class ChunkGenNetwork : MonoBehaviour
             UpdateVisibleChunks();
             lastUpdateViewerPos = viewerPos;
         }
-        else if (!initialLoadComplete)
-        {
-            UpdateVisibleChunks();
-        }
         if (!isLoadingAssetInstantiations && pendingAssetInstantiations.Count > 0)
         {
             StartCoroutine(LoadAssetInstantiationsOverTime());
@@ -508,9 +513,9 @@ public class ChunkGenNetwork : MonoBehaviour
         }
         chunksVisibleLastUpdate.Clear();
 
-        int currentChunkCoordX = Mathf.RoundToInt(viewerPos.x / chunkSize);
-        int currentChunkCoordY = Mathf.RoundToInt(viewerPos.y / chunkSize);
-        int currentChunkCoordZ = Mathf.RoundToInt(viewerPos.z / chunkSize);
+        int currentChunkCoordX = Mathf.FloorToInt(viewerPos.x / chunkSize);
+        int currentChunkCoordY = Mathf.FloorToInt(viewerPos.y / chunkSize);
+        int currentChunkCoordZ = Mathf.FloorToInt(viewerPos.z / chunkSize);
 
         if (viewerPos.y <= -5 && !lightingBlockerRenderer.enabled)
         {
@@ -531,6 +536,13 @@ public class ChunkGenNetwork : MonoBehaviour
             {
                 for (int zOffset = -chunksVisible; zOffset <= chunksVisible; zOffset++)
                 {
+                    // bool isEdge = false;
+                    // if (xOffset == -chunksVisible || xOffset == chunksVisible ||
+                    //     yOffset == -chunksVisible || yOffset == chunksVisible ||
+                    //     zOffset == -chunksVisible || zOffset == chunksVisible)
+                    //     isEdge = true;
+                    // if (!isEdge && initialLoadComplete) continue;
+                    
                     int currentX = currentChunkCoordX + xOffset;
                     int currentY = currentChunkCoordY + yOffset;
                     int currentZ = currentChunkCoordZ + zOffset;
@@ -550,7 +562,7 @@ public class ChunkGenNetwork : MonoBehaviour
                     float viewerDstFromBound = bounds.SqrDistance(viewerPos);
                     // float viewerDstFromBound = CalculateDstFromBound(viewedChunkCoord, viewerPos);
 
-                    if (chunkDictionary.TryGetValue(chunkCoordId, out TerrainChunk dictChunk))
+                    if (chunkDictionary.TryGetValue(chunkCoordId, out TerrainChunk dictChunk) && viewerDstFromBound <= maxViewDstSqr)
                     {
                         dictChunk.UpdateChunk(maxViewDst, viewerDstFromBound);
                         if (dictChunk.visible)
@@ -558,7 +570,7 @@ public class ChunkGenNetwork : MonoBehaviour
                     }
                     else
                     {
-                        if (!initialLoadComplete && viewerDstFromBound <= maxViewDstSqr)
+                        if (!initialLoadComplete)
                         {
                             // Generate immediately during first load
                             TerrainChunk chunk = new TerrainChunk(chunkCoordId, viewedChunkCoord, chunkSize, chunkParent, 
@@ -567,22 +579,19 @@ public class ChunkGenNetwork : MonoBehaviour
                                                                   noiseGeneratorTextureArray);
                             chunkDictionary.Add(chunkCoordId, chunk);
                             chunk.UpdateChunk(maxViewDst, viewerDstFromBound);
-
                             if (chunk.visible)
                                 chunksVisibleLastUpdate.Add(chunkCoordId);
                         }
                         else
                         {
-                            if (!chunkLoadSet.Contains(chunkCoordId))
+                            Vector3 chunkCenter = (viewedChunkCoord * chunkSize) + halfChunkVec;
+                            Vector3 toChunk = Vector3.Normalize(chunkCenter - viewerPos); 
+                            float angle = Vector3.Angle(movementDir, toChunk); 
+                            if (angle > 60f) continue;
+
+                            if (chunkLoadSet.Add(chunkCoordId))
                             {
-                                Vector3 chunkCenter = (viewedChunkCoord * chunkSize) + halfChunkVec;
-
-                                Vector3 toChunk = Vector3.Normalize(chunkCenter - viewerPos); 
-                                float angle = Vector3.Angle(movementDir, toChunk); 
-                                if (angle > 60f) continue;
-
                                 chunkLoadQueue.Enqueue(viewedChunkCoord, viewerDstFromBound);
-                                chunkLoadSet.Add(chunkCoordId);
                             }
                         }
                     }
@@ -667,48 +676,13 @@ public class ChunkGenNetwork : MonoBehaviour
         Vector3 movementVector = Vector3.Normalize(viewerPos - lastUpdateViewerPos); 
         Vector3 movementDir = movementVector.sqrMagnitude > 0.01f ? movementVector : cameraForwardVector; 
 
-        for (int iOffset = -chunksVisible; iOffset <= chunksVisible; iOffset++)
-        {
-            for (int jOffset = -chunksVisible; jOffset <= chunksVisible; jOffset++)
-            {
-                // int currentX = currentChunkCoordX + iOffset;
-                // int currentY = currentChunkCoordY + jOffset;
-                // int currentZ = currentChunkCoordZ + zOffset;
-                // Vector3Int viewedChunkCoord = new Vector3Int(currentX, currentY, currentZ);
-                // long chunkCoordId = PackChunkCoord(currentX, currentY, currentZ);
+        ChunkChecker(movementDir, currentChunkCoordX, currentChunkCoordY, currentChunkCoordZ, Axis.POSXAXIS);
+        ChunkChecker(movementDir, currentChunkCoordX, currentChunkCoordY, currentChunkCoordZ, Axis.NEGXAXIS);
+        ChunkChecker(movementDir, currentChunkCoordX, currentChunkCoordY, currentChunkCoordZ, Axis.POSYAXIS);
+        ChunkChecker(movementDir, currentChunkCoordX, currentChunkCoordY, currentChunkCoordZ, Axis.NEGYAXIS);
+        ChunkChecker(movementDir, currentChunkCoordX, currentChunkCoordY, currentChunkCoordZ, Axis.POSZAXIS);
+        ChunkChecker(movementDir, currentChunkCoordX, currentChunkCoordY, currentChunkCoordZ, Axis.NEGZAXIS);
 
-                // if ((currentY > 0 && currentChunkCoordY > maxWorldYChunks) || (currentY < 0 && currentChunkCoordY < -maxWorldYChunks))
-                //     continue;
-
-                // if (useFixedMapSize)
-                // {
-                //     if (math.abs(currentX) > ((mapSize - 1) / 2) || math.abs(currentZ) > ((mapSize - 1) / 2))
-                //         continue;
-                // }
-
-                // Bounds bounds = new Bounds((viewedChunkCoord * chunkSize) + (new Vector3(0.5f, 0.5f, 0.5f) * chunkSize), Vector3.one * chunkSize);
-                // float viewerDstFromBound = bounds.SqrDistance(viewerPos);
-                // // float viewerDstFromBound = CalculateDstFromBound(viewedChunkCoord, viewerPos);
-
-                // if (chunkDictionary.TryGetValue(chunkCoordId, out TerrainChunk dictChunk))
-                // {
-                //     dictChunk.UpdateChunk(maxViewDst, viewerDstFromBound);
-                //     if (dictChunk.visible)
-                //         chunksVisibleLastUpdate.Add(chunkCoordId);
-                // }
-                // else if (!chunkLoadSet.Contains(chunkCoordId))
-                // {
-                //     Vector3 chunkCenter = (viewedChunkCoord * chunkSize) + halfChunkVec;
-
-                //     Vector3 toChunk = Vector3.Normalize(chunkCenter - viewerPos); 
-                //     float angle = Vector3.Angle(movementDir, toChunk); 
-                //     if (angle > 60f) continue;
-
-                //     chunkLoadQueue.Enqueue(viewedChunkCoord, viewerDstFromBound);
-                //     chunkLoadSet.Add(chunkCoordId);
-                // }
-            }
-        }
         if (!initialLoadComplete)
         {
             initialLoadComplete = true;
@@ -758,49 +732,92 @@ public class ChunkGenNetwork : MonoBehaviour
             chunkVisibilityQueue.Enqueue(new ChunkVisibility(chunkToShow, true));
         }
     }
-    public void ChunkChecker(Vector3 cameraForwardVector, Vector3 movementVector, Vector3 movementDir,
-                             bool xDir, bool yDir, bool zDir)
+    public void ChunkChecker(Vector3 movementDir, int currentChunkCoordX, int currentChunkCoordY, int currentChunkCoordZ, Axis axis)
     {
         for (int iOffset = -chunksVisible; iOffset <= chunksVisible; iOffset++)
         {
             for (int jOffset = -chunksVisible; jOffset <= chunksVisible; jOffset++)
             {
-                // int currentX = currentChunkCoordX + iOffset;
-                // int currentY = currentChunkCoordY + jOffset;
-                // int currentZ = currentChunkCoordZ + zOffset;
-                // Vector3Int viewedChunkCoord = new Vector3Int(currentX, currentY, currentZ);
-                // long chunkCoordId = PackChunkCoord(currentX, currentY, currentZ);
+                int xOffset = 0;
+                int yOffset = 0;
+                int zOffset = 0;
+                switch (axis)
+                {
+                    case Axis.POSXAXIS:
+                        xOffset = chunksVisible;
+                        yOffset = iOffset;
+                        zOffset = jOffset;
+                        break;
+                    case Axis.NEGXAXIS:
+                        xOffset = -chunksVisible;
+                        yOffset = iOffset;
+                        zOffset = jOffset;
+                        break;
+                    case Axis.POSYAXIS:
+                        yOffset = chunksVisible;
+                        xOffset = iOffset;
+                        zOffset = jOffset;
+                        if (xOffset == -chunksVisible || xOffset == chunksVisible)
+                            continue;
+                        break;
+                    case Axis.NEGYAXIS:
+                        yOffset = -chunksVisible;
+                        xOffset = iOffset;
+                        zOffset = jOffset;
+                        if (xOffset == -chunksVisible || xOffset == chunksVisible)
+                            continue;
+                        break;
+                    case Axis.POSZAXIS:
+                        zOffset = chunksVisible;
+                        xOffset = iOffset;
+                        yOffset = jOffset;
+                        if (xOffset == -chunksVisible || xOffset == chunksVisible || yOffset == -chunksVisible || yOffset == chunksVisible)
+                            continue;
+                        break;
+                    case Axis.NEGZAXIS:
+                        zOffset = -chunksVisible;
+                        xOffset = iOffset;
+                        yOffset = jOffset;
+                        if (xOffset == -chunksVisible || xOffset == chunksVisible || yOffset == -chunksVisible || yOffset == chunksVisible)
+                            continue;
+                        break;
+                }
+                int currentX = currentChunkCoordX + xOffset;
+                int currentY = currentChunkCoordY + yOffset;
+                int currentZ = currentChunkCoordZ + zOffset;
+                Vector3Int viewedChunkCoord = new Vector3Int(currentX, currentY, currentZ);
+                long chunkCoordId = PackChunkCoord(currentX, currentY, currentZ);
 
-                // if ((currentY > 0 && currentChunkCoordY > maxWorldYChunks) || (currentY < 0 && currentChunkCoordY < -maxWorldYChunks))
-                //     continue;
+                if ((currentY > 0 && currentChunkCoordY > maxWorldYChunks) || (currentY < 0 && currentChunkCoordY < -maxWorldYChunks))
+                    continue;
 
-                // if (useFixedMapSize)
-                // {
-                //     if (math.abs(currentX) > ((mapSize - 1) / 2) || math.abs(currentZ) > ((mapSize - 1) / 2))
-                //         continue;
-                // }
+                if (useFixedMapSize)
+                {
+                    if (math.abs(currentX) > ((mapSize - 1) / 2) || math.abs(currentZ) > ((mapSize - 1) / 2))
+                        continue;
+                }
 
-                // Bounds bounds = new Bounds((viewedChunkCoord * chunkSize) + (new Vector3(0.5f, 0.5f, 0.5f) * chunkSize), Vector3.one * chunkSize);
-                // float viewerDstFromBound = bounds.SqrDistance(viewerPos);
-                // // float viewerDstFromBound = CalculateDstFromBound(viewedChunkCoord, viewerPos);
+                Bounds bounds = new Bounds((viewedChunkCoord * chunkSize) + (new Vector3(0.5f, 0.5f, 0.5f) * chunkSize), Vector3.one * chunkSize);
+                float viewerDstFromBound = bounds.SqrDistance(viewerPos);
 
-                // if (chunkDictionary.TryGetValue(chunkCoordId, out TerrainChunk dictChunk))
-                // {
-                //     dictChunk.UpdateChunk(maxViewDst, viewerDstFromBound);
-                //     if (dictChunk.visible)
-                //         chunksVisibleLastUpdate.Add(chunkCoordId);
-                // }
-                // else if (!chunkLoadSet.Contains(chunkCoordId))
-                // {
-                //     Vector3 chunkCenter = (viewedChunkCoord * chunkSize) + halfChunkVec;
-
-                //     Vector3 toChunk = Vector3.Normalize(chunkCenter - viewerPos); 
-                //     float angle = Vector3.Angle(movementDir, toChunk); 
-                //     if (angle > 60f) continue;
-
-                //     chunkLoadQueue.Enqueue(viewedChunkCoord, viewerDstFromBound);
-                //     chunkLoadSet.Add(chunkCoordId);
-                // }
+                if (chunkDictionary.TryGetValue(chunkCoordId, out TerrainChunk dictChunk))
+                {
+                    dictChunk.UpdateChunk(maxViewDst, viewerDstFromBound);
+                    if (dictChunk.visible)
+                        chunksVisibleLastUpdate.Add(chunkCoordId);
+                }
+                else
+                {
+                    Vector3 chunkCenter = (viewedChunkCoord * chunkSize) + halfChunkVec;
+                    Vector3 toChunk = Vector3.Normalize(chunkCenter - viewerPos); 
+                    float angle = Vector3.Angle(movementDir, toChunk); 
+                    if (angle > 60f) continue;
+                    
+                    if (chunkLoadSet.Add(chunkCoordId))
+                    {
+                        chunkLoadQueue.Enqueue(viewedChunkCoord, viewerDstFromBound);
+                    }
+                }
             }
         }
     }
@@ -834,7 +851,7 @@ public class ChunkGenNetwork : MonoBehaviour
                 chunkBatchCounter++;
             }
 
-            if (chunkBatchCounter % 4 == 0)
+            if (chunkBatchCounter % 8 == 0)
             {
                 yield return null;
             }
@@ -863,7 +880,7 @@ public class ChunkGenNetwork : MonoBehaviour
                 }
             }
 
-            // 1 readback per 20 fps with a min and max of 2 and 6
+            // 1 readback per 10 fps with a min and max of 2 and 6
             int maxActiveReadbacks = Mathf.Clamp(Mathf.RoundToInt(1f / Time.smoothDeltaTime / 10f), 2, 6);
 
             while (activeRequests.Count <= maxActiveReadbacks && pendingReadbacks.Count > 0)
@@ -1142,9 +1159,9 @@ public class ChunkGenNetwork : MonoBehaviour
         public MeshFilter meshFilter;
         public MeshRenderer meshRenderer;
         public bool visible = false;
-        public TerrainChunk(long chunkId, Vector3Int chunkCoord, int chunkSize, Transform parent, TerrainDensityData terrainDensityData, AssetSpawnData assetSpawnData, 
-                            ComputeShader terrainDensityComputeShader, Material terrainMaterial, Material waterMaterial, 
-                            bool initialLoadComplete, Texture2D[] noiseGeneratorTextureArray)
+        public TerrainChunk(long chunkId, Vector3Int chunkCoord, int chunkSize, Transform parent, TerrainDensityData terrainDensityData, 
+                            AssetSpawnData assetSpawnData, ComputeShader terrainDensityComputeShader, Material terrainMaterial, 
+                            Material waterMaterial, bool initialLoadComplete, Texture2D[] noiseGeneratorTextureArray)
         {
             this.chunkId = chunkId;
             this.chunkCoord = chunkCoord;
