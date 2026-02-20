@@ -12,6 +12,7 @@ public class ComputeMarchingCubes : MonoBehaviour
 {
     public ChunkGenNetwork.TerrainChunk owner;
     public ComputeShader terrainDensityComputeShader;
+    public GrassRender grass;
     public MeshFilter meshFilter;
     public MeshCollider meshCollider;
     public Texture2D[] noiseGeneratorTextureArray;
@@ -236,8 +237,6 @@ public class ComputeMarchingCubes : MonoBehaviour
         NativeSlice<int> slice = ChunkGenNetwork.Instance.staticMaxSizeVertexIndexArray.Slice(0, triangleCount * 3);
         slice.CopyTo(indexBuffer);
 
-        triangleArray.Dispose();
-
         meshData.subMeshCount = 1;
         meshData.SetSubMesh(0, new SubMeshDescriptor(0, triangleCount * 3, MeshTopology.Triangles));
 
@@ -261,17 +260,27 @@ public class ComputeMarchingCubes : MonoBehaviour
         if (!terraforming)
         {
             assetSpawner.SpawnAssets();
-            // if(chunkPos.y + terrainDensityData.width >= terrainDensityData.waterLevel && assetSpawner.chunkVertices.Length > 0)
-            // {
-            //     GrassRender grass = gameObject.AddComponent<GrassRender>();
-            //     grass.chunkPos = chunkPos;
-            //     grass.grassDensity = ChunkGenNetwork.Instance.grassDensity;
-            //     grass.grassMaterial = ChunkGenNetwork.Instance.grassMaterial;
-            //     grass.grassMesh = ChunkGenNetwork.Instance.grassMesh;
-            //     grass.grassPositionComputeShader = ChunkGenNetwork.Instance.grassPositionComputeShader;
-            //     grass.grassPositions = assetSpawner.chunkVertices.ToArray();
-            //     grass.bounds = mesh.bounds;
-            // }
+            if(chunkPos.y + terrainDensityData.width >= terrainDensityData.waterLevel && assetSpawner.chunkVertices.Length >= 8)
+            {
+                grass = gameObject.AddComponent<GrassRender>();
+                grass.chunkPos = chunkPos;
+                grass.grassDensity = ChunkGenNetwork.Instance.grassDensity;
+                grass.grassMaterial = ChunkGenNetwork.Instance.grassMaterial;
+                grass.grassMesh = ChunkGenNetwork.Instance.grassMesh;
+                grass.grassPositionComputeShader = ChunkGenNetwork.Instance.grassPositionComputeShader;
+                grass.grassTriangles = triangleArray.AsArray().ToArray();
+                grass.bounds = mesh.bounds;
+                grass.SetupGrass();
+                triangleArray.Dispose();
+            }
+            else
+            {
+                triangleArray.Dispose();
+            }
+        }
+        else
+        {
+            triangleArray.Dispose();
         }
     }
     /// <summary>

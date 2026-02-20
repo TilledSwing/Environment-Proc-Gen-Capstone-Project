@@ -13,7 +13,7 @@ using UnityEngine.Rendering.Universal;
 public class ChunkGenNetwork : MonoBehaviour
 {
     public static ChunkGenNetwork Instance;
-    private Transform mainCameraTransform;
+    public Transform mainCameraTransform;
     // Fog Render Feature Stuff
     public Material fogMat;
     public float fogDensity;
@@ -67,6 +67,7 @@ public class ChunkGenNetwork : MonoBehaviour
     public Mesh grassMesh;
     public Material grassMaterial;
     public int grassDensity;
+    public float maxGrassSlope;
     // Texture Arrays
     public Texture2DArray textureArray;
     public float[] useHeights;
@@ -225,8 +226,8 @@ public class ChunkGenNetwork : MonoBehaviour
             Destroy(gameObject);
 
         // VSYNC ON
-        // QualitySettings.vSyncCount = 1;   // wait for monitor refresh
-        // Application.targetFrameRate = -1; // let vsync control it
+        QualitySettings.vSyncCount = 1;   // wait for monitor refresh
+        Application.targetFrameRate = -1; // let vsync control it
 
         // DATA LEAK STACK TRACES ENABLED
         NativeLeakDetection.Mode = NativeLeakDetectionMode.EnabledWithStackTrace;
@@ -266,6 +267,7 @@ public class ChunkGenNetwork : MonoBehaviour
         waterMaterial.SetFloat("_fogDensity", fogDensity);
         waterMaterial.SetColor("_fogColor", lowerFogColor);
         waterMaterial.SetFloat("_fogActive", 0);
+        WaterMaterialSetup.Instance.SetupWaves(waterMaterial);
         SetFogActive(false);
         viewerPos = viewer.position;
         lastUpdateViewerPos = viewerPos;

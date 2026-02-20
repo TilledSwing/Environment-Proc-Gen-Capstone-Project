@@ -2,84 +2,138 @@ Shader "Custom/GrassShader"
 {
     Properties
     {
-        _MinHeight("Min Height", Float) = 30.0
-        _MaxHeight("Max Height", Float) = 60.0
+        _BaseColor ("BaseColor", Color) = (0,0,0,1)
+        _TipColor ("TipColor", Color) = (0,0,0,1)
     }
     SubShader
     {
-        // Pass
-        // {
-        //     Name "DepthOnly"
-        //     Tags { "LightMode" = "DepthOnly" }
+        Pass
+        {
+            Name "DepthOnly"
+            Tags { "LightMode" = "DepthNormals" }
 
-        //     Cull Back
-        //     ZWrite On
-        //     ColorMask 0
+            Cull Off
+            ZWrite On
+            ZTest LEqual
 
-        //     HLSLPROGRAM
-        //     #pragma vertex vert
-        //     #pragma fragment frag
-        //     #pragma multi_compile_instancing
+            HLSLPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
+            #pragma multi_compile_instancing
 
-        //     #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Hashes.hlsl"
 
-        //     struct Attributes
-        //     {
-        //         // The positionOS variable contains the vertex positions in object space.
-        //         float4 positionOS : POSITION;
-        //         uint instanceID : SV_InstanceID;
-        //     };
+            float2 GradientNoiseDeterministicDirfloat(float2 p)
+            {
+                float x; 
+                Hash_Tchou_2_1_float(p, x);
+                return normalize(float2(x - floor(x + 0.5), abs(x) - 0.5));
+            }
 
-        //     struct Varyings
-        //     {
-        //         // The positions in this struct must have the SV_POSITION semantic.
-        //         float4 positionHCS : SV_POSITION;
-        //         float3 worldPos : TEXCOORD0;
-        //         float minHeightCutoff : TEXCOORD1;
-        //         float maxHeightCutoff : TEXCOORD2;
-        //     };
+            float GradientNoiseDeterministicfloat (float2 UV, float Scale)
+            {
+                float2 p = UV * Scale;
+                float2 ip = floor(p);
+                float2 fp = frac(p);
+                float d00 = dot(GradientNoiseDeterministicDirfloat(ip), fp);
+                float d01 = dot(GradientNoiseDeterministicDirfloat(ip + float2(0, 1)), fp - float2(0, 1));
+                float d10 = dot(GradientNoiseDeterministicDirfloat(ip + float2(1, 0)), fp - float2(1, 0));
+                float d11 = dot(GradientNoiseDeterministicDirfloat(ip + float2(1, 1)), fp - float2(1, 1));
+                fp = fp * fp * fp * (fp * (fp * 6 - 15) + 10);
+                return lerp(lerp(d00, d01, fp.y), lerp(d10, d11, fp.y), fp.x) + 0.5;
+            }
 
-        //     struct Vertex
-        //     {
-        //         float3 position;
-        //         float3 normal;
-        //     };
+            struct Attributes
+            {
+                // The positionOS variable contains the vertex positions in object space.
+                float4 positionOS : POSITION;
+                float3 normalOS : NORMAL;
+                uint instanceID : SV_InstanceID;
+            };
 
-        //     StructuredBuffer<Vertex> _Positions;
-        //     float _MinHeight;
-        //     float _MaxHeight;
+            struct Varyings
+            {
+                // The positions in this struct must have the SV_POSITION semantic.
+                float4 positionHCS : SV_POSITION;
+                float3 worldPos : TEXCOORD0;
+                float3 worldNormal : TEXCOORD1;
+            };
 
-        //     Varyings vert(Attributes IN)
-        //     {
-        //         Varyings OUT;
-        //         uint instanceID = IN.instanceID;
-        //         float3 instanceOffset = _Positions[instanceID].position;
+            struct GrassBlade
+            {
+                float3 position;
+                float rotation;
+                float height;
+                float curve;
+                float3 terrainNormal;
+            };
 
-        //         float3 worldPos = IN.positionOS.xyz * 2 + instanceOffset;
-        //         OUT.positionHCS = TransformWorldToHClip(worldPos);
-        //         OUT.worldPos = worldPos;
+            StructuredBuffer<GrassBlade> _Positions;
+            // float _MinHeight;
+            // float _MaxHeight;
 
-        //         OUT.minHeightCutoff = instanceOffset.y - (_MinHeight + 0);
-        //         OUT.maxHeightCutoff = (_MaxHeight - 8) - instanceOffset.y;
+            Varyings vert(Attributes IN)
+            {
+                Varyings OUT;
+                uint instanceID = IN.instanceID;
+                GrassBlade grassBlade = _Positions[instanceID];
+                float3 instanceOffset = grassBlade.position;
+                float sinRot = sin(grassBlade.rotation);
+                float cosRot = cos(grassBlade.rotation);
 
-        //         return OUT;
-        //     }
+                // Y-axis rotation
+                float3 local = IN.positionOS.xyz;
+                local.z += pow(local.y, 2) * grassBlade.curve;
+                float3 rotated;
+                rotated.x = local.x * cosRot - local.z * sinRot;
+                rotated.z = local.x * sinRot + local.z * cosRot;
+                rotated.y = local.y * grassBlade.height;
 
-        //     float4 frag(Varyings IN) : SV_Target
-        //     {
-        //         clip(IN.minHeightCutoff);
-        //         clip(IN.maxHeightCutoff);
+                float3 worldPos = rotated + instanceOffset;
+                float windDirX = (GradientNoiseDeterministicfloat(worldPos.xz * 0.1 + _Time.z * 0.1, 1) + 1) * PI;
+                float windDirZ = (GradientNoiseDeterministicfloat(worldPos.xz * 0.1 + _Time.z * 0.1 + instanceID, 1) + 1) * PI;
+                float windStr = GradientNoiseDeterministicfloat(worldPos.xz * 0.5 + _Time.z * 0.35, 1) * 0.2;
 
-        //         return 0;
-        //     }
-        //     ENDHLSL
-        // }
+                float3 bend = float3(windDirX, 0, windDirZ) * windStr * rotated.y;
+                worldPos += bend;
+
+                OUT.positionHCS = TransformWorldToHClip(worldPos);
+                OUT.worldPos = worldPos;
+                
+                float3 normalLocal = IN.normalOS;
+                float3 rotatedNormal;
+                rotatedNormal.x = normalLocal.x * cosRot - normalLocal.z * sinRot;
+                rotatedNormal.z = normalLocal.x * sinRot + normalLocal.z * cosRot;
+                rotatedNormal.y = normalLocal.y;
+                
+                float dist = distance(_WorldSpaceCameraPos, worldPos);
+                float blend = saturate((dist - 50) / (100 - 50));
+
+                float3 blendedNormal = normalize(lerp(TransformObjectToWorldNormal(rotatedNormal), grassBlade.terrainNormal, blend));
+                OUT.worldNormal = blendedNormal;
+
+                return OUT;
+            }
+
+            float4 frag(Varyings IN, bool isFrontFace : SV_IsFrontFace) : SV_Target
+            {
+                float3 normalWS = normalize(IN.worldNormal);
+                if (!isFrontFace) 
+                {
+                    normalWS = -normalWS;
+                }
+                return float4(NormalizeNormalPerPixel(normalWS) * 0.5 + 0.5, 0);
+            }
+            ENDHLSL
+        }
         Pass
             {
             Tags { "RenderType"="Opaque" "Queue"="Opaque" "RenderPipeline"="UniversalPipeline" "Lightmode"="UniversalForward"}
             LOD 200
             Cull Off
-            ZWrite Off
+            ZWrite On
+            ZTest LEqual
 
             HLSLPROGRAM
             // This line defines the name of the vertex shader.
@@ -103,6 +157,27 @@ Shader "Custom/GrassShader"
             #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/CommonMaterial.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/RealtimeLights.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
+            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Hashes.hlsl"
+
+            float2 GradientNoiseDeterministicDirfloat(float2 p)
+            {
+                float x; 
+                Hash_Tchou_2_1_float(p, x);
+                return normalize(float2(x - floor(x + 0.5), abs(x) - 0.5));
+            }
+
+            float GradientNoiseDeterministicfloat (float2 UV, float Scale)
+            {
+                float2 p = UV * Scale;
+                float2 ip = floor(p);
+                float2 fp = frac(p);
+                float d00 = dot(GradientNoiseDeterministicDirfloat(ip), fp);
+                float d01 = dot(GradientNoiseDeterministicDirfloat(ip + float2(0, 1)), fp - float2(0, 1));
+                float d10 = dot(GradientNoiseDeterministicDirfloat(ip + float2(1, 0)), fp - float2(1, 0));
+                float d11 = dot(GradientNoiseDeterministicDirfloat(ip + float2(1, 1)), fp - float2(1, 1));
+                fp = fp * fp * fp * (fp * (fp * 6 - 15) + 10);
+                return lerp(lerp(d00, d01, fp.y), lerp(d10, d11, fp.y), fp.x) + 0.5;
+            }
 
             struct Attributes
             {
@@ -121,66 +196,104 @@ Shader "Custom/GrassShader"
                 float3 worldNormal : TEXCOORD1;
                 float fogFactor : TEXCOORD2;
                 float4 shadowCoord : TEXCOORD3;
-                float minHeightCutoff : TEXCOORD4;
-                float maxHeightCutoff : TEXCOORD5;
+                float grassHeight : TEXCOORD4;
             };
 
-            struct Vertex
+            struct GrassBlade
             {
                 float3 position;
-                float3 normal;
+                float rotation;
+                float height;
+                float curve;
+                float3 terrainNormal;
             };
 
-            StructuredBuffer<Vertex> _Positions;
-            float _MinHeight;
-            float _MaxHeight;
+            StructuredBuffer<GrassBlade> _Positions;
+            float4 _BaseColor;
+            float4 _TipColor;
 
             Varyings vert(Attributes IN)
             {
                 Varyings OUT;
                 uint instanceID = IN.instanceID;
-                float3 instanceOffset = _Positions[instanceID].position;
+                GrassBlade grassBlade = _Positions[instanceID];
+                float3 instanceOffset = grassBlade.position;
+                float sinRot = sin(grassBlade.rotation);
+                float cosRot = cos(grassBlade.rotation);
 
-                float3 worldPos = IN.positionOS.xyz * 2 + instanceOffset;
+                // Y-axis rotation
+                float3 local = IN.positionOS.xyz;
+                local.z += pow(local.y, 2) * grassBlade.curve;
+                float3 rotated;
+                rotated.x = local.x * cosRot - local.z * sinRot;
+                rotated.z = local.x * sinRot + local.z * cosRot;
+                rotated.y = local.y * grassBlade.height;
+
+                float3 worldPos = rotated + instanceOffset;
+                float windDirX = (GradientNoiseDeterministicfloat(worldPos.xz * 0.1 + _Time.z * 0.1, 1) + 1) * PI;
+                float windDirZ = (GradientNoiseDeterministicfloat(worldPos.xz * 0.1 + _Time.z * 0.1 + instanceID, 1) + 1) * PI;
+                float windStr = GradientNoiseDeterministicfloat(worldPos.xz * 0.5 + _Time.z * 0.35, 1) * 0.2;
+
+                float3 bend = float3(windDirX, 0, windDirZ) * windStr * rotated.y;
+                float dist = distance(_WorldSpaceCameraPos, worldPos);
+                float blend = saturate((dist - 80) / (120 - 80));
+                worldPos += bend * (1 - blend);
+
                 OUT.positionHCS = TransformWorldToHClip(worldPos);
                 OUT.fogFactor = ComputeFogFactor(OUT.positionHCS.z);
                 OUT.worldPos = worldPos;
-                OUT.worldNormal = TransformObjectToWorldNormal(IN.normalOS);
+
+                float3 normalLocal = IN.normalOS;
+                float3 rotatedNormal;
+                rotatedNormal.x = normalLocal.x * cosRot - normalLocal.z * sinRot;
+                rotatedNormal.z = normalLocal.x * sinRot + normalLocal.z * cosRot;
+                rotatedNormal.y = normalLocal.y;
+
+                float3 blendedNormal = normalize(lerp(TransformObjectToWorldNormal(rotatedNormal), grassBlade.terrainNormal, blend));
+                OUT.worldNormal = blendedNormal;
 
                 VertexPositionInputs vertexInput = GetVertexPositionInputs(IN.positionOS.xyz);
                 #if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
                 OUT.shadowCoord = GetShadowCoord(vertexInput);
                 #endif
 
-                OUT.minHeightCutoff = instanceOffset.y - (_MinHeight + 0);
-                OUT.maxHeightCutoff = (_MaxHeight - 8) - instanceOffset.y;
+                OUT.grassHeight = IN.positionOS.y;
 
                 return OUT;
             }
 
-            float4 frag(Varyings IN) : SV_Target
+            float4 frag(Varyings IN, bool isFrontFace : SV_IsFrontFace) : SV_Target
             {
-                clip(IN.minHeightCutoff);
-                clip(IN.maxHeightCutoff);
+                float height01 = saturate(IN.grassHeight);
+
+                float3 mixedGradientColor = lerp(_BaseColor, _TipColor, height01);
+                float ao = pow(1 - height01, 2);
+                mixedGradientColor *= lerp(1, 0.5, ao);
+
+                float3 normalWS = normalize(IN.worldNormal);
+                if (!isFrontFace) 
+                {
+                    normalWS = -normalWS;
+                }
 
                 InputData inputData = (InputData)0;
                 inputData.positionWS = IN.worldPos;
-                inputData.normalWS = IN.worldNormal;
+                inputData.normalWS = normalWS;
                 inputData.viewDirectionWS = normalize(_WorldSpaceCameraPos - IN.worldPos);
                 inputData.shadowCoord = TransformWorldToShadowCoord(IN.worldPos);
                 inputData.fogCoord = 0;
-                inputData.bakedGI = SampleSH(inputData.normalWS);
+                inputData.bakedGI = saturate(SampleSH(inputData.normalWS) + float3(0.01, 0.01, 0.01));
                 inputData.vertexLighting = 0;
                 inputData.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(IN.positionHCS);
                 inputData.shadowMask = 1;
 
                 SurfaceData surfaceData;
-                surfaceData.albedo = float3(0,1,0);
+                surfaceData.albedo = mixedGradientColor;
                 surfaceData.alpha = 1;
                 surfaceData.metallic = 0.0;
-                surfaceData.specular = 0.2;
+                surfaceData.specular = 0.4;
                 surfaceData.smoothness = 0.5;
-                surfaceData.normalTS = float3(0,1,0);
+                surfaceData.normalTS = float3(0,0,1);
                 surfaceData.emission = 0.0;
                 surfaceData.occlusion = 1.0;
                 surfaceData.clearCoatMask = 0.0;

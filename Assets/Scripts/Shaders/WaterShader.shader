@@ -61,6 +61,15 @@ Shader "Custom/WaterShader"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/RealtimeLights.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
 
+            struct Wave
+            {
+                float4 direction;
+                float amplitude;
+                float wavelength;
+                float speed;
+                float phase;
+            };
+
             struct Attributes
             {
                 // The positionOS variable contains the vertex positions in object space.
@@ -84,6 +93,9 @@ Shader "Custom/WaterShader"
                 float3 worldTangent : TEXCOORD7;
                 float3 worldBitangent : TEXCOORD8;
             };
+
+            StructuredBuffer<Wave> _Waves;
+            int _WaveCount;
 
             float _Depth;
             float4 _ShallowColor;
@@ -116,15 +128,50 @@ Shader "Custom/WaterShader"
             float4 _fogColor;
             float _fogActive;
 
+            float SineWave(float2 posXZ, float2 dir, float amplitude, float wavelength, float speed, float time, float phase)
+            {
+                float frequency = 2.0 * PI / wavelength;
+                float direction = dot(dir, posXZ);
+                return amplitude * sin(direction * frequency + time * speed + phase);
+            }
+
+            float2 WaveDerivative(float2 posXZ, float2 dir, float amplitude, float wavelength, float speed, float time, float phase)
+            {
+                float frequency = 2.0 * PI / wavelength;
+                float direction = dot(dir, posXZ);
+                float c = amplitude * frequency * cos(direction * frequency + time * speed + phase);
+                return dir * c;
+            }
+
             Varyings vert(Attributes IN)
             {
                 Varyings OUT;
                 float3 worldPos = TransformObjectToWorld(IN.positionOS.xyz);
-                worldPos.y += sin(worldPos.x * _WaveSpeed + _Time.z) * _WaveAmplitude;
+                float height = 0;
+                float2 derivative = float2(0,0);
+                float2 position = worldPos.xz;
+                float time = _Time.z;
+
+                for (int i = 0; i < _WaveCount; i++)
+                {
+                    Wave wave = _Waves[i];
+
+                    float2 dir = normalize(wave.direction.xy);
+
+                    height += SineWave(position, dir, wave.amplitude, wave.wavelength, wave.speed, time, wave.phase);
+                    derivative += WaveDerivative(position, dir, wave.amplitude, wave.wavelength, wave.speed, time, wave.phase);
+                }
+
+                worldPos.y += height;
+
+                float3 normal = normalize(float3(-derivative.x, 1, -derivative.y));
+                OUT.worldNormal = normal;
+
+                // worldPos.y += sin(worldPos.x * _WaveSpeed + _Time.z) * _WaveAmplitude;
                 OUT.positionHCS = TransformWorldToHClip(worldPos);
                 OUT.fogFactor = ComputeFogFactor(OUT.positionHCS.z);
                 OUT.worldPos = worldPos;
-                OUT.worldNormal = TransformObjectToWorldNormal(IN.normalOS);
+                // OUT.worldNormal = TransformObjectToWorldNormal(IN.normalOS);
 
                 float2 refractionOffset1 = _Time.z * float2(_RefractionSpeed, _RefractionSpeed * 0.5);
                 float2 refractionOffset2 = _Time.z * float2(-_RefractionSpeed * 0.3, -_RefractionSpeed * 0.4);
@@ -224,10 +271,10 @@ Shader "Custom/WaterShader"
                 //Normals
                 float normalStrength = lerp(0, _NormalStrength, 1 - steppedNoise);
                 float3 normal = normalize(float3(blendedNormal * normalStrength + IN.worldNormal));
-                if (dot(IN.worldNormal, normalize(_WorldSpaceCameraPos - IN.worldPos)) < 0)
-                {
-                    normal = -normal;
-                }
+                // if (dot(IN.worldNormal, normalize(_WorldSpaceCameraPos - IN.worldPos)) < 0)
+                // {
+                //     normal = -normal;
+                // }
 
                 InputData inputData = (InputData)0;
                 inputData.positionWS = IN.worldPos;

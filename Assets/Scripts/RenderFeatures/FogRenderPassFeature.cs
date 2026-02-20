@@ -67,6 +67,8 @@ public class FogRenderPassFeature : ScriptableRendererFeature
 
         // Configures where the render pass should be injected.
         m_ScriptablePass.renderPassEvent = renderPassEvent;
+        m_ScriptablePass.ConfigureInput(ScriptableRenderPassInput.Normal);
+
     }
 
     // Here you can inject one or multiple render passes in the renderer.

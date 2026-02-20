@@ -27,7 +27,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d97e9e746664690449fb1f88800a78cd, type: 3}
   m_Name: EdgeDetectionRenderPassFeature
   m_EditorClassIdentifier: 
-  m_Active: 1
+  m_Active: 0
   material: {fileID: 2100000, guid: cd21a087edba7d04fb73d00b7515fa52, type: 2}
   renderPassEvent: 300
 --- !u!114 &11400000
@@ -101,7 +101,7 @@ MonoBehaviour:
     AOMethod: 1
     Downsample: 1
     AfterOpaque: 1
-    Source: 1
+    Source: 0
     NormalSamples: 1
     Intensity: 3
     DirectLightingStrength: 0.25

@@ -7,76 +7,90 @@ struct Vertex
     float3 normal;
 };
 
-RWStructuredBuffer<Vertex> GrassPositionsBuffer;
+struct Triangle
+{
+    Vertex v1;
+    Vertex v2;
+    Vertex v3;
+};
 
+struct GrassBlade 
+{
+    float3 position;
+    float rotation;
+    float height;
+    float curve;
+    float3 terrainNormal;
+};
+
+StructuredBuffer<Triangle> GrassTriangleBuffer;
+AppendStructuredBuffer<GrassBlade> GrassPositionsBuffer;
+
+int TriangleCount;
 uint ChunkSize;
 float3 ChunkPos;
 int GrassDensity;
 
-int FlattenIndex(float2 id, int size) {
-    return id.y * (size + 1) + id.x;
+int MinHeight;
+int MaxHeight;
+float MaxSlope;
+
+// Random hash function
+float Hash(uint seed)
+{
+    seed ^= 2747636419u;
+    seed *= 2654435769u;
+    seed ^= seed >> 16;
+    seed *= 2654435769u;
+    seed ^= seed >> 16;
+    seed *= 2654435769u;
+    return (seed & 0x00FFFFFF) / 16777216.0;
 }
 
-// inline float unity_noise_randomValue (float2 uv)
-// {
-//     return frac(sin(dot(uv, float2(12.9898, 78.233)))*43758.5453);
-// }
-
-// inline float unity_noise_interpolate (float a, float b, float t)
-// {
-//     return (1.0-t)*a + (t*b);
-// }
-
-// inline float unity_valueNoise (float2 uv)
-// {
-//     float2 i = floor(uv);
-//     float2 f = frac(uv);
-//     f = f * f * (3.0 - 2.0 * f);
-
-//     uv = abs(frac(uv) - 0.5);
-//     float2 c0 = i + float2(0.0, 0.0);
-//     float2 c1 = i + float2(1.0, 0.0);
-//     float2 c2 = i + float2(0.0, 1.0);
-//     float2 c3 = i + float2(1.0, 1.0);
-//     float r0 = unity_noise_randomValue(c0);
-//     float r1 = unity_noise_randomValue(c1);
-//     float r2 = unity_noise_randomValue(c2);
-//     float r3 = unity_noise_randomValue(c3);
-
-//     float bottomOfGrid = unity_noise_interpolate(r0, r1, f.x);
-//     float topOfGrid = unity_noise_interpolate(r2, r3, f.x);
-//     float t = unity_noise_interpolate(bottomOfGrid, topOfGrid, f.y);
-//     return t;
-// }
-
-// float Unity_SimpleNoise_float(float2 UV, float Scale)
-// {
-//     float t = 0.0;
-
-//     float freq = pow(2.0, float(0));
-//     float amp = pow(0.5, float(3-0));
-//     t += unity_valueNoise(float2(UV.x*Scale/freq, UV.y*Scale/freq))*amp;
-
-//     freq = pow(2.0, float(1));
-//     amp = pow(0.5, float(3-1));
-//     t += unity_valueNoise(float2(UV.x*Scale/freq, UV.y*Scale/freq))*amp;
-
-//     freq = pow(2.0, float(2));
-//     amp = pow(0.5, float(3-2));
-//     t += unity_valueNoise(float2(UV.x*Scale/freq, UV.y*Scale/freq))*amp;
-
-//    return t;
-// }
-
-[numthreads(8,8,1)]
+[numthreads(64,1,1)]
 void GrassCompute (uint3 id : SV_DispatchThreadID)
 {
-    if(id.x >= (ChunkSize+1) * GrassDensity || id.y >= (ChunkSize+1  * GrassDensity)) {
+    if (id.x >= TriangleCount) 
         return ;
+
+    Triangle tri = GrassTriangleBuffer[id.x];
+    Vertex v1 = tri.v1;
+    Vertex v2 = tri.v2;
+    Vertex v3 = tri.v3;
+
+    float3 crossProd = cross(v2.position - v1.position, v3.position - v1.position);
+    float area = length(crossProd) * 0.5;
+
+    int bladeCount = clamp((int)(area * GrassDensity), 1, 12);
+    
+    float3 normal = normalize(crossProd);
+
+    if (dot(normal, float3(0,1,0)) < MaxSlope)
+        return;
+
+    for (int i = 0; i < bladeCount; i++)
+    {
+        float r1 = Hash(id.x * 73856093u + i);
+        float r2 = Hash(id.x * 19349663u + i * 17u);
+
+        float sqrtR1 = sqrt(r1);
+
+        float u = 1 - sqrtR1;
+        float v = sqrtR1 * (1 - r2);
+        float w = sqrtR1 * r2;
+
+        float3 pos = (u * v1.position + v * v2.position + w * v3.position);
+
+        if (pos.y < MinHeight || pos.y > MaxHeight)
+            continue;
+
+        GrassBlade grassBlade;
+        grassBlade.position = pos;
+        grassBlade.curve = Hash(id.x * 27821056u + i);
+        grassBlade.rotation = Hash(id.x * 83492791u + i) * 2 * 6.2831853;
+        grassBlade.height = lerp(0.8, 1.2, Hash(id.x * 17432890u + i));
+        grassBlade.terrainNormal = normal;
+
+        GrassPositionsBuffer.Append(grassBlade);
     }
-
-    Vertex pos = GrassPositionsBuffer[FlattenIndex(id.xy, ChunkSize)];
-    pos.position.xz *= 1 / GrassDensity;
-
-    GrassPositionsBuffer[FlattenIndex(id.xy, ChunkSize)] = pos;
 }

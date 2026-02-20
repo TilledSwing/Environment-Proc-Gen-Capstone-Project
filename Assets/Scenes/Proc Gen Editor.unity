@@ -18842,6 +18842,71 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1125585764}
   m_CullTransparentMesh: 1
+--- !u!1 &1125643714
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1125643715}
+  - component: {fileID: 1125643716}
+  m_Layer: 0
+  m_Name: WaterWaveController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1125643715
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1125643714}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1190382495}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1125643716
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1125643714}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df755ddf173d77248a7a77601918af4a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  waves:
+  - direction: {x: 1, y: 0.35, z: 0, w: 0}
+    amplitude: 0.2
+    wavelength: 10
+    speed: 0.3
+    phase: 0
+  - direction: {x: -0.7, y: 1, z: 0, w: 0}
+    amplitude: 0.12
+    wavelength: 6
+    speed: 0.5
+    phase: 1.3
+  - direction: {x: 0.3, y: -1, z: 0, w: 0}
+    amplitude: 0.1
+    wavelength: 4
+    speed: 0.6
+    phase: 2.1
+  - direction: {x: 1, y: 0.35, z: 0, w: 0}
+    amplitude: 0.05
+    wavelength: 2.5
+    speed: 1
+    phase: 4.73
 --- !u!1 &1147044324
 GameObject:
   m_ObjectHideFlags: 0
@@ -19788,6 +19853,7 @@ Transform:
   - {fileID: 1368767289}
   - {fileID: 2091506632}
   - {fileID: 1473897288}
+  - {fileID: 1125643715}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1190382496
@@ -27020,6 +27086,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c0091ae0cb98b49469de027c5cd3ba88, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainCameraTransform: {fileID: 0}
   fogMat: {fileID: 2100000, guid: b78a36d964d317b498aa1107a6978473, type: 2}
   fogDensity: 0.08
   fogOffset: 110
@@ -27058,9 +27125,10 @@ MonoBehaviour:
   waterMaterial: {fileID: 2100000, guid: 804af839dce47f748a2151ac2e3113a9, type: 2}
   waterMesh: {fileID: 0}
   grassPositionComputeShader: {fileID: 7200000, guid: f2f43ed31c15f4c499751ac8fe425ce1, type: 3}
-  grassMesh: {fileID: 3679985272907197249, guid: 64f6b014b6a06c44eb912584f647433f, type: 3}
+  grassMesh: {fileID: -462981019419857548, guid: 7d67a45bb7b722a43a696709d2b89636, type: 3}
   grassMaterial: {fileID: 2100000, guid: bdfda37c10344e84ebfde33ef935cf28, type: 2}
-  grassDensity: 1
+  grassDensity: 5
+  maxGrassSlope: 50
   textureArray: {fileID: 0}
   useHeights: []
   heightStarts: []
