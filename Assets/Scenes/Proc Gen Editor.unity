@@ -19854,6 +19854,7 @@ Transform:
   - {fileID: 2091506632}
   - {fileID: 1473897288}
   - {fileID: 1125643715}
+  - {fileID: 1960343077}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1190382496
@@ -24667,81 +24668,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
---- !u!1 &1627581231
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1627581232}
-  - component: {fileID: 1627581233}
-  - component: {fileID: 1627581237}
-  m_Layer: 0
-  m_Name: TerrainChunk
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &1627581232
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1627581231}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1627581233
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1627581231}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 85d7070574d34d743b11ebe05b4cbe4c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  terrainDensityData: {fileID: 0}
-  waterPlaneGenerator: {fileID: 0}
-  chunkPos: {x: 0, y: 0, z: 0}
---- !u!114 &1627581237
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1627581231}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0dda44ec4e4e2374ebe51af9f0c70b57, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  vertexBufferLength: 0
-  terrainDensityData: {fileID: 11400000, guid: 4bc939f839855ea45ade17dce060eea5, type: 2}
-  assetSpawnData: {fileID: 11400000, guid: ab99a77c69cf7db40993f26b05db1132, type: 2}
-  chunkPos: {x: 0, y: 0, z: 0}
-  assetLayer:
-    serializedVersion: 2
-    m_Bits: 0
-  interactLayer:
-    serializedVersion: 2
-    m_Bits: 0
-  assetSpacing: 10
-  assetsSet: 0
-  assetsHiddenEarly: 0
-  emptyChunk: 0
-  minDepthPointsCalculated: 0
 --- !u!1 &1652846912
 GameObject:
   m_ObjectHideFlags: 0
@@ -28550,12 +28476,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1960343076}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1190382495}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1960343078
 MonoBehaviour:
@@ -34402,7 +34328,6 @@ SceneRoots:
   - {fileID: 330585546}
   - {fileID: 410087041}
   - {fileID: 832575519}
-  - {fileID: 1627581232}
   - {fileID: 1067132751}
   - {fileID: 271182673}
   - {fileID: 1935617445}
@@ -34423,4 +34348,3 @@ SceneRoots:
   - {fileID: 1611538830}
   - {fileID: 1152764973}
   - {fileID: 1115038388}
-  - {fileID: 1960343077}
