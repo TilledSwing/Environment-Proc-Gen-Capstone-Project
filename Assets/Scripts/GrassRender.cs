@@ -33,7 +33,7 @@ public class GrassRender : MonoBehaviour
         grassTriangleBuffer.SetData(grassTriangles);
         grassPositionComputeShader.SetBuffer(grassPositionKernel, "GrassTriangleBuffer", grassTriangleBuffer);
 
-        int maxBlades = Mathf.CeilToInt(grassTriangles.Length * 12);
+        int maxBlades = Mathf.CeilToInt(grassTriangles.Length * 15);
         grassPositionBuffer = new ComputeBuffer(
             maxBlades,
             sizeof(float) * 9,

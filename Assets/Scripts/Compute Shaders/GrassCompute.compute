@@ -61,7 +61,7 @@ void GrassCompute (uint3 id : SV_DispatchThreadID)
     float3 crossProd = cross(v2.position - v1.position, v3.position - v1.position);
     float area = length(crossProd) * 0.5;
 
-    int bladeCount = clamp((int)(area * GrassDensity), 1, 12);
+    int bladeCount = clamp((int)(area * GrassDensity), 1, 15);
     
     float3 normal = normalize(crossProd);
 
@@ -88,7 +88,7 @@ void GrassCompute (uint3 id : SV_DispatchThreadID)
         grassBlade.position = pos;
         grassBlade.curve = Hash(id.x * 27821056u + i);
         grassBlade.rotation = Hash(id.x * 83492791u + i) * 2 * 6.2831853;
-        grassBlade.height = lerp(0.8, 1.2, Hash(id.x * 17432890u + i));
+        grassBlade.height = lerp(0.7, 1.1, Hash(id.x * 17432890u + i));
         grassBlade.terrainNormal = normal;
 
         GrassPositionsBuffer.Append(grassBlade);

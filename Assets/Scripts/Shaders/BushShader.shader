@@ -1,16 +1,15 @@
-Shader "Custom/GrassShader"
+Shader "Custom/BushShader"
 {
     Properties
     {
+        _BushTexture ("BushTexture", 2D) = "white" {}
         _BaseColor ("BaseColor", Color) = (0,0,0,1)
-        _TipColor ("TipColor", Color) = (0,0,0,1)
         _WindDir ("WindDir", Vector) = (1,1,0,0)
-        _AOStrength ("AOStrength", Float) = 0.5
     }
     SubShader
     {
         Pass
-        {
+            {
             Name "DepthOnly"
             Tags { "LightMode" = "DepthNormals" }
 
@@ -51,7 +50,7 @@ Shader "Custom/GrassShader"
                 // The positionOS variable contains the vertex positions in object space.
                 float4 positionOS : POSITION;
                 float3 normalOS : NORMAL;
-                uint instanceID : SV_InstanceID;
+                float2 uv : TEXCOORD0;
             };
 
             struct Varyings
@@ -60,76 +59,64 @@ Shader "Custom/GrassShader"
                 float4 positionHCS : SV_POSITION;
                 float3 worldPos : TEXCOORD0;
                 float3 worldNormal : TEXCOORD1;
+                float2 uv : TEXCOORD2;
             };
 
-            struct GrassBlade
-            {
-                float3 position;
-                float rotation;
-                float height;
-                float curve;
-                float3 terrainNormal;
-            };
-
-            StructuredBuffer<GrassBlade> _Positions;
+            TEXTURE2D(_BushTexture);
+            SAMPLER(sampler_BushTexture);
             float2 _WindDir;
 
             Varyings vert(Attributes IN)
             {
                 Varyings OUT;
-                uint instanceID = IN.instanceID;
-                GrassBlade grassBlade = _Positions[instanceID];
-                float3 instanceOffset = grassBlade.position;
-                float sinRot = sin(grassBlade.rotation);
-                float cosRot = cos(grassBlade.rotation);
 
-                // Y-axis rotation
                 float3 local = IN.positionOS.xyz;
-                local.z += pow(local.y, 2) * grassBlade.curve;
-                float3 rotated;
-                rotated.x = local.x * cosRot - local.z * sinRot;
-                rotated.z = local.x * sinRot + local.z * cosRot;
-                rotated.y = local.y * grassBlade.height;
 
-                float3 worldPos = rotated + instanceOffset;
+                float3 worldPos = TransformObjectToWorld(local);
                 float2 windDir = normalize(_WindDir);
-                float wave = sin((_Time.z * 0.8) + (worldPos.x * 0.15) + (worldPos.z * 0.15));
-                float windStr = ((GradientNoiseDeterministicfloat(worldPos.xz * 0.5 + instanceID, 1) * 2 - 1) + wave) * 0.5;
+                float windStr = (GradientNoiseDeterministicfloat(worldPos.xz * 0.5 + _Time.z * 0.2, 1) * 2 - 1) * 0.3;
 
-                float3 bend = float3(windDir.x, 0, windDir.y) * windStr * rotated.y;
-                float dist = distance(_WorldSpaceCameraPos, worldPos);
-                float blend = saturate((dist - 80) / (120 - 80));
-                worldPos += bend * (1 - blend);
+                float3 bend = float3(windDir.x, 0, windDir.y) * windStr;
+                worldPos += bend;
 
                 OUT.positionHCS = TransformWorldToHClip(worldPos);
                 OUT.worldPos = worldPos;
-                
-                float3 normalLocal = normalize(float3(IN.normalOS.x / 0.075, 0, 1));
-                float3 rotatedNormal;
-                rotatedNormal.x = normalLocal.x * cosRot - normalLocal.z * sinRot;
-                rotatedNormal.z = normalLocal.x * sinRot + normalLocal.z * cosRot;
-                rotatedNormal.y = normalLocal.y;
 
-                float3 blendedNormal = normalize(lerp(TransformObjectToWorldNormal(rotatedNormal + bend), grassBlade.terrainNormal, blend));
-                OUT.worldNormal = blendedNormal;
+                OUT.worldNormal = normalize(TransformObjectToWorldNormal(IN.normalOS));
+
+                OUT.uv = IN.uv;
 
                 return OUT;
             }
 
             float4 frag(Varyings IN, bool isFrontFace : SV_IsFrontFace) : SV_Target
             {
+                float4 tex = SAMPLE_TEXTURE2D(_BushTexture, sampler_BushTexture, IN.uv);
+
+                // Alpha clipping
+                clip(tex.a - 0.5);
+
+                float3 viewDirectionWS = normalize(_WorldSpaceCameraPos - IN.worldPos);
+
+                float3 dx = ddx(IN.worldPos);
+                float3 dy = ddy(IN.worldPos);
+                float3 geoNormal = normalize(cross(dx, dy));
+                float facingCamera = abs(dot(geoNormal, viewDirectionWS));
+                float fade = smoothstep(0.1, 0.6, facingCamera);
+
+                float2 screenUV = GetNormalizedScreenSpaceUV(IN.positionHCS);
+                float2 pixel = screenUV * _ScreenParams.xy;
+                float noise = lerp(0, 0.6, GradientNoiseDeterministicfloat(pixel, 1));
+                clip(fade - noise);
+
                 float3 normalWS = normalize(IN.worldNormal);
-                if (!isFrontFace) 
-                {
-                    normalWS = -normalWS;
-                }
                 return float4(NormalizeNormalPerPixel(normalWS), 0);
             }
             ENDHLSL
         }
         Pass
             {
-            Tags { "RenderType"="Opaque" "Queue"="Opaque" "RenderPipeline"="UniversalPipeline" "Lightmode"="UniversalForward"}
+            Tags { "RenderType"="TransparentCutout" "Queue"="AlphaTest" "RenderPipeline"="UniversalPipeline" "Lightmode"="UniversalForward"}
             LOD 200
             Cull Off
             ZWrite On
@@ -185,7 +172,6 @@ Shader "Custom/GrassShader"
                 float4 positionOS : POSITION;
                 float3 normalOS : NORMAL;
                 float2 uv : TEXCOORD0;
-                uint instanceID : SV_InstanceID;
             };
 
             struct Varyings
@@ -196,105 +182,81 @@ Shader "Custom/GrassShader"
                 float3 worldNormal : TEXCOORD1;
                 float fogFactor : TEXCOORD2;
                 float4 shadowCoord : TEXCOORD3;
-                float grassHeight : TEXCOORD4;
+                float2 uv : TEXCOORD4;
             };
 
-            struct GrassBlade
-            {
-                float3 position;
-                float rotation;
-                float height;
-                float curve;
-                float3 terrainNormal;
-            };
-
-            StructuredBuffer<GrassBlade> _Positions;
+            TEXTURE2D(_BushTexture);
+            SAMPLER(sampler_BushTexture);
             float4 _BaseColor;
-            float4 _TipColor;
             float2 _WindDir;
-            float _AOStrength;
 
             Varyings vert(Attributes IN)
             {
                 Varyings OUT;
-                uint instanceID = IN.instanceID;
-                GrassBlade grassBlade = _Positions[instanceID];
-                float3 instanceOffset = grassBlade.position;
-                float sinRot = sin(grassBlade.rotation);
-                float cosRot = cos(grassBlade.rotation);
 
-                // Y-axis rotation
                 float3 local = IN.positionOS.xyz;
-                local.z += pow(local.y, 2) * grassBlade.curve;
-                float3 rotated;
-                rotated.x = local.x * cosRot - local.z * sinRot;
-                rotated.z = local.x * sinRot + local.z * cosRot;
-                rotated.y = local.y * grassBlade.height;
 
-                float3 worldPos = rotated + instanceOffset;
+                float3 worldPos = TransformObjectToWorld(local);
                 float2 windDir = normalize(_WindDir);
-                float wave = sin((_Time.z * 0.8) + (worldPos.x * 0.15) + (worldPos.z * 0.15));
-                float windStr = ((GradientNoiseDeterministicfloat(worldPos.xz * 0.5 + instanceID, 1) * 2 - 1) + wave) * 0.5;
+                float windStr = (GradientNoiseDeterministicfloat(worldPos.xz * 0.5 + _Time.z * 0.2, 1) * 2 - 1) * 0.3;
 
-                float3 bend = float3(windDir.x, 0, windDir.y) * windStr * rotated.y;
-                float dist = distance(_WorldSpaceCameraPos, worldPos);
-                float blend = saturate((dist - 80) / (120 - 80));
-                worldPos += bend * (1 - blend);
+                float3 bend = float3(windDir.x, 0, windDir.y) * windStr;
+                worldPos += bend;
 
                 OUT.positionHCS = TransformWorldToHClip(worldPos);
                 OUT.fogFactor = ComputeFogFactor(OUT.positionHCS.z);
                 OUT.worldPos = worldPos;
 
-                float3 normalLocal = normalize(float3(IN.normalOS.x / 0.075, 0, 1));
-                float3 rotatedNormal;
-                rotatedNormal.x = normalLocal.x * cosRot - normalLocal.z * sinRot;
-                rotatedNormal.z = normalLocal.x * sinRot + normalLocal.z * cosRot;
-                rotatedNormal.y = normalLocal.y;
+                OUT.worldNormal = normalize(TransformObjectToWorldNormal(IN.normalOS));
 
-                float3 blendedNormal = normalize(lerp(TransformObjectToWorldNormal(rotatedNormal + bend), grassBlade.terrainNormal, blend));
-                OUT.worldNormal = blendedNormal;
+                OUT.shadowCoord = TransformWorldToShadowCoord(worldPos);
 
-                VertexPositionInputs vertexInput = GetVertexPositionInputs(rotated + bend);
-                #if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
-                OUT.shadowCoord = GetShadowCoord(vertexInput);
-                #endif
-
-                OUT.grassHeight = IN.positionOS.y;
+                OUT.uv = IN.uv;
 
                 return OUT;
             }
 
             float4 frag(Varyings IN, bool isFrontFace : SV_IsFrontFace) : SV_Target
             {
-                float height01 = saturate(IN.grassHeight);
+                float4 tex = SAMPLE_TEXTURE2D(_BushTexture, sampler_BushTexture, IN.uv);
 
-                float3 mixedGradientColor = lerp(_BaseColor, _TipColor, height01);
-                float ao = pow(1 - height01, 2);
-                mixedGradientColor *= lerp(1, _AOStrength, ao);
-
+                // Alpha clipping
+                clip(tex.a - 0.5);
+                
                 float3 normalWS = normalize(IN.worldNormal);
-                if (!isFrontFace) 
-                {
-                    normalWS = -normalWS;
-                }
+                float3 viewDirectionWS = normalize(_WorldSpaceCameraPos - IN.worldPos);
+
+                // Get geometry normal and calculate angle top camera
+                float3 dx = ddx(IN.worldPos);
+                float3 dy = ddy(IN.worldPos);
+                float3 geoNormal = normalize(cross(dx, dy));
+                float facingCamera = abs(dot(geoNormal, viewDirectionWS));
+                float fade = smoothstep(0.1, 0.6, facingCamera);
+
+                float2 screenUV = GetNormalizedScreenSpaceUV(IN.positionHCS);
+                float2 pixel = screenUV * _ScreenParams.xy;
+                float noise = distance(_WorldSpaceCameraPos, IN.worldPos) < 30 ? lerp(0, 0.6, GradientNoiseDeterministicfloat(pixel, 1)) : 0;
+
+                clip(fade - noise);
+                tex *= _BaseColor;
 
                 InputData inputData = (InputData)0;
                 inputData.positionWS = IN.worldPos;
                 inputData.normalWS = normalWS;
-                inputData.viewDirectionWS = normalize(_WorldSpaceCameraPos - IN.worldPos);
+                inputData.viewDirectionWS = viewDirectionWS;
                 inputData.shadowCoord = TransformWorldToShadowCoord(IN.worldPos);
                 inputData.fogCoord = 0;
-                inputData.bakedGI = saturate(SampleSH(inputData.normalWS) + float3(0.02, 0.02, 0.02));
+                inputData.bakedGI = saturate(SampleSH(inputData.normalWS) + float3(0.1, 0.1, 0.1));
                 inputData.vertexLighting = 0;
                 inputData.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(IN.positionHCS);
                 inputData.shadowMask = 1;
 
                 SurfaceData surfaceData;
-                surfaceData.albedo = mixedGradientColor;
+                surfaceData.albedo = tex;
                 surfaceData.alpha = 1;
                 surfaceData.metallic = 0.0;
                 surfaceData.specular = 0.5;
-                surfaceData.smoothness = 0.5;
+                surfaceData.smoothness = 0.2;
                 surfaceData.normalTS = float3(0,0,1);
                 surfaceData.emission = 0.0;
                 surfaceData.occlusion = 1.0;
@@ -304,6 +266,7 @@ Shader "Custom/GrassShader"
                 float4 finalColor = UniversalFragmentPBR(inputData, surfaceData);
 
                 return finalColor;
+                // return float4(facingCamera, facingCamera, facingCamera, 1);
             }
             ENDHLSL
         }

@@ -20,6 +20,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f288ae1f4751b564a96ac7587541f7a2
+    m_Address: Assets/Settings/PC_Renderer.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 442e4234e0593ec4d94390915e165746, type: 2}
   m_SchemaSet:
