@@ -24,27 +24,7 @@ Shader "Custom/GrassShader"
             #pragma multi_compile_instancing
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Hashes.hlsl"
-
-            float2 GradientNoiseDeterministicDirfloat(float2 p)
-            {
-                float x; 
-                Hash_Tchou_2_1_float(p, x);
-                return normalize(float2(x - floor(x + 0.5), abs(x) - 0.5));
-            }
-
-            float GradientNoiseDeterministicfloat (float2 UV, float Scale)
-            {
-                float2 p = UV * Scale;
-                float2 ip = floor(p);
-                float2 fp = frac(p);
-                float d00 = dot(GradientNoiseDeterministicDirfloat(ip), fp);
-                float d01 = dot(GradientNoiseDeterministicDirfloat(ip + float2(0, 1)), fp - float2(0, 1));
-                float d10 = dot(GradientNoiseDeterministicDirfloat(ip + float2(1, 0)), fp - float2(1, 0));
-                float d11 = dot(GradientNoiseDeterministicDirfloat(ip + float2(1, 1)), fp - float2(1, 1));
-                fp = fp * fp * fp * (fp * (fp * 6 - 15) + 10);
-                return lerp(lerp(d00, d01, fp.y), lerp(d10, d11, fp.y), fp.x) + 0.5;
-            }
+            #include "Assets/Scripts/Shaders/Common/Helpers.hlsl"
 
             struct Attributes
             {
@@ -89,7 +69,14 @@ Shader "Custom/GrassShader"
                 float3 rotated;
                 rotated.x = local.x * cosRot - local.z * sinRot;
                 rotated.z = local.x * sinRot + local.z * cosRot;
-                rotated.y = local.y * grassBlade.height;
+                if (grassBlade.height > 3 || grassBlade.height < 0)
+                {
+                    rotated.y = local.y;
+                }
+                else 
+                {
+                    rotated.y = local.y * grassBlade.height;
+                }
 
                 float3 worldPos = rotated + instanceOffset;
                 float2 windDir = normalize(_WindDir);
@@ -157,27 +144,8 @@ Shader "Custom/GrassShader"
             #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/CommonMaterial.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/RealtimeLights.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
-            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Hashes.hlsl"
-
-            float2 GradientNoiseDeterministicDirfloat(float2 p)
-            {
-                float x; 
-                Hash_Tchou_2_1_float(p, x);
-                return normalize(float2(x - floor(x + 0.5), abs(x) - 0.5));
-            }
-
-            float GradientNoiseDeterministicfloat (float2 UV, float Scale)
-            {
-                float2 p = UV * Scale;
-                float2 ip = floor(p);
-                float2 fp = frac(p);
-                float d00 = dot(GradientNoiseDeterministicDirfloat(ip), fp);
-                float d01 = dot(GradientNoiseDeterministicDirfloat(ip + float2(0, 1)), fp - float2(0, 1));
-                float d10 = dot(GradientNoiseDeterministicDirfloat(ip + float2(1, 0)), fp - float2(1, 0));
-                float d11 = dot(GradientNoiseDeterministicDirfloat(ip + float2(1, 1)), fp - float2(1, 1));
-                fp = fp * fp * fp * (fp * (fp * 6 - 15) + 10);
-                return lerp(lerp(d00, d01, fp.y), lerp(d10, d11, fp.y), fp.x) + 0.5;
-            }
+            
+            #include "Assets/Scripts/Shaders/Common/Helpers.hlsl"
 
             struct Attributes
             {
@@ -229,7 +197,14 @@ Shader "Custom/GrassShader"
                 float3 rotated;
                 rotated.x = local.x * cosRot - local.z * sinRot;
                 rotated.z = local.x * sinRot + local.z * cosRot;
-                rotated.y = local.y * grassBlade.height;
+                if (grassBlade.height > 3 || grassBlade.height < 0)
+                {
+                    rotated.y = local.y;
+                }
+                else 
+                {
+                    rotated.y = local.y * grassBlade.height;
+                }
 
                 float3 worldPos = rotated + instanceOffset;
                 float2 windDir = normalize(_WindDir);

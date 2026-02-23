@@ -5,6 +5,7 @@ Shader "Custom/BushShader"
         _BushTexture ("BushTexture", 2D) = "white" {}
         _BaseColor ("BaseColor", Color) = (0,0,0,1)
         _WindDir ("WindDir", Vector) = (1,1,0,0)
+        _WindStrength ("WindStrength", Float) = 0.3
     }
     SubShader
     {
@@ -23,27 +24,7 @@ Shader "Custom/BushShader"
             #pragma multi_compile_instancing
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Hashes.hlsl"
-
-            float2 GradientNoiseDeterministicDirfloat(float2 p)
-            {
-                float x; 
-                Hash_Tchou_2_1_float(p, x);
-                return normalize(float2(x - floor(x + 0.5), abs(x) - 0.5));
-            }
-
-            float GradientNoiseDeterministicfloat (float2 UV, float Scale)
-            {
-                float2 p = UV * Scale;
-                float2 ip = floor(p);
-                float2 fp = frac(p);
-                float d00 = dot(GradientNoiseDeterministicDirfloat(ip), fp);
-                float d01 = dot(GradientNoiseDeterministicDirfloat(ip + float2(0, 1)), fp - float2(0, 1));
-                float d10 = dot(GradientNoiseDeterministicDirfloat(ip + float2(1, 0)), fp - float2(1, 0));
-                float d11 = dot(GradientNoiseDeterministicDirfloat(ip + float2(1, 1)), fp - float2(1, 1));
-                fp = fp * fp * fp * (fp * (fp * 6 - 15) + 10);
-                return lerp(lerp(d00, d01, fp.y), lerp(d10, d11, fp.y), fp.x) + 0.5;
-            }
+            #include "Assets/Scripts/Shaders/Common/Helpers.hlsl"
 
             struct Attributes
             {
@@ -65,6 +46,7 @@ Shader "Custom/BushShader"
             TEXTURE2D(_BushTexture);
             SAMPLER(sampler_BushTexture);
             float2 _WindDir;
+            float _WindStrength;
 
             Varyings vert(Attributes IN)
             {
@@ -74,7 +56,7 @@ Shader "Custom/BushShader"
 
                 float3 worldPos = TransformObjectToWorld(local);
                 float2 windDir = normalize(_WindDir);
-                float windStr = (GradientNoiseDeterministicfloat(worldPos.xz * 0.5 + _Time.z * 0.2, 1) * 2 - 1) * 0.3;
+                float windStr = (GradientNoiseDeterministicfloat(worldPos.xz * 0.5 + _Time.z * 0.2, 1) * 2 - 1) * _WindStrength;
 
                 float3 bend = float3(windDir.x, 0, windDir.y) * windStr;
                 worldPos += bend;
@@ -144,27 +126,7 @@ Shader "Custom/BushShader"
             #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/CommonMaterial.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/RealtimeLights.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
-            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Hashes.hlsl"
-
-            float2 GradientNoiseDeterministicDirfloat(float2 p)
-            {
-                float x; 
-                Hash_Tchou_2_1_float(p, x);
-                return normalize(float2(x - floor(x + 0.5), abs(x) - 0.5));
-            }
-
-            float GradientNoiseDeterministicfloat (float2 UV, float Scale)
-            {
-                float2 p = UV * Scale;
-                float2 ip = floor(p);
-                float2 fp = frac(p);
-                float d00 = dot(GradientNoiseDeterministicDirfloat(ip), fp);
-                float d01 = dot(GradientNoiseDeterministicDirfloat(ip + float2(0, 1)), fp - float2(0, 1));
-                float d10 = dot(GradientNoiseDeterministicDirfloat(ip + float2(1, 0)), fp - float2(1, 0));
-                float d11 = dot(GradientNoiseDeterministicDirfloat(ip + float2(1, 1)), fp - float2(1, 1));
-                fp = fp * fp * fp * (fp * (fp * 6 - 15) + 10);
-                return lerp(lerp(d00, d01, fp.y), lerp(d10, d11, fp.y), fp.x) + 0.5;
-            }
+            #include "Assets/Scripts/Shaders/Common/Helpers.hlsl"
 
             struct Attributes
             {
@@ -189,6 +151,7 @@ Shader "Custom/BushShader"
             SAMPLER(sampler_BushTexture);
             float4 _BaseColor;
             float2 _WindDir;
+            float _WindStrength;
 
             Varyings vert(Attributes IN)
             {
@@ -198,7 +161,7 @@ Shader "Custom/BushShader"
 
                 float3 worldPos = TransformObjectToWorld(local);
                 float2 windDir = normalize(_WindDir);
-                float windStr = (GradientNoiseDeterministicfloat(worldPos.xz * 0.5 + _Time.z * 0.2, 1) * 2 - 1) * 0.3;
+                float windStr = (GradientNoiseDeterministicfloat(worldPos.xz * 0.5 + _Time.z * 0.2, 1) * 2 - 1) * _WindStrength;
 
                 float3 bend = float3(windDir.x, 0, windDir.y) * windStr;
                 worldPos += bend;
@@ -246,7 +209,7 @@ Shader "Custom/BushShader"
                 inputData.viewDirectionWS = viewDirectionWS;
                 inputData.shadowCoord = TransformWorldToShadowCoord(IN.worldPos);
                 inputData.fogCoord = 0;
-                inputData.bakedGI = saturate(SampleSH(inputData.normalWS) + float3(0.1, 0.1, 0.1));
+                inputData.bakedGI = saturate(SampleSH(inputData.normalWS) + float3(0.2, 0.2, 0.2));
                 inputData.vertexLighting = 0;
                 inputData.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(IN.positionHCS);
                 inputData.shadowMask = 1;
