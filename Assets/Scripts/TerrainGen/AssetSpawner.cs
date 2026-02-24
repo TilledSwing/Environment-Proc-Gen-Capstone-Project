@@ -170,10 +170,10 @@ public class AssetSpawner : MonoBehaviour
                 {
                     spawnPoint.y -= 0.75f;
                 }
-                else
-                {
-                    spawnPoint.y -= 0.1f;
-                }
+                // else
+                // {
+                //     spawnPoint.y -= 0.1f;
+                // }
 
                 float height = spawnPoint.y;
                 float slope = math.round(math.degrees(math.acos(math.clamp(math.dot(math.normalize(spawnPointNormal), math.up()), -1f, 1f))) * 100f) / 100f;

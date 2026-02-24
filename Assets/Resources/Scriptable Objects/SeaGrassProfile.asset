@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   grassMesh: {fileID: -462981019419857548, guid: 7d67a45bb7b722a43a696709d2b89636, type: 3}
   grassMaterial: {fileID: 2100000, guid: 456114c3dd3230b4abbb8424cd99df88, type: 2}
-  grassDensity: 25
+  grassDensity: 35
   maxBladesPerTriangle: 20
-  maxGrassSlope: 50
+  maxGrassSlope: 30
   grassHeightRange: {x: 1, y: 1.5}
