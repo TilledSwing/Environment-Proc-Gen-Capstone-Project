@@ -5,6 +5,8 @@ Shader "Custom/GrassShader"
         _BaseColor ("BaseColor", Color) = (0,0,0,1)
         _TipColor ("TipColor", Color) = (0,0,0,1)
         _WindDir ("WindDir", Vector) = (1,1,0,0)
+        _WindStrength ("WindStrength", Float) = 0.5
+        _WindOscillation ("WindOscillation", Float) = 0.8
         _AOStrength ("AOStrength", Float) = 0.5
     }
     SubShader
@@ -53,6 +55,8 @@ Shader "Custom/GrassShader"
 
             StructuredBuffer<GrassBlade> _Positions;
             float2 _WindDir;
+            float _WindStrength;
+            float _WindOscillation;
 
             Varyings vert(Attributes IN)
             {
@@ -80,8 +84,8 @@ Shader "Custom/GrassShader"
 
                 float3 worldPos = rotated + instanceOffset;
                 float2 windDir = normalize(_WindDir);
-                float wave = sin((_Time.z * 0.8) + (worldPos.x * 0.15) + (worldPos.z * 0.15));
-                float windStr = ((GradientNoiseDeterministicfloat(worldPos.xz * 0.5 + instanceID, 1) * 2 - 1) + wave) * 0.5;
+                float wave = sin((_Time.z * _WindOscillation) + (worldPos.x * 0.15) + (worldPos.z * 0.15));
+                float windStr = ((GradientNoiseDeterministicfloat(worldPos.xz * 0.5 + instanceID, 1) * 2 - 1) + wave) * _WindStrength;
 
                 float3 bend = float3(windDir.x, 0, windDir.y) * windStr * rotated.y;
                 float dist = distance(_WorldSpaceCameraPos, worldPos);
@@ -180,6 +184,8 @@ Shader "Custom/GrassShader"
             float4 _BaseColor;
             float4 _TipColor;
             float2 _WindDir;
+            float _WindStrength;
+            float _WindOscillation;
             float _AOStrength;
 
             Varyings vert(Attributes IN)
@@ -208,8 +214,8 @@ Shader "Custom/GrassShader"
 
                 float3 worldPos = rotated + instanceOffset;
                 float2 windDir = normalize(_WindDir);
-                float wave = sin((_Time.z * 0.8) + (worldPos.x * 0.15) + (worldPos.z * 0.15));
-                float windStr = ((GradientNoiseDeterministicfloat(worldPos.xz * 0.5 + instanceID, 1) * 2 - 1) + wave) * 0.5;
+                float wave = sin((_Time.z * _WindOscillation) + (worldPos.x * 0.15) + (worldPos.z * 0.15));
+                float windStr = ((GradientNoiseDeterministicfloat(worldPos.xz * 0.5 + instanceID, 1) * 2 - 1) + wave) * _WindStrength;
 
                 float3 bend = float3(windDir.x, 0, windDir.y) * windStr * rotated.y;
                 float dist = distance(_WorldSpaceCameraPos, worldPos);

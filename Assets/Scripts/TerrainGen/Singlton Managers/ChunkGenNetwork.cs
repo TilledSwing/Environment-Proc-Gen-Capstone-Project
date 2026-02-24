@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using TMPro;
-using Unity.AI.Navigation;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
@@ -12,85 +11,156 @@ using UnityEngine.Rendering.Universal;
 
 public class ChunkGenNetwork : MonoBehaviour
 {
+    [HideInInspector]
     public static ChunkGenNetwork Instance;
+    [HideInInspector]
     public Transform mainCameraTransform;
-    // Fog Render Feature Stuff
+
+    [Header ("========== Fog Settings ==========")]
+    [Space(5)]
     public Material fogMat;
     public float fogDensity;
     public float fogOffset;
     public Color upperFogColor;
     public Color lowerFogColor;
     public Color darkFogColor;
+
+    [Space(10)]
+    [Header("========== Render Data ==========")]
+    [Space(5)]
     public UniversalRendererData rendererData;
+    [HideInInspector]
     public FogRenderPassFeature fogRenderPassFeature;
     public UniversalRenderPipelineAsset mainUrpAsset;
     public UniversalRenderPipelineAsset underwaterUrpAsset;
+
+    [Space(10)]
+    [Header("========== Objective UI ==========")]
+    [Space(5)]
     // Objective Text Stuff
     public GameObject objectiveCanvas;
     public GameObject hudCanvas;
+
+    [Space(10)]
+    [Header("========== Chat and Lobby ==========")]
+    [Space(5)]
     // Chat & Lobby
     public GameObject chatContainer;
     public GameObject lobbyContainer;
+
+    [Space(10)]
+    [Header("========== Viewer Settings ==========")]
+    [Space(5)]
     // Viewer Settings
-    public int maxWorldYChunks = 10;
-    public float maxViewDst;
     public Transform viewer;
+    [HideInInspector]
     public Vector3 viewerPos;
-    public float updateDistanceThreshold = 5f;
-    // public float chunkLoadPriorityAngle;
-    // private float convertedChunkLoadPriorityAngle;
+    public float maxViewDst;
+    public int maxWorldYChunks;
+    public float updateDistanceThreshold;
+    public Transform chunkParent;
     private Vector3 lastUpdateViewerPos;
+    [HideInInspector]
     public int chunkSize;
+    [HideInInspector]
     public int chunksVisible;
+
+    [Space(10)]
+    [Header("========== Map Settings ==========")]
+    [Space(5)]
     public bool useFixedMapSize;
     public int mapSize;
     public int resolution;
+
+    [Space(10)]
+    [Header("========== Scriptable Object Settings ==========")]
+    [Space(5)]
     // Scriptable Object References
     public GenerationConfiguration generationConfiguration;
     public TerrainDensityData terrainDensityData;
     public AssetSpawnData assetSpawnData;
     public TerrainTextureData terrainTextureData;
+
+    [Space(10)]
+    [Header("========== Compute Shader References ==========")]
+    [Space(5)]
     // Compute Shader References
     public ComputeShader terrainDensityComputeShader;
     // Kernels
+    [HideInInspector]
     public int baseDensityKernel;
+    [HideInInspector]
     public int continentalnessDensityKernel;
+    [HideInInspector]
     public int peaksAndValleysDensityKernel;
+    [HideInInspector]
     public int erosionDensityKernel;
+    [HideInInspector]
     public int largeCaveDensityKernel;
+
+    [Space(10)]
+    [Header("========== Terrain and Water Data ==========")]
+    [Space(5)]
     // Material References
     public Material terrainMaterial;
     public Material waterMaterial;
+    [HideInInspector]
     public Mesh waterMesh;
+
+    [Space(10)]
+    [Header("========== Grass Settings ==========")]
+    [Space(5)]
     // Grass Stuff
     public ComputeShader grassPositionComputeShader;
     public Mesh grassMesh;
     public Material grassMaterial;
     public int grassDensity;
     public float maxGrassSlope;
+
     // Texture Arrays
+    [HideInInspector]
     public Texture2DArray textureArray;
+    [HideInInspector]
     public float[] useHeights;
+    [HideInInspector]
     public float[] heightStarts;
+    [HideInInspector]
     public float[] heightEnds;
+    [HideInInspector]
     public float[] useSlopes;
+    [HideInInspector]
     public float[] slopeStarts;
+    [HideInInspector]
     public float[] slopeEnds;
+
+    [Space(10)]
+    [Header("========== Texture Settings UI ==========")]
+    [Space(5)]
     // Texture Window Stuff
     public GameObject textureWindow;
     public GameObject textureSettingsTab;
+
+    [Space(10)]
+    [Header("========== Asset Settings UI ==========")]
+    [Space(5)]
     // Asset Window Stuff
     public GameObject assetWindow;
     public GameObject assetSettingsTab;
+
+    [Space(10)]
+    [Header("========== Preset Settings UI ==========")]
+    [Space(5)]
     // Preset Dropdown
     public TMP_Dropdown presetDropdown;
     // Chunk Variables
-    public Transform chunkParent;
     float maxViewDstSqr;
     Vector3 chunkVec;
     Vector3 halfChunkVec;
     float halfChunkSize;
+
+    // Chunk Data
     public Dictionary<long, TerrainChunk> chunkDictionary = new();
+    [HideInInspector]
     public List<long> chunksVisibleLastUpdate = new();
     List<long> chunksToDestroy = new();
     public PriorityQueue<Vector3Int> chunkLoadQueue = new();
@@ -98,22 +168,38 @@ public class ChunkGenNetwork : MonoBehaviour
     public Queue<ChunkVisibility> chunkVisibilityQueue = new();
     public HashSet<long> chunksToHide = new();
     public HashSet<long> chunksToShow = new();
+    [HideInInspector]
     public bool isLoadingChunkVisibility = false;
-    public float queueUpdateDistanceThreshold = 15f;
+    [HideInInspector]
     public bool isLoadingChunks = false;
+    [HideInInspector]
     public bool initialLoadComplete = false;
+
+    [HideInInspector]
     public Texture2D[] noiseGeneratorTextureArray;
+
+    [Space(10)]
+    [Header("========== Lighting Settings ==========")]
+    [Space(5)]
     // Lighting Blocker
     public GameObject lightingBlocker;
+    public Light mainLight;
     private MeshRenderer lightingBlockerRenderer;
-    public Light lightChange;
-    // Action Queues
+
+    // Readback Queue
+    [HideInInspector]
     public bool hasPendingReadbacks = false;
     public PriorityQueue<ReadbackRequest> pendingReadbacks = new();
+    [HideInInspector]
     public bool isLoadingReadbacks = false;
+    // Asset Instantiation Queue
+    [HideInInspector]
     public bool hasPendingAssetInstantiations = false;
     public Queue<AssetInstantiation> pendingAssetInstantiations = new();
+    [HideInInspector]
     public bool isLoadingAssetInstantiations = false;
+
+
     public Queue<MCQueueObject> marchingCubesJobQueue = new();
     // Reused Marching Cubes Native Array
     public NativeArray<float3> vertexOffsetTable;
@@ -123,6 +209,10 @@ public class ChunkGenNetwork : MonoBehaviour
     // Noise Settings list
     List<NoiseSettingsGPU> allNoiseSettings;
     public ComputeBuffer noiseSettingsBuffer;
+
+    /// <summary>
+    /// Create max size native array of vertex indices
+    /// </summary>
     public void CreateVertexIndexArray()
     {
         int size =  3 * (terrainDensityData.width + 1) * (terrainDensityData.width + 1) * (terrainDensityData.width + 1);
@@ -132,6 +222,7 @@ public class ChunkGenNetwork : MonoBehaviour
             staticMaxSizeVertexIndexArray[i] = i;
         }
     }
+    /* ============================================= HELPER STRUCTS START ============================================= */
     public struct ChunkVisibility
     {
         public TerrainChunk chunk;
@@ -217,6 +308,7 @@ public class ChunkGenNetwork : MonoBehaviour
         NEGYAXIS = 4,
         NEGZAXIS = 5,
     }
+    /* ============================================= HELPER STRUCTS END ============================================= */
     void Awake()
     {
         // Make a singleton
@@ -238,8 +330,6 @@ public class ChunkGenNetwork : MonoBehaviour
         chunkVec = Vector3.one * chunkSize;
         halfChunkVec = new Vector3(0.5f, 0.5f, 0.5f) * chunkSize;
         halfChunkSize = chunkSize * 0.5f;
-        // float cos = Mathf.Cos(chunkLoadPriorityAngle);
-        // convertedChunkLoadPriorityAngle = cos * cos;
 
         baseDensityKernel = terrainDensityComputeShader.FindKernel("BaseDensity");
         continentalnessDensityKernel = terrainDensityComputeShader.FindKernel("ContinentalnessDensity");
@@ -249,7 +339,7 @@ public class ChunkGenNetwork : MonoBehaviour
 
         lightingBlockerRenderer = lightingBlocker.GetComponent<MeshRenderer>();
         lightingBlockerRenderer.enabled = false;
-        lightChange.intensity = 12f;
+        mainLight.intensity = 12f;
 
         vertexOffsetTable = new(MarchingCubesTables.vertexOffsetTable, Allocator.Persistent);
         edgeIndexTable = new(MarchingCubesTables.edgeIndexTable, Allocator.Persistent);

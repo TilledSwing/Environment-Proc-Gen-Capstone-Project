@@ -6,6 +6,7 @@ Shader "Custom/BushShader"
         _BaseColor ("BaseColor", Color) = (0,0,0,1)
         _WindDir ("WindDir", Vector) = (1,1,0,0)
         _WindStrength ("WindStrength", Float) = 0.3
+        _WindOscillation ("WindOscillation", Float) = 0.2
     }
     SubShader
     {
@@ -47,6 +48,7 @@ Shader "Custom/BushShader"
             SAMPLER(sampler_BushTexture);
             float2 _WindDir;
             float _WindStrength;
+            float _WindOscillation;
 
             Varyings vert(Attributes IN)
             {
@@ -56,7 +58,7 @@ Shader "Custom/BushShader"
 
                 float3 worldPos = TransformObjectToWorld(local);
                 float2 windDir = normalize(_WindDir);
-                float windStr = (GradientNoiseDeterministicfloat(worldPos.xz * 0.5 + _Time.z * 0.2, 1) * 2 - 1) * _WindStrength;
+                float windStr = (GradientNoiseDeterministicfloat(worldPos.xz * 0.5 + _Time.z * _WindOscillation, 1) * 2 - 1) * _WindStrength;
 
                 float3 bend = float3(windDir.x, 0, windDir.y) * windStr;
                 worldPos += bend;
@@ -152,6 +154,7 @@ Shader "Custom/BushShader"
             float4 _BaseColor;
             float2 _WindDir;
             float _WindStrength;
+            float _WindOscillation;
 
             Varyings vert(Attributes IN)
             {
@@ -161,7 +164,7 @@ Shader "Custom/BushShader"
 
                 float3 worldPos = TransformObjectToWorld(local);
                 float2 windDir = normalize(_WindDir);
-                float windStr = (GradientNoiseDeterministicfloat(worldPos.xz * 0.5 + _Time.z * 0.2, 1) * 2 - 1) * _WindStrength;
+                float windStr = (GradientNoiseDeterministicfloat(worldPos.xz * 0.5 + _Time.z * _WindOscillation, 1) * 2 - 1) * _WindStrength;
 
                 float3 bend = float3(windDir.x, 0, windDir.y) * windStr;
                 worldPos += bend;

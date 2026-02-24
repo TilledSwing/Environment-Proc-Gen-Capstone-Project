@@ -1,4 +1,3 @@
-using Unity.Mathematics;
 using UnityEngine;
 
 public class GrassRender : MonoBehaviour
@@ -7,22 +6,17 @@ public class GrassRender : MonoBehaviour
     public Mesh grassMesh;
     public Material grassMaterial;
     public int grassDensity;
-    public ComputeMarchingCubes.Triangle[] grassTriangles;
+    public Vector3Int chunkPos;
+    public int bladeCount;
     public Bounds bounds;
-    RenderParams rp;
+    public RenderParams rp;
+    public ComputeMarchingCubes.Triangle[] grassTriangles;
     ComputeBuffer grassTriangleBuffer;
     ComputeBuffer grassPositionBuffer;
-    int grassPositionKernel;
-    int chunkSize;
-    public Vector3Int chunkPos;
-    int bladeCount;
     public void SetupGrass()
     {
-        chunkSize = ChunkGenNetwork.Instance.terrainDensityData.width;
-        grassPositionKernel = grassPositionComputeShader.FindKernel("GrassCompute");
+        int grassPositionKernel = grassPositionComputeShader.FindKernel("GrassCompute");
         grassPositionComputeShader.SetInt("TriangleCount", grassTriangles.Length);
-        grassPositionComputeShader.SetInt("ChunkSize", chunkSize);
-        grassPositionComputeShader.SetVector("ChunkPos", (Vector3)chunkPos);
         grassPositionComputeShader.SetInt("GrassDensity", grassDensity);
 
         grassPositionComputeShader.SetInt("MinHeight", ChunkGenNetwork.Instance.terrainDensityData.waterLevel);

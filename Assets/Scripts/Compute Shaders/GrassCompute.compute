@@ -1,4 +1,3 @@
-// Each #kernel tells which function to compile; you can have many kernels
 #pragma kernel GrassCompute
 
 struct Vertex
@@ -27,8 +26,6 @@ StructuredBuffer<Triangle> GrassTriangleBuffer;
 AppendStructuredBuffer<GrassBlade> GrassPositionsBuffer;
 
 int TriangleCount;
-uint ChunkSize;
-float3 ChunkPos;
 int GrassDensity;
 
 int MinHeight;
