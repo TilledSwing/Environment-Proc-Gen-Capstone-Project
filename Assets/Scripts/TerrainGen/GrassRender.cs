@@ -6,6 +6,11 @@ public class GrassRender : MonoBehaviour
     public Mesh grassMesh;
     public Material grassMaterial;
     public int grassDensity;
+    public int maxBladesPerTriangle;
+    public int minHeight;
+    public int maxHeight;
+    public float maxGrassSlope;
+    public Vector2 grassHeightRange;
     public Vector3Int chunkPos;
     public int bladeCount;
     public Bounds bounds;
@@ -19,15 +24,17 @@ public class GrassRender : MonoBehaviour
         grassPositionComputeShader.SetInt("TriangleCount", grassTriangles.Length);
         grassPositionComputeShader.SetInt("GrassDensity", grassDensity);
 
-        grassPositionComputeShader.SetInt("MinHeight", ChunkGenNetwork.Instance.terrainDensityData.waterLevel);
-        grassPositionComputeShader.SetInt("MaxHeight", 52);
-        grassPositionComputeShader.SetFloat("MaxSlope", Mathf.Cos(ChunkGenNetwork.Instance.maxGrassSlope * Mathf.Deg2Rad));
+        grassPositionComputeShader.SetInt("MinHeight", minHeight);
+        grassPositionComputeShader.SetInt("MaxHeight", maxHeight);
+        grassPositionComputeShader.SetInt("MaxBladesPerTriangle", maxBladesPerTriangle);
+        grassPositionComputeShader.SetVector("GrassHeightRange", grassHeightRange);
+        grassPositionComputeShader.SetFloat("MaxSlope", Mathf.Cos(maxGrassSlope * Mathf.Deg2Rad));
 
         grassTriangleBuffer = new(grassTriangles.Length, sizeof(float) * 18);
         grassTriangleBuffer.SetData(grassTriangles);
         grassPositionComputeShader.SetBuffer(grassPositionKernel, "GrassTriangleBuffer", grassTriangleBuffer);
 
-        int maxBlades = Mathf.CeilToInt(grassTriangles.Length * 15);
+        int maxBlades = Mathf.CeilToInt(grassTriangles.Length * maxBladesPerTriangle);
         grassPositionBuffer = new ComputeBuffer(
             maxBlades,
             sizeof(float) * 9,

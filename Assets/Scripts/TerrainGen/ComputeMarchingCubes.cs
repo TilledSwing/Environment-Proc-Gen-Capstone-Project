@@ -89,8 +89,6 @@ public class ComputeMarchingCubes : MonoBehaviour
     {
         // Terrain Values
         terrainDensityComputeShader.SetInt("height", terrainDensityData.height);
-        terrainDensityComputeShader.SetBool("terracing", terrainDensityData.terracing);
-        terrainDensityComputeShader.SetInt("terraceHeight", terrainDensityData.terraceHeight);
         terrainDensityComputeShader.SetInt("ChunkSize", terrainDensityData.width);
         terrainDensityComputeShader.SetVector("ChunkPos", (Vector3)chunkPos);
         terrainDensityComputeShader.SetFloat("isolevel", terrainDensityData.isolevel);
@@ -258,13 +256,36 @@ public class ComputeMarchingCubes : MonoBehaviour
         if (!terraforming)
         {
             assetSpawner.SpawnAssets();
-            if(chunkPos.y + terrainDensityData.width >= terrainDensityData.waterLevel && triangleCount > 15)
+            if(chunkPos.y + terrainDensityData.width >= terrainDensityData.waterLevel && triangleCount > ChunkGenNetwork.Instance.landGrass.maxBladesPerTriangle)
             {
                 grass = gameObject.AddComponent<GrassRender>();
                 grass.chunkPos = chunkPos;
-                grass.grassDensity = ChunkGenNetwork.Instance.grassDensity;
-                grass.grassMaterial = ChunkGenNetwork.Instance.grassMaterial;
-                grass.grassMesh = ChunkGenNetwork.Instance.grassMesh;
+                grass.grassDensity = ChunkGenNetwork.Instance.landGrass.grassDensity;
+                grass.maxBladesPerTriangle = ChunkGenNetwork.Instance.landGrass.maxBladesPerTriangle;
+                grass.grassMaterial = ChunkGenNetwork.Instance.landGrass.grassMaterial;
+                grass.grassMesh = ChunkGenNetwork.Instance.landGrass.grassMesh;
+                grass.minHeight = terrainDensityData.waterLevel;
+                grass.maxHeight = 52;
+                grass.maxGrassSlope = ChunkGenNetwork.Instance.landGrass.maxGrassSlope;
+                grass.grassHeightRange = ChunkGenNetwork.Instance.landGrass.grassHeightRange;
+                grass.grassPositionComputeShader = ChunkGenNetwork.Instance.grassPositionComputeShader;
+                grass.grassTriangles = triangleArray.AsArray().ToArray();
+                grass.bounds = mesh.bounds;
+                grass.SetupGrass();
+                triangleArray.Dispose();
+            }
+            else if(chunkPos.y + terrainDensityData.width <= terrainDensityData.waterLevel - terrainDensityData.width && triangleCount > ChunkGenNetwork.Instance.seaGrass.maxBladesPerTriangle)
+            {
+                grass = gameObject.AddComponent<GrassRender>();
+                grass.chunkPos = chunkPos;
+                grass.grassDensity = ChunkGenNetwork.Instance.seaGrass.grassDensity;
+                grass.maxBladesPerTriangle = ChunkGenNetwork.Instance.seaGrass.maxBladesPerTriangle;
+                grass.grassMaterial = ChunkGenNetwork.Instance.seaGrass.grassMaterial;
+                grass.grassMesh = ChunkGenNetwork.Instance.seaGrass.grassMesh;
+                grass.minHeight = -200;
+                grass.maxHeight = terrainDensityData.waterLevel - terrainDensityData.width;
+                grass.maxGrassSlope = ChunkGenNetwork.Instance.seaGrass.maxGrassSlope;
+                grass.grassHeightRange = ChunkGenNetwork.Instance.seaGrass.grassHeightRange;
                 grass.grassPositionComputeShader = ChunkGenNetwork.Instance.grassPositionComputeShader;
                 grass.grassTriangles = triangleArray.AsArray().ToArray();
                 grass.bounds = mesh.bounds;

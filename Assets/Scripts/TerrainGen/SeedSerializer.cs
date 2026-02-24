@@ -110,8 +110,6 @@ public static class SeedSerializer
             isolevel = settings.isolevel,
             waterLevel = settings.waterLevel,
             lerp = settings.lerp,
-            terracing = settings.terracing,
-            terraceHeight = settings.terraceHeight,
             water = settings.water
         };
     }
@@ -213,8 +211,6 @@ public static class SeedSerializer
         deserializedDensity.isolevel = settings.isolevel;
         deserializedDensity.waterLevel = settings.waterLevel;
         deserializedDensity.lerp = settings.lerp;
-        deserializedDensity.terracing = settings.terracing;
-        deserializedDensity.terraceHeight = settings.terraceHeight;
         deserializedDensity.water = settings.water;
 
         return deserializedDensity;

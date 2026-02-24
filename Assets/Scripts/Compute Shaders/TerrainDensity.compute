@@ -31,8 +31,6 @@ Texture2D<float> CaveDetailCurveTexture;
 int curveResolution = 256;
 // Terrain Values
 int height;
-bool terracing;
-int terraceHeight;
 float isolevel;
 
 uint ChunkSize;
@@ -80,7 +78,7 @@ void ContinentalnessDensity (uint3 id : SV_DispatchThreadID)
     float adjustedBaseTerrainHeight = HeightsBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)];
 
     // Continentalness
-    adjustedBaseTerrainHeight = adjustedBaseTerrainHeight * (ContinentalnessCurveTexture.SampleLevel(samplerLinearClamp, (continentalnessNoise+1)/2, 0));
+    adjustedBaseTerrainHeight *= ContinentalnessCurveTexture.SampleLevel(samplerLinearClamp, (continentalnessNoise+1)/2, 0);
 
     HeightsBuffer[FlattenIndex(float3(id.x,id.y,id.z), ChunkSize)] = adjustedBaseTerrainHeight;
 }
@@ -136,7 +134,7 @@ void LargeCaveDensity (uint3 id : SV_DispatchThreadID)
     float caveCarve = 1.0 - smoothstep(-0.4, 0.0, largeCaveNoise);
     // float smallCaveCarve =  1.0 + smoothstep(0.0, 0.2, caveDetailNoise * caveDetailNoise);
     // Terrain Density Calculation
-    float currentHeight = ((height * adjustedBaseTerrainHeight) + (terracing ? (id.y%terraceHeight) : 0));
+    float currentHeight = height * adjustedBaseTerrainHeight;
     float terrainDensity = currentHeight - (ChunkPos.y + id.y);
     // Cave Fade
     float surfaceFade = saturate((terrainDensity) / 60.0);

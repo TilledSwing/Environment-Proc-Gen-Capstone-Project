@@ -112,11 +112,8 @@ public class ChunkGenNetwork : MonoBehaviour
     [Space(5)]
     // Grass Stuff
     public ComputeShader grassPositionComputeShader;
-    public Mesh grassMesh;
-    public Material grassMaterial;
-    public int grassDensity;
-    public float maxGrassSlope;
-
+    public GrassProfile landGrass;
+    public GrassProfile seaGrass;
     // Texture Arrays
     [HideInInspector]
     public Texture2DArray textureArray;

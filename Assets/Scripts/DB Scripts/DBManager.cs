@@ -466,8 +466,6 @@ public struct DBNoiseGeneratorSettings
                 isolevel = settings.isolevel,
                 waterLevel = settings.waterLevel,
                 lerp = settings.lerp,
-                terracing = settings.terracing,
-                terraceHeight = settings.terraceHeight
             };
         }
 
@@ -533,8 +531,6 @@ public struct DBNoiseGeneratorSettings
             deserializedDensity.isolevel = settings.isolevel;
             deserializedDensity.waterLevel = settings.waterLevel;
             deserializedDensity.lerp = settings.lerp;
-            deserializedDensity.terracing = settings.terracing;
-            deserializedDensity.terraceHeight = settings.terraceHeight;
 
             return deserializedDensity;
         }

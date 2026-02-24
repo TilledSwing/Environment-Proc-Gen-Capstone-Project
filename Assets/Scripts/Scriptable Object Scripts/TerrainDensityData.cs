@@ -11,6 +11,4 @@ public class TerrainDensityData : ScriptableObject
     public int waterLevel = 35;
     public bool water = true;
     public bool lerp = true;
-    public bool terracing = false;
-    public int terraceHeight = 2;
 }

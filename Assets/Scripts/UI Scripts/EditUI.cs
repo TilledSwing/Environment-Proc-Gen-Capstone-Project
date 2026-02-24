@@ -73,9 +73,6 @@ public class EditUI : MonoBehaviour
             case "WaterToggle":
                 toggle.isOn = tdd.water;
                 break;
-            case "TerraceToggle":
-                toggle.isOn = tdd.terracing;
-                break;
             case "DWToggle":
                 toggle.isOn = ng.domainWarpToggle;
                 break;
@@ -124,9 +121,6 @@ public class EditUI : MonoBehaviour
                 break;
             case "FStrengthSlider":
                 slider.value = ng.fractalWeightedStrength;
-                break;
-            case "TerraceSlider":
-                slider.value = tdd.terraceHeight;
                 break;
             case "DWOctavesSlider":
                 slider.value = ng.domainWarpFractalOctaves;
@@ -182,8 +176,6 @@ public class EditUI : MonoBehaviour
         tdd.waterLevel = 30;
         tdd.water = true;
         tdd.lerp = true;
-        tdd.terracing = false;
-        tdd.terraceHeight = 2;
 
         StartCoroutine(Reload());
     }
@@ -218,7 +210,6 @@ public class EditUI : MonoBehaviour
     public void OnTerraceToggleChanged(bool marked)
     {
         loadScreen.SetActive(true);
-        tdd.terracing = marked;
         Debug.Log("toggle changed");
         StartCoroutine(Reload());
     }
@@ -292,10 +283,6 @@ public class EditUI : MonoBehaviour
     public void OnFStrengthChanged(float value)
     {
         ng.fractalWeightedStrength = value;
-    }
-    public void OnTerraceChanged(float value)
-    {
-        tdd.terraceHeight = (int)value;
     }
     public void OnDWOctavesChanged(float value)
     {
