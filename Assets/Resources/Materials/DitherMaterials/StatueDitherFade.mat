@@ -138,9 +138,9 @@ Material:
     - _ditherScale: 0.3
     - _fade: 0
     - _metallic: 0
-    - _smoothness: 0.5
+    - _smoothness: 0.45
     - _useMetallicMap: 1
-    - _useSmoothnessMap: 1
+    - _useSmoothnessMap: 0
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
