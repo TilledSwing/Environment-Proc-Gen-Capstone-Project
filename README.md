@@ -1,6 +1,8 @@
 If you want to test the terrain generation and play around with it, the easiest way is to click "Edit Environments" from the main menu and then you can click "Explore" in thhe top right followed by clicking "Start Server" and "Start Client".
 
 Here's some GIFS of what it generates:
+https://github.com/user-attachments/assets/50814904-45d0-4123-9b63-664ba3df3c65
+
 
 
 ======================== CAPSTONE README ========================
