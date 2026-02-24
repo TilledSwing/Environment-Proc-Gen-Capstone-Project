@@ -4,6 +4,7 @@ Here's some GIFS of what it generates:
 
 
 ======================== CAPSTONE README ========================
+
 Build and Run Instructions:
 To build and run our program, Unity is required. Clone the repo, open in Unity, and select “Build and Run” from the File dropdown. You are presented with a main menu screen and from there you can either start up game mode or enter editing mode.
 
