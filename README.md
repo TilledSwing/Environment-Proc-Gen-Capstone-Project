@@ -1,3 +1,13 @@
+If you want to test the terrain generation and play around with it, the easiest way is to click "Edit Environments" from the main menu and then you can click "Explore" in thhe top right followed by clicking "Start Server" and "Start Client".
+
+Here's some GIFS of what it generates:
+
+![landGIF](https://github.com/user-attachments/assets/d648d2f0-227e-420e-a8b8-2a02df62cc96)
+
+![seaGIF](https://github.com/user-attachments/assets/27a24f8c-918f-447b-8ff1-51a974721053)
+
+======================== CAPSTONE README ========================
+
 Build and Run Instructions:
 To build and run our program, Unity is required. Clone the repo, open in Unity, and select “Build and Run” from the File dropdown. You are presented with a main menu screen and from there you can either start up game mode or enter editing mode.
 
@@ -12,7 +22,6 @@ Once the game starts, read the in game menu for all the different player abiliti
 
 Editor Mode:
 In editor mode you are presented with a screen where you can modify terrain settings with sliders and buttons. Hovering over these will present further information on what the settings do. There are also options for changing textures. On the navigation bar at the top, you can save your terrain, load in a terrain from the database (see MAMP below), or enter explore mode. When you select explore mode, you are presented with options to start a server, client, enter an IP, or enter a name. If no IP is provided, then you host / connect as a client over the local network. Starting server establishes the connection, starting client joins the connection as a player. If an IP is provided of a remote server (like through ZeroTier), then players can join remotely. See in-game help menu for all player options. There is also a lobby and chat provided like with the game mode. If no name was presented then the player is “Anonymous”. 
-
 
 Additional Libraries / Systems Needed:
 MAMP:
