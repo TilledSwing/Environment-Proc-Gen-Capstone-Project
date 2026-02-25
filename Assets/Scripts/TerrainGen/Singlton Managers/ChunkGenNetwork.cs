@@ -108,12 +108,17 @@ public class ChunkGenNetwork : MonoBehaviour
     public Mesh waterMesh;
 
     [Space(10)]
-    [Header("========== Grass Settings ==========")]
+    [Header("========== Foliage Settings ==========")]
     [Space(5)]
-    // Grass Stuff
+    // Foliage Stuff
+    public Vector2 globalWindDirection;
     public ComputeShader grassPositionComputeShader;
     public GrassProfile landGrass;
     public GrassProfile seaGrass;
+    public Material bushMaterial;
+    public Material treeTopMaterial;
+    public ParticleSystem leafParticleSystem;
+
     // Texture Arrays
     [HideInInspector]
     public Texture2DArray textureArray;
@@ -358,6 +363,13 @@ public class ChunkGenNetwork : MonoBehaviour
         SetFogActive(false);
         viewerPos = viewer.position;
         lastUpdateViewerPos = viewerPos;
+
+        landGrass.grassMaterial.SetVector("_WindDir", globalWindDirection);
+        bushMaterial.SetVector("_WindDir", globalWindDirection);
+        treeTopMaterial.SetVector("_WindDir", globalWindDirection);
+        // var forceModule = leafParticleSystem.forceOverLifetime;
+        // forceModule.x = globalWindDirection.x;
+        // forceModule.z = globalWindDirection.y;
 
         InitializeGenerator();
     }

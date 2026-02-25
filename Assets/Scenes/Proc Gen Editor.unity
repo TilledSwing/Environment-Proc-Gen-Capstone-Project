@@ -26372,9 +26372,13 @@ MonoBehaviour:
   terrainMaterial: {fileID: 2100000, guid: d644a1ee14ca32a44b080e9c6de5ed62, type: 2}
   waterMaterial: {fileID: 2100000, guid: 804af839dce47f748a2151ac2e3113a9, type: 2}
   waterMesh: {fileID: 0}
+  globalWindDirection: {x: 0.8, y: 0.6}
   grassPositionComputeShader: {fileID: 7200000, guid: f2f43ed31c15f4c499751ac8fe425ce1, type: 3}
   landGrass: {fileID: 11400000, guid: b5321fb8eb3e63c43a1ea7873ecc4305, type: 2}
   seaGrass: {fileID: 11400000, guid: 724eaf9f27efdf04ea6a9b881f61336c, type: 2}
+  bushMaterial: {fileID: 2100000, guid: a6bda2ff0f39da34ea0e8286729af5f5, type: 2}
+  treeTopMaterial: {fileID: 2100000, guid: c9cd77bef0cc73f48b37bdc6614633f3, type: 2}
+  leafParticleSystem: {fileID: 7312104844829940776, guid: 4c1788d7929c4824d92b4727979ae073, type: 3}
   textureArray: {fileID: 0}
   useHeights: []
   heightStarts: []
