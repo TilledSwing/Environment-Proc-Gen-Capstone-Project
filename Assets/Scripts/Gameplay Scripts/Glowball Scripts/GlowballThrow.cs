@@ -48,7 +48,8 @@ public class GlowballThrow : NetworkBehaviour
     [ServerRpc]
     public void ThrowGlowball(Vector3 lookdir)
     {
-        GameObject thrownBall = Instantiate(glowball, transform.position + transform.up * 0.5f + transform.forward * 2f, Quaternion.identity);
+        GameObject thrownBall = Instantiate(glowball, Camera.main.transform.position + transform.forward * 4f, Quaternion.identity);
+        thrownBall.transform.rotation = Quaternion.LookRotation(Camera.main.transform.forward);
         Rigidbody ballRB = thrownBall.GetComponent<Rigidbody>();
         ballRB.AddForce(lookdir * throwForce, ForceMode.Impulse);
         ServerManager.Spawn(thrownBall);

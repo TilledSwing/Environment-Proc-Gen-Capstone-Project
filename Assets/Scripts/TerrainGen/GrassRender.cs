@@ -15,13 +15,13 @@ public class GrassRender : MonoBehaviour
     public int bladeCount;
     public Bounds bounds;
     public RenderParams rp;
-    public ComputeMarchingCubes.Triangle[] grassTriangles;
-    ComputeBuffer grassTriangleBuffer;
+    public int triangleCount;
+    public ComputeBuffer grassTriangleBuffer;
     ComputeBuffer grassPositionBuffer;
     public void SetupGrass()
     {
         int grassPositionKernel = grassPositionComputeShader.FindKernel("GrassCompute");
-        grassPositionComputeShader.SetInt("TriangleCount", grassTriangles.Length);
+        grassPositionComputeShader.SetInt("TriangleCount", triangleCount);
         grassPositionComputeShader.SetInt("GrassDensity", grassDensity);
 
         grassPositionComputeShader.SetInt("MinHeight", minHeight);
@@ -30,11 +30,9 @@ public class GrassRender : MonoBehaviour
         grassPositionComputeShader.SetVector("GrassHeightRange", grassHeightRange);
         grassPositionComputeShader.SetFloat("MaxSlope", Mathf.Cos(maxGrassSlope * Mathf.Deg2Rad));
 
-        grassTriangleBuffer = new(grassTriangles.Length, sizeof(float) * 18);
-        grassTriangleBuffer.SetData(grassTriangles);
         grassPositionComputeShader.SetBuffer(grassPositionKernel, "GrassTriangleBuffer", grassTriangleBuffer);
 
-        int maxBlades = Mathf.CeilToInt(grassTriangles.Length * maxBladesPerTriangle);
+        int maxBlades = Mathf.CeilToInt(triangleCount * maxBladesPerTriangle);
         grassPositionBuffer = new ComputeBuffer(
             maxBlades,
             sizeof(float) * 9,
@@ -43,7 +41,7 @@ public class GrassRender : MonoBehaviour
         grassPositionBuffer.SetCounterValue(0);
         grassPositionComputeShader.SetBuffer(grassPositionKernel, "GrassPositionsBuffer", grassPositionBuffer);
 
-        grassPositionComputeShader.Dispatch(grassPositionKernel, Mathf.CeilToInt(grassTriangles.Length / 64f), 1, 1);
+        grassPositionComputeShader.Dispatch(grassPositionKernel, Mathf.CeilToInt(triangleCount / 64f), 1, 1);
 
         grassTriangleBuffer.Release();
 

@@ -2,16 +2,19 @@ using UnityEngine;
 
 public class GlowballLogic : MonoBehaviour
 {
+    Rigidbody rb;
     public float maxAirTime = 6f;
     float creationTime;
     bool hit = false;
     void Start()
     {
         creationTime = Time.time;
+        rb = gameObject.GetComponent<Rigidbody>();
     }
-    void Update()
+    void FixedUpdate()
     {
         if (!hit) {
+            transform.rotation = Quaternion.LookRotation(rb.linearVelocity);
             CheckTime();
         }
     }
@@ -29,7 +32,6 @@ public class GlowballLogic : MonoBehaviour
     void OnCollisionEnter(Collision collision)
     {
         if (hit) return;
-        Rigidbody rb = gameObject.GetComponent<Rigidbody>();
         rb.linearVelocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
         rb.useGravity = false;

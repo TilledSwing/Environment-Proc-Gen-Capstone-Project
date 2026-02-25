@@ -40,7 +40,6 @@ public class PlayerController : NetworkBehaviour
     public Camera playerCamera;
 
     private bool isFlightMode = false;
-    private bool isSubmerged = false;
     private bool underwater = false;
     public bool dead = false;
 
@@ -126,15 +125,37 @@ public class PlayerController : NetworkBehaviour
             return;
         }
 
+        if (playerCamera.transform.position.y - 0.08f < waterLevel && !underwater && ChunkGenNetwork.Instance.terrainDensityData.water)
+        {
+            underwater = true;
+            GraphicsSettings.defaultRenderPipeline = ChunkGenNetwork.Instance.underwaterUrpAsset;
+            QualitySettings.renderPipeline = ChunkGenNetwork.Instance.underwaterUrpAsset;
+            ChunkGenNetwork.Instance.fogRenderPassFeature = ChunkGenNetwork.Instance.rendererData.rendererFeatures.Find(f => f is FogRenderPassFeature) as FogRenderPassFeature;
+            ChunkGenNetwork.Instance.fogMat.SetFloat("_fogDensity", 0.018f);
+            ChunkGenNetwork.Instance.fogMat.SetFloat("_fogOffset", -15f);
+            ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogDensity", 0.018f);
+            ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogOffset", -15f);
+        }
+        else if(playerCamera.transform.position.y - 0.08f > waterLevel && underwater && ChunkGenNetwork.Instance.terrainDensityData.water)
+        {
+            underwater = false;
+            GraphicsSettings.defaultRenderPipeline = ChunkGenNetwork.Instance.mainUrpAsset;
+            QualitySettings.renderPipeline = ChunkGenNetwork.Instance.mainUrpAsset;
+            ChunkGenNetwork.Instance.fogRenderPassFeature = ChunkGenNetwork.Instance.rendererData.rendererFeatures.Find(f => f is FogRenderPassFeature) as FogRenderPassFeature;
+            ChunkGenNetwork.Instance.fogMat.SetFloat("_fogDensity", ChunkGenNetwork.Instance.fogDensity);
+            ChunkGenNetwork.Instance.fogMat.SetFloat("_fogOffset", ChunkGenNetwork.Instance.fogOffset);
+            ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogDensity", ChunkGenNetwork.Instance.fogDensity);
+            ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogOffset", ChunkGenNetwork.Instance.fogOffset);
+        }
+
         bool isRunning = false;
 
-        // Press S to run
+        // Press Left Shift to run
         isRunning = Input.GetKey(KeyCode.LeftShift);
-        isSubmerged = transform.position.y < waterLevel;
 
-        if (isSubmerged && ChunkGenNetwork.Instance.terrainDensityData.water)
+        if (underwater && ChunkGenNetwork.Instance.terrainDensityData.water)
         {
-            gravity = 3.5f;
+            gravity = 0.0f;
             jumpSpeed = 5.0f;
 
             if (!isFlightMode)
@@ -149,34 +170,6 @@ public class PlayerController : NetworkBehaviour
             jumpSpeed = 8.0f;
             walkingSpeed = 7.5f;
             runningSpeed = 30f;
-        }
-        if (playerCamera.transform.position.y - 0.08f < waterLevel && !underwater && ChunkGenNetwork.Instance.terrainDensityData.water)
-        {
-            underwater = true;
-            GraphicsSettings.defaultRenderPipeline = ChunkGenNetwork.Instance.underwaterUrpAsset;
-            QualitySettings.renderPipeline = ChunkGenNetwork.Instance.underwaterUrpAsset;
-            ChunkGenNetwork.Instance.fogRenderPassFeature = ChunkGenNetwork.Instance.rendererData.rendererFeatures.Find(f => f is FogRenderPassFeature) as FogRenderPassFeature;
-            ChunkGenNetwork.Instance.fogMat.SetFloat("_fogDensity", 0.018f);
-            ChunkGenNetwork.Instance.fogMat.SetFloat("_fogOffset", -15f);
-            ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogDensity", 0.018f);
-            ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogOffset", -15f);
-
-            // ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogDensity", 0.018f);
-            // ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogOffset", -15f);
-        }
-        else if(playerCamera.transform.position.y - 0.08f > waterLevel && underwater && ChunkGenNetwork.Instance.terrainDensityData.water)
-        {
-            underwater = false;
-            GraphicsSettings.defaultRenderPipeline = ChunkGenNetwork.Instance.mainUrpAsset;
-            QualitySettings.renderPipeline = ChunkGenNetwork.Instance.mainUrpAsset;
-            ChunkGenNetwork.Instance.fogRenderPassFeature = ChunkGenNetwork.Instance.rendererData.rendererFeatures.Find(f => f is FogRenderPassFeature) as FogRenderPassFeature;
-            ChunkGenNetwork.Instance.fogMat.SetFloat("_fogDensity", ChunkGenNetwork.Instance.fogDensity);
-            ChunkGenNetwork.Instance.fogMat.SetFloat("_fogOffset", ChunkGenNetwork.Instance.fogOffset);
-            ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogDensity", ChunkGenNetwork.Instance.fogDensity);
-            ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogOffset", ChunkGenNetwork.Instance.fogOffset);
-
-            // ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogDensity", ChunkGenNetwork.Instance.fogDensity);
-            // ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogOffset", ChunkGenNetwork.Instance.fogOffset);
         }
 
         // Goes from first person to a pseudo pause screen and vice versa on escape.
@@ -194,50 +187,48 @@ public class PlayerController : NetworkBehaviour
         //     isFlightMode = !isFlightMode;
 
         // We are grounded, so recalculate move direction based on axis
-        Vector3 forward = transform.TransformDirection(Vector3.forward);
-        Vector3 right = transform.TransformDirection(Vector3.right);
+        Vector3 forward = underwater ? playerCamera.transform.forward : transform.TransformDirection(Vector3.forward);
+        Vector3 right = underwater ? playerCamera.transform.right : transform.TransformDirection(Vector3.right);
 
         float curSpeedX = canMove ? (isRunning ? runningSpeed : walkingSpeed) * wasd.ReadValue<Vector2>().y : 0;
         float curSpeedY = canMove ? (isRunning ? runningSpeed : walkingSpeed) * wasd.ReadValue<Vector2>().x : 0;
         float movementDirectionY = moveDirection.y;
         moveDirection = (forward * curSpeedX) + (right * curSpeedY);
-
-        if (!isFlightMode)
+        if (!underwater)
         {
-            if (Input.GetButton("Jump") && canMove && (characterController.isGrounded || isSubmerged))
-            {
-                moveDirection.y = jumpSpeed;
-            }
-            else
-            {
-                moveDirection.y = movementDirectionY;
-            }
+            moveDirection.y = movementDirectionY;
+        }
 
-            if (!characterController.isGrounded)
+        if (canMove)
+        {
+            if (!isFlightMode)
             {
-                if (isSubmerged)
+                if (Input.GetButton("Jump") && characterController.isGrounded && !underwater)
                 {
-                    // Dampen speed to match water "gravity". Smooth corrections for gravity that is close.
-                    moveDirection.y = Mathf.Lerp(moveDirection.y, -gravity, Time.deltaTime * 3f);
+                    moveDirection.y = jumpSpeed;
                 }
-                else
+                else if (!characterController.isGrounded && !underwater)
                 {
                     moveDirection.y -= gravity * Time.deltaTime;
                 }
+                else if (Input.GetButton("Jump") && underwater)
+                {
+                    moveDirection.y += jumpSpeed;
+                }
             }
-        }
-        else
-        {
-            moveDirection.y = 0f;
+            else
+            {
+                moveDirection.y = 0f;
 
-            // Free flight settings - not affected by gravity.
-            if (Input.GetButton("Jump") && canMove)
-            {
-                moveDirection.y = flightSpeed;
-            }
-            else if (Input.GetKey(KeyCode.LeftControl) && canMove)
-            {
-                moveDirection.y = -flightSpeed;
+                // Free flight settings - not affected by gravity.
+                if (Input.GetButton("Jump"))
+                {
+                    moveDirection.y = jumpSpeed;
+                }
+                else if (Input.GetKey(KeyCode.LeftControl))
+                {
+                    moveDirection.y = -jumpSpeed;
+                }
             }
         }
 

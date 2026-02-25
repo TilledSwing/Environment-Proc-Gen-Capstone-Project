@@ -269,7 +269,9 @@ public class ComputeMarchingCubes : MonoBehaviour
                 grass.maxGrassSlope = ChunkGenNetwork.Instance.landGrass.maxGrassSlope;
                 grass.grassHeightRange = ChunkGenNetwork.Instance.landGrass.grassHeightRange;
                 grass.grassPositionComputeShader = ChunkGenNetwork.Instance.grassPositionComputeShader;
-                grass.grassTriangles = triangleArray.AsArray().ToArray();
+                grass.triangleCount = triangleCount;
+                grass.grassTriangleBuffer = new(triangleCount, sizeof(float) * 18);
+                grass.grassTriangleBuffer.SetData(triangleArray.AsArray());
                 grass.bounds = mesh.bounds;
                 grass.SetupGrass();
                 triangleArray.Dispose();
@@ -287,7 +289,9 @@ public class ComputeMarchingCubes : MonoBehaviour
                 grass.maxGrassSlope = ChunkGenNetwork.Instance.seaGrass.maxGrassSlope;
                 grass.grassHeightRange = ChunkGenNetwork.Instance.seaGrass.grassHeightRange;
                 grass.grassPositionComputeShader = ChunkGenNetwork.Instance.grassPositionComputeShader;
-                grass.grassTriangles = triangleArray.AsArray().ToArray();
+                grass.triangleCount = triangleCount;
+                grass.grassTriangleBuffer = new(triangleCount, sizeof(float) * 18);
+                grass.grassTriangleBuffer.SetData(triangleArray.AsArray());
                 grass.bounds = mesh.bounds;
                 grass.SetupGrass();
                 triangleArray.Dispose();

@@ -610,7 +610,7 @@ public class ChunkGenNetwork : MonoBehaviour
         {
             lightingBlockerRenderer.enabled = true;
         }
-        else if (lightingBlockerRenderer.enabled)
+        else if (viewerPos.y >= -5 && lightingBlockerRenderer.enabled)
         {
             lightingBlockerRenderer.enabled = false;
         }
