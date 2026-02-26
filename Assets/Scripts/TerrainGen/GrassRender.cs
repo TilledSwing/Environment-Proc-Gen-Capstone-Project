@@ -18,6 +18,7 @@ public class GrassRender : MonoBehaviour
     public int triangleCount;
     public ComputeBuffer grassTriangleBuffer;
     ComputeBuffer grassPositionBuffer;
+    public bool underwater;
     public void SetupGrass()
     {
         int grassPositionKernel = grassPositionComputeShader.FindKernel("GrassCompute");
@@ -76,6 +77,8 @@ public class GrassRender : MonoBehaviour
         Plane[] planes = GeometryUtility.CalculateFrustumPlanes(Camera.main);
         if (GeometryUtility.TestPlanesAABB(planes, bounds))
         {
+            if (underwater && ChunkGenNetwork.Instance.viewerPos.y > ChunkGenNetwork.Instance.terrainDensityData.waterLevel)
+                return ;
             Graphics.RenderMeshPrimitives(rp, grassMesh, 0, bladeCount);
         }
     }

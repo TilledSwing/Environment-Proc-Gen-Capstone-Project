@@ -273,10 +273,11 @@ public class ComputeMarchingCubes : MonoBehaviour
                 grass.grassTriangleBuffer = new(triangleCount, sizeof(float) * 18);
                 grass.grassTriangleBuffer.SetData(triangleArray.AsArray());
                 grass.bounds = mesh.bounds;
+                grass.underwater = false;
                 grass.SetupGrass();
                 triangleArray.Dispose();
             }
-            else if(chunkPos.y + terrainDensityData.width <= terrainDensityData.waterLevel - terrainDensityData.width && triangleCount > ChunkGenNetwork.Instance.seaGrass.maxBladesPerTriangle)
+            else if(chunkPos.y + terrainDensityData.width <= terrainDensityData.waterLevel - terrainDensityData.width && triangleCount > ChunkGenNetwork.Instance.seaGrass.maxBladesPerTriangle && terrainDensityData.water)
             {
                 grass = gameObject.AddComponent<GrassRender>();
                 grass.chunkPos = chunkPos;
@@ -284,7 +285,7 @@ public class ComputeMarchingCubes : MonoBehaviour
                 grass.maxBladesPerTriangle = ChunkGenNetwork.Instance.seaGrass.maxBladesPerTriangle;
                 grass.grassMaterial = ChunkGenNetwork.Instance.seaGrass.grassMaterial;
                 grass.grassMesh = ChunkGenNetwork.Instance.seaGrass.grassMesh;
-                grass.minHeight = -200;
+                grass.minHeight = -300;
                 grass.maxHeight = terrainDensityData.waterLevel - terrainDensityData.width;
                 grass.maxGrassSlope = ChunkGenNetwork.Instance.seaGrass.maxGrassSlope;
                 grass.grassHeightRange = ChunkGenNetwork.Instance.seaGrass.grassHeightRange;
@@ -293,6 +294,7 @@ public class ComputeMarchingCubes : MonoBehaviour
                 grass.grassTriangleBuffer = new(triangleCount, sizeof(float) * 18);
                 grass.grassTriangleBuffer.SetData(triangleArray.AsArray());
                 grass.bounds = mesh.bounds;
+                grass.underwater = true;
                 grass.SetupGrass();
                 triangleArray.Dispose();
             }
