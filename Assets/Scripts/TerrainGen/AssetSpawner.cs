@@ -124,8 +124,6 @@ public class AssetSpawner : MonoBehaviour
 
                 minDepthJob.Run();
 
-                // minDepthPoints = GetMinDepthChunkPoints(currentAssetSpawnFilters.minDensity, heightsArray);
-                // if (minDepthPoints == null || minDepthPoints.Count == 0) continue;
                 if (depthResult.Length == 0)
                 {
                     depthResult.Dispose();

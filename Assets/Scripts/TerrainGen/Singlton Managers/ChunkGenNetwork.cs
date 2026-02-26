@@ -433,7 +433,7 @@ public class ChunkGenNetwork : MonoBehaviour
 
         noiseGeneratorTextureArray = CreateNoiseCurveTextures();
         CreateVertexIndexArray();
-        waterMesh = WaterPlaneGenerator.PlaneGeneratorJobHandler(terrainDensityData.width, terrainDensityData.waterLevel - terrainDensityData.width);
+        waterMesh = WaterPlaneGenerator.PlaneGeneratorJobHandler(terrainDensityData.width, terrainDensityData.waterLevel % terrainDensityData.width);
         UpdateVisibleChunks();
     }
     /// <summary>
@@ -565,7 +565,7 @@ public class ChunkGenNetwork : MonoBehaviour
     {
         // Position updates
         viewerPos = viewer.position;
-        lightingBlocker.transform.position = new Vector3(viewerPos.x, 0, viewerPos.z);
+        lightingBlocker.transform.position = new Vector3(viewerPos.x, viewerPos.y + 100f, viewerPos.z);
         // Darker fog at lower world heights
         float depthFactor = Mathf.Clamp01(-viewerPos.y * 0.01f);
         Color currentFog = Color.Lerp(lowerFogColor, darkFogColor, depthFactor);
@@ -618,11 +618,11 @@ public class ChunkGenNetwork : MonoBehaviour
         int currentChunkCoordY = Mathf.FloorToInt(viewerPos.y / chunkSize);
         int currentChunkCoordZ = Mathf.FloorToInt(viewerPos.z / chunkSize);
 
-        if (viewerPos.y <= -5 && !lightingBlockerRenderer.enabled)
+        if (viewerPos.y <= -40 && !lightingBlockerRenderer.enabled)
         {
             lightingBlockerRenderer.enabled = true;
         }
-        else if (viewerPos.y >= -5 && lightingBlockerRenderer.enabled)
+        else if (viewerPos.y >= -40 && lightingBlockerRenderer.enabled)
         {
             lightingBlockerRenderer.enabled = false;
         }

@@ -26350,9 +26350,9 @@ MonoBehaviour:
   lobbyContainer: {fileID: 194610414}
   viewer: {fileID: 1588582780}
   viewerPos: {x: 0, y: 0, z: 0}
-  maxViewDst: 144
-  maxWorldYChunks: 16
-  updateDistanceThreshold: 12
+  maxViewDst: 160
+  maxWorldYChunks: 12
+  updateDistanceThreshold: 16
   chunkParent: {fileID: 1368767289}
   chunkSize: 0
   chunksVisible: 0
