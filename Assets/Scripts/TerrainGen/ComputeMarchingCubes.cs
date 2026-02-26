@@ -40,7 +40,7 @@ public class ComputeMarchingCubes : MonoBehaviour
         public Vertex v2;
         public Vertex v3;
     }
-    void Start()
+    public void GenerateChunk()
     {
         SetTerrainSettings();
         SetHeights();
@@ -178,6 +178,8 @@ public class ComputeMarchingCubes : MonoBehaviour
         {
             Bounds bounds = new Bounds(chunkPos + (new Vector3(0.5f, 0.5f, 0.5f) * terrainDensityData.width), Vector3.one * terrainDensityData.width);
             float dst = bounds.SqrDistance(ChunkGenNetwork.Instance.viewerPos);
+            // Vector3 chunkCenter = chunkPos + ChunkGenNetwork.Instance.halfChunkVec;
+            // float dst = (chunkCenter - ChunkGenNetwork.Instance.viewerPos).sqrMagnitude - (ChunkGenNetwork.Instance.halfChunkSize * ChunkGenNetwork.Instance.halfChunkSize * 2);
             ChunkGenNetwork.Instance.pendingReadbacks.Enqueue(new ChunkGenNetwork.ReadbackRequest(chunkCoord, heightsBuffer, (AsyncGPUReadbackRequest dataRequest) =>
             {
                 if (dataRequest.hasError)

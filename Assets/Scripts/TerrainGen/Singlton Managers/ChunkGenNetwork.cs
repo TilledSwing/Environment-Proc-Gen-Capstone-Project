@@ -157,8 +157,10 @@ public class ChunkGenNetwork : MonoBehaviour
     // Chunk Variables
     float maxViewDstSqr;
     Vector3 chunkVec;
-    Vector3 halfChunkVec;
-    float halfChunkSize;
+    [HideInInspector]
+    public Vector3 halfChunkVec;
+    [HideInInspector]
+    public float halfChunkSize;
 
     // Chunk Data
     public Dictionary<long, TerrainChunk> chunkDictionary = new();
@@ -688,11 +690,16 @@ public class ChunkGenNetwork : MonoBehaviour
                             continue;
                     }
 
-                    Bounds bounds = new Bounds((viewedChunkCoord * chunkSize) + (new Vector3(0.5f, 0.5f, 0.5f) * chunkSize), Vector3.one * chunkSize);
+                    Bounds bounds = new Bounds((viewedChunkCoord * chunkSize) + (new Vector3(0.5f, 0.5f, 0.5f) * chunkSize), chunkVec);
                     float viewerDstFromBound = bounds.SqrDistance(viewerPos);
+                    // Vector3 chunkCenter = (viewedChunkCoord * chunkSize) + halfChunkVec;
+                    // float viewerDstFromBound = (chunkCenter - viewerPos).sqrMagnitude - (halfChunkSize * halfChunkSize * 2);
                     bool isInView = viewerDstFromBound <= maxViewDstSqr;
+                    
                     // float viewerDstFromBound = CalculateDstFromBound(viewedChunkCoord, viewerPos);
 
+                    // if (maxViewDstSqr - viewerDstFromBound <= chunkSize * chunkSize)
+                    //     continue;
                     if (!isInView)
                         continue;
 
@@ -721,7 +728,7 @@ public class ChunkGenNetwork : MonoBehaviour
                         Vector3 chunkCenter = (viewedChunkCoord * chunkSize) + halfChunkVec;
                         Vector3 toChunk = Vector3.Normalize(chunkCenter - viewerPos); 
                         float angle = Vector3.Angle(movementDir, toChunk); 
-                        if (angle > 60f) continue;
+                        if (angle > 75f) continue;
 
                         if (chunkLoadSet.Add(chunkCoordId))
                         {
@@ -795,6 +802,8 @@ public class ChunkGenNetwork : MonoBehaviour
             // float viewerDstFromBound = CalculateDstFromBound(coord, viewerPos);
             Bounds bounds = new Bounds(coord * chunkSize + (new Vector3(0.5f, 0.5f, 0.5f) * chunkSize), Vector3.one * chunkSize);
             float viewerDstFromBound = bounds.SqrDistance(viewerPos);
+            // Vector3 chunkCenter = (coord * chunkSize) + halfChunkVec;
+            // float viewerDstFromBound = (chunkCenter - viewerPos).sqrMagnitude - (halfChunkSize * halfChunkSize * 2);
             bool isInView = viewerDstFromBound <= maxViewDstSqr;
 
             if (!chunkDictionary.TryGetValue(packedCoord, out TerrainChunk dictChunk) && isInView)
@@ -1084,6 +1093,7 @@ public class ChunkGenNetwork : MonoBehaviour
             this.chunkCoord = chunkCoord;
             chunkPos = chunkCoord * chunkSize;
             chunk = new GameObject("Chunk" + chunkPos);
+            chunk.transform.SetParent(parent);
             chunk.layer = 3;
             // Set up basic chunk components
             meshCollider = chunk.AddComponent<MeshCollider>();
@@ -1091,6 +1101,17 @@ public class ChunkGenNetwork : MonoBehaviour
             meshRenderer = chunk.AddComponent<MeshRenderer>();
             // Chunk texture
             meshRenderer.sharedMaterial = terrainMaterial;
+            // Set up water generator
+            if (terrainDensityData.waterLevel > chunkPos.y && terrainDensityData.waterLevel < Mathf.RoundToInt(chunkPos.y + terrainDensityData.width) && terrainDensityData.water)
+            {
+                waterPlaneGenerator = new GameObject("Water");
+                waterPlaneGenerator.transform.SetParent(chunk.transform);
+                MeshFilter waterGenMeshFilter = waterPlaneGenerator.AddComponent<MeshFilter>();
+                waterMeshRenderer = waterPlaneGenerator.AddComponent<MeshRenderer>();
+                waterMeshRenderer.sharedMaterial = waterMaterial;
+                waterGenMeshFilter.mesh = Instance.waterMesh;
+                waterPlaneGenerator.transform.position = chunkPos;
+            }
             // Set up the chunk's AssetSpawn script
             assetSpawner = chunk.AddComponent<AssetSpawner>();
             assetSpawner.chunkPos = chunkPos;
@@ -1108,18 +1129,7 @@ public class ChunkGenNetwork : MonoBehaviour
             marchingCubes.terrainDensityData = terrainDensityData;
             marchingCubes.initialLoadComplete = initialLoadComplete;
             marchingCubes.noiseGeneratorTextureArray = noiseGeneratorTextureArray;
-            // Set up water generator
-            if (terrainDensityData.waterLevel > chunkPos.y && terrainDensityData.waterLevel < Mathf.RoundToInt(chunkPos.y + terrainDensityData.width) && terrainDensityData.water)
-            {
-                waterPlaneGenerator = new GameObject("Water");
-                waterPlaneGenerator.transform.SetParent(chunk.transform);
-                MeshFilter waterGenMeshFilter = waterPlaneGenerator.AddComponent<MeshFilter>();
-                waterMeshRenderer = waterPlaneGenerator.AddComponent<MeshRenderer>();
-                waterMeshRenderer.sharedMaterial = waterMaterial;
-                waterGenMeshFilter.mesh = Instance.waterMesh;
-                waterPlaneGenerator.transform.position = chunkPos;
-            }
-            chunk.transform.SetParent(parent);
+            marchingCubes.GenerateChunk();
         }
         /// <summary>
         /// Update the visibility of the chunk

@@ -25,6 +25,8 @@ Shader "Custom/GrassShader"
             #pragma fragment frag
             #pragma multi_compile_instancing
 
+            #define UNITY_INDIRECT_DRAW_ARGS IndirectDrawIndexedArgs
+            #include "UnityIndirect.cginc"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Assets/Scripts/Shaders/Common/Helpers.hlsl"
 
@@ -61,6 +63,7 @@ Shader "Custom/GrassShader"
             Varyings vert(Attributes IN)
             {
                 Varyings OUT;
+                InitIndirectDrawArgs(0);
                 uint instanceID = IN.instanceID;
                 GrassBlade grassBlade = _Positions[instanceID];
                 float3 instanceOffset = grassBlade.position;
@@ -140,6 +143,8 @@ Shader "Custom/GrassShader"
             #pragma multi_compile_instancing
             #pragma target 3.0
 
+            #define UNITY_INDIRECT_DRAW_ARGS IndirectDrawIndexedArgs
+            #include "UnityIndirect.cginc"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceInput.hlsl"
@@ -191,6 +196,7 @@ Shader "Custom/GrassShader"
             Varyings vert(Attributes IN)
             {
                 Varyings OUT;
+                InitIndirectDrawArgs(0);
                 uint instanceID = IN.instanceID;
                 GrassBlade grassBlade = _Positions[instanceID];
                 float3 instanceOffset = grassBlade.position;

@@ -23583,7 +23583,7 @@ Transform:
   m_GameObject: {fileID: 1588582779}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 80, y: 40.5, z: 63}
+  m_LocalPosition: {x: 80, y: 40.5, z: 60}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -26336,7 +26336,7 @@ MonoBehaviour:
   mainCameraTransform: {fileID: 0}
   fogMat: {fileID: 2100000, guid: b78a36d964d317b498aa1107a6978473, type: 2}
   fogDensity: 0.08
-  fogOffset: 110
+  fogOffset: 125
   upperFogColor: {r: 0.015686275, g: 0.05882353, b: 0.14117648, a: 0}
   lowerFogColor: {r: 0.101960786, g: 0.14901961, b: 0.20784314, a: 0}
   darkFogColor: {r: 0.09429512, g: 0.10846831, b: 0.122641504, a: 1}
@@ -26350,9 +26350,9 @@ MonoBehaviour:
   lobbyContainer: {fileID: 194610414}
   viewer: {fileID: 1588582780}
   viewerPos: {x: 0, y: 0, z: 0}
-  maxViewDst: 160
+  maxViewDst: 192
   maxWorldYChunks: 12
-  updateDistanceThreshold: 16
+  updateDistanceThreshold: 32
   chunkParent: {fileID: 1368767289}
   chunkSize: 0
   chunksVisible: 0

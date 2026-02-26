@@ -1,11 +1,10 @@
 // Each #kernel tells which function to compile; you can have many kernels
-#pragma kernel Terraform
+#pragma kernel GrassTerraform
 
-RWStructuredBuffer<float> HeightsBuffer;
+
 float3 TerraformCenter;
 float3 TerraformOffset;
 float TerraformRadius;
-float TerraformStrength;
 uint ChunkSize;
 float3 ChunkPos;
 bool TerraformMode;
@@ -15,8 +14,8 @@ int FlattenIndex(int3 id, int size) {
     return id.z * (size + 1) * (size + 1) + id.y * (size + 1) + id.x;
 }
 // Perform terraformation on the region of density around the point of terraformation
-[numthreads(1,1,1)]
-void Terraform (uint3 id : SV_DispatchThreadID)
+[numthreads(64,1,1)]
+void GrassTerraform (uint3 id : SV_DispatchThreadID)
 {
     uint3 localVoxelPos = TerraformOffset + id;
 
@@ -27,16 +26,9 @@ void Terraform (uint3 id : SV_DispatchThreadID)
     float3 worldVoxelPos = localVoxelPos + ChunkPos;
     float dstToCenter = length(worldVoxelPos - TerraformCenter);
 
-    float density = HeightsBuffer[FlattenIndex(localVoxelPos, ChunkSize)];
-    TerraformStrength *= 1.0 + abs(density / 3.0);
-    float falloff = (1.0 - (dstToCenter / TerraformRadius));
+    
 
     if(dstToCenter < TerraformRadius) {
-        if(TerraformMode) {
-            HeightsBuffer[FlattenIndex(localVoxelPos, ChunkSize)] -= TerraformStrength * falloff;
-        }
-        else if(!TerraformMode) {
-            HeightsBuffer[FlattenIndex(localVoxelPos, ChunkSize)] += TerraformStrength * falloff;
-        }
+        
     }
 }

@@ -17,14 +17,14 @@ public class GrassRender : MonoBehaviour
     public RenderParams rp;
     public int triangleCount;
     public ComputeBuffer grassTriangleBuffer;
-    ComputeBuffer grassPositionBuffer;
+    GraphicsBuffer grassPositionBuffer;
+    GraphicsBuffer argsBuffer;
     public bool underwater;
     public void SetupGrass()
     {
         int grassPositionKernel = grassPositionComputeShader.FindKernel("GrassCompute");
         grassPositionComputeShader.SetInt("TriangleCount", triangleCount);
         grassPositionComputeShader.SetInt("GrassDensity", grassDensity);
-
         grassPositionComputeShader.SetInt("MinHeight", minHeight);
         grassPositionComputeShader.SetInt("MaxHeight", maxHeight);
         grassPositionComputeShader.SetInt("MaxBladesPerTriangle", maxBladesPerTriangle);
@@ -34,10 +34,10 @@ public class GrassRender : MonoBehaviour
         grassPositionComputeShader.SetBuffer(grassPositionKernel, "GrassTriangleBuffer", grassTriangleBuffer);
 
         int maxBlades = Mathf.CeilToInt(triangleCount * maxBladesPerTriangle);
-        grassPositionBuffer = new ComputeBuffer(
+        grassPositionBuffer = new GraphicsBuffer(
+            GraphicsBuffer.Target.Append,
             maxBlades,
-            sizeof(float) * 9,
-            ComputeBufferType.Append
+            sizeof(float) * 9
         );
         grassPositionBuffer.SetCounterValue(0);
         grassPositionComputeShader.SetBuffer(grassPositionKernel, "GrassPositionsBuffer", grassPositionBuffer);
@@ -46,12 +46,10 @@ public class GrassRender : MonoBehaviour
 
         grassTriangleBuffer.Release();
 
-        ComputeBuffer countBuffer = new(1, sizeof(int), ComputeBufferType.Raw);
-        ComputeBuffer.CopyCount(grassPositionBuffer, countBuffer, 0);
-        int[] countArray = { 0 };
-        countBuffer.GetData(countArray);
-        bladeCount = countArray[0];
-        countBuffer.Release();
+        argsBuffer = new GraphicsBuffer(GraphicsBuffer.Target.IndirectArguments, 1, 5 * sizeof(uint));
+        uint[] args = new uint[5] { grassMesh.GetIndexCount(0), 0, 0, 0, 0 };
+        argsBuffer.SetData(args);
+        GraphicsBuffer.CopyCount(grassPositionBuffer, argsBuffer, sizeof(uint));
         
         grassMaterial.enableInstancing = true;
         grassMaterial.SetFloat("_MinHeight", ChunkGenNetwork.Instance.terrainDensityData.waterLevel);
@@ -63,6 +61,11 @@ public class GrassRender : MonoBehaviour
         };
         rp.matProps.SetBuffer("_Positions", grassPositionBuffer);
     }
+    public void UpdateGrass()
+    {
+
+        rp.matProps.SetBuffer("_Positions", grassPositionBuffer);
+    }
 
     void OnDisable()
     {
@@ -70,16 +73,16 @@ public class GrassRender : MonoBehaviour
         {
             grassPositionBuffer.Release();
         }
+        if (argsBuffer != null)
+        {
+            argsBuffer.Release();
+        }
     }
 
     void Update()
     {
-        Plane[] planes = GeometryUtility.CalculateFrustumPlanes(Camera.main);
-        if (GeometryUtility.TestPlanesAABB(planes, bounds))
-        {
-            if (underwater && ChunkGenNetwork.Instance.viewerPos.y > ChunkGenNetwork.Instance.terrainDensityData.waterLevel)
-                return ;
-            Graphics.RenderMeshPrimitives(rp, grassMesh, 0, bladeCount);
-        }
+        if (underwater && ChunkGenNetwork.Instance.viewerPos.y > ChunkGenNetwork.Instance.terrainDensityData.waterLevel)
+            return ;
+        Graphics.RenderMeshIndirect(rp, grassMesh, argsBuffer, 1, 0);
     }
 }
