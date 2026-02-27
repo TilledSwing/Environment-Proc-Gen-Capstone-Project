@@ -1,10 +1,13 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GrassRender : MonoBehaviour
 {
     public ComputeShader grassPositionComputeShader;
     public Mesh grassMesh;
+    public List<Mesh> meshes;
     public Material grassMaterial;
+    public List<Material> materials;
     public int grassDensity;
     public int maxBladesPerTriangle;
     public int minHeight;
@@ -14,10 +17,13 @@ public class GrassRender : MonoBehaviour
     public Vector3Int chunkPos;
     public Bounds bounds;
     public RenderParams rp;
+    List<RenderParams> renderParams;
     public int triangleCount;
     public ComputeBuffer grassTriangleBuffer;
+    List<GraphicsBuffer> positionsBuffers;
     GraphicsBuffer grassPositionBuffer;
     GraphicsBuffer argsBuffer;
+    List<GraphicsBuffer> argsBuffers;
     public bool underwater;
     public void SetupGrass()
     {

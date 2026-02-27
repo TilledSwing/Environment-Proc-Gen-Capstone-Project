@@ -111,43 +111,4 @@ public class NoiseGenerator : ScriptableObject
         Distance2Mul = 5,
         Distance2Div = 6
     };
-    // CPU Versions
-    public FastNoiseLite.NoiseType[] noiseTypeOptions = new FastNoiseLite.NoiseType[] {FastNoiseLite.NoiseType.OpenSimplex2,
-                                                                                       FastNoiseLite.NoiseType.OpenSimplex2S,
-                                                                                       FastNoiseLite.NoiseType.Cellular,
-                                                                                       FastNoiseLite.NoiseType.Perlin,
-                                                                                       FastNoiseLite.NoiseType.ValueCubic,
-                                                                                       FastNoiseLite.NoiseType.Value};
-
-    public FastNoiseLite.RotationType3D[] rotationType3DOptions = new FastNoiseLite.RotationType3D[] {FastNoiseLite.RotationType3D.None,
-                                                                                                      FastNoiseLite.RotationType3D.ImproveXYPlanes,
-                                                                                                      FastNoiseLite.RotationType3D.ImproveXZPlanes};
-
-    public FastNoiseLite.FractalType[] noiseFractalTypeOptions = new FastNoiseLite.FractalType[] {FastNoiseLite.FractalType.None,
-                                                                                                  FastNoiseLite.FractalType.FBm,
-                                                                                                  FastNoiseLite.FractalType.Ridged,
-                                                                                                  FastNoiseLite.FractalType.PingPong};
-
-    // Domain Warp Values
-    public FastNoiseLite.DomainWarpType[] domainWarpTypeOptions = new FastNoiseLite.DomainWarpType[] {FastNoiseLite.DomainWarpType.OpenSimplex2,
-                                                                                                      FastNoiseLite.DomainWarpType.OpenSimplex2Reduced,
-                                                                                                      FastNoiseLite.DomainWarpType.BasicGrid};
-
-    public FastNoiseLite.FractalType[] domainWarpFractalTypeOptions = new FastNoiseLite.FractalType[] {FastNoiseLite.FractalType.None,
-                                                                                                       FastNoiseLite.FractalType.DomainWarpProgressive,
-                                                                                                       FastNoiseLite.FractalType.DomainWarpIndependent};
-
-    // Cellular Values
-    public FastNoiseLite.CellularDistanceFunction[] cellularDistanceFunctionOptions = new FastNoiseLite.CellularDistanceFunction[] {FastNoiseLite.CellularDistanceFunction.Euclidean,
-                                                                                                                                    FastNoiseLite.CellularDistanceFunction.EuclideanSq,
-                                                                                                                                    FastNoiseLite.CellularDistanceFunction.Manhattan,
-                                                                                                                                    FastNoiseLite.CellularDistanceFunction.Hybrid};
-
-    public FastNoiseLite.CellularReturnType[] cellularReturnTypeOptions = new FastNoiseLite.CellularReturnType[] {FastNoiseLite.CellularReturnType.CellValue,
-                                                                                                                  FastNoiseLite.CellularReturnType.Distance,
-                                                                                                                  FastNoiseLite.CellularReturnType.Distance2,
-                                                                                                                  FastNoiseLite.CellularReturnType.Distance2Add,
-                                                                                                                  FastNoiseLite.CellularReturnType.Distance2Sub,
-                                                                                                                  FastNoiseLite.CellularReturnType.Distance2Mul,
-                                                                                                                  FastNoiseLite.CellularReturnType.Distance2Div};
 }
