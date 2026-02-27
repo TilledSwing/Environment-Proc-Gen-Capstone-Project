@@ -26352,7 +26352,7 @@ MonoBehaviour:
   viewerPos: {x: 0, y: 0, z: 0}
   maxViewDst: 192
   maxWorldYChunks: 12
-  updateDistanceThreshold: 32
+  updateDistanceThreshold: 16
   chunkParent: {fileID: 1368767289}
   chunkSize: 0
   chunksVisible: 0
@@ -26391,6 +26391,8 @@ MonoBehaviour:
   assetWindow: {fileID: 1020663068}
   assetSettingsTab: {fileID: 6267577448233224302, guid: df6bf163c048da44e862dc6585eda648, type: 3}
   presetDropdown: {fileID: 524126295}
+  halfChunkVec: {x: 0, y: 0, z: 0}
+  halfChunkSize: 0
   chunksVisibleLastUpdate: 
   isLoadingChunkVisibility: 0
   isLoadingChunks: 0
@@ -26400,8 +26402,6 @@ MonoBehaviour:
   mainLight: {fileID: 410087040}
   hasPendingReadbacks: 0
   isLoadingReadbacks: 0
-  hasPendingAssetInstantiations: 0
-  isLoadingAssetInstantiations: 0
 --- !u!4 &1838274977
 Transform:
   m_ObjectHideFlags: 0

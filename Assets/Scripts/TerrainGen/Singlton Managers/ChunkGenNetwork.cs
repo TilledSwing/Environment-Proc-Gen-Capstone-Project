@@ -58,6 +58,7 @@ public class ChunkGenNetwork : MonoBehaviour
     public float maxViewDst;
     public int maxWorldYChunks;
     public float updateDistanceThreshold;
+    float updateDistanceThresholdSqr;
     public Transform chunkParent;
     private Vector3 lastUpdateViewerPos;
     [HideInInspector]
@@ -305,6 +306,7 @@ public class ChunkGenNetwork : MonoBehaviour
         
         mainCameraTransform = Camera.main.transform;
         chunkParent = GameObject.Find("ChunkParent").transform;
+        updateDistanceThresholdSqr = updateDistanceThreshold * updateDistanceThreshold;
         maxViewDstSqr = maxViewDst * maxViewDst;
         maxChunkDst = (mapSize - 1) / 2;
         chunkVec = Vector3.one * chunkSize;
@@ -603,24 +605,22 @@ public class ChunkGenNetwork : MonoBehaviour
         waterMaterial.SetColor("_fogColor", currentFog);
 
         // Update chunks
-        if ((viewerPos - lastUpdateViewerPos).sqrMagnitude > updateDistanceThreshold * updateDistanceThreshold && initialLoadComplete)
+        if ((viewerPos - lastUpdateViewerPos).sqrMagnitude > updateDistanceThresholdSqr && initialLoadComplete)
         {
             UpdateVisibleChunks();
             lastUpdateViewerPos = viewerPos;
         }
 
         float start = Time.realtimeSinceStartup;
-        while (marchingCubesJobQueue.Count > 0 && Time.realtimeSinceStartup - start < 0.002f) // 2ms
+        while (marchingCubesJobQueue.Count > 0 && Time.realtimeSinceStartup - start < 0.003f) // 2ms
         {
             MCQueueObject mcJob = marchingCubesJobQueue.Dequeue();
             TerrainChunk terrainChunk = mcJob.terrainChunk;
             if (terrainChunk.chunk != null)
-            {
                 terrainChunk.marchingCubes.MarchingCubesJobHandler(terrainChunk.marchingCubes.heightsArray, mcJob.terraforming);
-            }
         }
         start = Time.realtimeSinceStartup;
-        while (chunkVisibilityQueue.Count > 0 && Time.realtimeSinceStartup - start < 0.002f) // 2ms
+        while (chunkVisibilityQueue.Count > 0 && Time.realtimeSinceStartup - start < 0.003f) // 2ms
         {
             ChunkVisibility chunk = chunkVisibilityQueue.Dequeue();
             chunk.chunk.SetVisible(chunk.visibility);
@@ -694,7 +694,6 @@ public class ChunkGenNetwork : MonoBehaviour
 
                     if (!initialLoadComplete)
                     {
-                        // Generate immediately during first load
                         TerrainChunk chunk = new TerrainChunk(chunkCoordId, viewedChunkCoord, chunkSize, chunkParent, 
                                                               terrainDensityData, assetSpawnData, terrainDensityComputeShader, 
                                                               terrainMaterial, waterMaterial, initialLoadComplete, 
@@ -727,26 +726,22 @@ public class ChunkGenNetwork : MonoBehaviour
                 }
             }
         }
-        if (!initialLoadComplete)
-        {
-            initialLoadComplete = true;
-        }
-        if (!isLoadingChunks)
-        {
-            StartCoroutine(LoadChunksOverTime());
-        }
-        if (!isLoadingReadbacks)
-        {
-            StartCoroutine(LoadReadbacksOverTime());
-        }
 
-        foreach (var chunk in chunkDictionary.Values)
+        if (!initialLoadComplete)
+            initialLoadComplete = true;
+            
+        // Check if coroutines need to run
+        if (!isLoadingChunks)
+            StartCoroutine(LoadChunksOverTime());
+        if (!isLoadingReadbacks)
+            StartCoroutine(LoadReadbacksOverTime());
+
+        foreach (long coord in chunksToHide)
         {
-            if (!WasVisited(chunk.chunkCoord.x, chunk.chunkCoord.y, chunk.chunkCoord.z, currentChunkCoordX, currentChunkCoordY, currentChunkCoordZ) && 
-                !chunk.marchingCubes.edited)
+            TerrainChunk chunk = chunkDictionary[coord];
+            if (!chunk.marchingCubes.edited)
             {
                 chunksToDestroy.Add(chunk.chunkId);
-                chunksToHide.Remove(chunk.chunkId);
             }
         }
 
@@ -760,12 +755,16 @@ public class ChunkGenNetwork : MonoBehaviour
 
         foreach (long coord in chunksToHide)
         {
-            TerrainChunk chunkToHide = chunkDictionary[coord];
+            TerrainChunk chunkToHide;
+            if (!chunkDictionary.TryGetValue(coord, out chunkToHide))
+                continue;
             chunkVisibilityQueue.Enqueue(new ChunkVisibility(chunkToHide, false));
         }
         foreach (long coord in chunksToShow)
         {
-            TerrainChunk chunkToShow = chunkDictionary[coord];
+            TerrainChunk chunkToShow;
+            if (!chunkDictionary.TryGetValue(coord, out chunkToShow))
+                continue;
             chunkVisibilityQueue.Enqueue(new ChunkVisibility(chunkToShow, true));
         }
     }
