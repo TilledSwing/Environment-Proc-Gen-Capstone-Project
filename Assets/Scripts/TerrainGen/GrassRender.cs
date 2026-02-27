@@ -12,7 +12,6 @@ public class GrassRender : MonoBehaviour
     public float maxGrassSlope;
     public Vector2 grassHeightRange;
     public Vector3Int chunkPos;
-    public int bladeCount;
     public Bounds bounds;
     public RenderParams rp;
     public int triangleCount;

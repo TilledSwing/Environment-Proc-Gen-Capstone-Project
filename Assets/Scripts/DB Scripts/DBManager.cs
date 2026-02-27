@@ -282,9 +282,7 @@ public class DBManager : MonoBehaviour
                         ChunkGenNetwork.Instance.hasPendingReadbacks = false;
                         ChunkGenNetwork.Instance.pendingReadbacks = new();
                         ChunkGenNetwork.Instance.isLoadingReadbacks = false;
-                        ChunkGenNetwork.Instance.hasPendingAssetInstantiations = false;
                         ChunkGenNetwork.Instance.pendingAssetInstantiations = new();
-                        ChunkGenNetwork.Instance.isLoadingAssetInstantiations = false;
 
                         ChunkGenNetwork.Instance.chunkSize = ChunkGenNetwork.Instance.terrainDensityData.width;
                         ChunkGenNetwork.Instance.chunksVisible = Mathf.RoundToInt(ChunkGenNetwork.Instance.maxViewDst / ChunkGenNetwork.Instance.chunkSize);

@@ -70,6 +70,7 @@ public class ChunkGenNetwork : MonoBehaviour
     [Space(5)]
     public bool useFixedMapSize;
     public int mapSize;
+    int maxChunkDst;
     public int resolution;
 
     [Space(10)]
@@ -197,11 +198,7 @@ public class ChunkGenNetwork : MonoBehaviour
     [HideInInspector]
     public bool isLoadingReadbacks = false;
     // Asset Instantiation Queue
-    [HideInInspector]
-    public bool hasPendingAssetInstantiations = false;
     public Queue<AssetInstantiation> pendingAssetInstantiations = new();
-    [HideInInspector]
-    public bool isLoadingAssetInstantiations = false;
 
 
     public Queue<MCQueueObject> marchingCubesJobQueue = new();
@@ -309,6 +306,7 @@ public class ChunkGenNetwork : MonoBehaviour
         mainCameraTransform = Camera.main.transform;
         chunkParent = GameObject.Find("ChunkParent").transform;
         maxViewDstSqr = maxViewDst * maxViewDst;
+        maxChunkDst = (mapSize - 1) / 2;
         chunkVec = Vector3.one * chunkSize;
         halfChunkVec = new Vector3(0.5f, 0.5f, 0.5f) * chunkSize;
         halfChunkSize = chunkSize * 0.5f;
@@ -425,9 +423,7 @@ public class ChunkGenNetwork : MonoBehaviour
         hasPendingReadbacks = false;
         pendingReadbacks = new();
         isLoadingReadbacks = false;
-        hasPendingAssetInstantiations = false;
         pendingAssetInstantiations = new();
-        isLoadingAssetInstantiations = false;
         allNoiseSettings = new();
 
         DestroyChunks();
@@ -593,9 +589,7 @@ public class ChunkGenNetwork : MonoBehaviour
         hasPendingReadbacks = false;
         pendingReadbacks = new();
         isLoadingReadbacks = false;
-        hasPendingAssetInstantiations = false;
         pendingAssetInstantiations = new();
-        isLoadingAssetInstantiations = false;
     }
     void Update()
     {
@@ -614,13 +608,9 @@ public class ChunkGenNetwork : MonoBehaviour
             UpdateVisibleChunks();
             lastUpdateViewerPos = viewerPos;
         }
-        if (!isLoadingAssetInstantiations && pendingAssetInstantiations.Count > 0)
-        {
-            StartCoroutine(LoadAssetInstantiationsOverTime());
-        }
 
         float start = Time.realtimeSinceStartup;
-        while (marchingCubesJobQueue.Count > 0 && Time.realtimeSinceStartup - start < 0.003f) // 3ms
+        while (marchingCubesJobQueue.Count > 0 && Time.realtimeSinceStartup - start < 0.002f) // 2ms
         {
             MCQueueObject mcJob = marchingCubesJobQueue.Dequeue();
             TerrainChunk terrainChunk = mcJob.terrainChunk;
@@ -630,10 +620,16 @@ public class ChunkGenNetwork : MonoBehaviour
             }
         }
         start = Time.realtimeSinceStartup;
-        while (chunkVisibilityQueue.Count > 0 && Time.realtimeSinceStartup - start < 0.003f) // 3ms
+        while (chunkVisibilityQueue.Count > 0 && Time.realtimeSinceStartup - start < 0.002f) // 2ms
         {
             ChunkVisibility chunk = chunkVisibilityQueue.Dequeue();
             chunk.chunk.SetVisible(chunk.visibility);
+        }
+        start = Time.realtimeSinceStartup;
+        while (pendingAssetInstantiations.Count > 0 && Time.realtimeSinceStartup - start < 0.002f) // 2ms
+        {
+            AssetInstantiation assetInstantiation = pendingAssetInstantiations.Dequeue();
+            assetInstantiation.terrainChunk.assetSpawner.AssetInstantiation(assetInstantiation.i, assetInstantiation.j, assetInstantiation.seed);
         }
     }
     /// <summary>
@@ -676,7 +672,7 @@ public class ChunkGenNetwork : MonoBehaviour
                 int currentY = currentChunkCoordY + yOffset;
 
                 if ((currentY > 0 && currentChunkCoordY > maxWorldYChunks) || (currentY < 0 && currentChunkCoordY < -maxWorldYChunks))
-                        continue;
+                    continue;
 
                 for (int zOffset = -chunksVisible; zOffset <= chunksVisible; zOffset++)
                 {
@@ -684,22 +680,15 @@ public class ChunkGenNetwork : MonoBehaviour
                     Vector3Int viewedChunkCoord = new Vector3Int(currentX, currentY, currentZ);
                     long chunkCoordId = PackChunkCoord(currentX, currentY, currentZ);
 
-                    if (useFixedMapSize)
-                    {
-                        if (math.abs(currentX) > ((mapSize - 1) / 2) || math.abs(currentZ) > ((mapSize - 1) / 2))
-                            continue;
-                    }
+                    if (useFixedMapSize && (math.abs(currentX) > maxChunkDst || math.abs(currentZ) > maxChunkDst))
+                        continue;
 
                     Bounds bounds = new Bounds((viewedChunkCoord * chunkSize) + (new Vector3(0.5f, 0.5f, 0.5f) * chunkSize), chunkVec);
                     float viewerDstFromBound = bounds.SqrDistance(viewerPos);
                     // Vector3 chunkCenter = (viewedChunkCoord * chunkSize) + halfChunkVec;
                     // float viewerDstFromBound = (chunkCenter - viewerPos).sqrMagnitude - (halfChunkSize * halfChunkSize * 2);
                     bool isInView = viewerDstFromBound <= maxViewDstSqr;
-                    
-                    // float viewerDstFromBound = CalculateDstFromBound(viewedChunkCoord, viewerPos);
 
-                    // if (maxViewDstSqr - viewerDstFromBound <= chunkSize * chunkSize)
-                    //     continue;
                     if (!isInView)
                         continue;
 
@@ -707,9 +696,9 @@ public class ChunkGenNetwork : MonoBehaviour
                     {
                         // Generate immediately during first load
                         TerrainChunk chunk = new TerrainChunk(chunkCoordId, viewedChunkCoord, chunkSize, chunkParent, 
-                                                                terrainDensityData, assetSpawnData, terrainDensityComputeShader, 
-                                                                terrainMaterial, waterMaterial, initialLoadComplete, 
-                                                                noiseGeneratorTextureArray);
+                                                              terrainDensityData, assetSpawnData, terrainDensityComputeShader, 
+                                                              terrainMaterial, waterMaterial, initialLoadComplete, 
+                                                              noiseGeneratorTextureArray);
                         chunkDictionary.Add(chunkCoordId, chunk);
                         chunk.UpdateChunk(isInView);
                         if (chunk.visible)
@@ -728,7 +717,7 @@ public class ChunkGenNetwork : MonoBehaviour
                         Vector3 chunkCenter = (viewedChunkCoord * chunkSize) + halfChunkVec;
                         Vector3 toChunk = Vector3.Normalize(chunkCenter - viewerPos); 
                         float angle = Vector3.Angle(movementDir, toChunk); 
-                        if (angle > 75f) continue;
+                        if (angle > 60f) continue;
 
                         if (chunkLoadSet.Add(chunkCoordId))
                         {
@@ -749,10 +738,6 @@ public class ChunkGenNetwork : MonoBehaviour
         if (!isLoadingReadbacks)
         {
             StartCoroutine(LoadReadbacksOverTime());
-        }
-        if (!isLoadingAssetInstantiations)
-        {
-            StartCoroutine(LoadAssetInstantiationsOverTime());
         }
 
         foreach (var chunk in chunkDictionary.Values)
@@ -847,7 +832,7 @@ public class ChunkGenNetwork : MonoBehaviour
             }
 
             // 1 readback per 10 fps with a min and max of 2 and 6
-            int maxActiveReadbacks = Mathf.Clamp(Mathf.RoundToInt(1f / Time.smoothDeltaTime / 10f), 2, 6);
+            int maxActiveReadbacks = Mathf.Clamp(Mathf.RoundToInt(1f / Time.smoothDeltaTime / 10f), 2, 8);
 
             while (activeRequests.Count <= maxActiveReadbacks && pendingReadbacks.Count > 0)
             {
@@ -864,28 +849,6 @@ public class ChunkGenNetwork : MonoBehaviour
         ListPoolManager<AsyncGPUReadbackRequest>.Return(activeRequests);
 
         isLoadingReadbacks = false;
-    }
-    /// <summary>
-    /// Coroutine for loading chunks asynchronously
-    /// </summary>
-    /// <returns>yield return</returns>
-    private IEnumerator LoadAssetInstantiationsOverTime()
-    {
-        isLoadingAssetInstantiations = true;
-
-        int assetInstantiationBatchCounter = 0;
-        while (pendingAssetInstantiations.Count > 0)
-        {
-            AssetInstantiation assetInstantiation = pendingAssetInstantiations.Dequeue();
-            assetInstantiation.terrainChunk.assetSpawner.AssetInstantiation(assetInstantiation.i, assetInstantiation.j, assetInstantiation.seed);
-
-            if (++assetInstantiationBatchCounter % 50 == 0)
-            {
-                yield return null;
-            }
-        }
-
-        isLoadingAssetInstantiations = false;
     }
     /// <summary>
     /// Get a TerrainChunk and its neighbors with the given chunk's coordinate
@@ -1119,16 +1082,18 @@ public class ChunkGenNetwork : MonoBehaviour
             assetSpawner.assetSpawnData = assetSpawnData;
             // Set up the chunk's ComputeMarchingCubes script
             marchingCubes = chunk.AddComponent<ComputeMarchingCubes>();
-            marchingCubes.owner = this;
-            marchingCubes.meshFilter = meshFilter;
-            marchingCubes.meshCollider = meshCollider;
-            marchingCubes.chunkCoord = chunkCoord;
-            marchingCubes.chunkPos = chunkPos;
-            marchingCubes.assetSpawner = assetSpawner;
-            marchingCubes.terrainDensityComputeShader = terrainDensityComputeShader;
-            marchingCubes.terrainDensityData = terrainDensityData;
-            marchingCubes.initialLoadComplete = initialLoadComplete;
-            marchingCubes.noiseGeneratorTextureArray = noiseGeneratorTextureArray;
+            marchingCubes.InitializeChunk(
+                this, 
+                meshFilter, 
+                meshCollider, 
+                chunkCoord, 
+                chunkPos, 
+                assetSpawner, 
+                terrainDensityComputeShader, 
+                terrainDensityData, 
+                initialLoadComplete, 
+                noiseGeneratorTextureArray
+            );
             marchingCubes.GenerateChunk();
         }
         /// <summary>

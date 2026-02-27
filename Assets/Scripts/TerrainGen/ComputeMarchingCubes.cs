@@ -40,6 +40,30 @@ public class ComputeMarchingCubes : MonoBehaviour
         public Vertex v2;
         public Vertex v3;
     }
+    public void InitializeChunk
+        (ChunkGenNetwork.TerrainChunk owner,
+        MeshFilter meshFilter,
+        MeshCollider meshCollider,
+        Vector3Int chunkCoord,
+        Vector3Int chunkPos,
+        AssetSpawner assetSpawner,
+        ComputeShader terrainDensityComputeShader,
+        TerrainDensityData terrainDensityData,
+        bool initialLoadComplete,
+        Texture2D[] noiseGeneratorTextureArray
+        )
+        {
+            this.owner = owner;
+            this.meshFilter = meshFilter;
+            this.meshCollider = meshCollider;
+            this.chunkCoord = chunkCoord;
+            this.chunkPos = chunkPos;
+            this.assetSpawner = assetSpawner;
+            this.terrainDensityComputeShader = terrainDensityComputeShader;
+            this.terrainDensityData = terrainDensityData;
+            this.initialLoadComplete = initialLoadComplete;
+            this.noiseGeneratorTextureArray = noiseGeneratorTextureArray;
+        }
     public void GenerateChunk()
     {
         SetTerrainSettings();
