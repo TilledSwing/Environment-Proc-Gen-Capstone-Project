@@ -74,6 +74,8 @@ public class NetworkManagerGame : NetworkBehaviour
         // Action Queues
         ChunkGenNetwork.Instance.terrainDensityJobList = new();
         ChunkGenNetwork.Instance.terrainDensityJobRemovalList = new();
+        ChunkGenNetwork.Instance.terrainPolygonizationJobList = new();
+        ChunkGenNetwork.Instance.terrainPolygonizationJobRemovalList = new();
         ChunkGenNetwork.Instance.pendingAssetInstantiations = new();
 
         ChunkGenNetwork.Instance.chunkSize = ChunkGenNetwork.Instance.terrainDensityData.width;

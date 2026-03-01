@@ -176,8 +176,10 @@ public class ChunkGenNetwork : MonoBehaviour
 
     // Readback Queue
     [HideInInspector]
-    public List<TerrainDensityJob> terrainDensityJobList;
-    public List<TerrainDensityJob> terrainDensityJobRemovalList;
+    public List<TerrainJobObject> terrainDensityJobList;
+    public List<TerrainJobObject> terrainDensityJobRemovalList;
+    public List<TerrainJobObject> terrainPolygonizationJobList;
+    public List<TerrainJobObject> terrainPolygonizationJobRemovalList;
     // Asset Instantiation Queue
     public Queue<AssetInstantiation> pendingAssetInstantiations = new();
 
@@ -229,14 +231,16 @@ public class ChunkGenNetwork : MonoBehaviour
             this.readbackRequest = readbackRequest;
         }
     }
-    public class TerrainDensityJob
+    public class TerrainJobObject
     {
         public TerrainChunk owner;
         public JobHandle jobHandle;
-        public TerrainDensityJob(TerrainChunk owner, JobHandle jobHandle)
+        public bool terraforming;
+        public TerrainJobObject(TerrainChunk owner, JobHandle jobHandle, bool terraforming)
         {
             this.owner = owner;
             this.jobHandle = jobHandle;
+            this.terraforming = terraforming;
         }
     }
     /* ============================================= HELPER STRUCTS END ============================================= */
@@ -378,6 +382,8 @@ public class ChunkGenNetwork : MonoBehaviour
         // Action Queues
         terrainDensityJobList = new();
         terrainDensityJobRemovalList = new();
+        terrainPolygonizationJobList = new();
+        terrainPolygonizationJobRemovalList = new();
         pendingAssetInstantiations = new();
 
         DestroyChunks();
@@ -492,31 +498,41 @@ public class ChunkGenNetwork : MonoBehaviour
             UpdateVisibleChunks();
             lastUpdateViewerPos = viewerPos;
         }
-
         float start = Time.realtimeSinceStartup;
         while (terrainDensityJobList.Count > 0 && Time.realtimeSinceStartup - start < 0.003f)
         {
             terrainDensityJobRemovalList.Clear();
-            foreach (TerrainDensityJob job in terrainDensityJobList)
+            foreach (TerrainJobObject job in terrainDensityJobList)
             {
                 if (job.jobHandle.IsCompleted)
                 {
+                    job.jobHandle.Complete();
                     terrainDensityJobRemovalList.Add(job);
-                    marchingCubesJobQueue.Enqueue(job.owner);
-                    // job.owner.marchingCubes.MarchingCubesJobHandler(false);
+                    job.owner.marchingCubes.MarchingCubesJobHandler(job.terraforming);
                 }
             }
-            foreach(TerrainDensityJob job in terrainDensityJobRemovalList)
+            foreach(TerrainJobObject job in terrainDensityJobRemovalList)
             {
                 terrainDensityJobList.Remove(job);
             }
         }
         start = Time.realtimeSinceStartup;
-        while (marchingCubesJobQueue.Count > 0 && Time.realtimeSinceStartup - start < 0.003f) // 2ms
+        while (terrainPolygonizationJobList.Count > 0 && Time.realtimeSinceStartup - start < 0.003f)
         {
-            TerrainChunk terrainChunk = marchingCubesJobQueue.Dequeue();
-            if (terrainChunk.chunk != null)
-                terrainChunk.marchingCubes.MarchingCubesJobHandler(false);
+            terrainPolygonizationJobRemovalList.Clear();
+            foreach (TerrainJobObject job in terrainPolygonizationJobList)
+            {
+                if (job.jobHandle.IsCompleted)
+                {
+                    job.jobHandle.Complete();
+                    terrainPolygonizationJobRemovalList.Add(job);
+                    job.owner.marchingCubes.SetMeshValuesPerformant(job.terraforming);
+                }
+            }
+            foreach(TerrainJobObject job in terrainPolygonizationJobRemovalList)
+            {
+                terrainPolygonizationJobList.Remove(job);
+            }
         }
         start = Time.realtimeSinceStartup;
         while (chunkVisibilityQueue.Count > 0 && Time.realtimeSinceStartup - start < 0.003f) // 2ms

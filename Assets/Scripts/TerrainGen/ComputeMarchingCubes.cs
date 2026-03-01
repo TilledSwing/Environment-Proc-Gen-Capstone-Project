@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
@@ -25,6 +26,7 @@ public class ComputeMarchingCubes : MonoBehaviour
     public bool initialLoadComplete = false;
     public bool edited = false;
     public JobHandle noiseDensityJobHandler;
+    public NativeList<Triangle> triangleArray;
     /// <summary>
     /// Struct for vertex data
     /// </summary>
@@ -117,7 +119,7 @@ public class ComputeMarchingCubes : MonoBehaviour
                 seed = ChunkGenNetwork.Instance.seed
             };
             noiseDensityJobHandler = noiseDensityJob.Schedule();
-            ChunkGenNetwork.Instance.terrainDensityJobList.Add(new ChunkGenNetwork.TerrainDensityJob(owner, noiseDensityJobHandler));
+            ChunkGenNetwork.Instance.terrainDensityJobList.Add(new ChunkGenNetwork.TerrainJobObject(owner, noiseDensityJobHandler, false));
     }
     /// <summary>
     /// Sets a given noise curbe texture in it's respective kernel
@@ -138,8 +140,9 @@ public class ComputeMarchingCubes : MonoBehaviour
     /// <param name="triangleCount">The amount of items in the triangle array</param>
     /// <param name="triangleArray">An array of triangles given by marching cubes</param>
     /// <param name="terraforming">Whether the user is terraforming</param>
-    public void SetMeshValuesPerformant(int triangleCount, NativeList<Triangle> triangleArray, bool terraforming)
+    public void SetMeshValuesPerformant(bool terraforming)
     {
+        int triangleCount = triangleArray.Length;
         Mesh.MeshDataArray meshDataArray = Mesh.AllocateWritableMeshData(1);
         Mesh.MeshData meshData = meshDataArray[0];
 
@@ -243,7 +246,7 @@ public class ComputeMarchingCubes : MonoBehaviour
         if (!heightsArray.IsCreated) return;
         int iterations = Mathf.CeilToInt(terrainDensityData.width / ChunkGenNetwork.Instance.resolution) * Mathf.CeilToInt(terrainDensityData.width / ChunkGenNetwork.Instance.resolution) * Mathf.CeilToInt(terrainDensityData.width / ChunkGenNetwork.Instance.resolution);
 
-        NativeList<Triangle> triangleArray = new(iterations, Allocator.Persistent);
+        triangleArray = new(iterations, Allocator.Persistent);
 
         MarchingCubesJob marchingCubesJob = new MarchingCubesJob
         {
@@ -260,9 +263,7 @@ public class ComputeMarchingCubes : MonoBehaviour
             height = terrainDensityData.height,
         };
         JobHandle marchingCubesHandler = marchingCubesJob.Schedule(iterations, 16, noiseDensityJobHandler);
-        marchingCubesHandler.Complete();
-
-        SetMeshValuesPerformant(triangleArray.Length, triangleArray, terraforming);
+        ChunkGenNetwork.Instance.terrainPolygonizationJobList.Add(new ChunkGenNetwork.TerrainJobObject(owner, marchingCubesHandler, terraforming));
     }
     /// <summary>
     /// Marching Cubes Burst Compiled Multithreaded job
