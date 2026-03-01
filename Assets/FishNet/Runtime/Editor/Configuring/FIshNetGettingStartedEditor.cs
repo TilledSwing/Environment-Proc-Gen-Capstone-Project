@@ -58,8 +58,8 @@ namespace FishNet.Editing
         [InitializeOnLoadMethod]
         private static void Initialize()
         {
-            SubscribeToUpdate();
-            LogFeedbackLink();
+            // SubscribeToUpdate();
+            // LogFeedbackLink();
         }
 
         private static void SubscribeToUpdate()

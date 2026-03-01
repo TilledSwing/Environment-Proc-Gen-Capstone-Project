@@ -1,9 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using TMPro;
 using Unity.Collections;
+using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -82,23 +84,6 @@ public class ChunkGenNetwork : MonoBehaviour
     public TerrainDensityData terrainDensityData;
     public AssetSpawnData assetSpawnData;
     public TerrainTextureData terrainTextureData;
-
-    [Space(10)]
-    [Header("========== Compute Shader References ==========")]
-    [Space(5)]
-    // Compute Shader References
-    public ComputeShader terrainDensityComputeShader;
-    // Kernels
-    [HideInInspector]
-    public int baseDensityKernel;
-    [HideInInspector]
-    public int continentalnessDensityKernel;
-    [HideInInspector]
-    public int peaksAndValleysDensityKernel;
-    [HideInInspector]
-    public int erosionDensityKernel;
-    [HideInInspector]
-    public int largeCaveDensityKernel;
 
     [Space(10)]
     [Header("========== Terrain and Water Data ==========")]
@@ -181,9 +166,6 @@ public class ChunkGenNetwork : MonoBehaviour
     [HideInInspector]
     public bool initialLoadComplete = false;
 
-    [HideInInspector]
-    public Texture2D[] noiseGeneratorTextureArray;
-
     [Space(10)]
     [Header("========== Lighting Settings ==========")]
     [Space(5)]
@@ -194,23 +176,21 @@ public class ChunkGenNetwork : MonoBehaviour
 
     // Readback Queue
     [HideInInspector]
-    public bool hasPendingReadbacks = false;
-    public PriorityQueue<ReadbackRequest> pendingReadbacks = new();
-    [HideInInspector]
-    public bool isLoadingReadbacks = false;
+    public List<TerrainDensityJob> terrainDensityJobList;
+    public List<TerrainDensityJob> terrainDensityJobRemovalList;
     // Asset Instantiation Queue
     public Queue<AssetInstantiation> pendingAssetInstantiations = new();
 
 
-    public Queue<MCQueueObject> marchingCubesJobQueue = new();
+    public Queue<TerrainChunk> marchingCubesJobQueue = new();
     // Reused Marching Cubes Native Array
     public NativeArray<float3> vertexOffsetTable;
     public NativeArray<int> edgeIndexTable;
     public NativeArray<int> triangleTable;
     public NativeArray<int> staticMaxSizeVertexIndexArray;
-    // Noise Settings list
-    List<NoiseSettingsGPU> allNoiseSettings;
-    public ComputeBuffer noiseSettingsBuffer;
+
+    public FastNoise noiseTest;
+    public int seed;
     /* ============================================= HELPER STRUCTS START ============================================= */
     public struct ChunkVisibility
     {
@@ -220,16 +200,6 @@ public class ChunkGenNetwork : MonoBehaviour
         {
             this.chunk = chunk;
             this.visibility = visibility;
-        }
-    }
-    public struct MCQueueObject
-    {
-        public TerrainChunk terrainChunk;
-        public bool terraforming;
-        public MCQueueObject(TerrainChunk terrainChunk, bool terraforming)
-        {
-            this.terrainChunk = terrainChunk;
-            this.terraforming = terraforming;
         }
     }
     public struct AssetInstantiation
@@ -259,34 +229,15 @@ public class ChunkGenNetwork : MonoBehaviour
             this.readbackRequest = readbackRequest;
         }
     }
-    public struct NoiseSettingsGPU
+    public class TerrainDensityJob
     {
-        // Noise and Fractal Values
-        public float noiseScale;
-        public int noiseDimension;
-        public int noiseType;
-        public int noiseFractalType;
-        public int rotationType3D;
-        public int noiseSeed;
-        public int noiseFractalOctaves;
-        public float noiseFractalLacunarity;
-        public float noiseFractalGain;
-        public float fractalWeightedStrength;
-        public float noiseFrequency;
-        // Domain Warp Values
-        public int domainWarpToggle;
-        public int domainWarpType;
-        public int domainWarpFractalType;
-        public float domainWarpAmplitude;
-        public int domainWarpSeed;
-        public int domainWarpFractalOctaves;
-        public float domainWarpFractalLacunarity;
-        public float domainWarpFractalGain;
-        public float domainWarpFrequency;
-        // Cellular(Voronoi) Values
-        public int cellularDistanceFunction;
-        public int cellularReturnType;
-        public float cellularJitter;
+        public TerrainChunk owner;
+        public JobHandle jobHandle;
+        public TerrainDensityJob(TerrainChunk owner, JobHandle jobHandle)
+        {
+            this.owner = owner;
+            this.jobHandle = jobHandle;
+        }
     }
     /* ============================================= HELPER STRUCTS END ============================================= */
     void Awake()
@@ -312,12 +263,6 @@ public class ChunkGenNetwork : MonoBehaviour
         chunkVec = Vector3.one * chunkSize;
         halfChunkVec = new Vector3(0.5f, 0.5f, 0.5f) * chunkSize;
         halfChunkSize = chunkSize * 0.5f;
-
-        baseDensityKernel = terrainDensityComputeShader.FindKernel("BaseDensity");
-        continentalnessDensityKernel = terrainDensityComputeShader.FindKernel("ContinentalnessDensity");
-        peaksAndValleysDensityKernel = terrainDensityComputeShader.FindKernel("PeaksAndValleysDensity");
-        erosionDensityKernel = terrainDensityComputeShader.FindKernel("ErosionDensity");
-        largeCaveDensityKernel = terrainDensityComputeShader.FindKernel("LargeCaveDensity");
 
         lightingBlockerRenderer = lightingBlocker.GetComponent<MeshRenderer>();
         lightingBlockerRenderer.enabled = false;
@@ -351,6 +296,25 @@ public class ChunkGenNetwork : MonoBehaviour
         // forceModule.x = globalWindDirection.x;
         // forceModule.z = globalWindDirection.y;
 
+        noiseTest = FastNoise.FromEncodedNodeTree("HQkQ@BFkQY@BPwkWAgQICtcjPAQKJAjD9Sg/CS4AAQ@BkNAAc@BI@AgQAkH@BFkQQPQpXvxhmZmY/BAOamRk/CwAAgD8cAwAAcEIEAhYCHAkuAAE@BJJQkL@BJUQQzczMPRgAACDAIAM@B4Ag@BokCM3MzD4JCQ@AD5CEB+F6z4YzcxMPwwSJAjNzMw+CQk@BwQggB@BEM3MzL4Y@BPyQC/wsAC+xROD4EChcJDQkI@CEEEA7geBT8LexQuPwQDj8J1PBQ=");
+        // NativeArray<float> density = new NativeArray<float>(
+        //     33 * 33 * 33,
+        //     Allocator.Persistent
+        // );
+        // Stopwatch sw;
+        // sw = Stopwatch.StartNew();
+        // for (int i = 0; i < 1000; i++)
+        // {
+        //     // sw = Stopwatch.StartNew();
+            // noiseTest.GenUniformGrid3D(density, 0, 0, 0, 33, 33, 33, 0.01f, 0.01f, 0.01f, 1337);
+        //     // sw.Stop();
+        //     // UnityEngine.Debug.Log(sw.Elapsed.TotalMilliseconds);
+        // }
+        // sw.Stop();
+        // UnityEngine.Debug.Log(sw.Elapsed.TotalMilliseconds);
+        // UnityEngine.Debug.Log(density[32]);
+        // density.Dispose();
+
         InitializeGenerator();
     }
     void OnDisable()
@@ -358,11 +322,6 @@ public class ChunkGenNetwork : MonoBehaviour
         if(staticMaxSizeVertexIndexArray != null && staticMaxSizeVertexIndexArray.IsCreated)
         {
             staticMaxSizeVertexIndexArray.Dispose();
-        }
-        
-        if (noiseSettingsBuffer != null)
-        {
-            noiseSettingsBuffer.Release();
         }
     }
     /// <summary>
@@ -373,11 +332,6 @@ public class ChunkGenNetwork : MonoBehaviour
         vertexOffsetTable.Dispose();
         edgeIndexTable.Dispose();
         triangleTable.Dispose();
-
-        if (noiseSettingsBuffer != null)
-        {
-            noiseSettingsBuffer.Release();
-        }
 
         if(staticMaxSizeVertexIndexArray != null && staticMaxSizeVertexIndexArray.IsCreated)
         {
@@ -422,11 +376,9 @@ public class ChunkGenNetwork : MonoBehaviour
         isLoadingChunks = false;
         initialLoadComplete = false;
         // Action Queues
-        hasPendingReadbacks = false;
-        pendingReadbacks = new();
-        isLoadingReadbacks = false;
+        terrainDensityJobList = new();
+        terrainDensityJobRemovalList = new();
         pendingAssetInstantiations = new();
-        allNoiseSettings = new();
 
         DestroyChunks();
         assetSpawnData.ResetSpawnPoints();
@@ -435,21 +387,7 @@ public class ChunkGenNetwork : MonoBehaviour
         AssetSetup();
         
         // Set seeds
-        foreach (NoiseGenerator noiseGenerator in terrainDensityData.noiseGenerators)
-        {
-            noiseGenerator.noiseSeed = UnityEngine.Random.Range(0, 100000);
-            noiseGenerator.domainWarpSeed = UnityEngine.Random.Range(0, 100000);
-            SetupNoiseSettingsGPU(noiseGenerator);
-        }
-        if (noiseSettingsBuffer != null)
-        {
-            noiseSettingsBuffer.Release();
-            noiseSettingsBuffer = null;
-        }
-        noiseSettingsBuffer = new ComputeBuffer(allNoiseSettings.Count, Marshal.SizeOf<NoiseSettingsGPU>());
-        noiseSettingsBuffer.SetData(allNoiseSettings);
-
-        noiseGeneratorTextureArray = CreateNoiseCurveTextures();
+        seed = UnityEngine.Random.Range(0, 100000);
         CreateVertexIndexArray();
         waterMesh = WaterPlaneGenerator.PlaneGeneratorJobHandler(terrainDensityData.width, terrainDensityData.waterLevel % terrainDensityData.width);
         UpdateVisibleChunks();
@@ -475,43 +413,6 @@ public class ChunkGenNetwork : MonoBehaviour
         {
             staticMaxSizeVertexIndexArray[i] = i;
         }
-    }
-    /// <summary>
-    /// Initialize noise settings in blittable struct
-    /// </summary>
-    /// <param name="noiseGenerator">The noise generator being used</param>
-    public void SetupNoiseSettingsGPU(NoiseGenerator noiseGenerator)
-    {
-        NoiseSettingsGPU noiseSettings = new NoiseSettingsGPU
-        {
-            // Noise and Fractal Values
-            noiseScale = noiseGenerator.noiseScale,
-            noiseDimension = (int)noiseGenerator.noiseDimension,
-            noiseType = (int)noiseGenerator.noiseType,
-            noiseFractalType = (int)noiseGenerator.noiseFractalType,
-            rotationType3D = (int)noiseGenerator.rotationType3D,
-            noiseSeed = noiseGenerator.noiseSeed,
-            noiseFractalOctaves = noiseGenerator.noiseFractalOctaves,
-            noiseFractalLacunarity = noiseGenerator.noiseFractalLacunarity,
-            noiseFractalGain = noiseGenerator.noiseFractalGain,
-            fractalWeightedStrength = noiseGenerator.fractalWeightedStrength,
-            noiseFrequency = noiseGenerator.noiseFrequency,
-            // Domain Warp Values
-            domainWarpToggle = noiseGenerator.domainWarpToggle ? 1 : 0,
-            domainWarpType = (int)noiseGenerator.domainWarpType,
-            domainWarpFractalType = (int)noiseGenerator.domainWarpFractalType,
-            domainWarpAmplitude = noiseGenerator.domainWarpAmplitude,
-            domainWarpSeed = noiseGenerator.domainWarpSeed,
-            domainWarpFractalOctaves = noiseGenerator.domainWarpFractalOctaves,
-            domainWarpFractalLacunarity = noiseGenerator.domainWarpFractalLacunarity,
-            domainWarpFractalGain = noiseGenerator.domainWarpFractalGain,
-            domainWarpFrequency = noiseGenerator.domainWarpFrequency,
-            // Cellular(Voronoi) Values
-            cellularDistanceFunction = (int)noiseGenerator.cellularDistanceFunction,
-            cellularReturnType = (int)noiseGenerator.cellularReturnType,
-            cellularJitter = noiseGenerator.cellularJitter
-        };
-        allNoiseSettings.Add(noiseSettings);
     }
     /// <summary>
     /// Use bitmasking to pack an integer xyz coordinate into a long
@@ -574,25 +475,6 @@ public class ChunkGenNetwork : MonoBehaviour
         waterMaterial.SetFloat("_fogDensity", active ? fogDensity : 1);
     }
 
-    public void UpdateFromDB(TerrainSettings settings)
-    {
-        terrainDensityData = SeedSerializer.DeserializeTerrainDensity(settings);
-
-        // Reset action and chunking to defaults (loading in from fresh)
-        // Chunk Variables
-        chunkDictionary = new();
-        chunksVisibleLastUpdate = new();
-        chunkLoadQueue = new();
-        chunkLoadSet = new();
-        isLoadingChunkVisibility = false;
-        isLoadingChunks = false;
-        initialLoadComplete = false;
-        // Action Queues
-        hasPendingReadbacks = false;
-        pendingReadbacks = new();
-        isLoadingReadbacks = false;
-        pendingAssetInstantiations = new();
-    }
     void Update()
     {
         // Position updates
@@ -612,12 +494,29 @@ public class ChunkGenNetwork : MonoBehaviour
         }
 
         float start = Time.realtimeSinceStartup;
+        while (terrainDensityJobList.Count > 0 && Time.realtimeSinceStartup - start < 0.003f)
+        {
+            terrainDensityJobRemovalList.Clear();
+            foreach (TerrainDensityJob job in terrainDensityJobList)
+            {
+                if (job.jobHandle.IsCompleted)
+                {
+                    terrainDensityJobRemovalList.Add(job);
+                    marchingCubesJobQueue.Enqueue(job.owner);
+                    // job.owner.marchingCubes.MarchingCubesJobHandler(false);
+                }
+            }
+            foreach(TerrainDensityJob job in terrainDensityJobRemovalList)
+            {
+                terrainDensityJobList.Remove(job);
+            }
+        }
+        start = Time.realtimeSinceStartup;
         while (marchingCubesJobQueue.Count > 0 && Time.realtimeSinceStartup - start < 0.003f) // 2ms
         {
-            MCQueueObject mcJob = marchingCubesJobQueue.Dequeue();
-            TerrainChunk terrainChunk = mcJob.terrainChunk;
+            TerrainChunk terrainChunk = marchingCubesJobQueue.Dequeue();
             if (terrainChunk.chunk != null)
-                terrainChunk.marchingCubes.MarchingCubesJobHandler(terrainChunk.marchingCubes.heightsArray, mcJob.terraforming);
+                terrainChunk.marchingCubes.MarchingCubesJobHandler(false);
         }
         start = Time.realtimeSinceStartup;
         while (chunkVisibilityQueue.Count > 0 && Time.realtimeSinceStartup - start < 0.003f) // 2ms
@@ -695,9 +594,8 @@ public class ChunkGenNetwork : MonoBehaviour
                     if (!initialLoadComplete)
                     {
                         TerrainChunk chunk = new TerrainChunk(chunkCoordId, viewedChunkCoord, chunkSize, chunkParent, 
-                                                              terrainDensityData, assetSpawnData, terrainDensityComputeShader, 
-                                                              terrainMaterial, waterMaterial, initialLoadComplete, 
-                                                              noiseGeneratorTextureArray);
+                                                              terrainDensityData, assetSpawnData, 
+                                                              terrainMaterial, waterMaterial, initialLoadComplete);
                         chunkDictionary.Add(chunkCoordId, chunk);
                         chunk.UpdateChunk(isInView);
                         if (chunk.visible)
@@ -733,8 +631,6 @@ public class ChunkGenNetwork : MonoBehaviour
         // Check if coroutines need to run
         if (!isLoadingChunks)
             StartCoroutine(LoadChunksOverTime());
-        if (!isLoadingReadbacks)
-            StartCoroutine(LoadReadbacksOverTime());
 
         foreach (long coord in chunksToHide)
         {
@@ -792,8 +688,8 @@ public class ChunkGenNetwork : MonoBehaviour
 
             if (!chunkDictionary.TryGetValue(packedCoord, out TerrainChunk dictChunk) && isInView)
             {
-                var chunk = new TerrainChunk(packedCoord, coord, chunkSize, chunkParent, terrainDensityData, assetSpawnData, terrainDensityComputeShader, 
-                                            terrainMaterial, waterMaterial, initialLoadComplete, noiseGeneratorTextureArray);
+                var chunk = new TerrainChunk(packedCoord, coord, chunkSize, chunkParent, terrainDensityData, assetSpawnData, 
+                                            terrainMaterial, waterMaterial, initialLoadComplete);
                 chunkDictionary.Add(packedCoord, chunk);
                 chunk.UpdateChunk(isInView);
                 if (chunk.visible)
@@ -808,46 +704,6 @@ public class ChunkGenNetwork : MonoBehaviour
         }
 
         isLoadingChunks = false;
-    }
-    /// <summary>
-    /// Coroutine for loading gpu readbacks asynchronously
-    /// </summary>
-    /// <returns>yield return</returns>
-    private IEnumerator LoadReadbacksOverTime()
-    {
-        isLoadingReadbacks = true;
-
-        List<AsyncGPUReadbackRequest> activeRequests = ListPoolManager<AsyncGPUReadbackRequest>.Get();
-
-        int count = 0;
-        while (pendingReadbacks.Count > 0 || activeRequests.Count > 0)
-        {
-            for (int i = activeRequests.Count - 1; i >= 0; i--)
-            {
-                if (activeRequests[i].done || activeRequests[i].hasError)
-                {
-                    activeRequests.RemoveAt(i);
-                }
-            }
-
-            // 1 readback per 10 fps with a min and max of 2 and 6
-            int maxActiveReadbacks = Mathf.Clamp(Mathf.RoundToInt(1f / Time.smoothDeltaTime / 10f), 2, 8);
-
-            while (activeRequests.Count <= maxActiveReadbacks && pendingReadbacks.Count > 0)
-            {
-                ReadbackRequest pendingReadback = pendingReadbacks.Dequeue();
-                
-                if (pendingReadback.buffer != null && pendingReadback.buffer.IsValid())
-                    activeRequests.Add(AsyncGPUReadback.Request(pendingReadback.buffer, pendingReadback.readbackRequest));
-            }
-
-            if(++count % 4 == 0) 
-                yield return null;
-        }
-
-        ListPoolManager<AsyncGPUReadbackRequest>.Return(activeRequests);
-
-        isLoadingReadbacks = false;
     }
     /// <summary>
     /// Get a TerrainChunk and its neighbors with the given chunk's coordinate
@@ -1048,8 +904,8 @@ public class ChunkGenNetwork : MonoBehaviour
         public MeshRenderer meshRenderer;
         public bool visible = false;
         public TerrainChunk(long chunkId, Vector3Int chunkCoord, int chunkSize, Transform parent, TerrainDensityData terrainDensityData, 
-                            AssetSpawnData assetSpawnData, ComputeShader terrainDensityComputeShader, Material terrainMaterial, 
-                            Material waterMaterial, bool initialLoadComplete, Texture2D[] noiseGeneratorTextureArray)
+                            AssetSpawnData assetSpawnData, Material terrainMaterial, 
+                            Material waterMaterial, bool initialLoadComplete)
         {
             this.chunkId = chunkId;
             this.chunkCoord = chunkCoord;
@@ -1087,11 +943,9 @@ public class ChunkGenNetwork : MonoBehaviour
                 meshCollider, 
                 chunkCoord, 
                 chunkPos, 
-                assetSpawner, 
-                terrainDensityComputeShader, 
+                assetSpawner,
                 terrainDensityData, 
-                initialLoadComplete, 
-                noiseGeneratorTextureArray
+                initialLoadComplete
             );
             marchingCubes.GenerateChunk();
         }

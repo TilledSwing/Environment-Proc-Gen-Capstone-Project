@@ -37,9 +37,8 @@ public class BroadcastRandomChange : NetworkBehaviour
         // queueUpdateDistanceThreshold = 15f;
         ChunkGenNetwork.Instance.isLoadingChunks = false;
         // Action Queues
-        ChunkGenNetwork.Instance.hasPendingReadbacks = false;
-        ChunkGenNetwork.Instance.pendingReadbacks = new();
-        ChunkGenNetwork.Instance.isLoadingReadbacks = false;
+        ChunkGenNetwork.Instance.terrainDensityJobList = new();
+        ChunkGenNetwork.Instance.terrainDensityJobRemovalList = new();
         ChunkGenNetwork.Instance.pendingAssetInstantiations = new();
 
         ChunkGenNetwork.Instance.chunkSize = ChunkGenNetwork.Instance.terrainDensityData.width;
@@ -88,9 +87,8 @@ public class BroadcastRandomChange : NetworkBehaviour
         // queueUpdateDistanceThreshold = 15f;
         ChunkGenNetwork.Instance.isLoadingChunks = false;
         // Action Queues
-        ChunkGenNetwork.Instance.hasPendingReadbacks = false;
-        ChunkGenNetwork.Instance.pendingReadbacks = new();
-        ChunkGenNetwork.Instance.isLoadingReadbacks = false;
+        ChunkGenNetwork.Instance.terrainDensityJobList = new();
+        ChunkGenNetwork.Instance.terrainDensityJobRemovalList = new();
         ChunkGenNetwork.Instance.pendingAssetInstantiations = new();
 
         ChunkGenNetwork.Instance.chunkSize = ChunkGenNetwork.Instance.terrainDensityData.width;

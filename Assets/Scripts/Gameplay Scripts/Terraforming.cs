@@ -167,7 +167,7 @@ public class Terraforming : NetworkBehaviour
                 // marchingCubes.heightsArray = heightsArray.ToArray();
                 // heightsArray.Dispose();
 
-                marchingCubes.MarchingCubesJobHandler(marchingCubes.heightsArray, true);
+                marchingCubes.MarchingCubesJobHandler(true);
             }
         }
     }

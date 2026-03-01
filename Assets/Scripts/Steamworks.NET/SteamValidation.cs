@@ -27,10 +27,10 @@ public class SteamValidation : MonoBehaviour
         steamID = SteamUser.GetSteamID().m_SteamID;
         IsInitialized = true;
         //Sanity print to ensure it is working
-        Debug.Log("Logged in user is: " + steamProfileName + ", and you Steam ID is: " + steamID);
+        // Debug.Log("Logged in user is: " + steamProfileName + ", and you Steam ID is: " + steamID);
 
-        DBManager db = GameObject.FindFirstObjectByType<DBManager>();
-        db.checkRegisteredUser(steamID, steamProfileName);
-        db.retreiveTerrainNames();
+        // DBManager db = GameObject.FindFirstObjectByType<DBManager>();
+        // db.checkRegisteredUser(steamID, steamProfileName);
+        // db.retreiveTerrainNames();
     }
 }

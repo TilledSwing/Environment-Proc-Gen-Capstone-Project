@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
@@ -23,6 +24,7 @@ public class ComputeMarchingCubes : MonoBehaviour
     public NativeArray<float> heightsArray;
     public bool initialLoadComplete = false;
     public bool edited = false;
+    public JobHandle noiseDensityJobHandler;
     /// <summary>
     /// Struct for vertex data
     /// </summary>
@@ -47,10 +49,8 @@ public class ComputeMarchingCubes : MonoBehaviour
         Vector3Int chunkCoord,
         Vector3Int chunkPos,
         AssetSpawner assetSpawner,
-        ComputeShader terrainDensityComputeShader,
         TerrainDensityData terrainDensityData,
-        bool initialLoadComplete,
-        Texture2D[] noiseGeneratorTextureArray
+        bool initialLoadComplete
         )
         {
             this.owner = owner;
@@ -59,14 +59,11 @@ public class ComputeMarchingCubes : MonoBehaviour
             this.chunkCoord = chunkCoord;
             this.chunkPos = chunkPos;
             this.assetSpawner = assetSpawner;
-            this.terrainDensityComputeShader = terrainDensityComputeShader;
             this.terrainDensityData = terrainDensityData;
             this.initialLoadComplete = initialLoadComplete;
-            this.noiseGeneratorTextureArray = noiseGeneratorTextureArray;
         }
     public void GenerateChunk()
     {
-        SetTerrainSettings();
         SetHeights();
         initialLoadComplete = true;
     }
@@ -102,124 +99,25 @@ public class ComputeMarchingCubes : MonoBehaviour
     }
     public void Regen()
     {
-        SetTerrainSettings();
         SetHeights();
-
-    }
-    /// <summary>
-    /// Set up for general terrain settings for the chunk
-    /// </summary>
-    private void SetTerrainSettings()
-    {
-        // Terrain Values
-        terrainDensityComputeShader.SetInt("height", terrainDensityData.height);
-        terrainDensityComputeShader.SetInt("ChunkSize", terrainDensityData.width);
-        terrainDensityComputeShader.SetVector("ChunkPos", (Vector3)chunkPos);
-        terrainDensityComputeShader.SetFloat("isolevel", terrainDensityData.isolevel);
-        terrainDensityComputeShader.SetInt("MaxWorldYChunks", ChunkGenNetwork.Instance.maxWorldYChunks);
     }
     /// <summary>
     /// Set up the density values for the chunk using compute shaders
     /// </summary>
     public void SetHeights()
     {
-        int baseDensityKernel = ChunkGenNetwork.Instance.baseDensityKernel;
-        int continentalnessDensityKernel = ChunkGenNetwork.Instance.continentalnessDensityKernel;
-        int peaksAndValleysDensityKernel = ChunkGenNetwork.Instance.peaksAndValleysDensityKernel;
-        int erosionDensityKernel = ChunkGenNetwork.Instance.erosionDensityKernel;
-        int largeCaveDensityKernel = ChunkGenNetwork.Instance.largeCaveDensityKernel;
-        int threadSize = Mathf.CeilToInt(terrainDensityData.width / 4f) + 1;
-        int voxelSize = (terrainDensityData.width + 1) * (terrainDensityData.width + 1) * (terrainDensityData.width + 1);
-        heightsBuffer = new ComputeBuffer(voxelSize, sizeof(float));
-
-        int i = 0;
-        foreach (NoiseGenerator noiseGenerator in terrainDensityData.noiseGenerators)
-        {
-
-            bool useRemoteTexture = noiseGenerator.remoteTexture != null;
-
-            switch (noiseGenerator.noiseGeneratorType)
+            int size = terrainDensityData.width + 1;
+            heightsArray = new(size * size * size, Allocator.Persistent);
+            NoiseDensityJob noiseDensityJob = new NoiseDensityJob
             {
-                case NoiseGenerator.NoiseGeneratorType.BaseGenerator:
-                    SetNoiseCurveTexture("BASE_INDEX", i, baseDensityKernel, "BaseCurveTexture", 
-                                     useRemoteTexture ? noiseGenerator.remoteTexture : noiseGeneratorTextureArray[i]);
-                    break;
-                case NoiseGenerator.NoiseGeneratorType.ContinentalnessGenerator:
-                    SetNoiseCurveTexture("CONTINENTALNESS_INDEX", i, continentalnessDensityKernel, "ContinentalnessCurveTexture", 
-                                     useRemoteTexture ? noiseGenerator.remoteTexture : noiseGeneratorTextureArray[i]);
-                    break;
-                case NoiseGenerator.NoiseGeneratorType.PeaksAndValleysMapGenerator:
-                    SetNoiseCurveTexture("PEAKSANDVALLEYS_INDEX", i, peaksAndValleysDensityKernel, "PeaksAndValleysCurveTexture", 
-                                     useRemoteTexture ? noiseGenerator.remoteTexture : noiseGeneratorTextureArray[i]);
-                    break;
-                case NoiseGenerator.NoiseGeneratorType.ErosionMapGenerator:
-                    SetNoiseCurveTexture("EROSION_INDEX", i, erosionDensityKernel, "ErosionCurveTexture", 
-                                     useRemoteTexture ? noiseGenerator.remoteTexture : noiseGeneratorTextureArray[i]);
-                    break;
-                case NoiseGenerator.NoiseGeneratorType.LargeCaveGenerator:
-                    SetNoiseCurveTexture("LARGECAVE_INDEX", i, largeCaveDensityKernel, "LargeCaveCurveTexture", 
-                                     useRemoteTexture ? noiseGenerator.remoteTexture : noiseGeneratorTextureArray[i]);
-                    break;
-                case NoiseGenerator.NoiseGeneratorType.CaveDetailGenerator:
-                    SetNoiseCurveTexture("CAVEDETAIL_INDEX", i, largeCaveDensityKernel, "CaveDetailCurveTexture", 
-                                     useRemoteTexture ? noiseGenerator.remoteTexture : noiseGeneratorTextureArray[i]);
-                    break;
-            }
-            i++;
-        }
-
-        // Run Density Kernels
-        /* BASE KERNEL */
-        terrainDensityComputeShader.SetBuffer(baseDensityKernel, "NoiseSettings", ChunkGenNetwork.Instance.noiseSettingsBuffer);
-        terrainDensityComputeShader.SetBuffer(baseDensityKernel, "HeightsBuffer", heightsBuffer);
-        terrainDensityComputeShader.Dispatch(baseDensityKernel, threadSize, threadSize, threadSize);
-        /* CONTINENTALNESS KERNEL */
-        terrainDensityComputeShader.SetBuffer(continentalnessDensityKernel, "NoiseSettings", ChunkGenNetwork.Instance.noiseSettingsBuffer);
-        terrainDensityComputeShader.SetBuffer(continentalnessDensityKernel, "HeightsBuffer", heightsBuffer);
-        terrainDensityComputeShader.Dispatch(continentalnessDensityKernel, threadSize, threadSize, threadSize);
-        /* PEAKSANDVALLEYS KERNEL */
-        terrainDensityComputeShader.SetBuffer(peaksAndValleysDensityKernel, "NoiseSettings", ChunkGenNetwork.Instance.noiseSettingsBuffer);
-        terrainDensityComputeShader.SetBuffer(peaksAndValleysDensityKernel, "HeightsBuffer", heightsBuffer);
-        terrainDensityComputeShader.Dispatch(peaksAndValleysDensityKernel, threadSize, threadSize, threadSize);
-        /* EROSION KERNEL */
-        terrainDensityComputeShader.SetBuffer(erosionDensityKernel, "NoiseSettings", ChunkGenNetwork.Instance.noiseSettingsBuffer);
-        terrainDensityComputeShader.SetBuffer(erosionDensityKernel, "HeightsBuffer", heightsBuffer);
-        terrainDensityComputeShader.Dispatch(erosionDensityKernel, threadSize, threadSize, threadSize);
-        /* LARGECAVE KERNEL */
-        terrainDensityComputeShader.SetBuffer(largeCaveDensityKernel, "NoiseSettings", ChunkGenNetwork.Instance.noiseSettingsBuffer);
-        terrainDensityComputeShader.SetBuffer(largeCaveDensityKernel, "HeightsBuffer", heightsBuffer);
-        terrainDensityComputeShader.Dispatch(largeCaveDensityKernel, threadSize, threadSize, threadSize);
-
-        if (!initialLoadComplete)
-        {
-            float[] tempHeightsArray = new float[voxelSize];
-            heightsBuffer.GetData(tempHeightsArray, 0, 0, voxelSize);
-            heightsBuffer.Release();
-            heightsArray = new(tempHeightsArray, Allocator.Persistent);
-            MarchingCubesJobHandler(heightsArray, false);
-        }
-        else
-        {
-            Bounds bounds = new Bounds(chunkPos + (new Vector3(0.5f, 0.5f, 0.5f) * terrainDensityData.width), Vector3.one * terrainDensityData.width);
-            float dst = bounds.SqrDistance(ChunkGenNetwork.Instance.viewerPos);
-            // Vector3 chunkCenter = chunkPos + ChunkGenNetwork.Instance.halfChunkVec;
-            // float dst = (chunkCenter - ChunkGenNetwork.Instance.viewerPos).sqrMagnitude - (ChunkGenNetwork.Instance.halfChunkSize * ChunkGenNetwork.Instance.halfChunkSize * 2);
-            ChunkGenNetwork.Instance.pendingReadbacks.Enqueue(new ChunkGenNetwork.ReadbackRequest(chunkCoord, heightsBuffer, (AsyncGPUReadbackRequest dataRequest) =>
-            {
-                if (dataRequest.hasError)
-                {
-                    Debug.LogError("Failed to read heights buffer.");
-                    return;
-                }
-
-                NativeArray<float> raw = dataRequest.GetData<float>();
-                heightsArray = new NativeArray<float>(raw.Length, Allocator.Persistent);
-                heightsArray.CopyFrom(raw);
-                heightsBuffer.Release();
-
-                ChunkGenNetwork.Instance.marchingCubesJobQueue.Enqueue(new ChunkGenNetwork.MCQueueObject(owner, false));
-            }), dst);
-        }
+                heightsArray = heightsArray,
+                chunkPos = new float3(chunkPos.x, chunkPos.y, chunkPos.z),
+                chunkSize = terrainDensityData.width,
+                height = terrainDensityData.height,
+                seed = ChunkGenNetwork.Instance.seed
+            };
+            noiseDensityJobHandler = noiseDensityJob.Schedule();
+            ChunkGenNetwork.Instance.terrainDensityJobList.Add(new ChunkGenNetwork.TerrainDensityJob(owner, noiseDensityJobHandler));
     }
     /// <summary>
     /// Sets a given noise curbe texture in it's respective kernel
@@ -339,10 +237,10 @@ public class ComputeMarchingCubes : MonoBehaviour
     /// </summary>
     /// <param name="heights">A native array containg density data for the given chunk</param>
     /// <param name="terraforming">Boolean indicating whether this is a terraforming call</param>
-    public void MarchingCubesJobHandler(NativeArray<float> heights, bool terraforming)
+    public void MarchingCubesJobHandler(bool terraforming)
     {
         if (terraforming) edited = true;
-        if (!heights.IsCreated) return;
+        if (!heightsArray.IsCreated) return;
         int iterations = Mathf.CeilToInt(terrainDensityData.width / ChunkGenNetwork.Instance.resolution) * Mathf.CeilToInt(terrainDensityData.width / ChunkGenNetwork.Instance.resolution) * Mathf.CeilToInt(terrainDensityData.width / ChunkGenNetwork.Instance.resolution);
 
         NativeList<Triangle> triangleArray = new(iterations, Allocator.Persistent);
@@ -350,7 +248,7 @@ public class ComputeMarchingCubes : MonoBehaviour
         MarchingCubesJob marchingCubesJob = new MarchingCubesJob
         {
             triangleArray = triangleArray.AsParallelWriter(),
-            heightsArray = heights,
+            heightsArray = heightsArray,
             vertexOffsetTable = ChunkGenNetwork.Instance.vertexOffsetTable,
             edgeIndexTable = ChunkGenNetwork.Instance.edgeIndexTable,
             triangleTable = ChunkGenNetwork.Instance.triangleTable,
@@ -359,9 +257,9 @@ public class ComputeMarchingCubes : MonoBehaviour
             isolevel = terrainDensityData.isolevel,
             lerpToggle = terrainDensityData.lerp,
             resolution = ChunkGenNetwork.Instance.resolution,
+            height = terrainDensityData.height,
         };
-
-        JobHandle marchingCubesHandler = marchingCubesJob.Schedule(iterations, 16);
+        JobHandle marchingCubesHandler = marchingCubesJob.Schedule(iterations, 16, noiseDensityJobHandler);
         marchingCubesHandler.Complete();
 
         SetMeshValuesPerformant(triangleArray.Length, triangleArray, terraforming);
@@ -382,6 +280,7 @@ public class ComputeMarchingCubes : MonoBehaviour
         public float isolevel;
         public bool lerpToggle;
         public int resolution;
+        public int height;
         public void Execute(int index)
         {
             int adjustedSize = chunkSize / resolution;
@@ -551,6 +450,31 @@ public class ComputeMarchingCubes : MonoBehaviour
                 if (cmp != 0) return cmp;
 
                 return a.normal.z < b.normal.z ? -1 : (a.normal.z > b.normal.z ? 1 : 0);
+            }
+        }
+    }
+    public struct NoiseDensityJob : IJob
+    {
+        public NativeArray<float> heightsArray;
+        public float3 chunkPos;
+        public int chunkSize;
+        public int height;
+        public int seed;
+        public void Execute()
+        {
+            int size = chunkSize + 1;
+            ChunkGenNetwork.Instance.noiseTest.GenUniformGrid3D(
+                                                                heightsArray, chunkPos.x, chunkPos.y, chunkPos.z, 
+                                                                size, size, size, 1, 1, 1, seed);
+            for (int x = 0; x < size; x++)
+            {
+                for (int y = 0; y < size; y++)
+                {   
+                    for (int z = 0; z < size; z++)
+                    {
+                        heightsArray[z * size * size + y * size + x] = (chunkPos.y + y) - heightsArray[z * size * size + y * size + x] * height;
+                    }
+                }
             }
         }
     }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 
-class FastNoise : IDisposable
+public class FastNoise : IDisposable
 {
     public struct OutputMinMax
     {

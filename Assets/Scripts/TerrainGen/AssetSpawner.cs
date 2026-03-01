@@ -58,6 +58,9 @@ public class AssetSpawner : MonoBehaviour
         if (chunkVertices.IsCreated) {
             chunkVertices.Dispose();
         }
+        if (minDepthPoints.IsCreated) {
+            minDepthPoints.Dispose();
+        }
     }
     /// <summary>
     /// Release associated buffers
@@ -66,6 +69,9 @@ public class AssetSpawner : MonoBehaviour
     {
         if (chunkVertices.IsCreated) {
             chunkVertices.Dispose();
+        }
+        if (minDepthPoints.IsCreated) {
+            minDepthPoints.Dispose();
         }
     }
     /// <summary>

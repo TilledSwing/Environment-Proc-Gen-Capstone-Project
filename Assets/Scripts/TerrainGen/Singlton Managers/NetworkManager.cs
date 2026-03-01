@@ -76,9 +76,8 @@ public class NetworkManager : NetworkBehaviour
         // queueUpdateDistanceThreshold = 15f;
         ChunkGenNetwork.Instance.isLoadingChunks = false;
         // Action Queues
-        ChunkGenNetwork.Instance.hasPendingReadbacks = false;
-        ChunkGenNetwork.Instance.pendingReadbacks = new();
-        ChunkGenNetwork.Instance.isLoadingReadbacks = false;
+        ChunkGenNetwork.Instance.terrainDensityJobList = new();
+        ChunkGenNetwork.Instance.terrainDensityJobRemovalList = new();
         ChunkGenNetwork.Instance.pendingAssetInstantiations = new();
 
         ChunkGenNetwork.Instance.chunkSize = ChunkGenNetwork.Instance.terrainDensityData.width;
@@ -100,7 +99,7 @@ public class NetworkManager : NetworkBehaviour
 
     private IEnumerator ApplyTerraforms(List<Vector3> terraformCenters, List<Vector3Int> hitChunkPositions, List<int> terraformTypes)
     {
-        while (!ChunkGenNetwork.Instance.initialLoadComplete || ChunkGenNetwork.Instance.hasPendingReadbacks || ChunkGenNetwork.Instance.isLoadingReadbacks || ChunkGenNetwork.Instance.isLoadingChunks ||
+        while (!ChunkGenNetwork.Instance.initialLoadComplete || ChunkGenNetwork.Instance.isLoadingChunks ||
                 PlayerController.instance == null || ChunkGenNetwork.Instance.assetSpawnData.assets.Count == 0)
         { 
             yield return new WaitForSeconds(0.5f);
