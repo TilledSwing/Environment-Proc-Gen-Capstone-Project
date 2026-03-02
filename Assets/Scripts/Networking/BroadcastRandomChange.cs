@@ -21,11 +21,7 @@ public class BroadcastRandomChange : NetworkBehaviour
         }
 
         // Set random seeds
-        foreach (NoiseGenerator noiseGenerator in ChunkGenNetwork.Instance.terrainDensityData.noiseGenerators)
-        {
-            noiseGenerator.noiseSeed = UnityEngine.Random.Range(0, 100000);
-            noiseGenerator.domainWarpSeed = UnityEngine.Random.Range(0, 100000);
-        }
+        ChunkGenNetwork .Instance.seed = Random.Range(0, 100000);
 
         // Reset action and chunking to defaults (loading in from fresh)
         // Chunk Variables

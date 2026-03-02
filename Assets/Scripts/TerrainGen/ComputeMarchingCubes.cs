@@ -182,7 +182,7 @@ public class ComputeMarchingCubes : MonoBehaviour
 
         if (!terraforming)
         {
-            assetSpawner.SpawnAssets();
+            // assetSpawner.SpawnAssets();
             if(chunkPos.y + terrainDensityData.width >= terrainDensityData.waterLevel && triangleCount > ChunkGenNetwork.Instance.landGrass.maxBladesPerTriangle)
             {
                 grass = gameObject.AddComponent<GrassRender>();

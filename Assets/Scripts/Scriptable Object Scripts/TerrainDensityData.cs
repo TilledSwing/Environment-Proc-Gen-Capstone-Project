@@ -3,7 +3,6 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "TerrainDensityData", menuName = "Scriptable Objects/TerrainDensityData")]
 public class TerrainDensityData : ScriptableObject
 {
-    public NoiseGenerator[] noiseGenerators;
     // Terrain Values
     public int width = 24;
     public int height = 100;

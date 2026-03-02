@@ -643,8 +643,7 @@ public class ChunkGenNetwork : MonoBehaviour
 
         if (!initialLoadComplete)
             initialLoadComplete = true;
-            
-        // Check if coroutines need to run
+
         if (!isLoadingChunks)
             StartCoroutine(LoadChunksOverTime());
 
@@ -751,23 +750,6 @@ public class ChunkGenNetwork : MonoBehaviour
         }
 
         return chunkAndNeighbors;
-    }
-    /// <summary>
-    /// Create the textures used for density calculation from animation curves
-    /// </summary>
-    /// <returns>An array of the textures used in density calculation</returns>
-    public Texture2D[] CreateNoiseCurveTextures()
-    {
-        Texture2D[] textureArray = new Texture2D[terrainDensityData.noiseGenerators.Length];
-        
-        int i = 0;
-        foreach (NoiseGenerator noiseGenerator in terrainDensityData.noiseGenerators)
-        {
-            textureArray[i] = SplineCurveFunctions.ArrayToTexture(SplineCurveFunctions.CurveToArray(noiseGenerator.valueCurve));
-            i++;
-        }
-
-        return textureArray;
     }
     /// <summary>
     /// Initialize all texture data

@@ -42,7 +42,7 @@ public class AssetSpawner : MonoBehaviour
         
         if (!assetSpawnData.assets.ContainsKey(chunkPos))
         {
-            uint seed = Hash(chunkPos.x, chunkPos.y, chunkPos.z, terrainDensityData.noiseGenerators[0].noiseSeed);
+            uint seed = Hash(chunkPos.x, chunkPos.y, chunkPos.z, ChunkGenNetwork.Instance.seed);
             rng = new(seed);
             InitializeData();
             CreateSpawnPoints(ref rng);

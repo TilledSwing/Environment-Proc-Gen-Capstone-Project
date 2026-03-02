@@ -5,7 +5,6 @@ using System.Collections;
 public class EditUI : MonoBehaviour
 {
     public TerrainDensityData tdd;
-    public NoiseGenerator ng;
     public AssetSpawnData asd;
     public Slider slider;
     public Toggle toggle;
@@ -17,9 +16,8 @@ public class EditUI : MonoBehaviour
     /// </summary>
     void Start()
     {
-        UpdateSettings();
+        // UpdateSettings();
         // tdd = ChunkGenNetwork.Instance.generationConfiguration.terrainConfigs[2].terrainDensityData;
-        // ng = tdd.noiseGenerators[0];
         // asd = ChunkGenNetwork.Instance.generationConfiguration.terrainConfigs[2].assetSpawnData;
     }
 
@@ -30,7 +28,6 @@ public class EditUI : MonoBehaviour
     public void SetNewData()
     {
         tdd = ChunkGenNetwork.Instance.generationConfiguration.terrainConfigs[ChunkGenNetwork.Instance.presetDropdown.value].terrainDensityData;
-        ng = tdd.noiseGenerators[0];
         asd = ChunkGenNetwork.Instance.generationConfiguration.terrainConfigs[ChunkGenNetwork.Instance.presetDropdown.value].assetSpawnData;
     }
 
@@ -73,20 +70,6 @@ public class EditUI : MonoBehaviour
             case "WaterToggle":
                 toggle.isOn = tdd.water;
                 break;
-            case "DWToggle":
-                toggle.isOn = ng.domainWarpToggle;
-                break;
-        }
-
-        // setting inputs
-        switch (input.name)
-        {
-            case "NoiseSeedInput":
-                input.text = ng.noiseSeed.ToString();
-                break;
-            case "DWSeedInput":
-                input.text = ng.domainWarpSeed.ToString();
-                break;
         }
 
         // setting sliders
@@ -95,47 +78,11 @@ public class EditUI : MonoBehaviour
             case "HeightSlider":
                 slider.value = tdd.height;
                 break;
-            case "FrequencySlider":
-                slider.value = ng.noiseFrequency;
-                break;
-            case "NoiseScaleSlider":
-                slider.value = ng.noiseScale;
-                break;
             case "IsoSlider":
                 slider.value = tdd.isolevel;
                 break;
-            case "JitterSlider":
-                slider.value = ng.cellularJitter;
-                break;
             case "WaterSlider":
                 slider.value = tdd.waterLevel;
-                break;
-            case "FOctavesSlider":
-                slider.value = ng.noiseFractalOctaves;
-                break;
-            case "FLacunaritySlider":
-                slider.value = ng.noiseFractalLacunarity;
-                break;
-            case "FGainSlider":
-                slider.value = ng.noiseFractalGain;
-                break;
-            case "FStrengthSlider":
-                slider.value = ng.fractalWeightedStrength;
-                break;
-            case "DWOctavesSlider":
-                slider.value = ng.domainWarpFractalOctaves;
-                break;
-            case "DWLacunaritySlider":
-                slider.value = ng.domainWarpFractalLacunarity;
-                break;
-            case "DWGainSlider":
-                slider.value = ng.domainWarpFractalGain;
-                break;
-            case "DWFrequencySlider":
-                slider.value = ng.domainWarpFrequency;
-                break;
-            case "DWAmpSlider":
-                slider.value = ng.domainWarpAmplitude;
                 break;
         }
     }
@@ -146,32 +93,8 @@ public class EditUI : MonoBehaviour
     public void ResetButton()
     {
         loadScreen.SetActive(true);
-
-        // Noise and Fractal Settings
-        ng.noiseDimension = NoiseGenerator.fnl_noise_dimension._3D;
-        ng.noiseType = NoiseGenerator.fnl_noise_type.OpenSimplex2;
-        ng.noiseFractalType = NoiseGenerator.fnl_fractal_type.FBm;
-        ng.noiseFractalOctaves = 5;
-        ng.noiseFractalLacunarity = 2;
-        ng.noiseFractalGain = 0.5f;
-        ng.fractalWeightedStrength = 0;
-        ng.noiseFrequency = 0.01f;
-        // Domain Warp Values
-        ng.domainWarpToggle = false;
-        ng.domainWarpType = NoiseGenerator.fnl_domain_warp_type.OpenSimplex2;
-        ng.domainWarpFractalType = NoiseGenerator.fnl_domain_warp_fractal_type.None;
-        ng.domainWarpAmplitude = 1;
-        ng.domainWarpFractalOctaves = 5;
-        ng.domainWarpFractalLacunarity = 2;
-        ng.domainWarpFractalGain = 0.5f;
-        ng.domainWarpFrequency = 0.01f;
-        // Cellular(Voronoi) Values
-        ng.cellularDistanceFunction = NoiseGenerator.fnl_cellular_distance_func.EuclideanSq;
-        ng.cellularReturnType = NoiseGenerator.fnl_cellular_return_type.Distance;
-        ng.cellularJitter = 1;
         // Terrain Values
         tdd.height = 250;
-        ng.noiseScale = 0.6f;
         tdd.isolevel = 0.5f;
         tdd.waterLevel = 30;
         tdd.water = true;
@@ -207,38 +130,6 @@ public class EditUI : MonoBehaviour
         Debug.Log("toggle changed");
         StartCoroutine(Reload());
     }
-    public void OnTerraceToggleChanged(bool marked)
-    {
-        loadScreen.SetActive(true);
-        Debug.Log("toggle changed");
-        StartCoroutine(Reload());
-    }
-    public void OnDWToggleChanged(bool marked)
-    {
-        loadScreen.SetActive(true);
-        ng.domainWarpToggle = marked;
-        Debug.Log("toggle changed");
-        StartCoroutine(Reload());
-    }
-
-    /// <summary>
-    /// Methods to change the seeds of the TDD with the UI input field
-    /// </summary>
-    /// <param name="seed">The int seed entered</param>
-    public void OnNoiseSeedChanged(string seed)
-    {
-        loadScreen.SetActive(true);
-        Debug.Log("seed changed");
-        RegenerateButton();
-        ng.noiseSeed = System.Convert.ToInt32(seed);
-    }
-    public void OnDWSeedChanged(string seed)
-    {
-        loadScreen.SetActive(true);
-        Debug.Log("seed changed");
-        RegenerateButton();
-        ng.domainWarpSeed = System.Convert.ToInt32(seed);
-    }
 
     /// <summary>
     /// Methods to change the different parameters of the TDD with the UI sliders
@@ -248,61 +139,12 @@ public class EditUI : MonoBehaviour
     {
         tdd.height = (int)value;
     }
-    public void OnNFreqChanged(float value)
-    {
-        ng.noiseFrequency = value;
-    }
-    public void OnNScaleChanged(float value)
-    {
-        ng.noiseScale = value;
-    }
     public void OnIsoChanged(float value)
     {
         tdd.isolevel = value;
-    }
-    public void OnJitterChanged(float value)
-    {
-        ng.cellularJitter = value;
     }
     public void OnWaterChanged(float value)
     {
         tdd.waterLevel = (int)value;
     }
-    public void OnFOctavesChanged(float value)
-    {
-        ng.noiseFractalOctaves = (int)value;
-    }
-    public void OnFLacunarityChanged(float value)
-    {
-        ng.noiseFractalLacunarity = value;
-    }
-    public void OnFGainChanged(float value)
-    {
-        ng.noiseFractalGain = value;
-    }
-    public void OnFStrengthChanged(float value)
-    {
-        ng.fractalWeightedStrength = value;
-    }
-    public void OnDWOctavesChanged(float value)
-    {
-        ng.domainWarpFractalOctaves = (int)value;
-    }
-    public void OnDWLacunarityChanged(float value)
-    {
-        ng.domainWarpFractalLacunarity = value;
-    }
-    public void OnDWGainChanged(float value)
-    {
-        ng.domainWarpFractalGain = value;
-    }
-    public void OnDWFrequencyChanged(float value)
-    {
-        ng.domainWarpFrequency = value;
-    }
-    public void OnDWAmplitudeChanged(float value)
-    {
-        ng.domainWarpAmplitude = value;
-    }
-    
 }
