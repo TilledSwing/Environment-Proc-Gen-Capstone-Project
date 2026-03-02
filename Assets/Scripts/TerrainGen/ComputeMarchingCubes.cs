@@ -11,11 +11,9 @@ using UnityEngine.Rendering;
 public class ComputeMarchingCubes : MonoBehaviour
 {
     public ChunkGenNetwork.TerrainChunk owner;
-    public ComputeShader terrainDensityComputeShader;
     public GrassRender grass;
     public MeshFilter meshFilter;
     public MeshCollider meshCollider;
-    public Texture2D[] noiseGeneratorTextureArray;
     public TerrainDensityData terrainDensityData;
     public AssetSpawner assetSpawner;
     public Vector3Int chunkCoord;
@@ -120,19 +118,6 @@ public class ComputeMarchingCubes : MonoBehaviour
             };
             noiseDensityJobHandler = noiseDensityJob.Schedule();
             ChunkGenNetwork.Instance.terrainDensityJobList.Add(new ChunkGenNetwork.TerrainJobObject(owner, noiseDensityJobHandler, false));
-    }
-    /// <summary>
-    /// Sets a given noise curbe texture in it's respective kernel
-    /// </summary>
-    /// <param name="noiseIndexName">The name of the noise's index variable in the shader</param>
-    /// <param name="noiseIndex">The index to refer to the noise</param>
-    /// <param name="kernel">The noise's respective kernel</param>
-    /// <param name="noiseTextureName">The name of the noise's texture variable in the shader</param>
-    /// <param name="texture">The noise texture to pass to the shader</param>
-    public void SetNoiseCurveTexture(string noiseIndexName, int noiseIndex, int kernel, string noiseTextureName, Texture texture)
-    {
-        terrainDensityComputeShader.SetInt(noiseIndexName, noiseIndex);
-        terrainDensityComputeShader.SetTexture(kernel, noiseTextureName, texture);
     }
     /// <summary>
     /// Sets up a mesh given a triangle array and count using lower level api for better performance

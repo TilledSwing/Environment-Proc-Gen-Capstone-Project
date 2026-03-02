@@ -301,23 +301,6 @@ public class ChunkGenNetwork : MonoBehaviour
         // forceModule.z = globalWindDirection.y;
 
         noiseTest = FastNoise.FromEncodedNodeTree("HQkQ@BFkQY@BPwkWAgQICtcjPAQKJAjD9Sg/CS4AAQ@BkNAAc@BI@AgQAkH@BFkQQPQpXvxhmZmY/BAOamRk/CwAAgD8cAwAAcEIEAhYCHAkuAAE@BJJQkL@BJUQQzczMPRgAACDAIAM@B4Ag@BokCM3MzD4JCQ@AD5CEB+F6z4YzcxMPwwSJAjNzMw+CQk@BwQggB@BEM3MzL4Y@BPyQC/wsAC+xROD4EChcJDQkI@CEEEA7geBT8LexQuPwQDj8J1PBQ=");
-        // NativeArray<float> density = new NativeArray<float>(
-        //     33 * 33 * 33,
-        //     Allocator.Persistent
-        // );
-        // Stopwatch sw;
-        // sw = Stopwatch.StartNew();
-        // for (int i = 0; i < 1000; i++)
-        // {
-        //     // sw = Stopwatch.StartNew();
-            // noiseTest.GenUniformGrid3D(density, 0, 0, 0, 33, 33, 33, 0.01f, 0.01f, 0.01f, 1337);
-        //     // sw.Stop();
-        //     // UnityEngine.Debug.Log(sw.Elapsed.TotalMilliseconds);
-        // }
-        // sw.Stop();
-        // UnityEngine.Debug.Log(sw.Elapsed.TotalMilliseconds);
-        // UnityEngine.Debug.Log(density[32]);
-        // density.Dispose();
 
         InitializeGenerator();
     }
@@ -480,7 +463,76 @@ public class ChunkGenNetwork : MonoBehaviour
         waterMaterial.SetFloat("_fogOffset", active ? fogOffset : 1000);
         waterMaterial.SetFloat("_fogDensity", active ? fogDensity : 1);
     }
-
+    /// <summary>
+    /// Process active chunk density jobs
+    /// </summary>
+    /// <param name="startTime">Start of allocated time frame</param>
+    public void ProcessDensityJobs(float startTime) {
+        while (terrainDensityJobList.Count > 0 && Time.realtimeSinceStartup - startTime < 0.003f)
+        {
+            terrainDensityJobRemovalList.Clear();
+            foreach (TerrainJobObject job in terrainDensityJobList)
+            {
+                if (job.jobHandle.IsCompleted)
+                {
+                    job.jobHandle.Complete();
+                    terrainDensityJobRemovalList.Add(job);
+                    job.owner.marchingCubes.MarchingCubesJobHandler(job.terraforming);
+                }
+            }
+            foreach(TerrainJobObject job in terrainDensityJobRemovalList)
+            {
+                terrainDensityJobList.Remove(job);
+            }
+        }
+    }
+    /// <summary>
+    /// Process active chunk polygonization jobs
+    /// </summary>
+    /// <param name="startTime">Start of allocated time frame</param>
+    public void ProcessPolygonizationJobs(float startTime) {
+        while (terrainPolygonizationJobList.Count > 0 && Time.realtimeSinceStartup - startTime < 0.003f)
+        {
+            terrainPolygonizationJobRemovalList.Clear();
+            foreach (TerrainJobObject job in terrainPolygonizationJobList)
+            {
+                if (job.jobHandle.IsCompleted)
+                {
+                    job.jobHandle.Complete();
+                    terrainPolygonizationJobRemovalList.Add(job);
+                    job.owner.marchingCubes.SetMeshValuesPerformant(job.terraforming);
+                }
+            }
+            foreach(TerrainJobObject job in terrainPolygonizationJobRemovalList)
+            {
+                terrainPolygonizationJobList.Remove(job);
+            }
+        }
+    }
+    /// <summary>
+    /// Process chunk visibility queue
+    /// </summary>
+    /// <param name="startTime">Start of allocated time frame</param>
+    public void ProcessChunkVisibilty(float startTime)
+    {
+        while (chunkVisibilityQueue.Count > 0 && Time.realtimeSinceStartup - startTime < 0.003f) // 2ms
+        {
+            ChunkVisibility chunk = chunkVisibilityQueue.Dequeue();
+            chunk.chunk.SetVisible(chunk.visibility);
+        }
+    }
+    /// <summary>
+    /// Process asset instantiation queue
+    /// </summary>
+    /// <param name="startTime">Start of allocated time frame</param>
+    public void ProcessAssetInstantiation(float startTime)
+    {
+        while (pendingAssetInstantiations.Count > 0 && Time.realtimeSinceStartup - startTime < 0.002f) // 2ms
+        {
+            AssetInstantiation assetInstantiation = pendingAssetInstantiations.Dequeue();
+            assetInstantiation.terrainChunk.assetSpawner.AssetInstantiation(assetInstantiation.i, assetInstantiation.j, assetInstantiation.seed);
+        }
+    }
     void Update()
     {
         // Position updates
@@ -498,54 +550,10 @@ public class ChunkGenNetwork : MonoBehaviour
             UpdateVisibleChunks();
             lastUpdateViewerPos = viewerPos;
         }
-        float start = Time.realtimeSinceStartup;
-        while (terrainDensityJobList.Count > 0 && Time.realtimeSinceStartup - start < 0.003f)
-        {
-            terrainDensityJobRemovalList.Clear();
-            foreach (TerrainJobObject job in terrainDensityJobList)
-            {
-                if (job.jobHandle.IsCompleted)
-                {
-                    job.jobHandle.Complete();
-                    terrainDensityJobRemovalList.Add(job);
-                    job.owner.marchingCubes.MarchingCubesJobHandler(job.terraforming);
-                }
-            }
-            foreach(TerrainJobObject job in terrainDensityJobRemovalList)
-            {
-                terrainDensityJobList.Remove(job);
-            }
-        }
-        start = Time.realtimeSinceStartup;
-        while (terrainPolygonizationJobList.Count > 0 && Time.realtimeSinceStartup - start < 0.003f)
-        {
-            terrainPolygonizationJobRemovalList.Clear();
-            foreach (TerrainJobObject job in terrainPolygonizationJobList)
-            {
-                if (job.jobHandle.IsCompleted)
-                {
-                    job.jobHandle.Complete();
-                    terrainPolygonizationJobRemovalList.Add(job);
-                    job.owner.marchingCubes.SetMeshValuesPerformant(job.terraforming);
-                }
-            }
-            foreach(TerrainJobObject job in terrainPolygonizationJobRemovalList)
-            {
-                terrainPolygonizationJobList.Remove(job);
-            }
-        }
-        start = Time.realtimeSinceStartup;
-        while (chunkVisibilityQueue.Count > 0 && Time.realtimeSinceStartup - start < 0.003f) // 2ms
-        {
-            ChunkVisibility chunk = chunkVisibilityQueue.Dequeue();
-            chunk.chunk.SetVisible(chunk.visibility);
-        }
-        start = Time.realtimeSinceStartup;
-        while (pendingAssetInstantiations.Count > 0 && Time.realtimeSinceStartup - start < 0.002f) // 2ms
-        {
-            AssetInstantiation assetInstantiation = pendingAssetInstantiations.Dequeue();
-            assetInstantiation.terrainChunk.assetSpawner.AssetInstantiation(assetInstantiation.i, assetInstantiation.j, assetInstantiation.seed);
-        }
+        ProcessDensityJobs(Time.realtimeSinceStartup);
+        ProcessPolygonizationJobs(Time.realtimeSinceStartup);
+        ProcessChunkVisibilty(Time.realtimeSinceStartup);
+        ProcessAssetInstantiation(Time.realtimeSinceStartup);
     }
     /// <summary>
     /// Update all the visible chunks loading in new ones and unloading old ones that are no longer visible
