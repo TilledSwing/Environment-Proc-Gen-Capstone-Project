@@ -98,7 +98,7 @@ void GrassCompute (uint3 id : SV_DispatchThreadID)
         grassBlade.height = lerp(GrassHeightRange.x, GrassHeightRange.y, Hash(id.x * 17432890u + i));
         grassBlade.terrainNormal = normal;
 
-        GrassPositionsBuffer.Append(grassBlade);
+        GrassPositionsBuffer1.Append(grassBlade);
     }
 }
 // [numthreads(64,1,1)]
