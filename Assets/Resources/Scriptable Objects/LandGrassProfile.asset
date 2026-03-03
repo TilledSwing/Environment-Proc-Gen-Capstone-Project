@@ -18,3 +18,4 @@ MonoBehaviour:
   maxBladesPerTriangle: 20
   maxGrassSlope: 50
   grassHeightRange: {x: 0.7, y: 1.1}
+  grassCurveRange: {x: 0, y: 1}

@@ -11,4 +11,5 @@ public class GrassProfile : ScriptableObject
     public int maxBladesPerTriangle;
     public float maxGrassSlope;
     public Vector2 grassHeightRange;
+    public Vector2 grassCurveRange;
 }

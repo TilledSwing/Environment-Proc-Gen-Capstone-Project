@@ -213,28 +213,6 @@ public class AssetSpawner : MonoBehaviour
                         tooClose = true;
                         break;
                     }
-                    /* OLD ASSET PROXIMITY SPAWN CHECK REPLACE WITH POISSON DISK SAMPLING */
-                    // ChunkGenNetwork.TerrainChunk[] chunkAndNeighbors = ChunkGenNetwork.Instance.GetChunkAndNeighbors(new Vector3Int(Mathf.CeilToInt(chunkPos.x / terrainDensityData.width), Mathf.CeilToInt(chunkPos.y / terrainDensityData.width), Mathf.CeilToInt(chunkPos.z / terrainDensityData.width)));
-                    // foreach (ChunkGenNetwork.TerrainChunk terrainChunk in chunkAndNeighbors)
-                    // {
-                    //     if (terrainChunk == null) continue;
-                    //     if (!assetSpawnData.assets.TryGetValue(terrainChunk.chunkPos, out List<ComputeMarchingCubes.Vertex> neighborSpawnPoints)) continue;
-                    //     for (int k = 0; k < neighborSpawnPoints.Count; k++)
-                    //     {
-                    //         if (math.lengthsq(assetSpawnData.assets[terrainChunk.chunkPos][k].position - spawnPoints[i][j].position) <= spacingSquared)
-                    //         {
-                    //             tooClose = true;
-                    //             break;
-                    //         }
-                    //     }
-                    //     if (tooClose) break;
-                    // }
-                    // Collider[] colliders = Physics.OverlapSphere(spawnPoints[i][j].position, assetSpacing, assetLayer | interactLayer);
-                    // if (colliders.Length > 0)
-                    // {
-                    //     tooClose = true;
-                    //     break;
-                    // }
                 }
 
                 if (!tooClose)

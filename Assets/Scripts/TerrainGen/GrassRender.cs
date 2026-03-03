@@ -5,16 +5,11 @@ using UnityEngine;
 public class GrassRender : MonoBehaviour
 {
     public ComputeShader grassPositionComputeShader;
-    public Mesh grassMesh;
-    public List<Mesh> meshes;
-    public Material grassMaterial;
+    public GrassProfile grassProfile;
+    List<Mesh> meshes;
     public List<Material> materials;
-    public int grassDensity;
-    public int maxBladesPerTriangle;
     public int minHeight;
     public int maxHeight;
-    public float maxGrassSlope;
-    public Vector2 grassHeightRange;
     public Vector3Int chunkPos;
     public Bounds bounds;
     public RenderParams rp;
@@ -27,14 +22,9 @@ public class GrassRender : MonoBehaviour
     List<GraphicsBuffer> argsBuffers;
     public bool underwater;
     public void InitializeGrassRenderer(Vector3Int chunkPos,
-                                        int grassDensity,
-                                        int maxBladesPerTriangle,
-                                        Material grassMaterial,
-                                        Mesh grassMesh,
+                                        GrassProfile grassProfile,
                                         int minHeight,
                                         int maxHeight,
-                                        float maxGrassSlope,
-                                        Vector2 grassHeightRange,
                                         ComputeShader grassPositionComputeShader,
                                         int triangleCount,
                                         NativeArray<ComputeMarchingCubes.Triangle> triangleArray,
@@ -43,14 +33,9 @@ public class GrassRender : MonoBehaviour
                                         )
     {
         this.chunkPos = chunkPos;
-        this.grassDensity = grassDensity;
-        this.maxBladesPerTriangle = maxBladesPerTriangle;
-        this.grassMaterial = grassMaterial;
-        this.grassMesh = grassMesh;
+        this.grassProfile = grassProfile;
         this.minHeight = minHeight;
         this.maxHeight = maxHeight;
-        this.maxGrassSlope = maxGrassSlope;
-        this.grassHeightRange = grassHeightRange;
         this.grassPositionComputeShader = grassPositionComputeShader;
         this.triangleCount = triangleCount;
         grassTriangleBuffer = new(triangleCount, sizeof(float) * 18);
@@ -62,36 +47,37 @@ public class GrassRender : MonoBehaviour
     {
         int grassPositionKernel = grassPositionComputeShader.FindKernel("GrassCompute");
         grassPositionComputeShader.SetInt("TriangleCount", triangleCount);
-        grassPositionComputeShader.SetInt("GrassDensity", grassDensity);
+        grassPositionComputeShader.SetInt("GrassDensity", grassProfile.grassDensity);
         grassPositionComputeShader.SetInt("MinHeight", minHeight);
         grassPositionComputeShader.SetInt("MaxHeight", maxHeight);
-        grassPositionComputeShader.SetInt("MaxBladesPerTriangle", maxBladesPerTriangle);
-        grassPositionComputeShader.SetVector("GrassHeightRange", grassHeightRange);
-        grassPositionComputeShader.SetFloat("MaxSlope", Mathf.Cos(maxGrassSlope * Mathf.Deg2Rad));
+        grassPositionComputeShader.SetInt("MaxBladesPerTriangle", grassProfile.maxBladesPerTriangle);
+        grassPositionComputeShader.SetVector("GrassHeightRange", grassProfile.grassHeightRange);
+        grassPositionComputeShader.SetVector("GrassCurveRange", grassProfile.grassCurveRange);
+        grassPositionComputeShader.SetFloat("MaxSlope", Mathf.Cos(grassProfile.maxGrassSlope * Mathf.Deg2Rad));
 
         grassPositionComputeShader.SetBuffer(grassPositionKernel, "GrassTriangleBuffer", grassTriangleBuffer);
 
-        int maxBlades = Mathf.CeilToInt(triangleCount * maxBladesPerTriangle);
+        int maxBlades = Mathf.CeilToInt(triangleCount * grassProfile.maxBladesPerTriangle);
         grassPositionBuffer = new GraphicsBuffer(
             GraphicsBuffer.Target.Append,
             maxBlades,
             sizeof(float) * 9
         );
         grassPositionBuffer.SetCounterValue(0);
-        grassPositionComputeShader.SetBuffer(grassPositionKernel, "GrassPositionsBuffer", grassPositionBuffer);
+        grassPositionComputeShader.SetBuffer(grassPositionKernel, "GrassPositionsBuffer1", grassPositionBuffer);
 
         grassPositionComputeShader.Dispatch(grassPositionKernel, Mathf.CeilToInt(triangleCount / 64f), 1, 1);
 
         grassTriangleBuffer.Release();
 
         argsBuffer = new GraphicsBuffer(GraphicsBuffer.Target.IndirectArguments, 1, 5 * sizeof(uint));
-        uint[] args = new uint[5] { grassMesh.GetIndexCount(0), 0, 0, 0, 0 };
+        uint[] args = new uint[5] { grassProfile.grassMesh.GetIndexCount(0), 0, 0, 0, 0 };
         argsBuffer.SetData(args);
         GraphicsBuffer.CopyCount(grassPositionBuffer, argsBuffer, sizeof(uint));
         
-        grassMaterial.enableInstancing = true;
-        grassMaterial.SetFloat("_MinHeight", ChunkGenNetwork.Instance.terrainDensityData.waterLevel);
-        rp = new RenderParams(grassMaterial)
+        grassProfile.grassMaterial.enableInstancing = true;
+        grassProfile.grassMaterial.SetFloat("_MinHeight", ChunkGenNetwork.Instance.terrainDensityData.waterLevel);
+        rp = new RenderParams(grassProfile.grassMaterial)
         {
             matProps = new MaterialPropertyBlock(),
             worldBounds = bounds,
@@ -121,6 +107,6 @@ public class GrassRender : MonoBehaviour
     {
         if (underwater && ChunkGenNetwork.Instance.viewerPos.y > ChunkGenNetwork.Instance.terrainDensityData.waterLevel)
             return ;
-        Graphics.RenderMeshIndirect(rp, grassMesh, argsBuffer, 1, 0);
+        Graphics.RenderMeshIndirect(rp, grassProfile.grassMesh, argsBuffer, 1, 0);
     }
 }

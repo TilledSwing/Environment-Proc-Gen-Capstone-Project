@@ -96,7 +96,7 @@ public class EditUI : MonoBehaviour
         // Terrain Values
         tdd.height = 250;
         tdd.isolevel = 0.5f;
-        tdd.waterLevel = 30;
+        tdd.waterLevel = 0;
         tdd.water = true;
         tdd.lerp = true;
 

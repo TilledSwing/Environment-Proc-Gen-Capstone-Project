@@ -81,8 +81,11 @@ public class ChunkGenNetwork : MonoBehaviour
     [Space(5)]
     // Scriptable Object References
     public GenerationConfiguration generationConfiguration;
+    [HideInInspector]
     public TerrainDensityData terrainDensityData;
+    [HideInInspector]
     public AssetSpawnData assetSpawnData;
+    [HideInInspector]
     public TerrainTextureData terrainTextureData;
 
     [Space(10)]
@@ -299,7 +302,8 @@ public class ChunkGenNetwork : MonoBehaviour
         // forceModule.x = globalWindDirection.x;
         // forceModule.z = globalWindDirection.y;
 
-        noiseTest = FastNoise.FromEncodedNodeTree("HQkQ@BFkQY@BPwkWAgQICtcjPAQKJAjD9Sg/CS4AAQ@BkNAAc@BI@AgQAkH@BFkQQPQpXvxhmZmY/BAOamRk/CwAAgD8cAwAAcEIEAhYCHAkuAAE@BJJQkL@BJUQQzczMPRgAACDAIAM@B4Ag@BokCM3MzD4JCQ@AD5CEB+F6z4YzcxMPwwSJAjNzMw+CQk@BwQggB@BEM3MzL4Y@BPyQC/wsAC+xROD4EChcJDQkI@CEEEA7geBT8LexQuPwQDj8J1PBQ=");
+        // noiseTest = FastNoise.FromEncodedNodeTree("HQkQ@BFkQY@BPwkWAgQICtcjPAQKJAjD9Sg/CS4AAQ@BkNAAc@BI@AgQAkH@BFkQQPQpXvxhmZmY/BAOamRk/CwAAgD8cAwAAcEIEAhYCHAkuAAE@BJJQkL@BJUQQzczMPRgAACDAIAM@B4Ag@BokCM3MzD4JCQ@AD5CEB+F6z4YzcxMPwwSJAjNzMw+CQk@BwQggB@BEM3MzL4Y@BPyQC/wsAC+xROD4EChcJDQkI@CEEEA7geBT8LexQuPwQDj8J1PBQ=");
+        noiseTest = FastNoise.FromEncodedNodeTree("HQkQ@BFkQY@BPwkWAgQICtejPAQKJAjD9Sg/CS4AAQ@BkNAAc@BI@AgQAkH@BFkQQPQpXvxhmZmY/BAOamRk/CwAAgD8cAwAAcEIEAhYCHAkuAAE@BJJQkL@BJUQQzczMPRgAACDAIAM@B4Ag@BokCM3MzD4JCQ@AD5CEB+F6z4YzcxMPwwSJAjNzMw+CQk@BwQggB@BEM3MzL4Y@BPyQC/wsAC+xROD4EChcJDQkI@CEEEA7geBT8LexQuPwQDj8J1PBQ=");
 
         InitializeGenerator();
     }
@@ -939,7 +943,7 @@ public class ChunkGenNetwork : MonoBehaviour
             // Chunk texture
             meshRenderer.sharedMaterial = terrainMaterial;
             // Set up water generator
-            if (terrainDensityData.waterLevel > chunkPos.y && terrainDensityData.waterLevel < Mathf.RoundToInt(chunkPos.y + terrainDensityData.width) && terrainDensityData.water)
+            if (terrainDensityData.waterLevel >= chunkPos.y && terrainDensityData.waterLevel < Mathf.RoundToInt(chunkPos.y + terrainDensityData.width) && terrainDensityData.water)
             {
                 waterPlaneGenerator = new GameObject("Water");
                 waterPlaneGenerator.transform.SetParent(chunk.transform);
@@ -998,7 +1002,7 @@ public class ChunkGenNetwork : MonoBehaviour
                 }
             }
             // Water
-            if (Instance.terrainDensityData.waterLevel > chunkPos.y && Instance.terrainDensityData.waterLevel < Mathf.RoundToInt(chunkPos.y + Instance.terrainDensityData.width) && Instance.terrainDensityData.water)
+            if (Instance.terrainDensityData.waterLevel > chunkPos.y && Instance.terrainDensityData.waterLevel <= Mathf.RoundToInt(chunkPos.y + Instance.terrainDensityData.width) && Instance.terrainDensityData.water)
             {
                 if (waterMeshRenderer != null && waterMeshRenderer.enabled != visible)
                 {

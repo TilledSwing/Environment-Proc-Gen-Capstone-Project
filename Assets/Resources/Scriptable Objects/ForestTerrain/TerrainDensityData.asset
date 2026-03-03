@@ -12,15 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c29ee72cee6fb9144bd844ec6a8f7ebb, type: 3}
   m_Name: TerrainDensityData
   m_EditorClassIdentifier: 
-  noiseGenerators:
-  - {fileID: 11400000, guid: 8997d176223be34408e2157b1cb92a3e, type: 2}
-  - {fileID: 11400000, guid: ba042f300ebfc12449574e9980101924, type: 2}
-  - {fileID: 11400000, guid: 3f2cdb4d1242061499f4422dd41cec60, type: 2}
-  - {fileID: 11400000, guid: 6c79ac92c203a2949969a902faee120e, type: 2}
-  - {fileID: 11400000, guid: 8b48f37d82b57414a9b10e2e22659108, type: 2}
   width: 32
   height: 200
   isolevel: 0.5
-  waterLevel: 30
+  waterLevel: 0
   water: 1
   lerp: 1

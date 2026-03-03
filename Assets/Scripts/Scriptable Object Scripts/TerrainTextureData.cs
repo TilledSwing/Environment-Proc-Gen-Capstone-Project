@@ -12,6 +12,11 @@ public class TerrainTextureData : ScriptableObject
     public TextureFormat textureFormat;
     public int maxTextureSize;
 
+    void Start()
+    {
+        biomeTextureConfigsBackup = new();
+    }
+
     public void BackupOriginalState()
     {
         biomeTextureConfigsBackup = new();

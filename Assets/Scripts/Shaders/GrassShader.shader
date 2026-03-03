@@ -2,6 +2,7 @@ Shader "Custom/GrassShader"
 {
     Properties
     {
+        _InstanceTexture ("InstanceTexture", 2D) = "white" {}
         _BaseColor ("BaseColor", Color) = (0,0,0,1)
         _TipColor ("TipColor", Color) = (0,0,0,1)
         _WindDir ("WindDir", Vector) = (1,1,0,0)
@@ -36,6 +37,7 @@ Shader "Custom/GrassShader"
                 float4 positionOS : POSITION;
                 float3 normalOS : NORMAL;
                 uint instanceID : SV_InstanceID;
+                float2 uv : TEXCOORD0;
             };
 
             struct Varyings
@@ -44,6 +46,7 @@ Shader "Custom/GrassShader"
                 float4 positionHCS : SV_POSITION;
                 float3 worldPos : TEXCOORD0;
                 float3 worldNormal : TEXCOORD1;
+                float2 uv : TEXCOORD2;
             };
 
             struct GrassBlade
@@ -54,7 +57,9 @@ Shader "Custom/GrassShader"
                 float curve;
                 float3 terrainNormal;
             };
-
+            
+            TEXTURE2D(_InstanceTexture);
+            SAMPLER(sampler_InstanceTexture);
             StructuredBuffer<GrassBlade> _Positions;
             float2 _WindDir;
             float _WindStrength;
@@ -107,11 +112,15 @@ Shader "Custom/GrassShader"
                 float3 blendedNormal = normalize(lerp(TransformObjectToWorldNormal(rotatedNormal + bend), grassBlade.terrainNormal, blend));
                 OUT.worldNormal = blendedNormal;
 
+                OUT.uv = IN.uv;
+
                 return OUT;
             }
 
             float4 frag(Varyings IN, bool isFrontFace : SV_IsFrontFace) : SV_Target
             {
+                float4 tex = SAMPLE_TEXTURE2D(_InstanceTexture, sampler_InstanceTexture, IN.uv);
+                clip(tex.a - 0.5);
                 float3 normalWS = normalize(IN.worldNormal);
                 if (!isFrontFace) 
                 {
@@ -174,6 +183,7 @@ Shader "Custom/GrassShader"
                 float fogFactor : TEXCOORD2;
                 float4 shadowCoord : TEXCOORD3;
                 float grassHeight : TEXCOORD4;
+                float2 uv : TEXCOORD5;
             };
 
             struct GrassBlade
@@ -185,6 +195,8 @@ Shader "Custom/GrassShader"
                 float3 terrainNormal;
             };
 
+            TEXTURE2D(_InstanceTexture);
+            SAMPLER(sampler_InstanceTexture);
             StructuredBuffer<GrassBlade> _Positions;
             float4 _BaseColor;
             float4 _TipColor;
@@ -247,17 +259,21 @@ Shader "Custom/GrassShader"
                 #endif
 
                 OUT.grassHeight = IN.positionOS.y;
+                OUT.uv = IN.uv;
 
                 return OUT;
             }
 
             float4 frag(Varyings IN, bool isFrontFace : SV_IsFrontFace) : SV_Target
             {
+                float4 tex = SAMPLE_TEXTURE2D(_InstanceTexture, sampler_InstanceTexture, IN.uv);
+                clip(tex.a - 0.5);
                 float height01 = saturate(IN.grassHeight);
 
-                float3 mixedGradientColor = lerp(_BaseColor, _TipColor, height01);
+                float3 albedo = lerp(_BaseColor, _TipColor, height01);
                 float ao = pow(1 - height01, 2);
-                mixedGradientColor *= lerp(1, _AOStrength, ao);
+                albedo *= lerp(1, _AOStrength, ao);
+                albedo *= tex.xyz;
 
                 float3 normalWS = normalize(IN.worldNormal);
                 if (!isFrontFace) 
@@ -277,7 +293,7 @@ Shader "Custom/GrassShader"
                 inputData.shadowMask = 1;
 
                 SurfaceData surfaceData;
-                surfaceData.albedo = mixedGradientColor;
+                surfaceData.albedo = albedo;
                 surfaceData.alpha = 1;
                 surfaceData.metallic = 0.0;
                 surfaceData.specular = 0.5;

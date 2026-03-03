@@ -169,19 +169,14 @@ public class ComputeMarchingCubes : MonoBehaviour
         {
             ChunkGenNetwork.Instance.spawningPointCreationQueue.Enqueue(assetSpawner);
             // assetSpawner.SpawnAssets();
-            if(chunkPos.y + terrainDensityData.width >= terrainDensityData.waterLevel && triangleCount > ChunkGenNetwork.Instance.landGrass.maxBladesPerTriangle)
+            if(chunkPos.y >= terrainDensityData.waterLevel && triangleCount > ChunkGenNetwork.Instance.landGrass.maxBladesPerTriangle)
             {
                 grass = gameObject.AddComponent<GrassRender>();
                 grass.InitializeGrassRenderer(
                     chunkPos, 
-                    ChunkGenNetwork.Instance.landGrass.grassDensity,
-                    ChunkGenNetwork.Instance.landGrass.maxBladesPerTriangle,
-                    ChunkGenNetwork.Instance.landGrass.grassMaterial,
-                    ChunkGenNetwork.Instance.landGrass.grassMesh,
+                    ChunkGenNetwork.Instance.landGrass,
                     terrainDensityData.waterLevel,
                     52,
-                    ChunkGenNetwork.Instance.landGrass.maxGrassSlope,
-                    ChunkGenNetwork.Instance.landGrass.grassHeightRange,
                     ChunkGenNetwork.Instance.grassPositionComputeShader,
                     triangleCount,
                     triangleArray.AsArray(),
@@ -195,14 +190,9 @@ public class ComputeMarchingCubes : MonoBehaviour
                 grass = gameObject.AddComponent<GrassRender>();
                 grass.InitializeGrassRenderer(
                     chunkPos, 
-                    ChunkGenNetwork.Instance.seaGrass.grassDensity,
-                    ChunkGenNetwork.Instance.seaGrass.maxBladesPerTriangle,
-                    ChunkGenNetwork.Instance.seaGrass.grassMaterial,
-                    ChunkGenNetwork.Instance.seaGrass.grassMesh,
+                    ChunkGenNetwork.Instance.seaGrass,
                     -300,
                     terrainDensityData.waterLevel - terrainDensityData.width,
-                    ChunkGenNetwork.Instance.seaGrass.maxGrassSlope,
-                    ChunkGenNetwork.Instance.seaGrass.grassHeightRange,
                     ChunkGenNetwork.Instance.grassPositionComputeShader,
                     triangleCount,
                     triangleArray.AsArray(),

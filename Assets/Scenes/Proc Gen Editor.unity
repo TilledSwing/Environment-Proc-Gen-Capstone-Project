@@ -11745,9 +11745,9 @@ MonoBehaviour:
   mapSize: 11
   resolution: 1
   generationConfiguration: {fileID: 11400000, guid: a75488b0b243f294d935326c1a604eb1, type: 2}
-  terrainDensityData: {fileID: 11400000, guid: 4bc939f839855ea45ade17dce060eea5, type: 2}
-  assetSpawnData: {fileID: 11400000, guid: ac92efdaf283ed346bf2f132639a35ad, type: 2}
-  terrainTextureData: {fileID: 11400000, guid: 1fa52b57a0c85a34eb28c4f99612d21f, type: 2}
+  terrainDensityData: {fileID: 0}
+  assetSpawnData: {fileID: 0}
+  terrainTextureData: {fileID: 0}
   terrainMaterial: {fileID: 2100000, guid: d644a1ee14ca32a44b080e9c6de5ed62, type: 2}
   waterMaterial: {fileID: 2100000, guid: 804af839dce47f748a2151ac2e3113a9, type: 2}
   waterMesh: {fileID: 0}
