@@ -180,11 +180,10 @@ public class ChunkGenNetwork : MonoBehaviour
     public List<TerrainJobObject> terrainDensityJobRemovalList;
     public List<TerrainJobObject> terrainPolygonizationJobList;
     public List<TerrainJobObject> terrainPolygonizationJobRemovalList;
+    // Asset Spawn Point Creation Queue
+    public Queue<AssetSpawner> spawningPointCreationQueue = new();
     // Asset Instantiation Queue
     public Queue<AssetInstantiation> pendingAssetInstantiations = new();
-
-
-    public Queue<TerrainChunk> marchingCubesJobQueue = new();
     // Reused Marching Cubes Native Array
     public NativeArray<float3> vertexOffsetTable;
     public NativeArray<int> edgeIndexTable;
@@ -367,6 +366,7 @@ public class ChunkGenNetwork : MonoBehaviour
         terrainDensityJobRemovalList = new();
         terrainPolygonizationJobList = new();
         terrainPolygonizationJobRemovalList = new();
+        spawningPointCreationQueue = new();
         pendingAssetInstantiations = new();
 
         DestroyChunks();
@@ -533,6 +533,18 @@ public class ChunkGenNetwork : MonoBehaviour
             assetInstantiation.terrainChunk.assetSpawner.AssetInstantiation(assetInstantiation.i, assetInstantiation.j, assetInstantiation.seed);
         }
     }
+    /// <summary>
+    /// Process spawn point creation queue
+    /// </summary>
+    /// <param name="startTime">Start of allocated time frame</param>
+    public void ProcessSpawnPointCreation(float startTime)
+    {
+        while (spawningPointCreationQueue.Count > 0 && Time.realtimeSinceStartup - startTime < 0.003f) // 3ms
+        {
+            AssetSpawner assetSpawner = spawningPointCreationQueue.Dequeue();
+            assetSpawner.SpawnAssets();
+        }
+    }
     void Update()
     {
         // Position updates
@@ -553,6 +565,7 @@ public class ChunkGenNetwork : MonoBehaviour
         ProcessDensityJobs(Time.realtimeSinceStartup);
         ProcessPolygonizationJobs(Time.realtimeSinceStartup);
         ProcessChunkVisibilty(Time.realtimeSinceStartup);
+        ProcessSpawnPointCreation(Time.realtimeSinceStartup);
         ProcessAssetInstantiation(Time.realtimeSinceStartup);
     }
     /// <summary>

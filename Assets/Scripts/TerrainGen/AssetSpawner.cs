@@ -356,27 +356,6 @@ public class AssetSpawner : MonoBehaviour
         }
         spawnableAsset.spawnedAssets.Add(new Asset(assetToSpawn, assetToSpawn.GetComponent<MeshRenderer>(), assetToSpawn.GetComponent<MeshCollider>()));
     }
-    public List<float3> GetMinDepthChunkPoints(float minDepth, NativeArray<float> heightsArray)
-    {
-        List<float3> depthResult = new();
-        int size = terrainDensityData.width + 1;
-
-        for (int z = 0; z < size; z++)
-        {
-            for (int y = 0; y < size; y++)
-            {
-                for (int x = 0; x < size; x++)
-                {
-                    if(heightsArray[(z * size * size) + (y * size) + x] > minDepth)
-                    {
-                        depthResult.Add(new float3(chunkPos.x + x, chunkPos.y + y, chunkPos.z + z));
-                    }
-                }
-            }
-        }
-
-        return depthResult;
-    }
     [BurstCompile]
     private struct MinDepthPointsJob: IJob
     {

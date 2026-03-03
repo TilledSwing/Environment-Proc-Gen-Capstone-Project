@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.Collections;
 using UnityEngine;
 
 public class GrassRender : MonoBehaviour
@@ -25,6 +26,38 @@ public class GrassRender : MonoBehaviour
     GraphicsBuffer argsBuffer;
     List<GraphicsBuffer> argsBuffers;
     public bool underwater;
+    public void InitializeGrassRenderer(Vector3Int chunkPos,
+                                        int grassDensity,
+                                        int maxBladesPerTriangle,
+                                        Material grassMaterial,
+                                        Mesh grassMesh,
+                                        int minHeight,
+                                        int maxHeight,
+                                        float maxGrassSlope,
+                                        Vector2 grassHeightRange,
+                                        ComputeShader grassPositionComputeShader,
+                                        int triangleCount,
+                                        NativeArray<ComputeMarchingCubes.Triangle> triangleArray,
+                                        Bounds bounds,
+                                        bool underwater
+                                        )
+    {
+        this.chunkPos = chunkPos;
+        this.grassDensity = grassDensity;
+        this.maxBladesPerTriangle = maxBladesPerTriangle;
+        this.grassMaterial = grassMaterial;
+        this.grassMesh = grassMesh;
+        this.minHeight = minHeight;
+        this.maxHeight = maxHeight;
+        this.maxGrassSlope = maxGrassSlope;
+        this.grassHeightRange = grassHeightRange;
+        this.grassPositionComputeShader = grassPositionComputeShader;
+        this.triangleCount = triangleCount;
+        grassTriangleBuffer = new(triangleCount, sizeof(float) * 18);
+        grassTriangleBuffer.SetData(triangleArray);
+        this.bounds = bounds;
+        this.underwater = underwater;
+    }
     public void SetupGrass()
     {
         int grassPositionKernel = grassPositionComputeShader.FindKernel("GrassCompute");
