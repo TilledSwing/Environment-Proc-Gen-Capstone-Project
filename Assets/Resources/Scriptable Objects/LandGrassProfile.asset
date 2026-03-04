@@ -12,10 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c562b96baf304494496503f80b3de477, type: 3}
   m_Name: LandGrassProfile
   m_EditorClassIdentifier: 
-  grassMesh: {fileID: -462981019419857548, guid: 7d67a45bb7b722a43a696709d2b89636, type: 3}
-  grassMaterial: {fileID: 2100000, guid: bdfda37c10344e84ebfde33ef935cf28, type: 2}
+  foliageList:
+  - useUniformScale: 0
+    grassMesh: {fileID: -462981019419857548, guid: 7d67a45bb7b722a43a696709d2b89636, type: 3}
+    grassMaterial: {fileID: 2100000, guid: bdfda37c10344e84ebfde33ef935cf28, type: 2}
+    grassHeightRange: {x: 0.7, y: 1.1}
+    grassCurveRange: {x: 0, y: 1}
+    spawnProbabilityUpperThreshold: 0.995
+  - useUniformScale: 1
+    grassMesh: {fileID: 4781277628412113339, guid: 39fbcfb3440d46148bab38e13a0a4e4f, type: 3}
+    grassMaterial: {fileID: 2100000, guid: c48ee81920a7c0348aab46d0a9d6417c, type: 2}
+    grassHeightRange: {x: 0.6, y: 0.9}
+    grassCurveRange: {x: 0, y: 0}
+    spawnProbabilityUpperThreshold: 1
   grassDensity: 25
   maxBladesPerTriangle: 20
   maxGrassSlope: 50
-  grassHeightRange: {x: 0.7, y: 1.1}
-  grassCurveRange: {x: 0, y: 1}

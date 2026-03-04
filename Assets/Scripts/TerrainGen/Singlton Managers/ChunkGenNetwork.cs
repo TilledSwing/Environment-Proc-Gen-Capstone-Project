@@ -295,7 +295,10 @@ public class ChunkGenNetwork : MonoBehaviour
         viewerPos = viewer.position;
         lastUpdateViewerPos = viewerPos;
 
-        landGrass.grassMaterial.SetVector("_WindDir", globalWindDirection);
+        foreach (GrassProfile.FoliageType foliageType in landGrass.foliageList)
+        {
+            foliageType.grassMaterial.SetVector("_WindDir", globalWindDirection);
+        }
         bushMaterial.SetVector("_WindDir", globalWindDirection);
         treeTopMaterial.SetVector("_WindDir", globalWindDirection);
         // var forceModule = leafParticleSystem.forceOverLifetime;

@@ -36,8 +36,6 @@ int MinHeight;
 int MaxHeight;
 float MaxSlope;
 int MaxBladesPerTriangle;
-float2 GrassHeightRange;
-float2 GrassCurveRange;
 StructuredBuffer<float2> GrassHeightRangeBuffer;
 StructuredBuffer<float2> GrassCurveRangeBuffer;
 StructuredBuffer<float> GrassProbabilityBuffer;
@@ -53,7 +51,6 @@ float Hash(uint seed)
     seed *= 2654435769u;
     return (seed & 0x00FFFFFF) / 16777216.0;
 }
-
 [numthreads(64,1,1)]
 void GrassCompute (uint3 id : SV_DispatchThreadID)
 {
@@ -93,60 +90,38 @@ void GrassCompute (uint3 id : SV_DispatchThreadID)
 
         GrassBlade grassBlade;
         grassBlade.position = pos;
-        grassBlade.curve = lerp(GrassCurveRange.x, GrassCurveRange.y, Hash(id.x * 27821056u + i));
-        grassBlade.rotation = Hash(id.x * 83492791u + i) * 2 * 6.2831853;
-        grassBlade.height = lerp(GrassHeightRange.x, GrassHeightRange.y, Hash(id.x * 17432890u + i));
         grassBlade.terrainNormal = normal;
+        grassBlade.rotation = Hash(id.x * 83492791u + i) * 2 * 6.2831853;
 
-        GrassPositionsBuffer1.Append(grassBlade);
+        float roll = Hash(id.x * 36472916u + i * 3u);
+        for (int j = 0; j < 5; j++)
+        {
+            if ( roll <= GrassProbabilityBuffer[j]) 
+            {
+                grassBlade.height = lerp(GrassHeightRangeBuffer[j].x, GrassHeightRangeBuffer[j].y, Hash(id.x * 17432890u + i));
+                grassBlade.curve = lerp(GrassCurveRangeBuffer[j].x, GrassCurveRangeBuffer[j].y, Hash(id.x * 27821056u + i));
+
+                switch(j)
+                {
+                    case 0:
+                        GrassPositionsBuffer1.Append(grassBlade);
+                        break;
+                    case 1:
+                        GrassPositionsBuffer2.Append(grassBlade);
+                        break;
+                    case 2:
+                        GrassPositionsBuffer3.Append(grassBlade);
+                        break;
+                    case 3:
+                        GrassPositionsBuffer4.Append(grassBlade);
+                        break;
+                    case 4:
+                        GrassPositionsBuffer5.Append(grassBlade);
+                        break;
+                }
+                
+                break;
+            }
+        }
     }
 }
-// [numthreads(64,1,1)]
-// void GrassCompute (uint3 id : SV_DispatchThreadID)
-// {
-//     if (id.x >= TriangleCount) 
-//         return ;
-
-//     Triangle tri = GrassTriangleBuffer[id.x];
-//     Vertex v1 = tri.v1;
-//     Vertex v2 = tri.v2;
-//     Vertex v3 = tri.v3;
-
-//     float3 crossProd = cross(v2.position - v1.position, v3.position - v1.position);
-//     float area = length(crossProd) * 0.5;
-
-//     int bladeCount = clamp((int)(area * GrassDensity), 1, MaxBladesPerTriangle);
-    
-//     float3 normal = normalize(crossProd);
-
-//     if (dot(normal, float3(0,1,0)) < MaxSlope)
-//         return;
-
-//     for (int i = 0; i < bladeCount; i++)
-//     {
-//         float roll = Hash(id.x * 36472916u + i * 3u);
-
-//         float r1 = Hash(id.x * 73856093u + i);
-//         float r2 = Hash(id.x * 19349663u + i * 17u);
-
-//         float sqrtR1 = sqrt(r1);
-
-//         float u = 1 - sqrtR1;
-//         float v = sqrtR1 * (1 - r2);
-//         float w = sqrtR1 * r2;
-
-//         float3 pos = (u * v1.position + v * v2.position + w * v3.position);
-
-//         if (pos.y < MinHeight || pos.y > MaxHeight)
-//             continue;
-
-//         GrassBlade grassBlade;
-//         grassBlade.position = pos;
-//         grassBlade.curve = lerp(GrassCurveRange.x, GrassCurveRange.y, Hash(id.x * 27821056u + i));
-//         grassBlade.rotation = Hash(id.x * 83492791u + i) * 2 * 6.2831853;
-//         grassBlade.height = lerp(GrassHeightRange.x, GrassHeightRange.y, Hash(id.x * 17432890u + i));
-//         grassBlade.terrainNormal = normal;
-
-//         GrassPositionsBuffer.Append(grassBlade);
-//     }
-// }

@@ -6,13 +6,19 @@ using UnityEngine;
 public class GrassProfile : ScriptableObject
 {
     [Header ("MAX 5 FOLIAGE")]
-    public Mesh grassMesh;
-    public Material grassMaterial;
+    public List<FoliageType> foliageList;
     public int grassDensity;
     public int maxBladesPerTriangle;
     public float maxGrassSlope;
-    public Vector2 grassHeightRange;
-    public Vector2 grassCurveRange;
-    [Header ("SPAWN PROBABILITY MUST TOTAL 1")]
-    public float spawnProbability;
+
+    [Serializable]
+    public struct FoliageType
+    {
+        public bool useUniformScale;
+        public Mesh grassMesh;
+        public Material grassMaterial;
+        public Vector2 grassHeightRange;
+        public Vector2 grassCurveRange;
+        public float spawnProbabilityUpperThreshold;
+    }
 }

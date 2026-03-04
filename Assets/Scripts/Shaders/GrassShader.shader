@@ -25,6 +25,7 @@ Shader "Custom/GrassShader"
             #pragma vertex vert
             #pragma fragment frag
             #pragma multi_compile_instancing
+            #pragma shader_feature _UNIFORM_SCALE
 
             #define UNITY_INDIRECT_DRAW_ARGS IndirectDrawIndexedArgs
             #include "UnityIndirect.cginc"
@@ -81,14 +82,12 @@ Shader "Custom/GrassShader"
                 float3 rotated;
                 rotated.x = local.x * cosRot - local.z * sinRot;
                 rotated.z = local.x * sinRot + local.z * cosRot;
-                if (grassBlade.height > 3 || grassBlade.height < 0)
-                {
-                    rotated.y = local.y;
-                }
-                else 
-                {
-                    rotated.y = local.y * grassBlade.height;
-                }
+                rotated.y = local.y;
+                #ifdef _UNIFORM_SCALE
+                    rotated.xyz *= grassBlade.height;
+                #else
+                    rotated.y *= grassBlade.height;
+                #endif
 
                 float3 worldPos = rotated + instanceOffset;
                 float2 windDir = normalize(_WindDir);
@@ -102,14 +101,15 @@ Shader "Custom/GrassShader"
 
                 OUT.positionHCS = TransformWorldToHClip(worldPos);
                 OUT.worldPos = worldPos;
-                
-                float3 normalLocal = normalize(float3(IN.normalOS.x / 0.075, 0, 1));
+
+                float3 normalLocal = IN.normalOS;
+                normalLocal.z += 2 * IN.positionOS.y * grassBlade.curve;
                 float3 rotatedNormal;
                 rotatedNormal.x = normalLocal.x * cosRot - normalLocal.z * sinRot;
                 rotatedNormal.z = normalLocal.x * sinRot + normalLocal.z * cosRot;
                 rotatedNormal.y = normalLocal.y;
 
-                float3 blendedNormal = normalize(lerp(TransformObjectToWorldNormal(rotatedNormal + bend), grassBlade.terrainNormal, blend));
+                float3 blendedNormal = normalize(lerp(normalize(rotatedNormal), grassBlade.terrainNormal, blend));
                 OUT.worldNormal = blendedNormal;
 
                 OUT.uv = IN.uv;
@@ -151,6 +151,7 @@ Shader "Custom/GrassShader"
             #pragma multi_compile_fragment _ _SHADOWS_SOFT
             #pragma multi_compile_instancing
             #pragma target 3.0
+            #pragma shader_feature _UNIFORM_SCALE
 
             #define UNITY_INDIRECT_DRAW_ARGS IndirectDrawIndexedArgs
             #include "UnityIndirect.cginc"
@@ -221,14 +222,12 @@ Shader "Custom/GrassShader"
                 float3 rotated;
                 rotated.x = local.x * cosRot - local.z * sinRot;
                 rotated.z = local.x * sinRot + local.z * cosRot;
-                if (grassBlade.height > 3 || grassBlade.height < 0)
-                {
-                    rotated.y = local.y;
-                }
-                else 
-                {
-                    rotated.y = local.y * grassBlade.height;
-                }
+                rotated.y = local.y;
+                #ifdef _UNIFORM_SCALE
+                    rotated.xyz *= grassBlade.height;
+                #else
+                    rotated.y *= grassBlade.height;
+                #endif
 
                 float3 worldPos = rotated + instanceOffset;
                 float2 windDir = normalize(_WindDir);
@@ -244,19 +243,15 @@ Shader "Custom/GrassShader"
                 OUT.fogFactor = ComputeFogFactor(OUT.positionHCS.z);
                 OUT.worldPos = worldPos;
 
-                float3 normalLocal = normalize(float3(IN.normalOS.x / 0.075, 0, 1));
+                float3 normalLocal = IN.normalOS;
+                normalLocal.z += 2 * IN.positionOS.y * grassBlade.curve;
                 float3 rotatedNormal;
                 rotatedNormal.x = normalLocal.x * cosRot - normalLocal.z * sinRot;
                 rotatedNormal.z = normalLocal.x * sinRot + normalLocal.z * cosRot;
                 rotatedNormal.y = normalLocal.y;
 
-                float3 blendedNormal = normalize(lerp(TransformObjectToWorldNormal(rotatedNormal + bend), grassBlade.terrainNormal, blend));
+                float3 blendedNormal = normalize(lerp(normalize(rotatedNormal), grassBlade.terrainNormal, blend));
                 OUT.worldNormal = blendedNormal;
-
-                VertexPositionInputs vertexInput = GetVertexPositionInputs(rotated + bend);
-                #if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
-                OUT.shadowCoord = GetShadowCoord(vertexInput);
-                #endif
 
                 OUT.grassHeight = IN.positionOS.y;
                 OUT.uv = IN.uv;
