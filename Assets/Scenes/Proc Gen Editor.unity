@@ -8849,6 +8849,11 @@ MonoBehaviour:
     wavelength: 2.5
     speed: 1
     phase: 4.73
+  - direction: {x: 1, y: 0.35, z: 0, w: 0}
+    amplitude: 0.1
+    wavelength: 4
+    speed: 0.4
+    phase: 22.71
 --- !u!1 &1152764968
 GameObject:
   m_ObjectHideFlags: 0

@@ -76,18 +76,28 @@ Shader "Custom/GrassShader"
                 float sinRot = sin(grassBlade.rotation);
                 float cosRot = cos(grassBlade.rotation);
 
+                float3 up = normalize(grassBlade.terrainNormal);
+                float3 tangent = normalize(cross(up, float3(0,1,0)));
+                if (length(tangent) < 0.001)
+                {
+                    tangent = normalize(cross(up, float3(1,0,0)));
+                }
+                float3 bitangent = cross(up, tangent); 
+
                 // Y-axis rotation
                 float3 local = IN.positionOS.xyz;
                 local.z += pow(local.y, 2) * grassBlade.curve;
-                float3 rotated;
-                rotated.x = local.x * cosRot - local.z * sinRot;
-                rotated.z = local.x * sinRot + local.z * cosRot;
-                rotated.y = local.y;
+                float3 rotatedLocal;
+                rotatedLocal.x = local.x * cosRot - local.z * sinRot;
+                rotatedLocal.z = local.x * sinRot + local.z * cosRot;
+                rotatedLocal.y = local.y;
                 #ifdef _UNIFORM_SCALE
-                    rotated.xyz *= grassBlade.height;
+                    rotatedLocal.xyz *= grassBlade.height;
                 #else
-                    rotated.y *= grassBlade.height;
+                    rotatedLocal.y *= grassBlade.height;
                 #endif
+
+                float3 rotated = rotatedLocal.x * tangent + rotatedLocal.y * up + rotatedLocal.z * bitangent;
 
                 float3 worldPos = rotated + instanceOffset;
                 float2 windDir = normalize(_WindDir);
@@ -104,10 +114,12 @@ Shader "Custom/GrassShader"
 
                 float3 normalLocal = IN.normalOS;
                 normalLocal.z += 2 * IN.positionOS.y * grassBlade.curve;
-                float3 rotatedNormal;
-                rotatedNormal.x = normalLocal.x * cosRot - normalLocal.z * sinRot;
-                rotatedNormal.z = normalLocal.x * sinRot + normalLocal.z * cosRot;
-                rotatedNormal.y = normalLocal.y;
+                float3 rotatedNormalLocal;
+                rotatedNormalLocal.x = normalLocal.x * cosRot - normalLocal.z * sinRot;
+                rotatedNormalLocal.z = normalLocal.x * sinRot + normalLocal.z * cosRot;
+                rotatedNormalLocal.y = normalLocal.y;
+
+                float3 rotatedNormal = rotatedNormalLocal.x * tangent + rotatedNormalLocal.y * up + rotatedNormalLocal.z * bitangent;
 
                 float3 blendedNormal = normalize(lerp(normalize(rotatedNormal), grassBlade.terrainNormal, blend));
                 OUT.worldNormal = blendedNormal;
@@ -216,18 +228,28 @@ Shader "Custom/GrassShader"
                 float sinRot = sin(grassBlade.rotation);
                 float cosRot = cos(grassBlade.rotation);
 
+                float3 up = normalize(grassBlade.terrainNormal);
+                float3 tangent = normalize(cross(up, float3(0,1,0)));
+                if (length(tangent) < 0.01)
+                {
+                    tangent = normalize(cross(up, float3(1,0,0)));
+                }
+                float3 bitangent = cross(up, tangent);
+
                 // Y-axis rotation
                 float3 local = IN.positionOS.xyz;
                 local.z += pow(local.y, 2) * grassBlade.curve;
-                float3 rotated;
-                rotated.x = local.x * cosRot - local.z * sinRot;
-                rotated.z = local.x * sinRot + local.z * cosRot;
-                rotated.y = local.y;
+                float3 rotatedLocal;
+                rotatedLocal.x = local.x * cosRot - local.z * sinRot;
+                rotatedLocal.z = local.x * sinRot + local.z * cosRot;
+                rotatedLocal.y = local.y;
                 #ifdef _UNIFORM_SCALE
-                    rotated.xyz *= grassBlade.height;
+                    rotatedLocal.xyz *= grassBlade.height;
                 #else
-                    rotated.y *= grassBlade.height;
+                    rotatedLocal.y *= grassBlade.height;
                 #endif
+
+                float3 rotated = rotatedLocal.x * tangent + rotatedLocal.y * up + rotatedLocal.z * bitangent;
 
                 float3 worldPos = rotated + instanceOffset;
                 float2 windDir = normalize(_WindDir);
@@ -245,10 +267,12 @@ Shader "Custom/GrassShader"
 
                 float3 normalLocal = IN.normalOS;
                 normalLocal.z += 2 * IN.positionOS.y * grassBlade.curve;
-                float3 rotatedNormal;
-                rotatedNormal.x = normalLocal.x * cosRot - normalLocal.z * sinRot;
-                rotatedNormal.z = normalLocal.x * sinRot + normalLocal.z * cosRot;
-                rotatedNormal.y = normalLocal.y;
+                float3 rotatedNormalLocal;
+                rotatedNormalLocal.x = normalLocal.x * cosRot - normalLocal.z * sinRot;
+                rotatedNormalLocal.z = normalLocal.x * sinRot + normalLocal.z * cosRot;
+                rotatedNormalLocal.y = normalLocal.y;
+
+                float3 rotatedNormal = rotatedNormalLocal.x * tangent + rotatedNormalLocal.y * up + rotatedNormalLocal.z * bitangent;
 
                 float3 blendedNormal = normalize(lerp(normalize(rotatedNormal), grassBlade.terrainNormal, blend));
                 OUT.worldNormal = blendedNormal;
