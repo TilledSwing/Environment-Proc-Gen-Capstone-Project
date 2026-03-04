@@ -142,9 +142,9 @@ MonoBehaviour:
   _networkObjectCache: {fileID: -1921843187881818449}
   maxAirTime: 6
   explosionDelay: 3
-  explosionRadius: 10
+  explosionRadius: 12
   terrainDensityData: {fileID: 11400000, guid: 4bc939f839855ea45ade17dce060eea5, type: 2}
-  terraformStrength: 25
+  terraformStrength: 5
   assetLayer:
     serializedVersion: 2
     m_Bits: 64
@@ -234,7 +234,7 @@ MonoBehaviour:
   _spectatorInterpolation: 2
   _enableTeleport: 0
   _teleportThreshold: 1
-  <PrefabId>k__BackingField: 11
+  <PrefabId>k__BackingField: 12
   <SpawnableCollectionId>k__BackingField: 0
   <AssetPathHash>k__BackingField: 13218102392829198384
   <SceneId>k__BackingField: 0

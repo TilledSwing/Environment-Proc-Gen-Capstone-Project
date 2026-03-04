@@ -40,6 +40,7 @@ public class PlayerController : NetworkBehaviour
     public Camera playerCamera;
 
     private bool isFlightMode = false;
+    private bool inWater = false;
     private bool underwater = false;
     public bool dead = false;
 
@@ -125,6 +126,8 @@ public class PlayerController : NetworkBehaviour
             return;
         }
 
+        inWater = transform.position.y - 1f < waterLevel;
+
         if (playerCamera.transform.position.y - 0.08f < waterLevel && !underwater && ChunkGenNetwork.Instance.terrainDensityData.water)
         {
             underwater = true;
@@ -153,7 +156,7 @@ public class PlayerController : NetworkBehaviour
         // Press Left Shift to run
         isRunning = Input.GetKey(KeyCode.LeftShift);
 
-        if (underwater && ChunkGenNetwork.Instance.terrainDensityData.water)
+        if (inWater && ChunkGenNetwork.Instance.terrainDensityData.water)
         {
             gravity = 0.0f;
             jumpSpeed = 5.0f;
@@ -187,14 +190,14 @@ public class PlayerController : NetworkBehaviour
         //     isFlightMode = !isFlightMode;
 
         // We are grounded, so recalculate move direction based on axis
-        Vector3 forward = underwater ? playerCamera.transform.forward : transform.TransformDirection(Vector3.forward);
-        Vector3 right = underwater ? playerCamera.transform.right : transform.TransformDirection(Vector3.right);
+        Vector3 forward = inWater ? playerCamera.transform.forward : transform.TransformDirection(Vector3.forward);
+        Vector3 right = inWater ? playerCamera.transform.right : transform.TransformDirection(Vector3.right);
 
         float curSpeedX = canMove ? (isRunning ? runningSpeed : walkingSpeed) * wasd.ReadValue<Vector2>().y : 0;
         float curSpeedY = canMove ? (isRunning ? runningSpeed : walkingSpeed) * wasd.ReadValue<Vector2>().x : 0;
         float movementDirectionY = moveDirection.y;
         moveDirection = (forward * curSpeedX) + (right * curSpeedY);
-        if (!underwater)
+        if (!inWater)
         {
             moveDirection.y = movementDirectionY;
         }
@@ -203,17 +206,21 @@ public class PlayerController : NetworkBehaviour
         {
             if (!isFlightMode)
             {
-                if (Input.GetButton("Jump") && characterController.isGrounded && !underwater)
+                if (Input.GetButton("Jump") && characterController.isGrounded && !inWater)
                 {
                     moveDirection.y = jumpSpeed;
                 }
-                else if (!characterController.isGrounded && !underwater)
+                else if (!characterController.isGrounded && !inWater)
                 {
                     moveDirection.y -= gravity * Time.deltaTime;
                 }
-                else if (Input.GetButton("Jump") && underwater)
+                else if (Input.GetButton("Jump") && inWater)
                 {
                     moveDirection.y += jumpSpeed;
+                }
+                else if (Input.GetKey(KeyCode.LeftControl) && inWater)
+                {
+                    moveDirection.y -= jumpSpeed;
                 }
             }
             else

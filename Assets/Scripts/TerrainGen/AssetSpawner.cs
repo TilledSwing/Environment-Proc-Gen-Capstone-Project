@@ -353,7 +353,7 @@ public class AssetSpawner : MonoBehaviour
                     for (int x = 0; x < size; x++)
                     {
 
-                        if(heightsArray[(z * size * size) + (y * size) + x] > depth)
+                        if(heightsArray[(z * size * size) + (y * size) + x] < depth)
                         {
                             depthResult.AddNoResize(new int3(chunkPos.x + x, chunkPos.y + y, chunkPos.z + z));
                         }

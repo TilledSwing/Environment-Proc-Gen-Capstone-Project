@@ -614,8 +614,8 @@ public class ChunkGenNetwork : MonoBehaviour
             {
                 int currentY = currentChunkCoordY + yOffset;
 
-                if ((currentY > 0 && currentChunkCoordY > maxWorldYChunks) || (currentY < 0 && currentChunkCoordY < -maxWorldYChunks))
-                    continue;
+                // if ((currentY > 0 && currentChunkCoordY > maxWorldYChunks) || (currentY < 0 && currentChunkCoordY < -maxWorldYChunks))
+                //     continue;
 
                 for (int zOffset = -chunksVisible; zOffset <= chunksVisible; zOffset++)
                 {
@@ -1005,7 +1005,7 @@ public class ChunkGenNetwork : MonoBehaviour
                 }
             }
             // Water
-            if (Instance.terrainDensityData.waterLevel > chunkPos.y && Instance.terrainDensityData.waterLevel <= Mathf.RoundToInt(chunkPos.y + Instance.terrainDensityData.width) && Instance.terrainDensityData.water)
+            if (Instance.terrainDensityData.waterLevel >= chunkPos.y && Instance.terrainDensityData.waterLevel < Mathf.RoundToInt(chunkPos.y + Instance.terrainDensityData.width) && Instance.terrainDensityData.water)
             {
                 if (waterMeshRenderer != null && waterMeshRenderer.enabled != visible)
                 {
@@ -1027,8 +1027,16 @@ public class ChunkGenNetwork : MonoBehaviour
                                 asset.meshCollider.enabled = visible;
                             }
                         }
+                        if (asset.meshRenderer == null)
+                        {
+                            asset.obj.SetActive(visible);
+                        }
                     }
                 }
+            }
+            if (marchingCubes != null && marchingCubes.grass != null)
+            {
+                marchingCubes.grass.renderGrass = visible;
             }
         }
     }

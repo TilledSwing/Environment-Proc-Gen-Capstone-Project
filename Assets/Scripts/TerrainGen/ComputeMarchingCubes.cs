@@ -24,6 +24,7 @@ public class ComputeMarchingCubes : MonoBehaviour
     public bool initialLoadComplete = false;
     public bool edited = false;
     public JobHandle noiseDensityJobHandler;
+    public JobHandle marchingCubesJobHandler;
     public NativeList<Triangle> triangleArray;
     /// <summary>
     /// Struct for vertex data
@@ -185,13 +186,13 @@ public class ComputeMarchingCubes : MonoBehaviour
                 );
                 grass.SetupGrass();
             }
-            else if(chunkPos.y + terrainDensityData.width <= terrainDensityData.waterLevel - terrainDensityData.width && triangleCount > ChunkGenNetwork.Instance.seaGrass.maxBladesPerTriangle && terrainDensityData.water)
+            else if(chunkPos.y <= terrainDensityData.waterLevel - terrainDensityData.width && triangleCount > ChunkGenNetwork.Instance.seaGrass.maxBladesPerTriangle && terrainDensityData.water)
             {
                 grass = gameObject.AddComponent<GrassRender>();
                 grass.InitializeGrassRenderer(
                     chunkPos, 
                     ChunkGenNetwork.Instance.seaGrass,
-                    -300,
+                    -500,
                     terrainDensityData.waterLevel - terrainDensityData.width,
                     ChunkGenNetwork.Instance.grassPositionComputeShader,
                     triangleCount,
@@ -231,8 +232,17 @@ public class ComputeMarchingCubes : MonoBehaviour
             resolution = ChunkGenNetwork.Instance.resolution,
             height = terrainDensityData.height,
         };
-        JobHandle marchingCubesHandler = marchingCubesJob.Schedule(iterations, 16, noiseDensityJobHandler);
-        ChunkGenNetwork.Instance.terrainPolygonizationJobList.Add(new ChunkGenNetwork.TerrainJobObject(owner, marchingCubesHandler, terraforming));
+        marchingCubesJobHandler = marchingCubesJob.Schedule(iterations, 16, noiseDensityJobHandler);
+
+        if (terraforming)
+        {
+            marchingCubesJobHandler.Complete();
+            SetMeshValuesPerformant(terraforming);
+        }
+        else
+        {
+            ChunkGenNetwork.Instance.terrainPolygonizationJobList.Add(new ChunkGenNetwork.TerrainJobObject(owner, marchingCubesJobHandler, terraforming));
+        }
     }
     /// <summary>
     /// Marching Cubes Burst Compiled Multithreaded job
@@ -279,14 +289,14 @@ public class ComputeMarchingCubes : MonoBehaviour
 
             int configurationIndex = 0;
 
-            if (cubeVertices.v0 < isolevel) configurationIndex |= 1;
-            if (cubeVertices.v1 < isolevel) configurationIndex |= 2;
-            if (cubeVertices.v2 < isolevel) configurationIndex |= 4;
-            if (cubeVertices.v3 < isolevel) configurationIndex |= 8;
-            if (cubeVertices.v4 < isolevel) configurationIndex |= 16;
-            if (cubeVertices.v5 < isolevel) configurationIndex |= 32;
-            if (cubeVertices.v6 < isolevel) configurationIndex |= 64;
-            if (cubeVertices.v7 < isolevel) configurationIndex |= 128;
+            if (cubeVertices.v0 > isolevel) configurationIndex |= 1;
+            if (cubeVertices.v1 > isolevel) configurationIndex |= 2;
+            if (cubeVertices.v2 > isolevel) configurationIndex |= 4;
+            if (cubeVertices.v3 > isolevel) configurationIndex |= 8;
+            if (cubeVertices.v4 > isolevel) configurationIndex |= 16;
+            if (cubeVertices.v5 > isolevel) configurationIndex |= 32;
+            if (cubeVertices.v6 > isolevel) configurationIndex |= 64;
+            if (cubeVertices.v7 > isolevel) configurationIndex |= 128;
 
             if (configurationIndex == 0 || configurationIndex == 255)
             {
@@ -436,16 +446,17 @@ public class ComputeMarchingCubes : MonoBehaviour
             ChunkGenNetwork.Instance.noiseTest.GenUniformGrid3D(
                                                                 heightsArray, chunkPos.x, chunkPos.y, chunkPos.z, 
                                                                 size, size, size, 1, 1, 1, seed);
-            for (int x = 0; x < size; x++)
-            {
-                for (int y = 0; y < size; y++)
-                {   
-                    for (int z = 0; z < size; z++)
-                    {
-                        heightsArray[z * size * size + y * size + x] = (chunkPos.y + y) - heightsArray[z * size * size + y * size + x] * height;
-                    }
-                }
-            }
+            // for (int x = 0; x < size; x++)
+            // {
+            //     for (int y = 0; y < size; y++)
+            //     {   
+            //         for (int z = 0; z < size; z++)
+            //         {
+            //             int flattenedIndex = z * size * size + y * size + x;
+            //             heightsArray[flattenedIndex] = (chunkPos.y + y) - heightsArray[flattenedIndex] * height;
+            //         }
+            //     }
+            // }
         }
     }
     /// <summary>

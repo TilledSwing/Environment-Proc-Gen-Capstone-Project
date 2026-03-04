@@ -161,11 +161,8 @@ public class Terraforming : NetworkBehaviour
                     terraformMode = terraformMode,
                 };
 
-                JobHandle terraformHandler = terraformJob.Schedule(threadSizeX * threadSizeY * threadSizeZ, 16);
+                JobHandle terraformHandler = terraformJob.Schedule(threadSizeX * threadSizeY * threadSizeZ, 16, terrainChunk.marchingCubes.marchingCubesJobHandler);
                 terraformHandler.Complete();
-
-                // marchingCubes.heightsArray = heightsArray.ToArray();
-                // heightsArray.Dispose();
 
                 marchingCubes.MarchingCubesJobHandler(true);
             }
@@ -203,16 +200,16 @@ public class Terraforming : NetworkBehaviour
             float3 worldVoxelPos = localVoxelPos + chunkPos;
             float dstToCenter = math.length(worldVoxelPos - TerraformCenter);
 
-            float density = heightsArray[FlattenIndex(localVoxelPos, chunkSize)];
-            float strength = TerraformStrength * (float)(1.0 + math.abs(density / 3.0));
+            // float density = heightsArray[FlattenIndex(localVoxelPos, chunkSize)];
+            // float strength = TerraformStrength * (float)(1.0 + math.abs(density / 3.0));
             float falloff = (float)(1.0 - (dstToCenter / TerraformRadius));
 
             if(dstToCenter < TerraformRadius) {
                 if(terraformMode) {
-                    heightsArray[FlattenIndex(localVoxelPos, chunkSize)] -= strength * falloff;
+                    heightsArray[FlattenIndex(localVoxelPos, chunkSize)] += TerraformStrength * falloff;
                 }
                 else if(!terraformMode) {
-                    heightsArray[FlattenIndex(localVoxelPos, chunkSize)] += strength * falloff;
+                    heightsArray[FlattenIndex(localVoxelPos, chunkSize)] -= TerraformStrength * falloff;
                 }
             }
         }

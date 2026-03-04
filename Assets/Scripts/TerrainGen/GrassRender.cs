@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class GrassRender : MonoBehaviour
 {
+    public bool renderGrass = true;
     public ComputeShader grassPositionComputeShader;
     public GrassProfile grassProfile;
     public int minHeight;
@@ -148,7 +149,7 @@ public class GrassRender : MonoBehaviour
     }
     void Update()
     {
-        if (underwater && ChunkGenNetwork.Instance.viewerPos.y > ChunkGenNetwork.Instance.terrainDensityData.waterLevel)
+        if (underwater && ChunkGenNetwork.Instance.viewerPos.y > ChunkGenNetwork.Instance.terrainDensityData.waterLevel || renderGrass == false)
             return ;
         for (int i = 0; i < grassProfile.foliageList.Count; i++)
         {

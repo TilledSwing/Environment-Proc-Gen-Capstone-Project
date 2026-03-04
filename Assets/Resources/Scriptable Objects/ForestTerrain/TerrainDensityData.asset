@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   width: 32
   height: 200
-  isolevel: 0.5
+  isolevel: 0
   waterLevel: 0
   water: 1
   lerp: 1
