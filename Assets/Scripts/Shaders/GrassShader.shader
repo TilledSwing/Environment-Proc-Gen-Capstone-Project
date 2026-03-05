@@ -77,11 +77,8 @@ Shader "Custom/GrassShader"
                 float cosRot = cos(grassBlade.rotation);
 
                 float3 up = normalize(grassBlade.terrainNormal);
-                float3 tangent = normalize(cross(up, float3(0,1,0)));
-                if (length(tangent) < 0.001)
-                {
-                    tangent = normalize(cross(up, float3(1,0,0)));
-                }
+                float3 ref = abs(up.y) < 0.999 ? float3(0,1,0) : float3(1,0,0);
+                float3 tangent = normalize(cross(ref, up));
                 float3 bitangent = cross(up, tangent); 
 
                 // Y-axis rotation
@@ -97,12 +94,14 @@ Shader "Custom/GrassShader"
                     rotatedLocal.y *= grassBlade.height;
                 #endif
 
-                float3 rotated = rotatedLocal.x * tangent + rotatedLocal.y * up + rotatedLocal.z * bitangent;
+                // float3 rotated = rotatedLocal.x * tangent + rotatedLocal.y * up + rotatedLocal.z * bitangent;
+                float3 rotated = rotatedLocal;
 
                 float3 worldPos = rotated + instanceOffset;
                 float2 windDir = normalize(_WindDir);
                 float wave = sin((_Time.z * _WindOscillation) + (worldPos.x * 0.15) + (worldPos.z * 0.15));
-                float windStr = ((GradientNoiseDeterministicfloat(worldPos.xz * 0.5 + instanceID, 1) * 2 - 1) + wave) * _WindStrength;
+                float phase = dot(grassBlade.position.xz, float2(12.5, 8.2));
+                float windStr = ((GradientNoiseDeterministicfloat(worldPos.xz * 0.5 + phase, 1) * 2 - 1) + wave) * _WindStrength;
 
                 float3 bend = float3(windDir.x, 0, windDir.y) * windStr * rotated.y;
                 float dist = distance(_WorldSpaceCameraPos, worldPos);
@@ -113,16 +112,16 @@ Shader "Custom/GrassShader"
                 OUT.worldPos = worldPos;
 
                 float3 normalLocal = IN.normalOS;
-                normalLocal.z += 2 * IN.positionOS.y * grassBlade.curve;
+                // normalLocal.z += pow(normalLocal.y, 2) * grassBlade.curve;
                 float3 rotatedNormalLocal;
                 rotatedNormalLocal.x = normalLocal.x * cosRot - normalLocal.z * sinRot;
                 rotatedNormalLocal.z = normalLocal.x * sinRot + normalLocal.z * cosRot;
                 rotatedNormalLocal.y = normalLocal.y;
+                
+                float3 rotatedNormal = rotatedNormalLocal;
+                // float3 rotatedNormal = rotatedNormalLocal.x * tangent + rotatedNormalLocal.y * up + rotatedNormalLocal.z * bitangent;
 
-                float3 rotatedNormal = rotatedNormalLocal.x * tangent + rotatedNormalLocal.y * up + rotatedNormalLocal.z * bitangent;
-
-                float3 blendedNormal = normalize(lerp(normalize(rotatedNormal), grassBlade.terrainNormal, blend));
-                OUT.worldNormal = blendedNormal;
+                OUT.worldNormal = normalize(rotatedNormal);
 
                 OUT.uv = IN.uv;
 
@@ -229,11 +228,8 @@ Shader "Custom/GrassShader"
                 float cosRot = cos(grassBlade.rotation);
 
                 float3 up = normalize(grassBlade.terrainNormal);
-                float3 tangent = normalize(cross(up, float3(0,1,0)));
-                if (length(tangent) < 0.01)
-                {
-                    tangent = normalize(cross(up, float3(1,0,0)));
-                }
+                float3 ref = abs(up.y) < 0.999 ? float3(0,1,0) : float3(1,0,0);
+                float3 tangent = normalize(cross(ref, up));
                 float3 bitangent = cross(up, tangent);
 
                 // Y-axis rotation
@@ -249,12 +245,14 @@ Shader "Custom/GrassShader"
                     rotatedLocal.y *= grassBlade.height;
                 #endif
 
-                float3 rotated = rotatedLocal.x * tangent + rotatedLocal.y * up + rotatedLocal.z * bitangent;
+                // float3 rotated = rotatedLocal.x * tangent + rotatedLocal.y * up + rotatedLocal.z * bitangent;
+                float3 rotated = rotatedLocal;
 
                 float3 worldPos = rotated + instanceOffset;
                 float2 windDir = normalize(_WindDir);
                 float wave = sin((_Time.z * _WindOscillation) + (worldPos.x * 0.15) + (worldPos.z * 0.15));
-                float windStr = ((GradientNoiseDeterministicfloat(worldPos.xz * 0.5 + instanceID, 1) * 2 - 1) + wave) * _WindStrength;
+                float phase = dot(grassBlade.position.xz, float2(12.5, 8.2));
+                float windStr = ((GradientNoiseDeterministicfloat(worldPos.xz * 0.5 + phase, 1) * 2 - 1) + wave) * _WindStrength;
 
                 float3 bend = float3(windDir.x, 0, windDir.y) * windStr * rotated.y;
                 float dist = distance(_WorldSpaceCameraPos, worldPos);
@@ -266,16 +264,16 @@ Shader "Custom/GrassShader"
                 OUT.worldPos = worldPos;
 
                 float3 normalLocal = IN.normalOS;
-                normalLocal.z += 2 * IN.positionOS.y * grassBlade.curve;
+                // normalLocal.z += pow(normalLocal.y, 2) * grassBlade.curve;
                 float3 rotatedNormalLocal;
                 rotatedNormalLocal.x = normalLocal.x * cosRot - normalLocal.z * sinRot;
                 rotatedNormalLocal.z = normalLocal.x * sinRot + normalLocal.z * cosRot;
                 rotatedNormalLocal.y = normalLocal.y;
 
-                float3 rotatedNormal = rotatedNormalLocal.x * tangent + rotatedNormalLocal.y * up + rotatedNormalLocal.z * bitangent;
+                float3 rotatedNormal = rotatedNormalLocal;
+                // float3 rotatedNormal = rotatedNormalLocal.x * tangent + rotatedNormalLocal.y * up + rotatedNormalLocal.z * bitangent;
 
-                float3 blendedNormal = normalize(lerp(normalize(rotatedNormal), grassBlade.terrainNormal, blend));
-                OUT.worldNormal = blendedNormal;
+                OUT.worldNormal = normalize(rotatedNormal);
 
                 OUT.grassHeight = IN.positionOS.y;
                 OUT.uv = IN.uv;
@@ -309,7 +307,7 @@ Shader "Custom/GrassShader"
                 inputData.bakedGI = saturate(SampleSH(inputData.normalWS) + float3(0.02, 0.02, 0.02));
                 inputData.vertexLighting = 0;
                 inputData.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(IN.positionHCS);
-                inputData.shadowMask = 1;
+                inputData.shadowMask = SAMPLE_SHADOWMASK(IN.positionHCS);
 
                 SurfaceData surfaceData;
                 surfaceData.albedo = albedo;

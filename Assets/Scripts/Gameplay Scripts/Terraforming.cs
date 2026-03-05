@@ -165,6 +165,11 @@ public class Terraforming : NetworkBehaviour
                 terraformHandler.Complete();
 
                 marchingCubes.MarchingCubesJobHandler(true);
+                if (marchingCubes.grass != null)
+                {
+                    if (!marchingCubes.grass.isTerraforming)
+                        marchingCubes.grass.UpdateGrass(terraformCenter, terraformRadius + 0.1f);
+                }
             }
         }
     }

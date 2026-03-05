@@ -1,34 +1,79 @@
 // Each #kernel tells which function to compile; you can have many kernels
 #pragma kernel GrassTerraform
 
+struct GrassBlade 
+{
+    float3 position;
+    float rotation;
+    float height;
+    float curve;
+    float3 terrainNormal;
+};
 
+ByteAddressBuffer GrassCountsBuffer;
+StructuredBuffer<GrassBlade> OldGrassPositionsBuffer1;
+AppendStructuredBuffer<GrassBlade> NewGrassPositionsBuffer1;
+StructuredBuffer<GrassBlade> OldGrassPositionsBuffer2;
+AppendStructuredBuffer<GrassBlade> NewGrassPositionsBuffer2;
+StructuredBuffer<GrassBlade> OldGrassPositionsBuffer3;
+AppendStructuredBuffer<GrassBlade> NewGrassPositionsBuffer3;
+StructuredBuffer<GrassBlade> OldGrassPositionsBuffer4;
+AppendStructuredBuffer<GrassBlade> NewGrassPositionsBuffer4;
+StructuredBuffer<GrassBlade> OldGrassPositionsBuffer5;
+AppendStructuredBuffer<GrassBlade> NewGrassPositionsBuffer5;
 float3 TerraformCenter;
-float3 TerraformOffset;
 float TerraformRadius;
-uint ChunkSize;
-float3 ChunkPos;
-bool TerraformMode;
 
-// Convert a 3D array index into a 1D flat array index
-int FlattenIndex(int3 id, int size) {
-    return id.z * (size + 1) * (size + 1) + id.y * (size + 1) + id.x;
-}
 // Perform terraformation on the region of density around the point of terraformation
 [numthreads(64,1,1)]
 void GrassTerraform (uint3 id : SV_DispatchThreadID)
 {
-    uint3 localVoxelPos = TerraformOffset + id;
+    uint count1 = GrassCountsBuffer.Load(0);
+    uint count2 = GrassCountsBuffer.Load(4);
+    uint count3 = GrassCountsBuffer.Load(8);
+    uint count4 = GrassCountsBuffer.Load(12);
+    uint count5 = GrassCountsBuffer.Load(16);
+    // if (id.x >= count1 + count2 + count3 + count4 + count5) 
+    //     return ;
 
-    if(localVoxelPos.x >= ChunkSize+1 || localVoxelPos.y >= ChunkSize+1 || localVoxelPos.z >= ChunkSize+1) {
-        return ;
+    if (id.x < count1) 
+    {
+        float dstToCenter = length(OldGrassPositionsBuffer1[id.x].position - TerraformCenter);
+
+        if(dstToCenter > TerraformRadius) {
+            NewGrassPositionsBuffer1.Append(OldGrassPositionsBuffer1[id.x]);
+        }
     }
+    if (id.x < count2) 
+    {
+        float dstToCenter = length(OldGrassPositionsBuffer2[id.x].position - TerraformCenter);
 
-    float3 worldVoxelPos = localVoxelPos + ChunkPos;
-    float dstToCenter = length(worldVoxelPos - TerraformCenter);
+        if(dstToCenter > TerraformRadius) {
+            NewGrassPositionsBuffer2.Append(OldGrassPositionsBuffer2[id.x]);
+        }
+    }
+    if (id.x < count3) 
+    {
+        float dstToCenter = length(OldGrassPositionsBuffer3[id.x].position - TerraformCenter);
 
-    
+        if(dstToCenter > TerraformRadius) {
+            NewGrassPositionsBuffer3.Append(OldGrassPositionsBuffer3[id.x]);
+        }
+    }
+    if (id.x < count4) 
+    {
+        float dstToCenter = length(OldGrassPositionsBuffer4[id.x].position - TerraformCenter);
 
-    if(dstToCenter < TerraformRadius) {
-        
+        if(dstToCenter > TerraformRadius) {
+            NewGrassPositionsBuffer4.Append(OldGrassPositionsBuffer4[id.x]);
+        }
+    }
+    if (id.x < count5) 
+    {
+        float dstToCenter = length(OldGrassPositionsBuffer5[id.x].position - TerraformCenter);
+
+        if(dstToCenter > TerraformRadius) {
+            NewGrassPositionsBuffer5.Append(OldGrassPositionsBuffer5[id.x]);
+        }
     }
 }

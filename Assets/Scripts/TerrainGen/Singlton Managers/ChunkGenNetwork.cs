@@ -103,6 +103,7 @@ public class ChunkGenNetwork : MonoBehaviour
     // Foliage Stuff
     public Vector2 globalWindDirection;
     public ComputeShader grassPositionComputeShader;
+    public ComputeShader grassUpdateComputeShader;
     public GrassProfile landGrass;
     public GrassProfile seaGrass;
     public Material bushMaterial;
@@ -474,8 +475,8 @@ public class ChunkGenNetwork : MonoBehaviour
     /// Process active chunk density jobs
     /// </summary>
     /// <param name="startTime">Start of allocated time frame</param>
-    public void ProcessDensityJobs(float startTime) {
-        while (terrainDensityJobList.Count > 0 && Time.realtimeSinceStartup - startTime < 0.003f)
+    public void ProcessDensityJobs(float startTime, float timeBudget) {
+        while (terrainDensityJobList.Count > 0 && Time.realtimeSinceStartup - startTime < timeBudget)
         {
             terrainDensityJobRemovalList.Clear();
             foreach (TerrainJobObject job in terrainDensityJobList)
@@ -497,8 +498,8 @@ public class ChunkGenNetwork : MonoBehaviour
     /// Process active chunk polygonization jobs
     /// </summary>
     /// <param name="startTime">Start of allocated time frame</param>
-    public void ProcessPolygonizationJobs(float startTime) {
-        while (terrainPolygonizationJobList.Count > 0 && Time.realtimeSinceStartup - startTime < 0.003f)
+    public void ProcessPolygonizationJobs(float startTime, float timeBudget) {
+        while (terrainPolygonizationJobList.Count > 0 && Time.realtimeSinceStartup - startTime < timeBudget)
         {
             terrainPolygonizationJobRemovalList.Clear();
             foreach (TerrainJobObject job in terrainPolygonizationJobList)
@@ -520,9 +521,9 @@ public class ChunkGenNetwork : MonoBehaviour
     /// Process chunk visibility queue
     /// </summary>
     /// <param name="startTime">Start of allocated time frame</param>
-    public void ProcessChunkVisibilty(float startTime)
+    public void ProcessChunkVisibilty(float startTime, float timeBudget)
     {
-        while (chunkVisibilityQueue.Count > 0 && Time.realtimeSinceStartup - startTime < 0.003f) // 2ms
+        while (chunkVisibilityQueue.Count > 0 && Time.realtimeSinceStartup - startTime < timeBudget)
         {
             ChunkVisibility chunk = chunkVisibilityQueue.Dequeue();
             chunk.chunk.SetVisible(chunk.visibility);
@@ -532,9 +533,9 @@ public class ChunkGenNetwork : MonoBehaviour
     /// Process asset instantiation queue
     /// </summary>
     /// <param name="startTime">Start of allocated time frame</param>
-    public void ProcessAssetInstantiation(float startTime)
+    public void ProcessAssetInstantiation(float startTime, float timeBudget)
     {
-        while (pendingAssetInstantiations.Count > 0 && Time.realtimeSinceStartup - startTime < 0.002f) // 2ms
+        while (pendingAssetInstantiations.Count > 0 && Time.realtimeSinceStartup - startTime < timeBudget)
         {
             AssetInstantiation assetInstantiation = pendingAssetInstantiations.Dequeue();
             assetInstantiation.terrainChunk.assetSpawner.AssetInstantiation(assetInstantiation.i, assetInstantiation.j, assetInstantiation.seed);
@@ -544,9 +545,9 @@ public class ChunkGenNetwork : MonoBehaviour
     /// Process spawn point creation queue
     /// </summary>
     /// <param name="startTime">Start of allocated time frame</param>
-    public void ProcessSpawnPointCreation(float startTime)
+    public void ProcessSpawnPointCreation(float startTime, float timeBudget)
     {
-        while (spawningPointCreationQueue.Count > 0 && Time.realtimeSinceStartup - startTime < 0.003f) // 3ms
+        while (spawningPointCreationQueue.Count > 0 && Time.realtimeSinceStartup - startTime < timeBudget)
         {
             AssetSpawner assetSpawner = spawningPointCreationQueue.Dequeue();
             assetSpawner.SpawnAssets();
@@ -569,11 +570,11 @@ public class ChunkGenNetwork : MonoBehaviour
             UpdateVisibleChunks();
             lastUpdateViewerPos = viewerPos;
         }
-        ProcessDensityJobs(Time.realtimeSinceStartup);
-        ProcessPolygonizationJobs(Time.realtimeSinceStartup);
-        ProcessChunkVisibilty(Time.realtimeSinceStartup);
-        ProcessSpawnPointCreation(Time.realtimeSinceStartup);
-        ProcessAssetInstantiation(Time.realtimeSinceStartup);
+        ProcessDensityJobs(Time.realtimeSinceStartup, 0.002f);
+        ProcessPolygonizationJobs(Time.realtimeSinceStartup, 0.002f);
+        ProcessChunkVisibilty(Time.realtimeSinceStartup, 0.002f);
+        ProcessSpawnPointCreation(Time.realtimeSinceStartup, 0.002f);
+        ProcessAssetInstantiation(Time.realtimeSinceStartup, 0.002f);
     }
     /// <summary>
     /// Update all the visible chunks loading in new ones and unloading old ones that are no longer visible
@@ -1027,7 +1028,7 @@ public class ChunkGenNetwork : MonoBehaviour
                                 asset.meshCollider.enabled = visible;
                             }
                         }
-                        if (asset.meshRenderer == null)
+                        if (asset.meshRenderer == null && asset.obj != null)
                         {
                             asset.obj.SetActive(visible);
                         }

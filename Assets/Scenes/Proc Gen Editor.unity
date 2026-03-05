@@ -11758,6 +11758,7 @@ MonoBehaviour:
   waterMesh: {fileID: 0}
   globalWindDirection: {x: 0.8, y: 0.6}
   grassPositionComputeShader: {fileID: 7200000, guid: f2f43ed31c15f4c499751ac8fe425ce1, type: 3}
+  grassUpdateComputeShader: {fileID: 7200000, guid: e41356404106d3e4487dd76d300e0a73, type: 3}
   landGrass: {fileID: 11400000, guid: b5321fb8eb3e63c43a1ea7873ecc4305, type: 2}
   seaGrass: {fileID: 11400000, guid: 724eaf9f27efdf04ea6a9b881f61336c, type: 2}
   bushMaterial: {fileID: 2100000, guid: a6bda2ff0f39da34ea0e8286729af5f5, type: 2}
