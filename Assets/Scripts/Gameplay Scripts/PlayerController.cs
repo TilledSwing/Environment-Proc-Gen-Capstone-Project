@@ -26,6 +26,7 @@ public class PlayerController : NetworkBehaviour
     public float flightSpeed = 6.0f;
     public bool editorPlayer = true;
     public bool gameStarted = false;
+    public ParticleSystem underwaterParticles;
 
     public List<Vector3> terraformCenters;
     public List<Vector3Int> hitChunkPositions;
@@ -138,6 +139,7 @@ public class PlayerController : NetworkBehaviour
             ChunkGenNetwork.Instance.fogMat.SetFloat("_fogOffset", -15f);
             ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogDensity", 0.018f);
             ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogOffset", -15f);
+            underwaterParticles.Play();
         }
         else if(playerCamera.transform.position.y - 0.08f > waterLevel && underwater && ChunkGenNetwork.Instance.terrainDensityData.water)
         {
@@ -149,6 +151,7 @@ public class PlayerController : NetworkBehaviour
             ChunkGenNetwork.Instance.fogMat.SetFloat("_fogOffset", ChunkGenNetwork.Instance.fogOffset);
             ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogDensity", ChunkGenNetwork.Instance.fogDensity);
             ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogOffset", ChunkGenNetwork.Instance.fogOffset);
+            underwaterParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         }
 
         bool isRunning = false;
@@ -190,14 +193,14 @@ public class PlayerController : NetworkBehaviour
         //     isFlightMode = !isFlightMode;
 
         // We are grounded, so recalculate move direction based on axis
-        Vector3 forward = inWater ? playerCamera.transform.forward : transform.TransformDirection(Vector3.forward);
-        Vector3 right = inWater ? playerCamera.transform.right : transform.TransformDirection(Vector3.right);
+        Vector3 forward = inWater && ChunkGenNetwork.Instance.terrainDensityData.water ? playerCamera.transform.forward : transform.TransformDirection(Vector3.forward);
+        Vector3 right = inWater && ChunkGenNetwork.Instance.terrainDensityData.water ? playerCamera.transform.right : transform.TransformDirection(Vector3.right);
 
         float curSpeedX = canMove ? (isRunning ? runningSpeed : walkingSpeed) * wasd.ReadValue<Vector2>().y : 0;
         float curSpeedY = canMove ? (isRunning ? runningSpeed : walkingSpeed) * wasd.ReadValue<Vector2>().x : 0;
         float movementDirectionY = moveDirection.y;
         moveDirection = (forward * curSpeedX) + (right * curSpeedY);
-        if (!inWater)
+        if (!inWater || !ChunkGenNetwork.Instance.terrainDensityData.water)
         {
             moveDirection.y = movementDirectionY;
         }
@@ -206,19 +209,19 @@ public class PlayerController : NetworkBehaviour
         {
             if (!isFlightMode)
             {
-                if (Input.GetButton("Jump") && characterController.isGrounded && !inWater)
+                if (Input.GetButton("Jump") && characterController.isGrounded && (!inWater || !ChunkGenNetwork.Instance.terrainDensityData.water))
                 {
                     moveDirection.y = jumpSpeed;
                 }
-                else if (!characterController.isGrounded && !inWater)
+                else if (!characterController.isGrounded && (!inWater || !ChunkGenNetwork.Instance.terrainDensityData.water))
                 {
                     moveDirection.y -= gravity * Time.deltaTime;
                 }
-                else if (Input.GetButton("Jump") && inWater)
+                else if (Input.GetButton("Jump") && inWater && ChunkGenNetwork.Instance.terrainDensityData.water)
                 {
                     moveDirection.y += jumpSpeed;
                 }
-                else if (Input.GetKey(KeyCode.LeftControl) && inWater)
+                else if (Input.GetKey(KeyCode.LeftControl) && inWater && ChunkGenNetwork.Instance.terrainDensityData.water)
                 {
                     moveDirection.y -= jumpSpeed;
                 }

@@ -622,12 +622,13 @@ public class ChunkGenNetwork : MonoBehaviour
                 {
                     int currentZ = currentChunkCoordZ + zOffset;
                     Vector3Int viewedChunkCoord = new Vector3Int(currentX, currentY, currentZ);
+                    Vector3Int viewedChunkPos = viewedChunkCoord * chunkSize;
                     long chunkCoordId = PackChunkCoord(currentX, currentY, currentZ);
 
                     if (useFixedMapSize && (math.abs(currentX) > maxChunkDst || math.abs(currentZ) > maxChunkDst))
                         continue;
 
-                    Bounds bounds = new Bounds((viewedChunkCoord * chunkSize) + (new Vector3(0.5f, 0.5f, 0.5f) * chunkSize), chunkVec);
+                    Bounds bounds = new Bounds(viewedChunkPos + (new Vector3(0.5f, 0.5f, 0.5f) * chunkSize), chunkVec);
                     float viewerDstFromBound = bounds.SqrDistance(viewerPos);
                     // Vector3 chunkCenter = (viewedChunkCoord * chunkSize) + halfChunkVec;
                     // float viewerDstFromBound = (chunkCenter - viewerPos).sqrMagnitude - (halfChunkSize * halfChunkSize * 2);
@@ -656,7 +657,7 @@ public class ChunkGenNetwork : MonoBehaviour
                     }
                     else
                     {
-                        Vector3 chunkCenter = (viewedChunkCoord * chunkSize) + halfChunkVec;
+                        Vector3 chunkCenter = viewedChunkPos + halfChunkVec;
                         Vector3 toChunk = Vector3.Normalize(chunkCenter - viewerPos); 
                         float angle = Vector3.Angle(movementDir, toChunk); 
                         if (angle > 60f) continue;

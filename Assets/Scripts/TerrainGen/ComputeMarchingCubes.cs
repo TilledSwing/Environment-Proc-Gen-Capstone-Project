@@ -163,6 +163,7 @@ public class ComputeMarchingCubes : MonoBehaviour
         Mesh.ApplyAndDisposeWritableMeshData(meshDataArray, mesh, MeshUpdateFlags.DontValidateIndices);
 
         meshFilter.mesh = mesh;
+        Physics.BakeMesh(mesh.GetInstanceID(), false);
         meshCollider.sharedMesh = mesh;
         mesh.RecalculateBounds();
 
@@ -447,17 +448,6 @@ public class ComputeMarchingCubes : MonoBehaviour
             ChunkGenNetwork.Instance.noiseTest.GenUniformGrid3D(
                                                                 heightsArray, chunkPos.x, chunkPos.y, chunkPos.z, 
                                                                 size, size, size, 1, 1, 1, seed);
-            // for (int x = 0; x < size; x++)
-            // {
-            //     for (int y = 0; y < size; y++)
-            //     {   
-            //         for (int z = 0; z < size; z++)
-            //         {
-            //             int flattenedIndex = z * size * size + y * size + x;
-            //             heightsArray[flattenedIndex] = (chunkPos.y + y) - heightsArray[flattenedIndex] * height;
-            //         }
-            //     }
-            // }
         }
     }
     /// <summary>
