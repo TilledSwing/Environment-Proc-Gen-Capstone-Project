@@ -207,7 +207,7 @@ public class GrassRender : MonoBehaviour
     {
         foreach (GraphicsBuffer positionBuffer in positionsBuffers)
         {
-            if (positionBuffer != null)
+            if (positionBuffer.IsValid())
             {
                 positionBuffer.Release();
             }
@@ -216,7 +216,7 @@ public class GrassRender : MonoBehaviour
 
         foreach (GraphicsBuffer argsBuffer in argsBuffers)
         {
-            if (argsBuffer != null)
+            if (argsBuffer.IsValid())
             {
                 argsBuffer.Release();
             }

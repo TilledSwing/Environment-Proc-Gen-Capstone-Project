@@ -27,6 +27,8 @@ public class AssetSpawner : MonoBehaviour
     public bool assetsHiddenEarly = false;
     public bool emptyChunk = false;
     public bool minDepthPointsCalculated = false;
+    public bool spawnPointsKilled;
+    public JobHandle minDepthPointJobHandler;
     Unity.Mathematics.Random rng;
     void Start() {
         assetLayer = LayerMask.GetMask("Asset Layer");
@@ -37,6 +39,8 @@ public class AssetSpawner : MonoBehaviour
     /// </summary>
     public void SpawnAssets()
     {
+        if (chunkVertices == null)
+            return ;
         vertexBufferLength = chunkVertices.Length;
         if (vertexBufferLength <= 0) emptyChunk = true;
         
@@ -45,7 +49,11 @@ public class AssetSpawner : MonoBehaviour
             uint seed = Hash(chunkPos.x, chunkPos.y, chunkPos.z, ChunkGenNetwork.Instance.seed);
             rng = new(seed);
             InitializeData();
+            if (!heightsArray.IsCreated)
+                return ;
             CreateSpawnPoints(ref rng);
+            if(spawnPointsKilled) 
+                return ;
             SetSpawnPoints();
             AssetSpawnHandler(rng);
         }
@@ -58,6 +66,9 @@ public class AssetSpawner : MonoBehaviour
         if (chunkVertices.IsCreated) {
             chunkVertices.Dispose();
         }
+        if (heightsArray.IsCreated) {
+            heightsArray.Dispose();
+        }
         if (minDepthPoints.IsCreated) {
             minDepthPoints.Dispose();
         }
@@ -69,6 +80,9 @@ public class AssetSpawner : MonoBehaviour
     {
         if (chunkVertices.IsCreated) {
             chunkVertices.Dispose();
+        }
+        if (heightsArray.IsCreated) {
+            heightsArray.Dispose();
         }
         if (minDepthPoints.IsCreated) {
             minDepthPoints.Dispose();
@@ -113,37 +127,30 @@ public class AssetSpawner : MonoBehaviour
             if (currentAssetSpawnFilters.undergroundAsset && !minDepthPointsCalculated)
             {
                 int iterations = Mathf.CeilToInt((terrainDensityData.width + 1) / ChunkGenNetwork.Instance.resolution) * Mathf.CeilToInt((terrainDensityData.width + 1) / ChunkGenNetwork.Instance.resolution) * Mathf.CeilToInt((terrainDensityData.width + 1) / ChunkGenNetwork.Instance.resolution);
+                if (minDepthPoints.IsCreated)
+                    minDepthPoints.Dispose();
                 minDepthPoints = new(iterations, Allocator.Persistent);
-                
-                NativeList<float3> depthResult = new(iterations, Allocator.Persistent);
-                NativeArray<float> heightsNativeArray = new(heightsArray, Allocator.Persistent);
 
                 MinDepthPointsJob minDepthJob = new MinDepthPointsJob
                 {
-                    depthResult = depthResult.AsParallelWriter(),
+                    depthResult = minDepthPoints.AsParallelWriter(),
                     depth = currentAssetSpawnFilters.minDensity,
-                    heightsArray = heightsNativeArray,
+                    heightsArray = heightsArray,
                     chunkSize = terrainDensityData.width,
                     chunkPos = new int3(chunkPos.x, chunkPos.y, chunkPos.z),
                     resolution = ChunkGenNetwork.Instance.resolution,
                 };
+                
+                minDepthPointJobHandler = minDepthJob.Schedule();
+                minDepthPointJobHandler.Complete();
 
-                minDepthJob.Run();
-
-                if (depthResult.Length == 0)
+                if (minDepthPoints.Length == 0)
                 {
-                    depthResult.Dispose();
-                    heightsNativeArray.Dispose();
+                    minDepthPoints.Dispose();
                     continue;
                 }
 
-                minDepthPoints.Clear();
-                minDepthPoints.AddRange(depthResult.AsArray());
-
                 minDepthPointsCalculated = true;
-
-                depthResult.Dispose();
-                heightsNativeArray.Dispose();
             }
             for (int j = 0; j < assetSpawnData.spawnableAssets[i].maxPerChunk; j++)
             {
@@ -165,19 +172,23 @@ public class AssetSpawner : MonoBehaviour
                 else
                 {
                     if (emptyChunk) continue;
-                    randomIndex = rng.NextInt(0, chunkVertices.Length);
-                    spawnPoint = chunkVertices[randomIndex].position;
-                    spawnPointNormal = chunkVertices[randomIndex].normal;
+                    if (chunkVertices.IsCreated)
+                    {
+                        randomIndex = rng.NextInt(0, chunkVertices.Length);
+                        spawnPoint = chunkVertices[randomIndex].position;
+                        spawnPointNormal = chunkVertices[randomIndex].normal;
+                    }
+                    else
+                    {
+                        spawnPointsKilled = true;
+                        return ;
+                    }
                 }
 
                 if (!currentAssetSpawnFilters.rotateToFaceNormal)
                 {
                     spawnPoint.y -= 0.75f;
                 }
-                // else
-                // {
-                //     spawnPoint.y -= 0.1f;
-                // }
 
                 float height = spawnPoint.y;
                 float slope = math.round(math.degrees(math.acos(math.clamp(math.dot(math.normalize(spawnPointNormal), math.up()), -1f, 1f))) * 100f) / 100f;
@@ -223,7 +234,8 @@ public class AssetSpawner : MonoBehaviour
 
             acceptedSpawnPoints[i].AddRange(tempAccepted);
         }
-        minDepthPoints.Dispose();
+        if (minDepthPoints.IsCreated)
+            minDepthPoints.Dispose();
         minDepthPointsCalculated = false;
     }
     /// <summary>

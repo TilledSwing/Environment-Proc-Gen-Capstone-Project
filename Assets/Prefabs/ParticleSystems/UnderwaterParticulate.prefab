@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7498475705998431202}
   - component: {fileID: 8236809346259461932}
   - component: {fileID: 4203200981489181944}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: UnderwaterParticulate
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4869,7 +4869,7 @@ GameObject:
   - component: {fileID: 1544681314306789285}
   - component: {fileID: 2761646491019036958}
   - component: {fileID: 6948052408815294901}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: WaterSurface
   m_TagString: Untagged
   m_Icon: {fileID: 0}

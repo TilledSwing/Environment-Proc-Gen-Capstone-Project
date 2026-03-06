@@ -18,7 +18,6 @@ public class ComputeMarchingCubes : MonoBehaviour
     public AssetSpawner assetSpawner;
     public Vector3Int chunkCoord;
     public Vector3Int chunkPos;
-    public ComputeBuffer heightsBuffer;
     public ComputeBuffer vertexBuffer;
     public NativeArray<float> heightsArray;
     public bool initialLoadComplete = false;
@@ -73,13 +72,10 @@ public class ComputeMarchingCubes : MonoBehaviour
     /// </summary>
     void OnDisable()
     {
-        if (heightsBuffer != null && heightsBuffer.IsValid())
+        if (heightsArray.IsCreated)
         {
-            heightsBuffer.Release();
-        }
-
-        if (heightsArray != null && heightsArray.IsCreated)
-        {
+            noiseDensityJobHandler.Complete();
+            marchingCubesJobHandler.Complete();
             heightsArray.Dispose();
         }
     }
@@ -88,19 +84,12 @@ public class ComputeMarchingCubes : MonoBehaviour
     /// </summary>
     void OnApplicationQuit()
     {
-        if (heightsBuffer != null && heightsBuffer.IsValid())
+        if (heightsArray.IsCreated)
         {
-            heightsBuffer.Release();
-        }
-
-        if (heightsArray != null && heightsArray.IsCreated)
-        {
+            noiseDensityJobHandler.Complete();
+            marchingCubesJobHandler.Complete();
             heightsArray.Dispose();
         }
-    }
-    public void Regen()
-    {
-        SetHeights();
     }
     /// <summary>
     /// Set up the density values for the chunk using compute shaders
@@ -128,6 +117,8 @@ public class ComputeMarchingCubes : MonoBehaviour
     /// <param name="terraforming">Whether the user is terraforming</param>
     public void SetMeshValuesPerformant(bool terraforming)
     {
+        if (!heightsArray.IsCreated)
+            return;
         int triangleCount = triangleArray.Length;
         Mesh.MeshDataArray meshDataArray = Mesh.AllocateWritableMeshData(1);
         Mesh.MeshData meshData = meshDataArray[0];
@@ -149,27 +140,25 @@ public class ComputeMarchingCubes : MonoBehaviour
         meshData.subMeshCount = 1;
         meshData.SetSubMesh(0, new SubMeshDescriptor(0, triangleCount * 3, MeshTopology.Triangles));
 
-        if (!terraforming)
+        if (!terraforming) 
         {
             assetSpawner.owner = owner;
             assetSpawner.chunkVertices = new NativeArray<Vertex>(vertexBuffer, Allocator.Persistent);
-            assetSpawner.heightsArray = heightsArray;
-
-            VertexSortJob vertexSortJob = new VertexSortJob { vertexArray = assetSpawner.chunkVertices };
-            vertexSortJob.Run();
+            assetSpawner.heightsArray = new(heightsArray, Allocator.Persistent);
         }
 
         Mesh mesh = new Mesh();
         Mesh.ApplyAndDisposeWritableMeshData(meshDataArray, mesh, MeshUpdateFlags.DontValidateIndices);
 
         meshFilter.mesh = mesh;
-        Physics.BakeMesh(mesh.GetInstanceID(), false);
-        meshCollider.sharedMesh = mesh;
         mesh.RecalculateBounds();
+        ChunkGenNetwork.Instance.collisionMeshBakeQueue.Enqueue(new ChunkGenNetwork.MeshBake(mesh, meshCollider));
 
         if (!terraforming)
         {
-            ChunkGenNetwork.Instance.spawningPointCreationQueue.Enqueue(assetSpawner);
+            VertexSortJob vertexSortJob = new VertexSortJob { vertexArray = assetSpawner.chunkVertices };
+            JobHandle vertexSortJobHandler = vertexSortJob.Schedule();
+            ChunkGenNetwork.Instance.vertexSortJobList.Add(new ChunkGenNetwork.VertexSortJob(vertexSortJobHandler, assetSpawner));
             if(chunkPos.y >= terrainDensityData.waterLevel && triangleCount > ChunkGenNetwork.Instance.landGrass.maxBladesPerTriangle)
             {
                 grass = gameObject.AddComponent<GrassRender>();
