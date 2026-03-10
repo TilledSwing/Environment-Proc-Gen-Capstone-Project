@@ -159,7 +159,7 @@ public class ChunkGenNetwork : MonoBehaviour
     // Chunk Data
     public Dictionary<long, TerrainChunk> chunkDictionary = new();
     [HideInInspector]
-    public List<long> chunksVisibleLastUpdate = new();
+    public List<TerrainChunk> chunksVisibleLastUpdate = new();
     public PriorityQueue<Vector3Int> chunkLoadQueue = new();
     public HashSet<long> chunkLoadSet = new();
     public Queue<ChunkVisibility> chunkVisibilityQueue = new();
@@ -720,7 +720,7 @@ public class ChunkGenNetwork : MonoBehaviour
                     TerrainChunk chunk = terrainChunkPool.GetChunk(packedCoord, viewedChunkCoord, chunkPos, waterChunk);
                     chunkDictionary.Add(packedCoord, chunk);
                     if (isEdge)
-                        chunksVisibleLastUpdate.Add(packedCoord);
+                        chunksVisibleLastUpdate.Add(chunk);
                 }
             }
         }
@@ -740,6 +740,7 @@ public class ChunkGenNetwork : MonoBehaviour
         int currentChunkCoordX = Mathf.FloorToInt(viewerPos.x / chunkSize);
         int currentChunkCoordY = Mathf.FloorToInt(viewerPos.y / chunkSize);
         int currentChunkCoordZ = Mathf.FloorToInt(viewerPos.z / chunkSize);
+        Vector3Int currentChunkCoord = new(currentChunkCoordX, currentChunkCoordY, currentChunkCoordZ);
 
         int minX = currentChunkCoordX - chunksVisible;
         int maxX = currentChunkCoordX + chunksVisible;
@@ -748,15 +749,22 @@ public class ChunkGenNetwork : MonoBehaviour
         int minZ = currentChunkCoordZ - chunksVisible;
         int maxZ = currentChunkCoordZ + chunksVisible;
 
-        chunksToHide.Clear();
-        chunksToShow.Clear();
-        foreach (long chunk in chunksVisibleLastUpdate)
+        foreach (TerrainChunk terrainChunk in chunksVisibleLastUpdate)
         {
-            chunkDictionary.TryGetValue(chunk, out TerrainChunk terrainChunk);
             if (terrainChunk.chunkCoord.x < minX || terrainChunk.chunkCoord.x > maxX ||
                 terrainChunk.chunkCoord.y < minY || terrainChunk.chunkCoord.y > maxY ||
                 terrainChunk.chunkCoord.z < minZ || terrainChunk.chunkCoord.z > maxZ)
-                chunksToHide.Add(terrainChunk);
+            {
+                if (!terrainChunk.marchingCubes.edited)
+                {
+                    terrainChunkPool.ReturnChunk(terrainChunk, terrainChunk.waterChunk);
+                    chunkDictionary.Remove(terrainChunk.packedCoord);
+                }
+                else
+                {
+                    chunkVisibilityQueue.Enqueue(new ChunkVisibility(terrainChunk, false, terrainChunk.chunkID));
+                }
+            }
         }
         chunksVisibleLastUpdate.Clear();
 
@@ -785,44 +793,22 @@ public class ChunkGenNetwork : MonoBehaviour
                     if (!isEdge)
                         continue;
 
-                    Vector3Int viewedChunkCoord = new Vector3Int(currentX, currentY, currentZ);
-                    Vector3Int viewedChunkPos = viewedChunkCoord * chunkSize;
                     long chunkCoordId = PackChunkCoord(currentX, currentY, currentZ);
-
-                    if (useFixedMapSize && (math.abs(currentX) > maxChunkDst || math.abs(currentZ) > maxChunkDst))
-                        continue;
 
                     if (chunkDictionary.TryGetValue(chunkCoordId, out TerrainChunk dictChunk))
                     {
+                        chunksToShow.Add(dictChunk);
                         chunkVisibilityQueue.Enqueue(new ChunkVisibility(dictChunk, true, dictChunk.chunkID));
-                        chunksVisibleLastUpdate.Add(chunkCoordId);
+                        chunksVisibleLastUpdate.Add(dictChunk);
                     }
                     else if (chunkLoadSet.Add(chunkCoordId))
                     {
-                        Bounds bounds = new Bounds(viewedChunkPos + (new Vector3(0.5f, 0.5f, 0.5f) * chunkSize), chunkVec);
-                        float viewerDstFromBound = bounds.SqrDistance(viewerPos);
-                        chunkLoadQueue.Enqueue(viewedChunkCoord, viewerDstFromBound);
+                        Vector3Int viewedChunkCoord = new Vector3Int(currentX, currentY, currentZ);
+                        float dst = Vector3Int.Distance(currentChunkCoord, viewedChunkCoord);
+                        chunkLoadQueue.Enqueue(viewedChunkCoord, dst);
                     }
                 }
             }
-        }
-
-        foreach (TerrainChunk chunk  in chunksToHide)
-        {
-            if (!chunk.marchingCubes.edited)
-            {
-                terrainChunkPool.ReturnChunk(chunk, chunk.waterChunk);
-                // chunkReturnQueue.Enqueue(chunk);
-                chunkDictionary.Remove(chunk.packedCoord);
-            }
-            else
-            {
-                chunkVisibilityQueue.Enqueue(new ChunkVisibility(chunk, false, chunk.chunkID));
-            }
-        }
-        foreach (TerrainChunk chunk in chunksToShow)
-        {
-            chunkVisibilityQueue.Enqueue(new ChunkVisibility(chunk, true, chunk.chunkID));
         }
 
         if (!isLoadingChunks && chunkLoadQueue.Count > 0)
@@ -857,7 +843,7 @@ public class ChunkGenNetwork : MonoBehaviour
                 bool waterChunk = terrainDensityData.waterLevel >= chunkPos.y && terrainDensityData.waterLevel < chunkPos.y + terrainDensityData.chunkSize && Instance.terrainDensityData.water;
                 TerrainChunk chunk = terrainChunkPool.GetChunk(packedCoord, coord, chunkPos, waterChunk);
                 chunkDictionary.Add(packedCoord, chunk);
-                chunksVisibleLastUpdate.Add(packedCoord);
+                chunksVisibleLastUpdate.Add(chunk);
                 chunkBatchCounter++;
             }
 

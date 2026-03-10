@@ -27,7 +27,7 @@ public class PlayerController : NetworkBehaviour
     public bool editorPlayer = true;
     public bool gameStarted = false;
     public ParticleSystem underwaterParticles;
-
+    public ParticleSystem snowParticles;
     public List<Vector3> terraformCenters;
     public List<Vector3Int> hitChunkPositions;
     public List<int> terraformTypes;
@@ -43,6 +43,7 @@ public class PlayerController : NetworkBehaviour
     private bool isFlightMode = false;
     private bool inWater = false;
     private bool underwater = false;
+    private bool inSnow = false;
     public bool dead = false;
 
     public CharacterController characterController;
@@ -141,7 +142,7 @@ public class PlayerController : NetworkBehaviour
             ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogOffset", -15f);
             underwaterParticles.Play();
         }
-        else if(playerCamera.transform.position.y - 0.08f > waterLevel && underwater && ChunkGenNetwork.Instance.terrainDensityData.water)
+        else if (playerCamera.transform.position.y - 0.08f > waterLevel && underwater && ChunkGenNetwork.Instance.terrainDensityData.water)
         {
             underwater = false;
             GraphicsSettings.defaultRenderPipeline = ChunkGenNetwork.Instance.mainUrpAsset;
@@ -152,6 +153,16 @@ public class PlayerController : NetworkBehaviour
             ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogDensity", ChunkGenNetwork.Instance.fogDensity);
             ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogOffset", ChunkGenNetwork.Instance.fogOffset);
             underwaterParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        }
+        if (playerCamera.transform.position.y > 60 && !inSnow)
+        {
+            snowParticles.Play();
+            inSnow = true;
+        }
+        else if (playerCamera.transform.position.y < 60 && inSnow)
+        {
+            snowParticles.Stop();
+            inSnow = false;
         }
 
         bool isRunning = false;

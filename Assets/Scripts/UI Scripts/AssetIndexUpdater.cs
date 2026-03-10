@@ -16,9 +16,8 @@ public class AssetIndexUpdater : MonoBehaviour
     public IEnumerator AssetRespawnCoroutine()
     {
         int count = 0;
-        foreach(var coord in ChunkGenNetwork.Instance.chunksVisibleLastUpdate)
+        foreach(ChunkGenNetwork.TerrainChunk terrainChunk in ChunkGenNetwork.Instance.chunksVisibleLastUpdate)
         {
-            ChunkGenNetwork.TerrainChunk terrainChunk = ChunkGenNetwork.Instance.chunkDictionary[coord];
             terrainChunk.marchingCubes.assetSpawner.SpawnAssets();
 
             if(++count % 12 == 0) 

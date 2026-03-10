@@ -13,9 +13,10 @@ MonoBehaviour:
   m_Name: SeaGrassProfile
   m_EditorClassIdentifier: 
   foliageList:
-  - grassMesh: {fileID: -462981019419857548, guid: 7d67a45bb7b722a43a696709d2b89636, type: 3}
+  - useUniformScale: 0
+    grassMesh: {fileID: -462981019419857548, guid: 7d67a45bb7b722a43a696709d2b89636, type: 3}
     grassMaterial: {fileID: 2100000, guid: 456114c3dd3230b4abbb8424cd99df88, type: 2}
-    grassHeightRange: {x: 1.1, y: 1.5}
+    grassHeightRange: {x: 1.5, y: 2}
     grassCurveRange: {x: 0, y: 1}
     spawnProbabilityUpperThreshold: 1
   grassDensity: 30

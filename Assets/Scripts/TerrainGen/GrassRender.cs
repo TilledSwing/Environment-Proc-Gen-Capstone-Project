@@ -23,6 +23,7 @@ public class GrassRender : MonoBehaviour
     GraphicsBuffer grassCountsBuffer;
     public bool underwater;
     public bool isTerraforming = false;
+    int foliageCount;
     int maxBlades;
     int grassUpdateKernel;
     int grassPositionKernel;
@@ -70,6 +71,7 @@ public class GrassRender : MonoBehaviour
         grassTriangleBuffer.SetData(triangleArray);
         this.bounds = bounds;
         this.underwater = underwater;
+        foliageCount = grassProfile.foliageList.Count;
     }
     public void SetupGrass()
     {
@@ -98,7 +100,7 @@ public class GrassRender : MonoBehaviour
         if (spawnProbabilityUpperThresholdBuffer == null || !spawnProbabilityUpperThresholdBuffer.IsValid())
             spawnProbabilityUpperThresholdBuffer = new ComputeBuffer(5, sizeof(float));
 
-        for (int i = 0; i < grassProfile.foliageList.Count; i++)
+        for (int i = 0; i < foliageCount; i++)
         {
             GrassProfile.FoliageType foliageType = grassProfile.foliageList[i];
             heightRangeList.Add(foliageType.grassHeightRange);
@@ -117,7 +119,7 @@ public class GrassRender : MonoBehaviour
             positionsBuffers[i].SetCounterValue(0);
             grassPositionComputeShader.SetBuffer(grassPositionKernel, $"GrassPositionsBuffer{i+1}", positionsBuffers[i]);
         }
-        for (int i = grassProfile.foliageList.Count; i < 5; i++)
+        for (int i = foliageCount; i < 5; i++)
         {
             if (positionsBuffers.Count <= i)
                 positionsBuffers.Add(new GraphicsBuffer(
@@ -144,7 +146,7 @@ public class GrassRender : MonoBehaviour
         if (grassCountsBuffer == null)
             grassCountsBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Raw, 5, sizeof(uint));
 
-        for (int i = 0; i < grassProfile.foliageList.Count; i++)
+        for (int i = 0; i < foliageCount; i++)
         {
             // Args buffers
             GrassProfile.FoliageType foliageType = grassProfile.foliageList[i];
@@ -181,7 +183,7 @@ public class GrassRender : MonoBehaviour
         grassUpdateComputeShader.SetVector("TerraformCenter", terraformCenter);
         grassUpdateComputeShader.SetFloat("TerraformRadius", terraformRadius);
         grassUpdateComputeShader.SetBuffer(grassUpdateKernel, "GrassCountsBuffer", grassCountsBuffer);
-        for (int i = 0; i < grassProfile.foliageList.Count; i++)
+        for (int i = 0; i < foliageCount; i++)
         {
             grassUpdateComputeShader.SetBuffer(grassUpdateKernel, $"OldGrassPositionsBuffer{i+1}", positionsBuffers[i]);
             GrassProfile.FoliageType foliageType = grassProfile.foliageList[i];
@@ -194,7 +196,7 @@ public class GrassRender : MonoBehaviour
             tempPositionsBuffers.Add(newGraphicsBuffer);
             grassUpdateComputeShader.SetBuffer(grassUpdateKernel, $"NewGrassPositionsBuffer{i+1}", newGraphicsBuffer);
         }
-        for (int i = grassProfile.foliageList.Count; i < 5; i++)
+        for (int i = foliageCount; i < 5; i++)
         {
             grassUpdateComputeShader.SetBuffer(grassUpdateKernel, $"OldGrassPositionsBuffer{i+1}", positionsBuffers[i]);
             GraphicsBuffer newGraphicsBuffer = new GraphicsBuffer(
@@ -213,7 +215,7 @@ public class GrassRender : MonoBehaviour
         {
             positionsBuffers[i].Release();
         }
-        for (int i = 0; i < grassProfile.foliageList.Count; i++)
+        for (int i = 0; i < foliageCount; i++)
         {
             argsBuffers[i].Release();
         }
@@ -225,7 +227,7 @@ public class GrassRender : MonoBehaviour
         }
         tempPositionsBuffers.Clear();
         
-        for (int i = 0; i < grassProfile.foliageList.Count; i++)
+        for (int i = 0; i < foliageCount; i++)
         {
             // Args buffers
             argsBuffers.Add(new GraphicsBuffer(GraphicsBuffer.Target.IndirectArguments, 1, 5 * sizeof(uint)));
@@ -279,14 +281,10 @@ public class GrassRender : MonoBehaviour
     }
     void Update()
     {
-        if (underwater && ChunkGenNetwork.Instance.viewerPos.y > ChunkGenNetwork.Instance.terrainDensityData.waterLevel || renderGrass == false)
+        if (renderGrass == false || (underwater && ChunkGenNetwork.Instance.viewerPos.y > ChunkGenNetwork.Instance.terrainDensityData.waterLevel))
             return ;
-        for (int i = 0; i < grassProfile.foliageList.Count; i++)
+        for (int i = 0; i < foliageCount; i++)
         {
-            if(renderParams.Count <= i || argsBuffers.Count <= i) 
-                continue;
-            if (argsBuffers[i] == null || !argsBuffers[i].IsValid())
-                continue;
             Graphics.RenderMeshIndirect(renderParams[i], grassProfile.foliageList[i].grassMesh, argsBuffers[i], 1, 0);
         }
     }
