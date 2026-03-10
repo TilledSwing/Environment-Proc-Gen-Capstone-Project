@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Mathematics;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class GrassRender : MonoBehaviour
@@ -23,6 +24,25 @@ public class GrassRender : MonoBehaviour
     public bool underwater;
     public bool isTerraforming = false;
     int maxBlades;
+    int grassUpdateKernel;
+    int grassPositionKernel;
+    List<Vector2> heightRangeList;
+    ComputeBuffer heightRangeBuffer;
+    List<Vector2> curveRangeList;
+    ComputeBuffer curveRangeBuffer;
+    List<float> spawnProbabilityUpperThresholdList;
+    ComputeBuffer spawnProbabilityUpperThresholdBuffer;
+    void Awake()
+    {
+        heightRangeList = new();
+        curveRangeList = new();
+        spawnProbabilityUpperThresholdList = new();
+
+        positionsBuffers = new();
+        tempPositionsBuffers = new();
+        argsBuffers = new();
+        renderParams = new();
+    }
     public void InitializeGrassRenderer(Vector3Int chunkPos,
                                         GrassProfile grassProfile,
                                         int minHeight,
@@ -41,6 +61,10 @@ public class GrassRender : MonoBehaviour
         this.maxHeight = maxHeight;
         this.grassPositionComputeShader = grassPositionComputeShader;
         this.grassUpdateComputeShader = grassUpdateComputeShader;
+        if (grassPositionKernel == 0)
+            grassPositionKernel = grassPositionComputeShader.FindKernel("GrassCompute");
+        if(grassUpdateKernel == 0) 
+            grassUpdateKernel = grassUpdateComputeShader.FindKernel("GrassTerraform");
         this.triangleCount = triangleCount;
         grassTriangleBuffer = new(triangleCount, sizeof(float) * 18);
         grassTriangleBuffer.SetData(triangleArray);
@@ -49,7 +73,6 @@ public class GrassRender : MonoBehaviour
     }
     public void SetupGrass()
     {
-        int grassPositionKernel = grassPositionComputeShader.FindKernel("GrassCompute");
         grassPositionComputeShader.SetBuffer(grassPositionKernel, "GrassTriangleBuffer", grassTriangleBuffer);
         grassPositionComputeShader.SetInt("TriangleCount", triangleCount);
         grassPositionComputeShader.SetInt("GrassDensity", grassProfile.grassDensity);
@@ -59,17 +82,21 @@ public class GrassRender : MonoBehaviour
         grassPositionComputeShader.SetFloat("MaxSlope", Mathf.Cos(grassProfile.maxGrassSlope * Mathf.Deg2Rad));
         maxBlades = Mathf.CeilToInt(triangleCount * grassProfile.maxBladesPerTriangle);
 
-        List<Vector2> heightRangeList = new();
-        ComputeBuffer heightRangeBuffer = new ComputeBuffer(5, sizeof(float) * 2);
-        List<Vector2> curveRangeList = new();
-        ComputeBuffer curveRangeBuffer = new ComputeBuffer(5, sizeof(float) * 2);
-        List<float> spawnProbabilityUpperThresholdList = new();
-        ComputeBuffer spawnProbabilityUpperThresholdBuffer = new ComputeBuffer(5, sizeof(float));
+        heightRangeList?.Clear();
+        curveRangeList?.Clear();
+        spawnProbabilityUpperThresholdList?.Clear();
 
-        positionsBuffers = new();
-        tempPositionsBuffers = new();
-        argsBuffers = new();
-        renderParams = new();
+        positionsBuffers?.Clear();
+        tempPositionsBuffers?.Clear();
+        argsBuffers?.Clear();
+        renderParams?.Clear();
+
+        if (heightRangeBuffer == null || !heightRangeBuffer.IsValid())
+            heightRangeBuffer = new ComputeBuffer(5, sizeof(float) * 2);
+        if (curveRangeBuffer == null || !curveRangeBuffer.IsValid())
+            curveRangeBuffer = new ComputeBuffer(5, sizeof(float) * 2);
+        if (spawnProbabilityUpperThresholdBuffer == null || !spawnProbabilityUpperThresholdBuffer.IsValid())
+            spawnProbabilityUpperThresholdBuffer = new ComputeBuffer(5, sizeof(float));
 
         for (int i = 0; i < grassProfile.foliageList.Count; i++)
         {
@@ -78,21 +105,26 @@ public class GrassRender : MonoBehaviour
             curveRangeList.Add(foliageType.grassCurveRange);
             spawnProbabilityUpperThresholdList.Add(foliageType.spawnProbabilityUpperThreshold);
 
-            positionsBuffers.Add(new GraphicsBuffer(
-                                                    GraphicsBuffer.Target.Append,
-                                                    Mathf.CeilToInt(maxBlades * (i != 0 ? foliageType.spawnProbabilityUpperThreshold - grassProfile.foliageList[i-1].spawnProbabilityUpperThreshold : foliageType.spawnProbabilityUpperThreshold)),
-                                                    sizeof(float) * 9
-                                                   ));
+            if (positionsBuffers.Count <= i)
+            {
+                int count = Mathf.CeilToInt(maxBlades * (i != 0 ? foliageType.spawnProbabilityUpperThreshold - grassProfile.foliageList[i-1].spawnProbabilityUpperThreshold : foliageType.spawnProbabilityUpperThreshold));
+                positionsBuffers.Add(new GraphicsBuffer(
+                                                        GraphicsBuffer.Target.Append,
+                                                        count,
+                                                        sizeof(float) * 9
+                                                    ));
+            }
             positionsBuffers[i].SetCounterValue(0);
             grassPositionComputeShader.SetBuffer(grassPositionKernel, $"GrassPositionsBuffer{i+1}", positionsBuffers[i]);
         }
         for (int i = grassProfile.foliageList.Count; i < 5; i++)
         {
-            positionsBuffers.Add(new GraphicsBuffer(
-                                                    GraphicsBuffer.Target.Append,
-                                                    1,
-                                                    sizeof(float) * 9
-                                                   ));
+            if (positionsBuffers.Count <= i)
+                positionsBuffers.Add(new GraphicsBuffer(
+                                                        GraphicsBuffer.Target.Append,
+                                                        1,
+                                                        sizeof(float) * 9
+                                                    ));
             positionsBuffers[i].SetCounterValue(0);
             grassPositionComputeShader.SetBuffer(grassPositionKernel, $"GrassPositionsBuffer{i+1}", positionsBuffers[i]);
         }
@@ -108,35 +140,37 @@ public class GrassRender : MonoBehaviour
         grassPositionComputeShader.Dispatch(grassPositionKernel, Mathf.CeilToInt(triangleCount / 64f), 1, 1);
 
         grassTriangleBuffer.Release();
-        heightRangeBuffer.Release();
-        curveRangeBuffer.Release();
-        spawnProbabilityUpperThresholdBuffer.Release();
 
-        grassCountsBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Raw, 5, sizeof(uint));
+        if (grassCountsBuffer == null)
+            grassCountsBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Raw, 5, sizeof(uint));
 
         for (int i = 0; i < grassProfile.foliageList.Count; i++)
         {
             // Args buffers
-            argsBuffers.Add(new GraphicsBuffer(GraphicsBuffer.Target.IndirectArguments, 1, 5 * sizeof(uint)));
-            uint[] args = new uint[5] { grassProfile.foliageList[i].grassMesh.GetIndexCount(0), 0, 0, 0, 0 };
+            GrassProfile.FoliageType foliageType = grassProfile.foliageList[i];
+            if (argsBuffers.Count <= i)
+                argsBuffers.Add(new GraphicsBuffer(GraphicsBuffer.Target.IndirectArguments, 1, 5 * sizeof(uint)));
+            uint[] args = new uint[5] { foliageType.grassMesh.GetIndexCount(0), 0, 0, 0, 0 };
             argsBuffers[i].SetData(args);
             GraphicsBuffer positionBuffer = positionsBuffers[i];
             GraphicsBuffer.CopyCount(positionBuffer, argsBuffers[i], sizeof(uint));
             GraphicsBuffer.CopyCount(positionBuffer, grassCountsBuffer, i * sizeof(uint));
 
             // Render Params
-            Material material = grassProfile.foliageList[i].grassMaterial;
+            Material material = foliageType.grassMaterial;
             material.enableInstancing = true;
-            if (grassProfile.foliageList[i].useUniformScale)
+            if (foliageType.useUniformScale)
                 material.EnableKeyword("_UNIFORM_SCALE");
             else
                 material.DisableKeyword("_UNIFORM_SCALE");
-            renderParams.Add(new RenderParams(material)
-                            {
-                                matProps = new MaterialPropertyBlock(),
-                                worldBounds = bounds,
-                                layer = 0
-                            });
+            
+            if (renderParams.Count <= i)
+                renderParams.Add(new RenderParams(material)
+                                {
+                                    matProps = new MaterialPropertyBlock(),
+                                    worldBounds = bounds,
+                                    layer = 0
+                                });
             renderParams[i].matProps.SetBuffer("_Positions", positionBuffer);
         }
     }
@@ -144,7 +178,6 @@ public class GrassRender : MonoBehaviour
     {
         isTerraforming = true;
         tempPositionsBuffers.Clear();
-        int grassUpdateKernel = grassUpdateComputeShader.FindKernel("GrassTerraform");
         grassUpdateComputeShader.SetVector("TerraformCenter", terraformCenter);
         grassUpdateComputeShader.SetFloat("TerraformRadius", terraformRadius);
         grassUpdateComputeShader.SetBuffer(grassUpdateKernel, "GrassCountsBuffer", grassCountsBuffer);
@@ -176,9 +209,12 @@ public class GrassRender : MonoBehaviour
 
         grassUpdateComputeShader.Dispatch(grassUpdateKernel, Mathf.CeilToInt(maxBlades / 64f), 1, 1);
 
-        for (int i = 0; i < grassProfile.foliageList.Count; i++)
+        for (int i = 0; i < 5; i++)
         {
             positionsBuffers[i].Release();
+        }
+        for (int i = 0; i < grassProfile.foliageList.Count; i++)
+        {
             argsBuffers[i].Release();
         }
         positionsBuffers.Clear();
@@ -203,29 +239,43 @@ public class GrassRender : MonoBehaviour
         }
         isTerraforming = false;
     }
-    void OnDisable()
+    public void DisposalReleaseHandler()
     {
+        if (heightRangeBuffer != null && heightRangeBuffer.IsValid())
+        {
+            heightRangeBuffer.Release();
+        }
+        if (curveRangeBuffer != null && curveRangeBuffer.IsValid())
+        {
+            curveRangeBuffer.Release();
+        }
+        if (spawnProbabilityUpperThresholdBuffer != null && spawnProbabilityUpperThresholdBuffer.IsValid())
+        {
+            spawnProbabilityUpperThresholdBuffer.Release();
+        }
         foreach (GraphicsBuffer positionBuffer in positionsBuffers)
         {
-            if (positionBuffer.IsValid())
+            if (positionBuffer != null && positionBuffer.IsValid())
             {
                 positionBuffer.Release();
             }
         }
-        positionsBuffers.Clear();
 
         foreach (GraphicsBuffer argsBuffer in argsBuffers)
         {
-            if (argsBuffer.IsValid())
+            if (argsBuffer != null && argsBuffer.IsValid())
             {
                 argsBuffer.Release();
             }
         }
-        argsBuffers.Clear();
-        if (grassCountsBuffer != null)
-            {
-                grassCountsBuffer.Release();
-            }
+        if (grassCountsBuffer != null && grassCountsBuffer.IsValid())
+        {
+            grassCountsBuffer.Release();
+        }
+    }
+    void OnDisable()
+    {
+        DisposalReleaseHandler();
     }
     void Update()
     {
@@ -233,6 +283,10 @@ public class GrassRender : MonoBehaviour
             return ;
         for (int i = 0; i < grassProfile.foliageList.Count; i++)
         {
+            if(renderParams.Count <= i || argsBuffers.Count <= i) 
+                continue;
+            if (argsBuffers[i] == null || !argsBuffers[i].IsValid())
+                continue;
             Graphics.RenderMeshIndirect(renderParams[i], grassProfile.foliageList[i].grassMesh, argsBuffers[i], 1, 0);
         }
     }

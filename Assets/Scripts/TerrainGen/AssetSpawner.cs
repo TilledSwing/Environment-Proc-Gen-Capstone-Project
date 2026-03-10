@@ -11,7 +11,7 @@ public class AssetSpawner : MonoBehaviour
 {
     public ChunkGenNetwork.TerrainChunk owner;
     public int vertexBufferLength;
-    public List<List<Asset>> spawnedAssets;
+    public List<Asset> spawnedAssets;
     public TerrainDensityData terrainDensityData;
     public AssetSpawnData assetSpawnData;
     public List<List<ComputeMarchingCubes.Vertex>> spawnPoints;
@@ -33,6 +33,15 @@ public class AssetSpawner : MonoBehaviour
     void Start() {
         assetLayer = LayerMask.GetMask("Asset Layer");
         interactLayer = LayerMask.GetMask("Interact Layer");
+
+        spawnPoints = new List<List<ComputeMarchingCubes.Vertex>>(assetSpawnData.spawnableAssets.Count);
+        acceptedSpawnPoints = new List<List<ComputeMarchingCubes.Vertex>>(assetSpawnData.spawnableAssets.Count);
+        spawnedAssets = new List<Asset>();
+        for (int i = 0; i < assetSpawnData.spawnableAssets.Count; i++)
+        {
+            spawnPoints.Add(new List<ComputeMarchingCubes.Vertex>());
+            acceptedSpawnPoints.Add(new List<ComputeMarchingCubes.Vertex>());
+        }
     }
     /// <summary>
     /// Initiate asset spawning for a given chunk
@@ -54,14 +63,10 @@ public class AssetSpawner : MonoBehaviour
             CreateSpawnPoints(ref rng);
             if(spawnPointsKilled) 
                 return ;
-            SetSpawnPoints();
             AssetSpawnHandler(rng);
         }
     }
-    /// <summary>
-    /// Release associated buffers
-    /// </summary>
-    private void OnDisable()
+    public void DisposalReleaseHandler() 
     {
         if (chunkVertices.IsCreated) {
             chunkVertices.Dispose();
@@ -73,38 +78,25 @@ public class AssetSpawner : MonoBehaviour
             minDepthPoints.Dispose();
         }
     }
-    /// <summary>
-    /// Release associated buffers
-    /// </summary>
+    private void OnDisable()
+    {
+        DisposalReleaseHandler();
+    }
     private void OnApplicationQuit()
     {
-        if (chunkVertices.IsCreated) {
-            chunkVertices.Dispose();
-        }
-        if (heightsArray.IsCreated) {
-            heightsArray.Dispose();
-        }
-        if (minDepthPoints.IsCreated) {
-            minDepthPoints.Dispose();
-        }
+        DisposalReleaseHandler();
     }
     /// <summary>
     /// Initizalize all the data structures
     /// </summary>
     private void InitializeData()
     {
-        spawnPoints?.Clear();
-        acceptedSpawnPoints?.Clear();
-        spawnedAssets?.Clear();
-        spawnPoints = new List<List<ComputeMarchingCubes.Vertex>>(assetSpawnData.spawnableAssets.Count);
-        acceptedSpawnPoints = new List<List<ComputeMarchingCubes.Vertex>>(assetSpawnData.spawnableAssets.Count);
-        spawnedAssets = new List<List<Asset>>(assetSpawnData.spawnableAssets.Count);
         assetSpawnData.assets.Add(chunkPos, new List<ComputeMarchingCubes.Vertex>());
+ 
         for (int i = 0; i < assetSpawnData.spawnableAssets.Count; i++)
         {
-            spawnPoints.Add(new List<ComputeMarchingCubes.Vertex>());
-            acceptedSpawnPoints.Add(new List<ComputeMarchingCubes.Vertex>());
-            spawnedAssets.Add(new List<Asset>());
+            spawnPoints[i].Clear();
+            acceptedSpawnPoints[i].Clear();
         }
     }
     public void CreateSpawnPoints(ref Unity.Mathematics.Random rng)
@@ -126,7 +118,7 @@ public class AssetSpawner : MonoBehaviour
     
             if (currentAssetSpawnFilters.undergroundAsset && !minDepthPointsCalculated)
             {
-                int iterations = Mathf.CeilToInt((terrainDensityData.width + 1) / ChunkGenNetwork.Instance.resolution) * Mathf.CeilToInt((terrainDensityData.width + 1) / ChunkGenNetwork.Instance.resolution) * Mathf.CeilToInt((terrainDensityData.width + 1) / ChunkGenNetwork.Instance.resolution);
+                int iterations = Mathf.CeilToInt((terrainDensityData.chunkSize + 1) / ChunkGenNetwork.Instance.resolution) * Mathf.CeilToInt((terrainDensityData.chunkSize + 1) / ChunkGenNetwork.Instance.resolution) * Mathf.CeilToInt((terrainDensityData.chunkSize + 1) / ChunkGenNetwork.Instance.resolution);
                 if (minDepthPoints.IsCreated)
                     minDepthPoints.Dispose();
                 minDepthPoints = new(iterations, Allocator.Persistent);
@@ -136,7 +128,7 @@ public class AssetSpawner : MonoBehaviour
                     depthResult = minDepthPoints.AsParallelWriter(),
                     depth = currentAssetSpawnFilters.minDensity,
                     heightsArray = heightsArray,
-                    chunkSize = terrainDensityData.width,
+                    chunkSize = terrainDensityData.chunkSize,
                     chunkPos = new int3(chunkPos.x, chunkPos.y, chunkPos.z),
                     resolution = ChunkGenNetwork.Instance.resolution,
                 };
@@ -233,6 +225,7 @@ public class AssetSpawner : MonoBehaviour
             }
 
             acceptedSpawnPoints[i].AddRange(tempAccepted);
+            assetSpawnData.assets[chunkPos].AddRange(tempAccepted);
         }
         if (minDepthPoints.IsCreated)
             minDepthPoints.Dispose();
@@ -289,16 +282,6 @@ public class AssetSpawner : MonoBehaviour
         }
     }
     /// <summary>
-    /// Add this chunks spawn points and game objects to a centralized scriptable object
-    /// </summary>
-    private void SetSpawnPoints()
-    {
-        for (int i = 0; i < assetSpawnData.spawnableAssets.Count; i++)
-        {
-            assetSpawnData.assets[chunkPos].AddRange(acceptedSpawnPoints[i]);
-        }
-    }
-    /// <summary>
     /// Use the spawn points from the compute shader to instantiate their respective game objects
     /// </summary>
     private void AssetSpawnHandler(Unity.Mathematics.Random rng)
@@ -312,7 +295,7 @@ public class AssetSpawner : MonoBehaviour
                 int indexI = i;
                 int indexJ = j;
                 uint seed = rng.NextUInt();
-                ChunkGenNetwork.Instance.pendingAssetInstantiations.Enqueue(new ChunkGenNetwork.AssetInstantiation(owner, indexI, indexJ, seed));
+                ChunkGenNetwork.Instance.pendingAssetInstantiations.Enqueue(new ChunkGenNetwork.AssetInstantiation(owner, indexI, indexJ, seed, owner.chunkID));
             }
         }
         assetsSet = true;
@@ -321,8 +304,7 @@ public class AssetSpawner : MonoBehaviour
     {
         if (gameObject == null) return;
         Unity.Mathematics.Random rng = new(seed);
-        float randomRotationDeg = rng.NextFloat(0f, 360f);
-        Quaternion randomYRotation = Quaternion.Euler(0f, randomRotationDeg, 0f);
+        Quaternion randomYRotation = Quaternion.Euler(0f, rng.NextFloat(0f, 360f), 0f);
 
         Vector3 n = acceptedSpawnPoints[i][j].normal;
         if (!math.all(math.isfinite(n)) || math.lengthsq(n) < 0.0001f)
@@ -330,11 +312,9 @@ public class AssetSpawner : MonoBehaviour
         Quaternion normal = Quaternion.FromToRotation(Vector3.up, n);
         SpawnableAsset spawnableAsset = assetSpawnData.spawnableAssets[i];
         bool rotateToFaceNormal = spawnableAsset.rotateToFaceNormal;
-        GameObject assetToSpawn;
         
-        assetToSpawn = Instantiate(spawnableAsset.asset, acceptedSpawnPoints[i][j].position, rotateToFaceNormal ? normal * randomYRotation : randomYRotation);
-        assetToSpawn.transform.SetParent(gameObject.transform);
-        spawnedAssets[i].Add(new Asset(assetToSpawn, assetToSpawn.GetComponent<MeshRenderer>(), assetToSpawn.GetComponent<MeshCollider>()));
+        GameObject assetToSpawn = Instantiate(spawnableAsset.asset, acceptedSpawnPoints[i][j].position, rotateToFaceNormal ? normal * randomYRotation : randomYRotation);
+        assetToSpawn.transform.SetParent(owner.assetParent.transform);
         
         if (spawnableAsset.isValuable)
         {
@@ -344,7 +324,19 @@ public class AssetSpawner : MonoBehaviour
             assetToSpawn.AddComponent<ScanObject>();
             assetToSpawn.transform.rotation = Quaternion.Euler(rng.NextFloat(0f, 360f), assetToSpawn.transform.rotation.y, rng.NextFloat(0f, 360f));
         }
-        spawnableAsset.spawnedAssets.Add(new Asset(assetToSpawn, assetToSpawn.GetComponent<MeshRenderer>(), assetToSpawn.GetComponent<MeshCollider>()));
+        Asset asset = new Asset(assetToSpawn, assetToSpawn.GetComponent<MeshRenderer>(), assetToSpawn.GetComponent<MeshCollider>(), spawnableAsset.name);
+        spawnedAssets.Add(asset);
+        spawnableAsset.spawnedAssets.Add(asset);
+    }
+    /// <summary>
+    /// Destroy all the assets
+    /// </summary>
+    public void ClearAssets()
+    {
+        foreach (Asset asset in spawnedAssets)
+        {
+            ChunkGenNetwork.Instance.assetPool.ReturnAsset(asset);
+        }
     }
     [BurstCompile]
     private struct MinDepthPointsJob: IJob
@@ -373,28 +365,6 @@ public class AssetSpawner : MonoBehaviour
                 }
             }
         }
-    }
-    /// <summary>
-    /// Destroy all the assets
-    /// </summary>
-    public void ClearAssets()
-    {
-        for (int i = 0; i < assetSpawnData.spawnableAssets.Count; i++)
-        {
-            if (acceptedSpawnPoints[i].ToArray() != null)
-            {
-                foreach (Asset asset in assetSpawnData.spawnableAssets[i].spawnedAssets)
-                {
-                    Destroy(asset.obj);
-                }
-            }
-        }
-    }
-    /// <summary>
-    /// Clear asset data
-    /// </summary>
-    public void ClearData() {
-        assetSpawnData.ResetSpawnPoints();
     }
 }
 /// <summary>
@@ -488,10 +458,12 @@ public class Asset
     public GameObject obj;
     public MeshRenderer meshRenderer;
     public MeshCollider meshCollider;
-    public Asset(GameObject obj, MeshRenderer meshRenderer, MeshCollider meshCollider)
+    public string name;
+    public Asset(GameObject obj, MeshRenderer meshRenderer, MeshCollider meshCollider, string name)
     {
         this.obj = obj;
         this.meshRenderer = meshRenderer;
         this.meshCollider = meshCollider;
+        this.name = name;
     }
 }

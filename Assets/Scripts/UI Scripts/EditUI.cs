@@ -75,9 +75,6 @@ public class EditUI : MonoBehaviour
         // setting sliders
         switch (slider.name)
         {
-            case "HeightSlider":
-                slider.value = tdd.height;
-                break;
             case "IsoSlider":
                 slider.value = tdd.isolevel;
                 break;
@@ -94,7 +91,6 @@ public class EditUI : MonoBehaviour
     {
         loadScreen.SetActive(true);
         // Terrain Values
-        tdd.height = 250;
         tdd.isolevel = 0.5f;
         tdd.waterLevel = 0;
         tdd.water = true;
@@ -135,10 +131,6 @@ public class EditUI : MonoBehaviour
     /// Methods to change the different parameters of the TDD with the UI sliders
     /// </summary>
     /// <param name="value">Reading from OnValueChanged()</param>
-    public void OnHeightChanged(float value)
-    {
-        tdd.height = (int)value;
-    }
     public void OnIsoChanged(float value)
     {
         tdd.isolevel = value;

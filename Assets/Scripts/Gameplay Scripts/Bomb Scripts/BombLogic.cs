@@ -48,7 +48,7 @@ public class BombLogic : NetworkBehaviour
             if (currentTime >= 1)
             {
                 Vector3 terraformCenter = gameObject.transform.position;
-                Vector3Int hitChunkPos = new Vector3Int(Mathf.FloorToInt(terraformCenter.x / terrainDensityData.width), Mathf.FloorToInt(terraformCenter.y / terrainDensityData.width), Mathf.FloorToInt(terraformCenter.z / terrainDensityData.width)) * terrainDensityData.width;
+                Vector3Int hitChunkPos = new Vector3Int(Mathf.FloorToInt(terraformCenter.x / terrainDensityData.chunkSize), Mathf.FloorToInt(terraformCenter.y / terrainDensityData.chunkSize), Mathf.FloorToInt(terraformCenter.z / terrainDensityData.chunkSize)) * terrainDensityData.chunkSize;
                 BombTerraformServer(terraformCenter, hitChunkPos);
             }
             yield return null;
@@ -58,7 +58,7 @@ public class BombLogic : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void BombTerraformServer(Vector3 terraformCenter, Vector3Int hitChunkPos)
     {
-        if (math.abs(terraformCenter.y - explosionRadius) >= terrainDensityData.width * ChunkGenNetwork.Instance.maxWorldYChunks)
+        if (math.abs(terraformCenter.y - explosionRadius) >= terrainDensityData.chunkSize * ChunkGenNetwork.Instance.maxWorldYChunks)
         {
             ServerManager.Despawn(gameObject);
             return;
@@ -86,11 +86,11 @@ public class BombLogic : NetworkBehaviour
     public void BombTerraformLocal(Vector3 terraformCenter, Vector3Int hitChunkPos)
     {
         Debug.LogWarning("BombTerraform called");
-        ChunkGenNetwork.TerrainChunk[] chunkAndNeighbors = ChunkGenNetwork.Instance.GetChunkAndNeighbors(new Vector3Int(Mathf.CeilToInt(hitChunkPos.x / terrainDensityData.width), Mathf.CeilToInt(hitChunkPos.y / terrainDensityData.width), Mathf.CeilToInt(hitChunkPos.z / terrainDensityData.width)));
+        ChunkGenNetwork.TerrainChunk[] chunkAndNeighbors = ChunkGenNetwork.Instance.GetChunkAndNeighbors(new Vector3Int(Mathf.CeilToInt(hitChunkPos.x / terrainDensityData.chunkSize), Mathf.CeilToInt(hitChunkPos.y / terrainDensityData.chunkSize), Mathf.CeilToInt(hitChunkPos.z / terrainDensityData.chunkSize)));
         foreach (ChunkGenNetwork.TerrainChunk terrainChunk in chunkAndNeighbors)
         {
             if (terrainChunk == null) continue;
-            Bounds bounds = new Bounds(terrainChunk.chunkPos + (new Vector3(0.5f, 0.5f, 0.5f) * terrainDensityData.width), Vector3.one * terrainDensityData.width);
+            Bounds bounds = new Bounds(terrainChunk.chunkPos + (new Vector3(0.5f, 0.5f, 0.5f) * terrainDensityData.chunkSize), Vector3.one * terrainDensityData.chunkSize);
             if(bounds.SqrDistance(terraformCenter) <= explosionRadius * explosionRadius)
             // if (ChunkGenNetwork.Instance.CalculateDstFromBound(terrainChunk.chunkCoord, terraformCenter) <= explosionRadius)
             {
@@ -98,7 +98,7 @@ public class BombLogic : NetworkBehaviour
                 Vector3Int chunkPos = terrainChunk.chunkPos;
                 Vector3Int radius = new Vector3Int(Mathf.CeilToInt(explosionRadius), Mathf.CeilToInt(explosionRadius), Mathf.CeilToInt(explosionRadius));
                 Vector3Int start = Vector3Int.Max(Vector3Int.RoundToInt(terraformCenter) - radius - chunkPos, Vector3Int.zero);
-                Vector3Int end = Vector3Int.Min(Vector3Int.RoundToInt(terraformCenter) + radius - chunkPos, new Vector3Int(Mathf.CeilToInt(terrainDensityData.width), Mathf.CeilToInt(terrainDensityData.width), Mathf.CeilToInt(terrainDensityData.width)));
+                Vector3Int end = Vector3Int.Min(Vector3Int.RoundToInt(terraformCenter) + radius - chunkPos, new Vector3Int(Mathf.CeilToInt(terrainDensityData.chunkSize), Mathf.CeilToInt(terrainDensityData.chunkSize), Mathf.CeilToInt(terrainDensityData.chunkSize)));
 
                 int threadSizeX = Mathf.CeilToInt((end.x - start.x) + 1f);
                 int threadSizeY = Mathf.CeilToInt((end.y - start.y) + 1f);
@@ -113,7 +113,7 @@ public class BombLogic : NetworkBehaviour
                     TerraformOffset = (Vector3)start,
                     TerraformRadius = explosionRadius,
                     TerraformStrength = terraformStrength,
-                    chunkSize = terrainDensityData.width,
+                    chunkSize = terrainDensityData.chunkSize,
                     chunkPos = (Vector3)chunkPos,
                     terraformMode = true,
                 };

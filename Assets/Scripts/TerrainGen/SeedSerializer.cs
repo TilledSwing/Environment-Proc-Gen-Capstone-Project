@@ -94,8 +94,7 @@ public static class SeedSerializer
         return new TerrainSettings
         {
             // Terrain Values
-            width = settings.width,
-            height = settings.height,
+            width = settings.chunkSize,
             isolevel = settings.isolevel,
             waterLevel = settings.waterLevel,
             lerp = settings.lerp,
@@ -143,8 +142,7 @@ public static class SeedSerializer
         var deserializedDensity = ScriptableObject.CreateInstance<TerrainDensityData>();
 
         // Terrain Values
-        deserializedDensity.width = settings.width;
-        deserializedDensity.height = settings.height;
+        deserializedDensity.chunkSize = settings.width;
         deserializedDensity.isolevel = settings.isolevel;
         deserializedDensity.waterLevel = settings.waterLevel;
         deserializedDensity.lerp = settings.lerp;

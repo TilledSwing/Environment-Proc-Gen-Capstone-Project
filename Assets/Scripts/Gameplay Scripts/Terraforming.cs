@@ -80,7 +80,7 @@ public class Terraforming : NetworkBehaviour
         Ray ray = playerCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
         if (Physics.Raycast(ray, out RaycastHit hit, terraformMaxDst, terrainLayer))
         {
-            if (hit.distance <= terraformMinDst || math.abs(hit.point.y - terraformRadius) >= terrainDensityData.width * (mode ? ChunkGenNetwork.Instance.maxWorldYChunks : ChunkGenNetwork.Instance.maxWorldYChunks + 1))
+            if (hit.distance <= terraformMinDst || math.abs(hit.point.y - terraformRadius) >= terrainDensityData.chunkSize * (mode ? ChunkGenNetwork.Instance.maxWorldYChunks : ChunkGenNetwork.Instance.maxWorldYChunks + 1))
                 return;
             // Trying to avoid player clipping
             if (hit.distance < 1.5f && Vector3.Dot(playerCamera.transform.forward.normalized, Vector3.up) < -Mathf.Sin(0f * Mathf.Deg2Rad) && !mode)
@@ -129,11 +129,11 @@ public class Terraforming : NetworkBehaviour
     /// <param name="terraformMode">Create/Destroy terraform mode</param>
     public void TerraformClientLocal(Vector3 terraformCenter, Vector3Int hitChunkPos, bool terraformMode)
     {
-        ChunkGenNetwork.TerrainChunk[] chunkAndNeighbors = ChunkGenNetwork.Instance.GetChunkAndNeighbors(new Vector3Int(Mathf.CeilToInt(hitChunkPos.x / terrainDensityData.width), Mathf.CeilToInt(hitChunkPos.y / terrainDensityData.width), Mathf.CeilToInt(hitChunkPos.z / terrainDensityData.width)));
+        ChunkGenNetwork.TerrainChunk[] chunkAndNeighbors = ChunkGenNetwork.Instance.GetChunkAndNeighbors(new Vector3Int(Mathf.CeilToInt(hitChunkPos.x / terrainDensityData.chunkSize), Mathf.CeilToInt(hitChunkPos.y / terrainDensityData.chunkSize), Mathf.CeilToInt(hitChunkPos.z / terrainDensityData.chunkSize)));
         foreach (ChunkGenNetwork.TerrainChunk terrainChunk in chunkAndNeighbors)
         {
             if (terrainChunk == null) continue;
-            Bounds bounds = new Bounds(terrainChunk.chunkPos + (new Vector3(0.5f, 0.5f, 0.5f) * terrainDensityData.width), Vector3.one * terrainDensityData.width);
+            Bounds bounds = new Bounds(terrainChunk.chunkPos + (new Vector3(0.5f, 0.5f, 0.5f) * terrainDensityData.chunkSize), Vector3.one * terrainDensityData.chunkSize);
             if(bounds.SqrDistance(terraformCenter) <= terraformRadius * terraformRadius)
             // if (ChunkGenNetwork.Instance.CalculateDstFromBound(terrainChunk.chunkCoord, terraformCenter) <= terraformRadius * terraformRadius)
             {
@@ -141,7 +141,7 @@ public class Terraforming : NetworkBehaviour
                 Vector3Int chunkPos = terrainChunk.chunkPos;
                 Vector3Int radius = new Vector3Int(Mathf.CeilToInt(terraformRadius), Mathf.CeilToInt(terraformRadius), Mathf.CeilToInt(terraformRadius));
                 Vector3Int start = Vector3Int.Max(Vector3Int.RoundToInt(terraformCenter) - radius - chunkPos, Vector3Int.zero);
-                Vector3Int end = Vector3Int.Min(Vector3Int.RoundToInt(terraformCenter) + radius - chunkPos, new Vector3Int(Mathf.CeilToInt(terrainDensityData.width), Mathf.CeilToInt(terrainDensityData.width), Mathf.CeilToInt(terrainDensityData.width)));
+                Vector3Int end = Vector3Int.Min(Vector3Int.RoundToInt(terraformCenter) + radius - chunkPos, new Vector3Int(Mathf.CeilToInt(terrainDensityData.chunkSize), Mathf.CeilToInt(terrainDensityData.chunkSize), Mathf.CeilToInt(terrainDensityData.chunkSize)));
 
                 int threadSizeX = Mathf.CeilToInt((end.x - start.x) + 1f);
                 int threadSizeY = Mathf.CeilToInt((end.y - start.y) + 1f);
@@ -156,7 +156,7 @@ public class Terraforming : NetworkBehaviour
                     TerraformOffset = (Vector3)start,
                     TerraformRadius = terraformRadius,
                     TerraformStrength = terraformStrength,
-                    chunkSize = terrainDensityData.width,
+                    chunkSize = terrainDensityData.chunkSize,
                     chunkPos = (Vector3)chunkPos,
                     terraformMode = terraformMode,
                 };

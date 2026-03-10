@@ -52,7 +52,7 @@ public class TextureSettingsTabController : MonoBehaviour
 
             texSettingsTab.texturePreview.texture = texture;
 
-            texSettingsTab.heightSlider.SetValues(-ChunkGenNetwork.Instance.maxWorldYChunks * ChunkGenNetwork.Instance.terrainDensityData.width, ChunkGenNetwork.Instance.maxWorldYChunks * ChunkGenNetwork.Instance.terrainDensityData.width, -ChunkGenNetwork.Instance.maxWorldYChunks * ChunkGenNetwork.Instance.terrainDensityData.width, ChunkGenNetwork.Instance.maxWorldYChunks * ChunkGenNetwork.Instance.terrainDensityData.width);
+            texSettingsTab.heightSlider.SetValues(-ChunkGenNetwork.Instance.maxWorldYChunks * ChunkGenNetwork.Instance.terrainDensityData.chunkSize, ChunkGenNetwork.Instance.maxWorldYChunks * ChunkGenNetwork.Instance.terrainDensityData.chunkSize, -ChunkGenNetwork.Instance.maxWorldYChunks * ChunkGenNetwork.Instance.terrainDensityData.chunkSize, ChunkGenNetwork.Instance.maxWorldYChunks * ChunkGenNetwork.Instance.terrainDensityData.chunkSize);
             texSettingsTab.slopeSlider.SetValues(0, 360, 0, 360);
 
             texSettingsTab.heightToggle.isOn = false;

@@ -37,13 +37,14 @@ public class BroadcastRandomChange : NetworkBehaviour
         ChunkGenNetwork.Instance.terrainDensityJobRemovalList = new();
         ChunkGenNetwork.Instance.terrainPolygonizationJobList = new();
         ChunkGenNetwork.Instance.terrainPolygonizationJobRemovalList = new();
+        ChunkGenNetwork.Instance.meshGenQueue = new();
+        ChunkGenNetwork.Instance.collisionMeshBakeQueue = new();
         ChunkGenNetwork.Instance.vertexSortJobList = new();
         ChunkGenNetwork.Instance.vertexSortJobRemovalList = new();
         ChunkGenNetwork.Instance.spawningPointCreationQueue = new();
-        ChunkGenNetwork.Instance.collisionMeshBakeQueue = new();
         ChunkGenNetwork.Instance.pendingAssetInstantiations = new();
 
-        ChunkGenNetwork.Instance.chunkSize = ChunkGenNetwork.Instance.terrainDensityData.width;
+        ChunkGenNetwork.Instance.chunkSize = ChunkGenNetwork.Instance.terrainDensityData.chunkSize;
         ChunkGenNetwork.Instance.chunksVisible = Mathf.RoundToInt(ChunkGenNetwork.Instance.maxViewDst / ChunkGenNetwork.Instance.chunkSize);
 
         PlayerController.instance.waterLevel = ChunkGenNetwork.Instance.terrainDensityData.waterLevel;
@@ -93,7 +94,7 @@ public class BroadcastRandomChange : NetworkBehaviour
         ChunkGenNetwork.Instance.terrainDensityJobRemovalList = new();
         ChunkGenNetwork.Instance.pendingAssetInstantiations = new();
 
-        ChunkGenNetwork.Instance.chunkSize = ChunkGenNetwork.Instance.terrainDensityData.width;
+        ChunkGenNetwork.Instance.chunkSize = ChunkGenNetwork.Instance.terrainDensityData.chunkSize;
         ChunkGenNetwork.Instance.chunksVisible = Mathf.RoundToInt(ChunkGenNetwork.Instance.maxViewDst / ChunkGenNetwork.Instance.chunkSize);
 
         PlayerController.instance.waterLevel = terrainDensityDataNew.waterLevel;

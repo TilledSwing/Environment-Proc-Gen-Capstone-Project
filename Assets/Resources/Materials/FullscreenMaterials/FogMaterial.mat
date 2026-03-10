@@ -144,9 +144,9 @@ Material:
     - _Surface: 0
     - _WorkflowMode: 1
     - _ZWrite: 1
-    - _fadeEnd: 30
+    - _fadeEnd: 0
     - _fadeHeight: 0.1
-    - _fadeStart: 0
+    - _fadeStart: -30
     - _fogDensity: 1
     - _fogOffset: 1000
     - _sunSize: 0.1

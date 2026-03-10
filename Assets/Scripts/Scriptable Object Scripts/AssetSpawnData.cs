@@ -9,12 +9,17 @@ public class AssetSpawnData : ScriptableObject
     public List<SpawnableAsset> spawnableAssets;
     public Dictionary<Vector3Int, List<ComputeMarchingCubes.Vertex>> assets = new();
 
+    public void ResetChunkAssets(Vector3Int chunkPos)
+    {
+        assets.Remove(chunkPos);
+    }
+
     public void ResetSpawnPoints() {
         for (int i = 0; i < spawnableAssets.Count; i++)
         {
             spawnableAssets[i].spawnedAssets.Clear();
-            assets.Clear();
         }
+        assets.Clear();
     }
 
     public void BackupOriginalState()

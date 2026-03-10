@@ -12,8 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c29ee72cee6fb9144bd844ec6a8f7ebb, type: 3}
   m_Name: TerrainDensityData
   m_EditorClassIdentifier: 
-  width: 32
-  height: 200
+  chunkSize: 32
   isolevel: 0
   waterLevel: 0
   water: 1

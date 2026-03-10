@@ -20,11 +20,12 @@ public class ComputeMarchingCubes : MonoBehaviour
     public Vector3Int chunkPos;
     public ComputeBuffer vertexBuffer;
     public NativeArray<float> heightsArray;
-    public bool initialLoadComplete = false;
     public bool edited = false;
     public JobHandle noiseDensityJobHandler;
     public JobHandle marchingCubesJobHandler;
     public NativeList<Triangle> triangleArray;
+    public Mesh mesh;
+    int marchingCubesIterations;
     /// <summary>
     /// Struct for vertex data
     /// </summary>
@@ -42,72 +43,76 @@ public class ComputeMarchingCubes : MonoBehaviour
         public Vertex v2;
         public Vertex v3;
     }
+    void Start()
+    {
+        marchingCubesIterations = Mathf.CeilToInt(terrainDensityData.chunkSize / ChunkGenNetwork.Instance.resolution) * Mathf.CeilToInt(terrainDensityData.chunkSize / ChunkGenNetwork.Instance.resolution) * Mathf.CeilToInt(terrainDensityData.chunkSize / ChunkGenNetwork.Instance.resolution);
+    }
     public void InitializeChunk
         (ChunkGenNetwork.TerrainChunk owner,
-        MeshFilter meshFilter,
-        MeshCollider meshCollider,
-        Vector3Int chunkCoord,
-        Vector3Int chunkPos,
-        AssetSpawner assetSpawner,
-        TerrainDensityData terrainDensityData,
-        bool initialLoadComplete
+         Mesh mesh,
+         MeshFilter meshFilter,
+         MeshCollider meshCollider,
+         Vector3Int chunkCoord,
+         Vector3Int chunkPos,
+         AssetSpawner assetSpawner,
+         TerrainDensityData terrainDensityData
         )
         {
             this.owner = owner;
+            this.mesh = mesh;
             this.meshFilter = meshFilter;
             this.meshCollider = meshCollider;
             this.chunkCoord = chunkCoord;
             this.chunkPos = chunkPos;
             this.assetSpawner = assetSpawner;
             this.terrainDensityData = terrainDensityData;
-            this.initialLoadComplete = initialLoadComplete;
         }
     public void GenerateChunk()
     {
         SetHeights();
-        initialLoadComplete = true;
+    }
+    public void DisposalReleaseHandler() 
+    {
+        if (heightsArray.IsCreated)
+        {
+            noiseDensityJobHandler.Complete();
+            marchingCubesJobHandler.Complete();
+            heightsArray.Dispose();
+        }
     }
     /// <summary>
     /// Release associated buffers
     /// </summary>
     void OnDisable()
     {
-        if (heightsArray.IsCreated)
-        {
-            noiseDensityJobHandler.Complete();
-            marchingCubesJobHandler.Complete();
-            heightsArray.Dispose();
-        }
+        DisposalReleaseHandler();
     }
     /// <summary>
     /// Release associated buffers
     /// </summary>
     void OnApplicationQuit()
     {
-        if (heightsArray.IsCreated)
-        {
-            noiseDensityJobHandler.Complete();
-            marchingCubesJobHandler.Complete();
-            heightsArray.Dispose();
-        }
+        DisposalReleaseHandler();
     }
     /// <summary>
     /// Set up the density values for the chunk using compute shaders
     /// </summary>
     public void SetHeights()
     {
-            int size = terrainDensityData.width + 1;
+        int size = terrainDensityData.chunkSize + 1;
+        if (!heightsArray.IsCreated)
+        {
             heightsArray = new(size * size * size, Allocator.Persistent);
-            NoiseDensityJob noiseDensityJob = new NoiseDensityJob
-            {
-                heightsArray = heightsArray,
-                chunkPos = new float3(chunkPos.x, chunkPos.y, chunkPos.z),
-                chunkSize = terrainDensityData.width,
-                height = terrainDensityData.height,
-                seed = ChunkGenNetwork.Instance.seed
-            };
-            noiseDensityJobHandler = noiseDensityJob.Schedule();
-            ChunkGenNetwork.Instance.terrainDensityJobList.Add(new ChunkGenNetwork.TerrainJobObject(owner, noiseDensityJobHandler, false));
+        }
+        NoiseDensityJob noiseDensityJob = new NoiseDensityJob
+        {
+            heightsArray = heightsArray,
+            chunkPos = new float3(chunkPos.x, chunkPos.y, chunkPos.z),
+            chunkSize = terrainDensityData.chunkSize,
+            seed = ChunkGenNetwork.Instance.seed
+        };
+        noiseDensityJobHandler = noiseDensityJob.Schedule();
+        ChunkGenNetwork.Instance.terrainDensityJobList.Add(new ChunkGenNetwork.TerrainJobObject(owner, noiseDensityJobHandler, false, owner.chunkID));
     }
     /// <summary>
     /// Sets up a mesh given a triangle array and count using lower level api for better performance
@@ -147,21 +152,22 @@ public class ComputeMarchingCubes : MonoBehaviour
             assetSpawner.heightsArray = new(heightsArray, Allocator.Persistent);
         }
 
-        Mesh mesh = new Mesh();
         Mesh.ApplyAndDisposeWritableMeshData(meshDataArray, mesh, MeshUpdateFlags.DontValidateIndices);
 
         meshFilter.mesh = mesh;
         mesh.RecalculateBounds();
-        ChunkGenNetwork.Instance.collisionMeshBakeQueue.Enqueue(new ChunkGenNetwork.MeshBake(mesh, meshCollider));
+        ChunkGenNetwork.Instance.collisionMeshBakeQueue.Enqueue(new ChunkGenNetwork.MeshBake(owner, mesh, meshCollider, owner.chunkID));
 
         if (!terraforming)
         {
             VertexSortJob vertexSortJob = new VertexSortJob { vertexArray = assetSpawner.chunkVertices };
             JobHandle vertexSortJobHandler = vertexSortJob.Schedule();
-            ChunkGenNetwork.Instance.vertexSortJobList.Add(new ChunkGenNetwork.VertexSortJob(vertexSortJobHandler, assetSpawner));
+            ChunkGenNetwork.Instance.vertexSortJobList.Add(new ChunkGenNetwork.VertexSortJob(vertexSortJobHandler, assetSpawner, owner.chunkID));
             if(chunkPos.y >= terrainDensityData.waterLevel && triangleCount > ChunkGenNetwork.Instance.landGrass.maxBladesPerTriangle)
             {
-                grass = gameObject.AddComponent<GrassRender>();
+                if (grass == null)
+                    grass = gameObject.AddComponent<GrassRender>();
+                grass.enabled = true;
                 grass.InitializeGrassRenderer(
                     chunkPos, 
                     ChunkGenNetwork.Instance.landGrass,
@@ -175,15 +181,18 @@ public class ComputeMarchingCubes : MonoBehaviour
                     false
                 );
                 grass.SetupGrass();
+                grass.renderGrass = true;
             }
-            else if(chunkPos.y <= terrainDensityData.waterLevel - terrainDensityData.width && triangleCount > ChunkGenNetwork.Instance.seaGrass.maxBladesPerTriangle && terrainDensityData.water)
+            else if(chunkPos.y <= terrainDensityData.waterLevel - terrainDensityData.chunkSize && triangleCount > ChunkGenNetwork.Instance.seaGrass.maxBladesPerTriangle && terrainDensityData.water)
             {
-                grass = gameObject.AddComponent<GrassRender>();
+                if (grass == null)
+                    grass = gameObject.AddComponent<GrassRender>();
+                grass.enabled = true;
                 grass.InitializeGrassRenderer(
                     chunkPos, 
                     ChunkGenNetwork.Instance.seaGrass,
                     -500,
-                    terrainDensityData.waterLevel - terrainDensityData.width,
+                    terrainDensityData.waterLevel - terrainDensityData.chunkSize,
                     ChunkGenNetwork.Instance.grassPositionComputeShader,
                     ChunkGenNetwork.Instance.grassUpdateComputeShader,
                     triangleCount,
@@ -192,6 +201,11 @@ public class ComputeMarchingCubes : MonoBehaviour
                     true
                 );
                 grass.SetupGrass();
+                grass.renderGrass = true;
+            }
+            else if (grass != null)
+            {
+                grass.enabled = false;
             }
         }
         triangleArray.Dispose();
@@ -205,9 +219,8 @@ public class ComputeMarchingCubes : MonoBehaviour
     {
         if (terraforming) edited = true;
         if (!heightsArray.IsCreated) return;
-        int iterations = Mathf.CeilToInt(terrainDensityData.width / ChunkGenNetwork.Instance.resolution) * Mathf.CeilToInt(terrainDensityData.width / ChunkGenNetwork.Instance.resolution) * Mathf.CeilToInt(terrainDensityData.width / ChunkGenNetwork.Instance.resolution);
 
-        triangleArray = new(iterations, Allocator.Persistent);
+        triangleArray = new(marchingCubesIterations, Allocator.Persistent);
 
         MarchingCubesJob marchingCubesJob = new MarchingCubesJob
         {
@@ -216,14 +229,13 @@ public class ComputeMarchingCubes : MonoBehaviour
             vertexOffsetTable = ChunkGenNetwork.Instance.vertexOffsetTable,
             edgeIndexTable = ChunkGenNetwork.Instance.edgeIndexTable,
             triangleTable = ChunkGenNetwork.Instance.triangleTable,
-            chunkSize = terrainDensityData.width,
+            chunkSize = terrainDensityData.chunkSize,
             chunkPos = new int3(chunkPos.x, chunkPos.y, chunkPos.z),
             isolevel = terrainDensityData.isolevel,
             lerpToggle = terrainDensityData.lerp,
             resolution = ChunkGenNetwork.Instance.resolution,
-            height = terrainDensityData.height,
         };
-        marchingCubesJobHandler = marchingCubesJob.Schedule(iterations, 16, noiseDensityJobHandler);
+        marchingCubesJobHandler = marchingCubesJob.Schedule(marchingCubesIterations, 16, noiseDensityJobHandler);
 
         if (terraforming)
         {
@@ -232,7 +244,7 @@ public class ComputeMarchingCubes : MonoBehaviour
         }
         else
         {
-            ChunkGenNetwork.Instance.terrainPolygonizationJobList.Add(new ChunkGenNetwork.TerrainJobObject(owner, marchingCubesJobHandler, terraforming));
+            ChunkGenNetwork.Instance.terrainPolygonizationJobList.Add(new ChunkGenNetwork.TerrainJobObject(owner, marchingCubesJobHandler, terraforming, owner.chunkID));
         }
     }
     /// <summary>
@@ -251,7 +263,6 @@ public class ComputeMarchingCubes : MonoBehaviour
         public float isolevel;
         public bool lerpToggle;
         public int resolution;
-        public int height;
         public void Execute(int index)
         {
             int adjustedSize = chunkSize / resolution;
@@ -429,7 +440,6 @@ public class ComputeMarchingCubes : MonoBehaviour
         public NativeArray<float> heightsArray;
         public float3 chunkPos;
         public int chunkSize;
-        public int height;
         public int seed;
         public void Execute()
         {
@@ -445,6 +455,6 @@ public class ComputeMarchingCubes : MonoBehaviour
     void OnDrawGizmos()
     {
         if (terrainDensityData == null || gameObject.GetComponent<MeshRenderer>().enabled == false) return; // still not found
-        Gizmos.DrawWireCube(chunkPos + (new Vector3(0.5f, 0.5f, 0.5f) * terrainDensityData.width), Vector3.one * terrainDensityData.width);
+        Gizmos.DrawWireCube(chunkPos + (new Vector3(0.5f, 0.5f, 0.5f) * terrainDensityData.chunkSize), Vector3.one * terrainDensityData.chunkSize);
     }
 }
