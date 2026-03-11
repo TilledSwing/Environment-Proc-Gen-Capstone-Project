@@ -168,7 +168,7 @@ public class Terraforming : NetworkBehaviour
                 if (marchingCubes.grass != null)
                 {
                     if (!marchingCubes.grass.isTerraforming)
-                        marchingCubes.grass.UpdateGrass(terraformCenter, terraformRadius + 0.1f);
+                        marchingCubes.grass.UpdateGrass(terraformCenter, terraformRadius);
                 }
             }
         }

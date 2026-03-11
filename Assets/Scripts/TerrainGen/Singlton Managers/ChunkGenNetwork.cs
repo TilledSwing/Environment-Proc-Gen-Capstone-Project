@@ -148,29 +148,20 @@ public class ChunkGenNetwork : MonoBehaviour
     [Space(5)]
     // Preset Dropdown
     public TMP_Dropdown presetDropdown;
-    // Chunk Variables
-    float maxViewDstSqr;
-    Vector3 chunkVec;
-    [HideInInspector]
-    public Vector3 halfChunkVec;
-    [HideInInspector]
-    public float halfChunkSize;
 
     // Chunk Data
     public Dictionary<long, TerrainChunk> chunkDictionary = new();
     [HideInInspector]
     public List<TerrainChunk> chunksVisibleLastUpdate = new();
     public PriorityQueue<Vector3Int> chunkLoadQueue = new();
-    public HashSet<long> chunkLoadSet = new();
-    public Queue<ChunkVisibility> chunkVisibilityQueue = new();
-    public HashSet<TerrainChunk> chunksToHide = new();
-    public HashSet<TerrainChunk> chunksToShow = new();
-    [HideInInspector]
-    public bool isLoadingChunkVisibility = false;
     [HideInInspector]
     public bool isLoadingChunks = false;
     [HideInInspector]
     public bool initialLoadComplete = false;
+    public Queue<TerrainChunk> chunkReturnQueue = new();
+    public bool isReturningChunks = false;
+    public HashSet<long> chunkLoadSet = new();
+    public Queue<ChunkVisibility> chunkVisibilityQueue = new();
 
     [Space(10)]
     [Header("========== Lighting Settings ==========")]
@@ -204,7 +195,7 @@ public class ChunkGenNetwork : MonoBehaviour
     public NativeArray<int> triangleTable;
     public NativeArray<int> staticMaxSizeVertexIndexArray;
 
-    public FastNoise noiseTest;
+    public FastNoise noiseGenerator;
     public int seed;
     Vector3Int[] chunkNeighborOffsets = new Vector3Int[]
     {
@@ -316,11 +307,7 @@ public class ChunkGenNetwork : MonoBehaviour
         mainCameraTransform = Camera.main.transform;
         chunkParent = GameObject.Find("ChunkParent").transform;
         updateDistanceThresholdSqr = updateDistanceThreshold * updateDistanceThreshold;
-        maxViewDstSqr = maxViewDst * maxViewDst;
         maxChunkDst = (mapSize - 1) / 2;
-        chunkVec = Vector3.one * chunkSize;
-        halfChunkVec = new Vector3(0.5f, 0.5f, 0.5f) * chunkSize;
-        halfChunkSize = chunkSize * 0.5f;
 
         lightingBlockerRenderer = lightingBlocker.GetComponent<MeshRenderer>();
         lightingBlockerRenderer.enabled = false;
@@ -355,13 +342,16 @@ public class ChunkGenNetwork : MonoBehaviour
         treeTopMaterial.SetVector("_WindDir", globalWindDirection);
 
         // noiseTest = FastNoise.FromEncodedNodeTree("HQkQ@BFkQY@BPwkWAgQICtcjPAQKJAjD9Sg/CS4AAQ@BkNAAc@BI@AgQAkH@BFkQQPQpXvxhmZmY/BAOamRk/CwAAgD8cAwAAcEIEAhYCHAkuAAE@BJJQkL@BJUQQzczMPRgAACDAIAM@B4Ag@BokCM3MzD4JCQ@AD5CEB+F6z4YzcxMPwwSJAjNzMw+CQk@BwQggB@BEM3MzL4Y@BPyQC/wsAC+xROD4EChcJDQkI@CEEEA7geBT8LexQuPwQDj8J1PBQ=");
-        noiseTest = FastNoise.FromEncodedNodeTree("HQkQ@BFkQY@BPwkWAgQICtejPAQKJAjD9Sg/CS4AAQ@BkNAAc@BI@AgQAkH@BFkQQPQpXvxhmZmY/BAOamRk/CwAAgD8cAwAAcEIEAhYCHAkuAAE@BJJQkL@BJUQQzczMPRgAACDAIAM@B4Ag@BokCM3MzD4JCQ@AD5CEB+F6z4YzcxMPwwSJAjNzMw+CQk@BwQggB@BEM3MzL4Y@BPyQC/wsAC+xROD4EChcJDQkI@CEEEA7geBT8LexQuPwQDj8J1PBQ=");
+        noiseGenerator = FastNoise.FromEncodedNodeTree
+        (
+            "HQkQ@BFkQY@BPwkWAgQICtejPAQKJAjD9Sg/CS4AAQ@BkNAAc@BI@AgQAkH@BFkQQPQpXvxhmZmY/BAOamRk/CwAAgD8cAwAAcEIEAhYCHAkuAAE@BJJQkL@BJUQQzczMPRgAACDAIAM@B4Ag@BokCM3MzD4JCQ@AD5CEB+F6z4YzcxMPwwSJAjNzMw+CQk@BwQggB@BEM3MzL4Y@BPyQC/wsAC+xROD4EChcJDQkI@CEEEA7geBT8LexQuPwQDj8J1PBQ="
+        );
 
         InitializeGenerator();
     }
     void OnDisable()
     {
-        if(staticMaxSizeVertexIndexArray.IsCreated)
+        if(staticMaxSizeVertexIndexArray != null && staticMaxSizeVertexIndexArray.IsCreated)
         {
             staticMaxSizeVertexIndexArray.Dispose();
         }
@@ -413,8 +403,8 @@ public class ChunkGenNetwork : MonoBehaviour
         chunkDictionary = new();
         chunksVisibleLastUpdate = new();
         chunkLoadQueue = new();
+        chunkReturnQueue = new();
         chunkLoadSet = new();
-        isLoadingChunkVisibility = false;
         isLoadingChunks = false;
         initialLoadComplete = false;
         // Action Queues
@@ -432,14 +422,13 @@ public class ChunkGenNetwork : MonoBehaviour
         DestroyChunks();
         assetSpawnData.ResetSpawnPoints();
 
+        CreateVertexIndexArray();
         TextureSetup();
         AssetSetup();
         
         // Set seeds
         seed = UnityEngine.Random.Range(0, 100000);
-        CreateVertexIndexArray();
         waterMesh = WaterPlaneGenerator.PlaneGeneratorJobHandler(terrainDensityData.chunkSize, terrainDensityData.waterLevel % terrainDensityData.chunkSize);
-        // UpdateVisibleChunks();
         UpdateChunksInitial();
     }
     /// <summary>
@@ -664,7 +653,7 @@ public class ChunkGenNetwork : MonoBehaviour
             UpdateVisibleChunks();
             lastUpdateViewerPos = viewerPos;
         }
-        // Current Max: 9ms
+        // Current Max: 10ms
         ProcessCollisionMeshBakes(Time.realtimeSinceStartup, 0.001f);
         ProcessDensityJobs(Time.realtimeSinceStartup, 0.001f);
         ProcessPolygonizationJobs(Time.realtimeSinceStartup, 0.001f);
@@ -756,14 +745,9 @@ public class ChunkGenNetwork : MonoBehaviour
                 terrainChunk.chunkCoord.z < minZ || terrainChunk.chunkCoord.z > maxZ)
             {
                 if (!terrainChunk.marchingCubes.edited)
-                {
-                    terrainChunkPool.ReturnChunk(terrainChunk, terrainChunk.waterChunk);
-                    chunkDictionary.Remove(terrainChunk.packedCoord);
-                }
+                    chunkReturnQueue.Enqueue(terrainChunk);
                 else
-                {
                     chunkVisibilityQueue.Enqueue(new ChunkVisibility(terrainChunk, false, terrainChunk.chunkID));
-                }
             }
         }
         chunksVisibleLastUpdate.Clear();
@@ -797,7 +781,6 @@ public class ChunkGenNetwork : MonoBehaviour
 
                     if (chunkDictionary.TryGetValue(chunkCoordId, out TerrainChunk dictChunk))
                     {
-                        chunksToShow.Add(dictChunk);
                         chunkVisibilityQueue.Enqueue(new ChunkVisibility(dictChunk, true, dictChunk.chunkID));
                         chunksVisibleLastUpdate.Add(dictChunk);
                     }
@@ -813,6 +796,9 @@ public class ChunkGenNetwork : MonoBehaviour
 
         if (!isLoadingChunks && chunkLoadQueue.Count > 0)
             StartCoroutine(LoadChunksOverTime());
+
+        if (!isReturningChunks && chunkReturnQueue.Count > 0)
+            StartCoroutine(ReturnChunksOverTime());
     }
     /// <summary>
     /// Coroutine for loading chunks asynchronously
@@ -854,6 +840,46 @@ public class ChunkGenNetwork : MonoBehaviour
         }
 
         isLoadingChunks = false;
+    }
+    /// <summary>
+    /// Coroutine for returning chunks asynchronously
+    /// </summary>
+    /// <returns>yield return</returns>
+    private IEnumerator ReturnChunksOverTime()
+    {
+        isReturningChunks = true;
+        int chunkBatchCounter = 0;
+
+        while (chunkReturnQueue.Count > 0)
+        {
+            TerrainChunk chunk = chunkReturnQueue.Dequeue();
+            
+            int currentChunkCoordX = Mathf.FloorToInt(viewerPos.x / chunkSize);
+            int currentChunkCoordY = Mathf.FloorToInt(viewerPos.y / chunkSize);
+            int currentChunkCoordZ = Mathf.FloorToInt(viewerPos.z / chunkSize);
+
+            bool isInView = Mathf.Abs(currentChunkCoordX - chunk.chunkCoord.x) <= chunksVisible &&
+                            Mathf.Abs(currentChunkCoordY - chunk.chunkCoord.y) <= chunksVisible &&
+                            Mathf.Abs(currentChunkCoordZ - chunk.chunkCoord.z) <= chunksVisible;
+
+            if (!isInView)
+            {
+                terrainChunkPool.ReturnChunk(chunk, chunk.waterChunk);
+                chunkDictionary.Remove(chunk.packedCoord);
+                chunkBatchCounter++;
+            }
+            else
+            {
+                chunksVisibleLastUpdate.Add(chunk);
+            }
+
+            if (chunkBatchCounter % 8 == 0)
+            {
+                yield return null;
+            }
+        }
+
+        isReturningChunks = false;
     }
     /// <summary>
     /// Get a TerrainChunk and its neighbors with the given chunk's coordinate
@@ -1098,8 +1124,6 @@ public class ChunkGenNetwork : MonoBehaviour
             // Set up the chunk's ComputeMarchingCubes script
             marchingCubes.chunkCoord = chunkCoord;
             marchingCubes.chunkPos = chunkPos;
-            // if (marchingCubes.grass != null)
-            //     marchingCubes.grass.renderGrass = true;
             marchingCubes.GenerateChunk();
         }
         public void ClearChunk()

@@ -92,7 +92,6 @@ public class BombLogic : NetworkBehaviour
             if (terrainChunk == null) continue;
             Bounds bounds = new Bounds(terrainChunk.chunkPos + (new Vector3(0.5f, 0.5f, 0.5f) * terrainDensityData.chunkSize), Vector3.one * terrainDensityData.chunkSize);
             if(bounds.SqrDistance(terraformCenter) <= explosionRadius * explosionRadius)
-            // if (ChunkGenNetwork.Instance.CalculateDstFromBound(terrainChunk.chunkCoord, terraformCenter) <= explosionRadius)
             {
                 ComputeMarchingCubes marchingCubes = terrainChunk.marchingCubes;
                 Vector3Int chunkPos = terrainChunk.chunkPos;
@@ -125,7 +124,7 @@ public class BombLogic : NetworkBehaviour
                 if (marchingCubes.grass != null)
                 {
                     if (!marchingCubes.grass.isTerraforming)
-                        marchingCubes.grass.UpdateGrass(terraformCenter, explosionRadius + 0.5f);
+                        marchingCubes.grass.UpdateGrass(terraformCenter, explosionRadius);
                 }
             }
         }

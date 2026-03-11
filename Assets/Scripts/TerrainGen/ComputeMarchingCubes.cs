@@ -444,7 +444,7 @@ public class ComputeMarchingCubes : MonoBehaviour
         public void Execute()
         {
             int size = chunkSize + 1;
-            ChunkGenNetwork.Instance.noiseTest.GenUniformGrid3D(
+            ChunkGenNetwork.Instance.noiseGenerator.GenUniformGrid3D(
                                                                 heightsArray, chunkPos.x, chunkPos.y, chunkPos.z, 
                                                                 size, size, size, 1, 1, 1, seed);
         }

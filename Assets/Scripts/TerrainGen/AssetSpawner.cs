@@ -31,8 +31,8 @@ public class AssetSpawner : MonoBehaviour
     public JobHandle minDepthPointJobHandler;
     Unity.Mathematics.Random rng;
     void Start() {
-        assetLayer = LayerMask.GetMask("Asset Layer");
-        interactLayer = LayerMask.GetMask("Interact Layer");
+        assetLayer = LayerMask.NameToLayer("Asset Layer");
+        interactLayer = LayerMask.NameToLayer("Interact Layer");
 
         spawnPoints = new List<List<ComputeMarchingCubes.Vertex>>(assetSpawnData.spawnableAssets.Count);
         acceptedSpawnPoints = new List<List<ComputeMarchingCubes.Vertex>>(assetSpawnData.spawnableAssets.Count);
@@ -313,12 +313,12 @@ public class AssetSpawner : MonoBehaviour
         SpawnableAsset spawnableAsset = assetSpawnData.spawnableAssets[i];
         bool rotateToFaceNormal = spawnableAsset.rotateToFaceNormal;
         
-        GameObject assetToSpawn = Instantiate(spawnableAsset.asset, acceptedSpawnPoints[i][j].position, rotateToFaceNormal ? normal * randomYRotation : randomYRotation);
-        assetToSpawn.transform.SetParent(owner.assetParent.transform);
-        
+        GameObject assetToSpawn = Instantiate(spawnableAsset.asset, acceptedSpawnPoints[i][j].position, rotateToFaceNormal ? normal * randomYRotation : randomYRotation, owner.assetParent.transform);
+        assetToSpawn.layer = assetLayer;
+
         if (spawnableAsset.isValuable)
         {
-            assetToSpawn.layer = LayerMask.NameToLayer("Interact Layer");
+            assetToSpawn.layer = interactLayer;
             ValuableProperties properties = assetToSpawn.AddComponent<ValuableProperties>();
             properties.value = rng.NextInt(spawnableAsset.minValue, spawnableAsset.maxValue);
             assetToSpawn.AddComponent<ScanObject>();
