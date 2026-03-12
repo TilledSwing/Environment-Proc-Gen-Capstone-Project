@@ -15,11 +15,6 @@ MonoBehaviour:
   m_GroupName: Default Local Group
   m_GUID: 8e48f53c038a9a64e92b7be8b4c06274
   m_SerializeEntries:
-  - m_GUID: c205b5931470b634b8c341cd6867f544
-    m_Address: Assets/Settings/PC_Renderer_Underwater.asset
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f288ae1f4751b564a96ac7587541f7a2
     m_Address: Assets/Settings/PC_Renderer.asset
     m_ReadOnly: 0

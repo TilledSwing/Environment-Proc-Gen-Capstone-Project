@@ -33,11 +33,13 @@ public class ChunkGenNetwork : MonoBehaviour
     [Space(10)]
     [Header("========== Render Data ==========")]
     [Space(5)]
-    public UniversalRendererData rendererData;
+    public Volume globalVolume;
     [HideInInspector]
-    public FogRenderPassFeature fogRenderPassFeature;
-    public UniversalRenderPipelineAsset mainUrpAsset;
-    public UniversalRenderPipelineAsset underwaterUrpAsset;
+    public DepthOfField depthOfField;
+    [HideInInspector]
+    public LensDistortion lensDistortion;
+    [HideInInspector]
+    public FilmGrain filmGrain;
 
     [Space(10)]
     [Header("========== Objective UI ==========")]
@@ -159,6 +161,7 @@ public class ChunkGenNetwork : MonoBehaviour
     [HideInInspector]
     public bool initialLoadComplete = false;
     public Queue<TerrainChunk> chunkReturnQueue = new();
+    [HideInInspector]
     public bool isReturningChunks = false;
     public HashSet<long> chunkLoadSet = new();
     public Queue<ChunkVisibility> chunkVisibilityQueue = new();
@@ -318,7 +321,6 @@ public class ChunkGenNetwork : MonoBehaviour
         NativeLeakDetection.Mode = NativeLeakDetectionMode.EnabledWithStackTrace;
         
         mainCameraTransform = Camera.main.transform;
-        chunkParent = GameObject.Find("ChunkParent").transform;
         updateDistanceThresholdSqr = updateDistanceThreshold * updateDistanceThreshold;
         maxChunkDst = (mapSize - 1) / 2;
 
@@ -331,8 +333,10 @@ public class ChunkGenNetwork : MonoBehaviour
         triangleTable = new(MarchingCubesTables.triangleTable, Allocator.Persistent);
 
         // Fog Shader Inits
-        fogRenderPassFeature = rendererData.rendererFeatures.Find(f => f is FogRenderPassFeature) as FogRenderPassFeature;
-        
+        VolumeProfile profile = globalVolume.profile;
+        profile.TryGet(out depthOfField);
+        profile.TryGet(out lensDistortion);
+        profile.TryGet(out filmGrain);
         fogMat.SetFloat("_fogOffset", fogOffset);
         fogMat.SetFloat("_fogDensity", fogDensity);
         fogMat.SetColor("_upperFogColor", upperFogColor);
@@ -389,8 +393,7 @@ public class ChunkGenNetwork : MonoBehaviour
         chunkDictionary.Clear();
         
         SetFogActive(false);
-        GraphicsSettings.defaultRenderPipeline = mainUrpAsset;
-        QualitySettings.renderPipeline = mainUrpAsset;
+        ToggleUnderwaterEffects(false);
     }
     public void InitializeGenerator()
     {
@@ -489,7 +492,19 @@ public class ChunkGenNetwork : MonoBehaviour
         waterMaterial.SetFloat("_fogOffset", active ? fogOffset : 1000);
         waterMaterial.SetFloat("_fogDensity", active ? fogDensity : 1);
     }
-    
+    /// <summary>
+    /// Toggle underwater effects
+    /// </summary>
+    /// <param name="enable">toggle bool</param>
+    public void ToggleUnderwaterEffects(bool enable)
+    {
+        if (depthOfField != null)
+            depthOfField.active = enable;
+        if (lensDistortion != null)
+            lensDistortion.active = enable;
+        if (filmGrain != null)
+            filmGrain.active = enable;
+    }
     /// <summary>
     /// Process active chunk density jobs
     /// </summary>

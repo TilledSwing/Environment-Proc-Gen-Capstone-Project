@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Rendering;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 // Template by Bobsi Unity - Youtube
 // Modified by Jacob Ormsby
@@ -133,9 +134,7 @@ public class PlayerController : NetworkBehaviour
         if (playerCamera.transform.position.y - 0.08f < waterLevel && !underwater && ChunkGenNetwork.Instance.terrainDensityData.water)
         {
             underwater = true;
-            GraphicsSettings.defaultRenderPipeline = ChunkGenNetwork.Instance.underwaterUrpAsset;
-            QualitySettings.renderPipeline = ChunkGenNetwork.Instance.underwaterUrpAsset;
-            ChunkGenNetwork.Instance.fogRenderPassFeature = ChunkGenNetwork.Instance.rendererData.rendererFeatures.Find(f => f is FogRenderPassFeature) as FogRenderPassFeature;
+            ChunkGenNetwork.Instance.ToggleUnderwaterEffects(true);
             ChunkGenNetwork.Instance.fogMat.SetFloat("_fogDensity", 0.018f);
             ChunkGenNetwork.Instance.fogMat.SetFloat("_fogOffset", -15f);
             ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogDensity", 0.018f);
@@ -145,9 +144,7 @@ public class PlayerController : NetworkBehaviour
         else if (playerCamera.transform.position.y - 0.08f > waterLevel && underwater && ChunkGenNetwork.Instance.terrainDensityData.water)
         {
             underwater = false;
-            GraphicsSettings.defaultRenderPipeline = ChunkGenNetwork.Instance.mainUrpAsset;
-            QualitySettings.renderPipeline = ChunkGenNetwork.Instance.mainUrpAsset;
-            ChunkGenNetwork.Instance.fogRenderPassFeature = ChunkGenNetwork.Instance.rendererData.rendererFeatures.Find(f => f is FogRenderPassFeature) as FogRenderPassFeature;
+            ChunkGenNetwork.Instance.ToggleUnderwaterEffects(false);
             ChunkGenNetwork.Instance.fogMat.SetFloat("_fogDensity", ChunkGenNetwork.Instance.fogDensity);
             ChunkGenNetwork.Instance.fogMat.SetFloat("_fogOffset", ChunkGenNetwork.Instance.fogOffset);
             ChunkGenNetwork.Instance.waterMaterial.SetFloat("_fogDensity", ChunkGenNetwork.Instance.fogDensity);
@@ -265,7 +262,6 @@ public class PlayerController : NetworkBehaviour
             transform.rotation *= Quaternion.Euler(0, Input.GetAxis("Mouse X") * lookSpeed, 0);
         }
     }
-
     private void Flight(InputAction.CallbackContext context)
     {
         Debug.Log("Flight toggled");

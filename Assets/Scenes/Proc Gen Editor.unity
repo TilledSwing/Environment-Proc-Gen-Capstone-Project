@@ -12067,10 +12067,10 @@ MonoBehaviour:
   upperFogColor: {r: 0.015686275, g: 0.05882353, b: 0.14117648, a: 0}
   lowerFogColor: {r: 0.101960786, g: 0.14901961, b: 0.20784314, a: 0}
   darkFogColor: {r: 0.09429512, g: 0.10846831, b: 0.122641504, a: 1}
-  rendererData: {fileID: 11400000, guid: f288ae1f4751b564a96ac7587541f7a2, type: 2}
-  fogRenderPassFeature: {fileID: -6941763473132003427, guid: f288ae1f4751b564a96ac7587541f7a2, type: 2}
-  mainUrpAsset: {fileID: 11400000, guid: 4b83569d67af61e458304325a23e5dfd, type: 2}
-  underwaterUrpAsset: {fileID: 11400000, guid: 2a0130e02479ff741a2d412b4faeb3a6, type: 2}
+  globalVolume: {fileID: 832575518}
+  depthOfField: {fileID: 0}
+  lensDistortion: {fileID: 0}
+  filmGrain: {fileID: 0}
   objectiveCanvas: {fileID: 1523709550}
   hudCanvas: {fileID: 1611538826}
   chatContainer: {fileID: 898901602}
@@ -12113,12 +12113,9 @@ MonoBehaviour:
   assetWindow: {fileID: 1020663068}
   assetSettingsTab: {fileID: 6267577448233224302, guid: df6bf163c048da44e862dc6585eda648, type: 3}
   presetDropdown: {fileID: 524126295}
-  halfChunkVec: {x: 0, y: 0, z: 0}
-  halfChunkSize: 0
-  chunksVisibleLastUpdate: 
-  isLoadingChunkVisibility: 0
   isLoadingChunks: 0
   initialLoadComplete: 0
+  isReturningChunks: 0
   lightingBlocker: {fileID: 762416109}
   mainLight: {fileID: 410087040}
   seed: 0
