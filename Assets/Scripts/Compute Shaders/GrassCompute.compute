@@ -51,7 +51,7 @@ float Hash(uint seed)
     seed *= 2654435769u;
     return (seed & 0x00FFFFFF) / 16777216.0;
 }
-[numthreads(64,1,1)]
+[numthreads(256,1,1)]
 void GrassCompute (uint3 id : SV_DispatchThreadID)
 {
     if (id.x >= TriangleCount) 

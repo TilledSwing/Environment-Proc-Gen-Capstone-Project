@@ -25,7 +25,7 @@ float3 TerraformCenter;
 float TerraformRadius;
 
 // Perform terraformation on the region of density around the point of terraformation
-[numthreads(64,1,1)]
+[numthreads(256,1,1)]
 void GrassTerraform (uint3 id : SV_DispatchThreadID)
 {
     uint count1 = GrassCountsBuffer.Load(0);

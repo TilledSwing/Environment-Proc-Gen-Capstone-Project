@@ -186,6 +186,7 @@ public class ChunkGenNetwork : MonoBehaviour
     // Asset Spawn Point Creation Queue
     public Queue<TerrainJobObject> meshGenQueue = new();
     public Queue<MeshBake> collisionMeshBakeQueue = new();
+    public Queue<GrassObject> grassProcessQueue = new();
     public Queue<AssetSpawnPointCreation> spawningPointCreationQueue = new();
     // Asset Instantiation Queue
     public Queue<AssetInstantiation> pendingAssetInstantiations = new();
@@ -222,22 +223,6 @@ public class ChunkGenNetwork : MonoBehaviour
             this.expectedID = expectedID;
         }
     }
-    public struct AssetInstantiation
-    {
-        public TerrainChunk owner;
-        public int i;
-        public int j;
-        public uint seed;
-        public uint expectedID;
-        public AssetInstantiation(TerrainChunk owner, int i, int j, uint seed, uint expectedID)
-        {
-            this.owner = owner;
-            this.i = i;
-            this.j = j;
-            this.seed = seed;
-            this.expectedID = expectedID;
-        }
-    }
     public class TerrainJobObject
     {
         public TerrainChunk owner;
@@ -249,18 +234,6 @@ public class ChunkGenNetwork : MonoBehaviour
             this.owner = owner;
             this.jobHandle = jobHandle;
             this.terraforming = terraforming;
-            this.expectedID = expectedID;
-        }
-    }
-    public class VertexSortJob
-    {
-        public JobHandle jobHandle;
-        public AssetSpawner assetSpawner;
-        public uint expectedID;
-        public VertexSortJob(JobHandle jobHandle, AssetSpawner assetSpawner, uint expectedID)
-        {
-            this.jobHandle = jobHandle;
-            this.assetSpawner = assetSpawner;
             this.expectedID = expectedID;
         }
     }
@@ -278,6 +251,30 @@ public class ChunkGenNetwork : MonoBehaviour
             this.expectedID = expectedID;
         }
     }
+    public class GrassObject
+    {
+        public TerrainChunk owner;
+        public int triangleCount;
+        public uint expectedID;
+        public GrassObject(TerrainChunk owner, int triangleCount, uint expectedID)
+        {
+            this.owner = owner;
+            this.triangleCount = triangleCount;
+            this.expectedID = expectedID;
+        }
+    }
+    public class VertexSortJob
+    {
+        public JobHandle jobHandle;
+        public AssetSpawner assetSpawner;
+        public uint expectedID;
+        public VertexSortJob(JobHandle jobHandle, AssetSpawner assetSpawner, uint expectedID)
+        {
+            this.jobHandle = jobHandle;
+            this.assetSpawner = assetSpawner;
+            this.expectedID = expectedID;
+        }
+    }
     public class AssetSpawnPointCreation
     {
         public TerrainChunk owner;
@@ -285,6 +282,22 @@ public class ChunkGenNetwork : MonoBehaviour
         public AssetSpawnPointCreation(TerrainChunk owner, uint expectedID)
         {
             this.owner = owner;
+            this.expectedID = expectedID;
+        }
+    }
+    public struct AssetInstantiation
+    {
+        public TerrainChunk owner;
+        public int i;
+        public int j;
+        public uint seed;
+        public uint expectedID;
+        public AssetInstantiation(TerrainChunk owner, int i, int j, uint seed, uint expectedID)
+        {
+            this.owner = owner;
+            this.i = i;
+            this.j = j;
+            this.seed = seed;
             this.expectedID = expectedID;
         }
     }
@@ -414,6 +427,7 @@ public class ChunkGenNetwork : MonoBehaviour
         terrainPolygonizationJobRemovalList = new();
         meshGenQueue = new();
         collisionMeshBakeQueue = new();
+        grassProcessQueue = new();
         vertexSortJobList = new();
         vertexSortJobRemovalList = new();
         spawningPointCreationQueue = new();
@@ -566,6 +580,21 @@ public class ChunkGenNetwork : MonoBehaviour
         }
     }
     /// <summary>
+    /// Process mesh creation queue
+    /// </summary>
+    /// <param name="startTime">Start of allocated time frame</param>
+    public void ProcessGrassQueue(float startTime, float timeBudget)
+    {
+        while (grassProcessQueue.Count > 0 && Time.realtimeSinceStartup - startTime < timeBudget)
+        {
+            GrassObject grass = grassProcessQueue.Dequeue();
+            if (grass.expectedID != grass.owner.chunkID)
+                continue;
+            else if (grass.owner.chunk != null)
+                grass.owner.marchingCubes.ProcessGrass(grass.triangleCount);
+        }
+    }
+    /// <summary>
     /// Process chunk visibility queue
     /// </summary>
     /// <param name="startTime">Start of allocated time frame</param>
@@ -653,11 +682,12 @@ public class ChunkGenNetwork : MonoBehaviour
             UpdateVisibleChunks();
             lastUpdateViewerPos = viewerPos;
         }
-        // Current Max: 10ms
-        ProcessCollisionMeshBakes(Time.realtimeSinceStartup, 0.001f);
+        // Current Max: 11ms
         ProcessDensityJobs(Time.realtimeSinceStartup, 0.001f);
         ProcessPolygonizationJobs(Time.realtimeSinceStartup, 0.001f);
         ProcessMeshGenQueue(Time.realtimeSinceStartup, 0.001f);
+        ProcessCollisionMeshBakes(Time.realtimeSinceStartup, 0.001f);
+        ProcessGrassQueue(Time.realtimeSinceStartup, 0.001f);
         ProcessChunkVisibilty(Time.realtimeSinceStartup, 0.001f);
         ProcessVertexSortJobs(Time.realtimeSinceStartup, 0.001f);
         ProcessSpawnPointCreation(Time.realtimeSinceStartup, 0.002f);

@@ -163,50 +163,58 @@ public class ComputeMarchingCubes : MonoBehaviour
             VertexSortJob vertexSortJob = new VertexSortJob { vertexArray = assetSpawner.chunkVertices };
             JobHandle vertexSortJobHandler = vertexSortJob.Schedule();
             ChunkGenNetwork.Instance.vertexSortJobList.Add(new ChunkGenNetwork.VertexSortJob(vertexSortJobHandler, assetSpawner, owner.chunkID));
-            if(chunkPos.y >= terrainDensityData.waterLevel && triangleCount > ChunkGenNetwork.Instance.landGrass.maxBladesPerTriangle)
-            {
-                if (grass == null)
-                    grass = gameObject.AddComponent<GrassRender>();
-                grass.enabled = true;
-                grass.InitializeGrassRenderer(
-                    chunkPos, 
-                    ChunkGenNetwork.Instance.landGrass,
-                    terrainDensityData.waterLevel,
-                    52,
-                    ChunkGenNetwork.Instance.grassPositionComputeShader,
-                    ChunkGenNetwork.Instance.grassUpdateComputeShader,
-                    triangleCount,
-                    triangleArray.AsArray(),
-                    mesh.bounds,
-                    false
-                );
-                grass.SetupGrass();
-                grass.renderGrass = true;
-            }
-            else if(chunkPos.y <= terrainDensityData.waterLevel - terrainDensityData.chunkSize && triangleCount > ChunkGenNetwork.Instance.seaGrass.maxBladesPerTriangle && terrainDensityData.water)
-            {
-                if (grass == null)
-                    grass = gameObject.AddComponent<GrassRender>();
-                grass.enabled = true;
-                grass.InitializeGrassRenderer(
-                    chunkPos, 
-                    ChunkGenNetwork.Instance.seaGrass,
-                    -500,
-                    terrainDensityData.waterLevel - terrainDensityData.chunkSize,
-                    ChunkGenNetwork.Instance.grassPositionComputeShader,
-                    ChunkGenNetwork.Instance.grassUpdateComputeShader,
-                    triangleCount,
-                    triangleArray.AsArray(),
-                    mesh.bounds,
-                    true
-                );
-                grass.SetupGrass();
-                grass.renderGrass = true;
-            }
-            else if (grass != null)
-            {
-                grass.enabled = false;
-            }
+            ChunkGenNetwork.Instance.grassProcessQueue.Enqueue(new ChunkGenNetwork.GrassObject(owner, triangleCount, owner.chunkID));
+        }
+        else
+        {
+            triangleArray.Dispose();
+        }
+    }
+    public void ProcessGrass(int triangleCount)
+    {
+        if(chunkPos.y >= terrainDensityData.waterLevel && triangleCount > ChunkGenNetwork.Instance.landGrass.maxBladesPerTriangle)
+        {
+            if (grass == null)
+                grass = gameObject.AddComponent<GrassRender>();
+            grass.enabled = true;
+            grass.InitializeGrassRenderer(
+                chunkPos, 
+                ChunkGenNetwork.Instance.landGrass,
+                terrainDensityData.waterLevel,
+                52,
+                ChunkGenNetwork.Instance.grassPositionComputeShader,
+                ChunkGenNetwork.Instance.grassUpdateComputeShader,
+                triangleCount,
+                triangleArray.AsArray(),
+                mesh.bounds,
+                false
+            );
+            grass.SetupGrass();
+            grass.renderGrass = true;
+        }
+        else if(chunkPos.y <= terrainDensityData.waterLevel - terrainDensityData.chunkSize && triangleCount > ChunkGenNetwork.Instance.seaGrass.maxBladesPerTriangle && terrainDensityData.water)
+        {
+            if (grass == null)
+                grass = gameObject.AddComponent<GrassRender>();
+            grass.enabled = true;
+            grass.InitializeGrassRenderer(
+                chunkPos, 
+                ChunkGenNetwork.Instance.seaGrass,
+                -500,
+                terrainDensityData.waterLevel - terrainDensityData.chunkSize,
+                ChunkGenNetwork.Instance.grassPositionComputeShader,
+                ChunkGenNetwork.Instance.grassUpdateComputeShader,
+                triangleCount,
+                triangleArray.AsArray(),
+                mesh.bounds,
+                true
+            );
+            grass.SetupGrass();
+            grass.renderGrass = true;
+        }
+        else if (grass != null)
+        {
+            grass.enabled = false;
         }
         triangleArray.Dispose();
     }

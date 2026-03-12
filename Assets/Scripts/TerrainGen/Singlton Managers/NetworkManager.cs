@@ -81,6 +81,7 @@ public class NetworkManager : NetworkBehaviour
         ChunkGenNetwork.Instance.terrainPolygonizationJobRemovalList = new();
         ChunkGenNetwork.Instance.meshGenQueue = new();
         ChunkGenNetwork.Instance.collisionMeshBakeQueue = new();
+        ChunkGenNetwork.Instance.grassProcessQueue = new();
         ChunkGenNetwork.Instance.vertexSortJobList = new();
         ChunkGenNetwork.Instance.vertexSortJobRemovalList = new();
         ChunkGenNetwork.Instance.spawningPointCreationQueue = new();
