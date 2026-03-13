@@ -135,7 +135,6 @@ public class Terraforming : NetworkBehaviour
             if (terrainChunk == null) continue;
             Bounds bounds = new Bounds(terrainChunk.chunkPos + (new Vector3(0.5f, 0.5f, 0.5f) * terrainDensityData.chunkSize), Vector3.one * terrainDensityData.chunkSize);
             if(bounds.SqrDistance(terraformCenter) <= terraformRadius * terraformRadius)
-            // if (ChunkGenNetwork.Instance.CalculateDstFromBound(terrainChunk.chunkCoord, terraformCenter) <= terraformRadius * terraformRadius)
             {
                 ComputeMarchingCubes marchingCubes = terrainChunk.marchingCubes;
                 Vector3Int chunkPos = terrainChunk.chunkPos;
@@ -165,7 +164,7 @@ public class Terraforming : NetworkBehaviour
                 terraformHandler.Complete();
 
                 marchingCubes.MarchingCubesJobHandler(true);
-                if (marchingCubes.grass != null)
+                if (marchingCubes.grass != null && !marchingCubes.assetSpawner.emptyChunk)
                 {
                     if (!marchingCubes.grass.isTerraforming)
                         marchingCubes.grass.UpdateGrass(terraformCenter, terraformRadius);

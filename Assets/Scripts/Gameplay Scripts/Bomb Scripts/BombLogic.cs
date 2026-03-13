@@ -121,7 +121,7 @@ public class BombLogic : NetworkBehaviour
                 terraformHandler.Complete();
 
                 marchingCubes.MarchingCubesJobHandler(true);
-                if (marchingCubes.grass != null)
+                if (marchingCubes.grass != null && !marchingCubes.assetSpawner.emptyChunk)
                 {
                     if (!marchingCubes.grass.isTerraforming)
                         marchingCubes.grass.UpdateGrass(terraformCenter, explosionRadius);
