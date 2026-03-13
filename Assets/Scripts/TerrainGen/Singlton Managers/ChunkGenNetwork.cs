@@ -226,7 +226,7 @@ public class ChunkGenNetwork : MonoBehaviour
             this.expectedID = expectedID;
         }
     }
-    public class TerrainJobObject
+    public struct TerrainJobObject
     {
         public TerrainChunk owner;
         public JobHandle jobHandle;
@@ -240,7 +240,7 @@ public class ChunkGenNetwork : MonoBehaviour
             this.expectedID = expectedID;
         }
     }
-    public class MeshBake
+    public struct MeshBake
     {
         public TerrainChunk owner;
         public Mesh mesh;
@@ -254,7 +254,7 @@ public class ChunkGenNetwork : MonoBehaviour
             this.expectedID = expectedID;
         }
     }
-    public class GrassObject
+    public struct GrassObject
     {
         public TerrainChunk owner;
         public int triangleCount;
@@ -266,7 +266,7 @@ public class ChunkGenNetwork : MonoBehaviour
             this.expectedID = expectedID;
         }
     }
-    public class VertexSortJob
+    public struct VertexSortJob
     {
         public JobHandle jobHandle;
         public AssetSpawner assetSpawner;
@@ -278,7 +278,7 @@ public class ChunkGenNetwork : MonoBehaviour
             this.expectedID = expectedID;
         }
     }
-    public class AssetSpawnPointCreation
+    public struct AssetSpawnPointCreation
     {
         public TerrainChunk owner;
         public uint expectedID;
@@ -517,14 +517,25 @@ public class ChunkGenNetwork : MonoBehaviour
             {
                 if(job.expectedID != job.owner.chunkID)
                 {
+                    job.jobHandle.Complete();
                     terrainDensityJobRemovalList.Add(job);
                     continue;
                 }
                 else if (job.jobHandle.IsCompleted)
                 {
                     job.jobHandle.Complete();
+                    FastNoise.OutputMinMax densityMinMax = job.owner.marchingCubes.densityMinMax.Value;
+                    // UnityEngine.Debug.Log("Min: " + densityMinMax.min + " Max: " + densityMinMax.max);
+                    if (terrainDensityData.isolevel > densityMinMax.min && terrainDensityData.isolevel < densityMinMax.max)
+                    {
+                        job.owner.marchingCubes.MarchingCubesJobHandler(job.terraforming);
+                    }
+                    else if (terrainDensityData.isolevel > densityMinMax.max)
+                    {
+                        job.owner.assetSpawner.emptyChunk = true;
+                        spawningPointCreationQueue.Enqueue(new AssetSpawnPointCreation(job.owner, job.owner.chunkID));
+                    }
                     terrainDensityJobRemovalList.Add(job);
-                    job.owner.marchingCubes.MarchingCubesJobHandler(job.terraforming);
                 }
             }
             foreach(TerrainJobObject job in terrainDensityJobRemovalList)
@@ -545,6 +556,7 @@ public class ChunkGenNetwork : MonoBehaviour
             {
                 if(job.expectedID != job.owner.chunkID)
                 {
+                    job.jobHandle.Complete();
                     terrainPolygonizationJobRemovalList.Add(job);
                     continue;
                 }
@@ -552,7 +564,6 @@ public class ChunkGenNetwork : MonoBehaviour
                 {
                     job.jobHandle.Complete();
                     terrainPolygonizationJobRemovalList.Add(job);
-                    // job.owner.marchingCubes.SetMeshValuesPerformant(job.terraforming);
                     meshGenQueue.Enqueue(job);
                 }
             }
@@ -635,6 +646,7 @@ public class ChunkGenNetwork : MonoBehaviour
             {
                 if (job.expectedID != job.assetSpawner.owner.chunkID)
                 {
+                    job.jobHandle.Complete();
                     vertexSortJobRemovalList.Add(job);
                     continue;
                 }
@@ -858,7 +870,6 @@ public class ChunkGenNetwork : MonoBehaviour
         {
             Vector3Int coord = chunkLoadQueue.Dequeue();
             long packedCoord = PackChunkCoord(coord.x, coord.y, coord.z);
-            chunkLoadSet.Remove(packedCoord);
             
             int currentChunkCoordX = Mathf.FloorToInt(viewerPos.x / chunkSize);
             int currentChunkCoordY = Mathf.FloorToInt(viewerPos.y / chunkSize);
@@ -877,6 +888,7 @@ public class ChunkGenNetwork : MonoBehaviour
                 chunksVisibleLastUpdate.Add(chunk);
                 chunkBatchCounter++;
             }
+            chunkLoadSet.Remove(packedCoord);
 
             if (chunkBatchCounter % 8 == 0)
             {
@@ -1133,6 +1145,7 @@ public class ChunkGenNetwork : MonoBehaviour
             }
             // Set up the chunk's AssetSpawn script
             assetSpawner = chunk.AddComponent<AssetSpawner>();
+            assetSpawner.owner = this;
             assetSpawner.chunkPos = chunkPos;
             assetSpawner.terrainDensityData = Instance.terrainDensityData;
             assetSpawner.assetSpawnData = Instance.assetSpawnData;
@@ -1166,6 +1179,7 @@ public class ChunkGenNetwork : MonoBehaviour
             }
             // Set up the chunk's AssetSpawn script
             assetSpawner.chunkPos = chunkPos;
+            assetSpawner.emptyChunk = false;
             // Set up the chunk's ComputeMarchingCubes script
             marchingCubes.chunkCoord = chunkCoord;
             marchingCubes.chunkPos = chunkPos;
@@ -1174,20 +1188,24 @@ public class ChunkGenNetwork : MonoBehaviour
         public void ClearChunk()
         {
             chunkID++;
+            mesh.Clear();
             meshRenderer.enabled = false;
-            marchingCubes.meshCollider.enabled = false;
+            meshCollider.enabled = false;
             if (waterChunk && waterMeshRenderer != null)
                 waterMeshRenderer.enabled = false;
             if (marchingCubes.grass != null)
+            {
+                marchingCubes.grass.enabled = false;
                 marchingCubes.grass.renderGrass = false;
+            }
             // assetSpawner.ClearAssets();
+            Instance.assetSpawnData.ResetChunkAssets(chunkPos);
+            assetSpawner.DisposalReleaseHandler();
+            assetSpawner.emptyChunk = false;
             Destroy(assetParent.gameObject);
             assetParent = new GameObject("Assets");
             assetParentTransform = assetParent.transform;
             assetParentTransform.SetParent(chunkTransform);
-            assetSpawner.emptyChunk = false;
-            assetSpawner.DisposalReleaseHandler();
-            Instance.assetSpawnData.ResetChunkAssets(chunkPos);
         }
         /// <summary>
         /// Set the visibility of the chunk

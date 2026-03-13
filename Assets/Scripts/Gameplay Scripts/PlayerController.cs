@@ -58,12 +58,11 @@ public class PlayerController : NetworkBehaviour
         if (base.IsOwner)
         {
             playerCamera = Camera.main;
-            //playerCamera = new Camera();
             playerCamera.transform.position = new Vector3(transform.position.x, transform.position.y + cameraYOffset, transform.position.z);
             playerCamera.transform.SetParent(transform);
 
-            Transform eye1 = transform.Find("Visor");
-            Transform eye2 = transform.Find("Visor (1)");
+            Transform eye1 = transform.Find("Visor1");
+            Transform eye2 = transform.Find("Visor2");
             Transform gameTag = transform.Find("GameTag");
 
             eye1.gameObject.SetActive(false);

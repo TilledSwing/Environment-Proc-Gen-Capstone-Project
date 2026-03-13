@@ -10,7 +10,6 @@ using UnityEngine;
 public class AssetSpawner : MonoBehaviour
 {
     public ChunkGenNetwork.TerrainChunk owner;
-    public int vertexBufferLength;
     public List<Asset> spawnedAssets;
     public TerrainDensityData terrainDensityData;
     public AssetSpawnData assetSpawnData;
@@ -24,7 +23,6 @@ public class AssetSpawner : MonoBehaviour
     public LayerMask interactLayer;
     public int assetSpacing = 8;
     public bool assetsSet = false;
-    public bool assetsHiddenEarly = false;
     public bool emptyChunk = false;
     public bool minDepthPointsCalculated = false;
     public bool spawnPointsKilled;
@@ -47,19 +45,12 @@ public class AssetSpawner : MonoBehaviour
     /// Initiate asset spawning for a given chunk
     /// </summary>
     public void SpawnAssets()
-    {
-        if (chunkVertices == null)
-            return ;
-        vertexBufferLength = chunkVertices.Length;
-        if (vertexBufferLength <= 0) emptyChunk = true;
-        
+    {   
         if (!assetSpawnData.assets.ContainsKey(chunkPos))
         {
             uint seed = Hash(chunkPos.x, chunkPos.y, chunkPos.z, ChunkGenNetwork.Instance.seed);
             rng = new(seed);
             InitializeData();
-            if (!heightsArray.IsCreated)
-                return ;
             CreateSpawnPoints(ref rng);
             if(spawnPointsKilled) 
                 return ;
@@ -115,7 +106,39 @@ public class AssetSpawner : MonoBehaviour
             if (emptyChunk && !assetSpawnData.spawnableAssets[i].undergroundAsset) continue;
             AssetSpawnFilters currentAssetSpawnFilters = assetSpawnFilters[i];
             if (currentAssetSpawnFilters.underwaterAsset && chunkPos.y > terrainDensityData.waterLevel && terrainDensityData.water) continue;
-    
+
+            if (!heightsArray.IsCreated && !emptyChunk)
+                return ;
+
+            if (emptyChunk && currentAssetSpawnFilters.undergroundAsset)
+            {
+                for (int j = 0; j < assetSpawnData.spawnableAssets[i].maxPerChunk; j++)
+                {
+                    float roll = rng.NextFloat();
+
+                    if (currentAssetSpawnFilters.spawnProbability < roll) continue;
+
+                    int randomPosX = rng.NextInt(0, terrainDensityData.chunkSize);
+                    int randomPosY = rng.NextInt(0, terrainDensityData.chunkSize);
+                    int randomPosZ = rng.NextInt(0, terrainDensityData.chunkSize);
+                    float3 spawnPoint = new(chunkPos.x + randomPosX, chunkPos.y + randomPosY, chunkPos.z + randomPosZ);
+                    float3 spawnPointNormal = new float3(rng.NextFloat(0f, 360f), rng.NextFloat(0f, 360f), rng.NextFloat(0f, 360f));
+
+                    float height = spawnPoint.y;
+
+                    if (currentAssetSpawnFilters.useMinHeight && height < currentAssetSpawnFilters.minHeight - 0.01f) continue;
+                    if (currentAssetSpawnFilters.useMaxHeight && height > currentAssetSpawnFilters.maxHeight + 0.01f) continue;
+                    if (currentAssetSpawnFilters.underwaterAsset && height > terrainDensityData.waterLevel - currentAssetSpawnFilters.minDepth && terrainDensityData.water) continue;
+                    if (!currentAssetSpawnFilters.underwaterAsset && height < terrainDensityData.waterLevel && !currentAssetSpawnFilters.undergroundAsset) continue;
+                    ComputeMarchingCubes.Vertex vert;
+                    vert.position = spawnPoint;
+                    vert.normal = spawnPointNormal;
+                    if (vert.position.Equals(float3.zero) || vert.normal.Equals(float3.zero)) continue;
+                    spawnPoints[i].Add(vert);
+                }
+                continue;
+            }
+
             if (currentAssetSpawnFilters.undergroundAsset && !minDepthPointsCalculated)
             {
                 int iterations = Mathf.CeilToInt((terrainDensityData.chunkSize + 1) / ChunkGenNetwork.Instance.resolution) * Mathf.CeilToInt((terrainDensityData.chunkSize + 1) / ChunkGenNetwork.Instance.resolution) * Mathf.CeilToInt((terrainDensityData.chunkSize + 1) / ChunkGenNetwork.Instance.resolution);
@@ -163,9 +186,9 @@ public class AssetSpawner : MonoBehaviour
                 }
                 else
                 {
-                    if (emptyChunk) continue;
                     if (chunkVertices.IsCreated)
                     {
+                        if (chunkVertices.Length <= 0) continue;
                         randomIndex = rng.NextInt(0, chunkVertices.Length);
                         spawnPoint = chunkVertices[randomIndex].position;
                         spawnPointNormal = chunkVertices[randomIndex].normal;

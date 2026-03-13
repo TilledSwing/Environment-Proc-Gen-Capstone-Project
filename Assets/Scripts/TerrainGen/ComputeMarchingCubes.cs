@@ -24,6 +24,7 @@ public class ComputeMarchingCubes : MonoBehaviour
     public JobHandle noiseDensityJobHandler;
     public JobHandle marchingCubesJobHandler;
     public NativeList<Triangle> triangleArray;
+    public NativeReference<FastNoise.OutputMinMax> densityMinMax;
     public Mesh mesh;
     int marchingCubesIterations;
     /// <summary>
@@ -69,6 +70,10 @@ public class ComputeMarchingCubes : MonoBehaviour
         }
     public void GenerateChunk()
     {
+        if (!noiseDensityJobHandler.Equals(default))
+            noiseDensityJobHandler.Complete();
+        if (!marchingCubesJobHandler.Equals(default))
+            marchingCubesJobHandler.Complete();
         SetHeights();
     }
     public void DisposalReleaseHandler() 
@@ -78,6 +83,10 @@ public class ComputeMarchingCubes : MonoBehaviour
             noiseDensityJobHandler.Complete();
             marchingCubesJobHandler.Complete();
             heightsArray.Dispose();
+        }
+        if (densityMinMax.IsCreated)
+        {
+            densityMinMax.Dispose();
         }
     }
     /// <summary>
@@ -104,14 +113,20 @@ public class ComputeMarchingCubes : MonoBehaviour
         {
             heightsArray = new(size * size * size, Allocator.Persistent);
         }
+        if (!densityMinMax.IsCreated)
+        {
+            densityMinMax = new NativeReference<FastNoise.OutputMinMax>(Allocator.Persistent);
+        }
         NoiseDensityJob noiseDensityJob = new NoiseDensityJob
         {
             heightsArray = heightsArray,
-            chunkPos = new float3(chunkPos.x, chunkPos.y, chunkPos.z),
+            densityMinMax = densityMinMax,
+            chunkPos = new int3(chunkPos.x, chunkPos.y, chunkPos.z),
             chunkSize = terrainDensityData.chunkSize,
             seed = ChunkGenNetwork.Instance.seed
         };
         noiseDensityJobHandler = noiseDensityJob.Schedule();
+        
         ChunkGenNetwork.Instance.terrainDensityJobList.Add(new ChunkGenNetwork.TerrainJobObject(owner, noiseDensityJobHandler, false, owner.chunkID));
     }
     /// <summary>
@@ -147,7 +162,6 @@ public class ComputeMarchingCubes : MonoBehaviour
 
         if (!terraforming) 
         {
-            assetSpawner.owner = owner;
             assetSpawner.chunkVertices = new NativeArray<Vertex>(vertexBuffer, Allocator.Persistent);
             assetSpawner.heightsArray = new(heightsArray, Allocator.Persistent);
         }
@@ -446,13 +460,14 @@ public class ComputeMarchingCubes : MonoBehaviour
     public struct NoiseDensityJob : IJob
     {
         public NativeArray<float> heightsArray;
-        public float3 chunkPos;
+        public NativeReference<FastNoise.OutputMinMax> densityMinMax;
+        public int3 chunkPos;
         public int chunkSize;
         public int seed;
         public void Execute()
         {
             int size = chunkSize + 1;
-            ChunkGenNetwork.Instance.noiseGenerator.GenUniformGrid3D(
+            densityMinMax.Value = ChunkGenNetwork.Instance.noiseGenerator.GenUniformGrid3D(
                                                                 heightsArray, chunkPos.x, chunkPos.y, chunkPos.z, 
                                                                 size, size, size, 1, 1, 1, seed);
         }
