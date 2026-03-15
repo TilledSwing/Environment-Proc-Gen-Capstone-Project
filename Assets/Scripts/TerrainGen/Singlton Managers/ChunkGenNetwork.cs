@@ -327,16 +327,17 @@ public class ChunkGenNetwork : MonoBehaviour
         edgeIndexTable = new(MarchingCubesTables.edgeIndexTable, Allocator.Persistent);
         triangleTable = new(MarchingCubesTables.triangleTable, Allocator.Persistent);
 
-        // Fog Shader Inits
+        // Volume Profile Stuff
         VolumeProfile profile = globalVolume.profile;
         profile.TryGet(out depthOfField);
         profile.TryGet(out lensDistortion);
         profile.TryGet(out filmGrain);
+
         fogMat.SetFloat("_fogOffset", fogOffset);
         fogMat.SetFloat("_fogDensity", fogDensity);
         fogMat.SetColor("_upperFogColor", upperFogColor);
         fogMat.SetColor("_lowerFogColor", lowerFogColor);
-
+        // Fog Shader Inits
         waterMaterial.SetFloat("_fogOffset", fogOffset);
         waterMaterial.SetFloat("_fogDensity", fogDensity);
         waterMaterial.SetColor("_fogColor", lowerFogColor);
@@ -353,7 +354,7 @@ public class ChunkGenNetwork : MonoBehaviour
         bushMaterial.SetVector("_WindDir", globalWindDirection);
         treeTopMaterial.SetVector("_WindDir", globalWindDirection);
 
-        // noiseTest = FastNoise.FromEncodedNodeTree("HQkQ@BFkQY@BPwkWAgQICtcjPAQKJAjD9Sg/CS4AAQ@BkNAAc@BI@AgQAkH@BFkQQPQpXvxhmZmY/BAOamRk/CwAAgD8cAwAAcEIEAhYCHAkuAAE@BJJQkL@BJUQQzczMPRgAACDAIAM@B4Ag@BokCM3MzD4JCQ@AD5CEB+F6z4YzcxMPwwSJAjNzMw+CQk@BwQggB@BEM3MzL4Y@BPyQC/wsAC+xROD4EChcJDQkI@CEEEA7geBT8LexQuPwQDj8J1PBQ=");
+        // noiseGenerator = FastNoise.FromEncodedNodeTree("HQkQ@BFkQY@BPwkWAgQICtcjPAQKJAjD9Sg/CS4AAQ@BkNAAc@BI@AgQAkH@BFkQQPQpXvxhmZmY/BAOamRk/CwAAgD8cAwAAcEIEAhYCHAkuAAE@BJJQkL@BJUQQzczMPRgAACDAIAM@B4Ag@BokCM3MzD4JCQ@AD5CEB+F6z4YzcxMPwwSJAjNzMw+CQk@BwQggB@BEM3MzL4Y@BPyQC/wsAC+xROD4EChcJDQkI@CEEEA7geBT8LexQuPwQDj8J1PBQ=");
         noiseGenerator = FastNoise.FromEncodedNodeTree
         (
             generationConfiguration.terrainConfigs[presetDropdown.value].terrainDensityData.encodedNodeTreeString
@@ -656,7 +657,6 @@ public class ChunkGenNetwork : MonoBehaviour
             else if(meshBake.expectedID != meshBake.owner.chunkID)
                 continue;
             meshBake.meshCollider.sharedMesh = meshBake.mesh;
-            meshBake.meshCollider.enabled = true;
         }
     }
     /// <summary>
@@ -742,20 +742,20 @@ public class ChunkGenNetwork : MonoBehaviour
             UpdateVisibleChunks();
             lastUpdateViewerPos = viewerPos;
         }
-        // Current Max: 8.4ms
+        // Current Max: 8.9ms
         ProcessChunkReturns(Time.realtimeSinceStartup, 0.0002f); //0.2ms
         ProcessChunkLoads(Time.realtimeSinceStartup, 0.0002f); //0.2ms
-        ProcessChunkVisibilty(Time.realtimeSinceStartup, 0.001f); //1ms
+        ProcessChunkVisibilty(Time.realtimeSinceStartup, 0.0005f); //0.5ms
 
         ProcessDensityJobs(Time.realtimeSinceStartup, 0.001f); //1ms
         ProcessPolygonizationJobs(Time.realtimeSinceStartup, 0.001f); //1ms
 
-        ProcessMeshGenQueue(Time.realtimeSinceStartup, 0.0005f); //0.5ms
+        ProcessMeshGenQueue(Time.realtimeSinceStartup, 0.001f); //1ms
         ProcessCollisionMeshBakes(Time.realtimeSinceStartup, 0.0005f); //0.5ms
 
         ProcessGrassQueue(Time.realtimeSinceStartup, 0.0005f); //0.5ms
 
-        ProcessVertexSortJobs(Time.realtimeSinceStartup, 0.0005f); //0.5ms
+        ProcessVertexSortJobs(Time.realtimeSinceStartup, 0.001f); //1ms
         ProcessSpawnPointCreation(Time.realtimeSinceStartup, 0.0015f); //1.5ms
         ProcessAssetInstantiation(Time.realtimeSinceStartup, 0.0015f); //1.5ms
     }
@@ -783,8 +783,8 @@ public class ChunkGenNetwork : MonoBehaviour
             {
                 int currentY = currentChunkCoordY + yOffset;
 
-                // if ((currentY > 0 && currentChunkCoordY > maxWorldYChunks) || (currentY < 0 && currentChunkCoordY < -maxWorldYChunks))
-                //     continue;
+                if ((currentY > 0 && currentY > maxWorldYChunks) || (currentY < 0 && currentY < -maxWorldYChunks))
+                    continue;
 
                 for (int zOffset = -chunksVisible; zOffset <= chunksVisible; zOffset++)
                 {
@@ -855,8 +855,8 @@ public class ChunkGenNetwork : MonoBehaviour
             {
                 int currentY = currentChunkCoordY + yOffset;
 
-                // if ((currentY > 0 && currentChunkCoordY > maxWorldYChunks) || (currentY < 0 && currentChunkCoordY < -maxWorldYChunks))
-                //     continue;
+                if ((currentY > 0 && currentY > maxWorldYChunks) || (currentY < 0 && currentY < -maxWorldYChunks))
+                    continue;
 
                 for (int zOffset = -chunksVisible; zOffset <= chunksVisible; zOffset++)
                 {
@@ -1062,8 +1062,10 @@ public class ChunkGenNetwork : MonoBehaviour
         public MeshFilter meshFilter;
         public bool waterChunk = false;
         public MeshRenderer meshRenderer;
+        public bool visible;
         public void StartChunk (long packedCoord, Vector3Int chunkCoord, Vector3Int chunkPos, bool waterChunk)
         {
+            visible = true;
             this.packedCoord = packedCoord;
             this.chunkCoord = chunkCoord;
             this.chunkPos = chunkPos;
@@ -1140,7 +1142,7 @@ public class ChunkGenNetwork : MonoBehaviour
             chunkID++;
             mesh.Clear();
             meshRenderer.enabled = false;
-            meshCollider.enabled = false;
+            meshCollider.sharedMesh = null;
             if (waterChunk && waterMeshRenderer != null)
                 waterMeshRenderer.enabled = false;
             if (marchingCubes.grass != null)
@@ -1163,6 +1165,7 @@ public class ChunkGenNetwork : MonoBehaviour
         /// <param name="visible">Whether the chunk is visible</param>
         public void SetVisible(bool visible)
         {
+            if (this.visible == visible) return;
             // Terrain
             if (meshRenderer != null && meshRenderer.enabled != visible)
             {
@@ -1200,6 +1203,7 @@ public class ChunkGenNetwork : MonoBehaviour
             {
                 marchingCubes.grass.renderGrass = visible;
             }
+            this.visible = visible;
         }
     }
 }
