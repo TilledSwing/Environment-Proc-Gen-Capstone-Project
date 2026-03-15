@@ -71,15 +71,12 @@ public class NetworkManagerGame : NetworkBehaviour
         ChunkGenNetwork.Instance.chunkLoadSet = new();
         ChunkGenNetwork.Instance.isLoadingChunks = false;
         // Action Queues
-        ChunkGenNetwork.Instance.terrainDensityJobList = new();
-        ChunkGenNetwork.Instance.terrainDensityJobRemovalList = new();
-        ChunkGenNetwork.Instance.terrainPolygonizationJobList = new();
-        ChunkGenNetwork.Instance.terrainPolygonizationJobRemovalList = new();
+        ChunkGenNetwork.Instance.terrainDensityJobQueue = new();
+        ChunkGenNetwork.Instance.terrainPolygonizationJobQueue = new();
         ChunkGenNetwork.Instance.meshGenQueue = new();
         ChunkGenNetwork.Instance.collisionMeshBakeQueue = new();
         ChunkGenNetwork.Instance.grassProcessQueue = new();
-        ChunkGenNetwork.Instance.vertexSortJobList = new();
-        ChunkGenNetwork.Instance.vertexSortJobRemovalList = new();
+        ChunkGenNetwork.Instance.vertexSortJobQueue = new();
         ChunkGenNetwork.Instance.spawningPointCreationQueue = new();
         ChunkGenNetwork.Instance.pendingAssetInstantiations = new();
 

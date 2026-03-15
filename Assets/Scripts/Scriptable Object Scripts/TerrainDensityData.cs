@@ -4,6 +4,7 @@ using UnityEngine;
 public class TerrainDensityData : ScriptableObject
 {
     // Terrain Values
+    public string encodedNodeTreeString;
     public int chunkSize;
     public float isolevel;
     public int waterLevel;

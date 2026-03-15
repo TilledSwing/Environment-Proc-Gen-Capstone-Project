@@ -17,14 +17,14 @@ MonoBehaviour:
     name: Blue Light Plant 1
     icon: {fileID: 2800000, guid: 179fe279d344c254fa8d0a473e2b4049, type: 3}
     spawnedAssets: []
-    maxPerChunk: 4
+    maxPerChunk: 2
     rotateToFaceNormal: 1
     spawnProbability: 0.5
     useMinSlope: 0
     minSlope: 0
-    useMaxSlope: 1
+    useMaxSlope: 0
     maxSlope: 50
-    useMinHeight: 1
+    useMinHeight: 0
     minHeight: 10
     useMaxHeight: 0
     maxHeight: 0

@@ -117,7 +117,7 @@ public class BombLogic : NetworkBehaviour
                     terraformMode = true,
                 };
 
-                JobHandle terraformHandler = terraformJob.Schedule(threadSizeX * threadSizeY * threadSizeZ, 16, terrainChunk.marchingCubes.marchingCubesJobHandler);
+                JobHandle terraformHandler = terraformJob.Schedule(threadSizeX * threadSizeY * threadSizeZ, 64, terrainChunk.marchingCubes.marchingCubesJobHandler);
                 terraformHandler.Complete();
 
                 marchingCubes.MarchingCubesJobHandler(true);

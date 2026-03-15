@@ -7564,9 +7564,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: EditUI, Assembly-CSharp
-        m_MethodName: RegenerateButton
+      - m_Target: {fileID: 1838274976}
+        m_TargetAssemblyTypeName: ChunkGenNetwork, Assembly-CSharp
+        m_MethodName: InitializeGenerator
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

@@ -127,7 +127,7 @@ public class ComputeMarchingCubes : MonoBehaviour
         };
         noiseDensityJobHandler = noiseDensityJob.Schedule();
         
-        ChunkGenNetwork.Instance.terrainDensityJobList.Add(new ChunkGenNetwork.TerrainJobObject(owner, noiseDensityJobHandler, false, owner.chunkID));
+        ChunkGenNetwork.Instance.terrainDensityJobQueue.Enqueue(new ChunkGenNetwork.TerrainJobObject(owner, noiseDensityJobHandler, false, owner.chunkID));
     }
     /// <summary>
     /// Sets up a mesh given a triangle array and count using lower level api for better performance
@@ -176,7 +176,7 @@ public class ComputeMarchingCubes : MonoBehaviour
         {
             VertexSortJob vertexSortJob = new VertexSortJob { vertexArray = assetSpawner.chunkVertices };
             JobHandle vertexSortJobHandler = vertexSortJob.Schedule();
-            ChunkGenNetwork.Instance.vertexSortJobList.Add(new ChunkGenNetwork.VertexSortJob(vertexSortJobHandler, assetSpawner, owner.chunkID));
+            ChunkGenNetwork.Instance.vertexSortJobQueue.Enqueue(new ChunkGenNetwork.VertexSortJob(vertexSortJobHandler, assetSpawner, owner.chunkID));
             ChunkGenNetwork.Instance.grassProcessQueue.Enqueue(new ChunkGenNetwork.GrassObject(owner, triangleCount, owner.chunkID));
         }
         else
@@ -257,7 +257,7 @@ public class ComputeMarchingCubes : MonoBehaviour
             lerpToggle = terrainDensityData.lerp,
             resolution = ChunkGenNetwork.Instance.resolution,
         };
-        marchingCubesJobHandler = marchingCubesJob.Schedule(marchingCubesIterations, 16, noiseDensityJobHandler);
+        marchingCubesJobHandler = marchingCubesJob.ScheduleParallel(marchingCubesIterations, 64, noiseDensityJobHandler);
 
         if (terraforming)
         {
@@ -266,14 +266,14 @@ public class ComputeMarchingCubes : MonoBehaviour
         }
         else
         {
-            ChunkGenNetwork.Instance.terrainPolygonizationJobList.Add(new ChunkGenNetwork.TerrainJobObject(owner, marchingCubesJobHandler, terraforming, owner.chunkID));
+            ChunkGenNetwork.Instance.terrainPolygonizationJobQueue.Enqueue(new ChunkGenNetwork.TerrainJobObject(owner, marchingCubesJobHandler, terraforming, owner.chunkID));
         }
     }
     /// <summary>
     /// Marching Cubes Burst Compiled Multithreaded job
     /// </summary>
     [BurstCompile]
-    private struct MarchingCubesJob : IJobParallelFor
+    private struct MarchingCubesJob : IJobFor
     {
         public NativeList<Triangle>.ParallelWriter triangleArray;
         [ReadOnly] public NativeArray<float> heightsArray;
