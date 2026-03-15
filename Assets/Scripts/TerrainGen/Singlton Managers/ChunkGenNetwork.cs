@@ -321,7 +321,6 @@ public class ChunkGenNetwork : MonoBehaviour
 
         lightingBlockerRenderer = lightingBlocker.GetComponent<MeshRenderer>();
         lightingBlockerRenderer.enabled = false;
-        mainLight.intensity = 12f;
 
         vertexOffsetTable = new(MarchingCubesTables.vertexOffsetTable, Allocator.Persistent);
         edgeIndexTable = new(MarchingCubesTables.edgeIndexTable, Allocator.Persistent);
@@ -335,12 +334,12 @@ public class ChunkGenNetwork : MonoBehaviour
 
         fogMat.SetFloat("_fogOffset", fogOffset);
         fogMat.SetFloat("_fogDensity", fogDensity);
-        fogMat.SetColor("_upperFogColor", upperFogColor);
-        fogMat.SetColor("_lowerFogColor", lowerFogColor);
+        // fogMat.SetColor("_upperFogColor", upperFogColor);
+        // fogMat.SetColor("_lowerFogColor", lowerFogColor);
         // Fog Shader Inits
         waterMaterial.SetFloat("_fogOffset", fogOffset);
         waterMaterial.SetFloat("_fogDensity", fogDensity);
-        waterMaterial.SetColor("_fogColor", lowerFogColor);
+        // waterMaterial.SetColor("_fogColor", lowerFogColor);
         waterMaterial.SetFloat("_fogActive", 0);
         WaterMaterialSetup.Instance.SetupWaves(waterMaterial);
         SetFogActive(false);
@@ -398,15 +397,21 @@ public class ChunkGenNetwork : MonoBehaviour
         if (assetSpawnData != null)
             assetSpawnData.RestoreToOriginalState();
 
-        terrainDensityData = generationConfiguration.terrainConfigs[presetDropdown.value].terrainDensityData;
-        terrainTextureData = generationConfiguration.terrainConfigs[presetDropdown.value].terrainTextureData;
-        assetSpawnData = generationConfiguration.terrainConfigs[presetDropdown.value].assetSpawnData;
-
         // Unity.Mathematics.Random rng = new((uint)UnityEngine.Random.Range(0, 100000));
         // int rand = rng.NextInt(0, generationConfiguration.terrainConfigs.Count);
-        // terrainDensityData = generationConfiguration.terrainConfigs[rand].terrainDensityData;
-        // terrainTextureData = generationConfiguration.terrainConfigs[rand].terrainTextureData;
-        // assetSpawnData = generationConfiguration.terrainConfigs[rand].assetSpawnData;
+        // TerrainConfig terrainConfig = generationConfiguration.terrainConfigs[rand];
+        TerrainConfig terrainConfig = generationConfiguration.terrainConfigs[presetDropdown.value];
+
+        terrainDensityData = terrainConfig.terrainDensityData;
+        terrainTextureData = terrainConfig.terrainTextureData;
+        assetSpawnData = terrainConfig.assetSpawnData;
+        mainLight.intensity = terrainConfig.nightLighting.lightIntensity;
+        mainLight.color = terrainConfig.nightLighting.lightColor;
+        fogMat.SetColor("_upperFogColor", terrainConfig.nightLighting.upperSkyColor);
+        fogMat.SetColor("_lowerFogColor", terrainConfig.nightLighting.lowerSkyColor);
+        fogMat.SetColor("_sunColor", terrainConfig.nightLighting.sunOrMoonColor);
+        fogMat.SetFloat("_sunSize", terrainConfig.nightLighting.sunOrMoonSize);
+        waterMaterial.SetColor("_fogColor", terrainConfig.nightLighting.lowerSkyColor);
 
         chunkSize = terrainDensityData.chunkSize;
         chunksVisible = Mathf.RoundToInt(maxViewDst / chunkSize);
