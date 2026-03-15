@@ -665,6 +665,7 @@ public class ChunkGenNetwork : MonoBehaviour
     /// <param name="startTime">Start of allocated time frame</param>
     public void ProcessGrassQueue(float startTime, float timeBudget)
     {
+        int counter = 0;
         while (grassProcessQueue.Count > 0 && Time.realtimeSinceStartup - startTime < timeBudget)
         {
             GrassObject grass = grassProcessQueue.Dequeue();
@@ -672,6 +673,7 @@ public class ChunkGenNetwork : MonoBehaviour
                 continue;
             else if (grass.owner.chunk != null)
                 grass.owner.marchingCubes.ProcessGrass(grass.triangleCount);
+            if (++counter >= 5) break;
         }
     }
     /// <summary>
@@ -742,7 +744,7 @@ public class ChunkGenNetwork : MonoBehaviour
             UpdateVisibleChunks();
             lastUpdateViewerPos = viewerPos;
         }
-        // Current Max: 8.9ms
+        // Current Max: 9.9ms
         ProcessChunkReturns(Time.realtimeSinceStartup, 0.0002f); //0.2ms
         ProcessChunkLoads(Time.realtimeSinceStartup, 0.0002f); //0.2ms
         ProcessChunkVisibilty(Time.realtimeSinceStartup, 0.0005f); //0.5ms
@@ -756,8 +758,8 @@ public class ChunkGenNetwork : MonoBehaviour
         ProcessGrassQueue(Time.realtimeSinceStartup, 0.0005f); //0.5ms
 
         ProcessVertexSortJobs(Time.realtimeSinceStartup, 0.001f); //1ms
-        ProcessSpawnPointCreation(Time.realtimeSinceStartup, 0.0015f); //1.5ms
-        ProcessAssetInstantiation(Time.realtimeSinceStartup, 0.0015f); //1.5ms
+        ProcessSpawnPointCreation(Time.realtimeSinceStartup, 0.002f); //2ms
+        ProcessAssetInstantiation(Time.realtimeSinceStartup, 0.002f); //2ms
     }
     /// <summary>
     /// Initial chunk load
