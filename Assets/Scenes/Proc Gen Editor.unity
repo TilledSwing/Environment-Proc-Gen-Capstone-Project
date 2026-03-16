@@ -12058,14 +12058,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c0091ae0cb98b49469de027c5cd3ba88, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  terrainConfig:
+    name: 
+    terrainDensityData: {fileID: 0}
+    terrainTextureData: {fileID: 0}
+    assetSpawnData: {fileID: 0}
+    dayLighting: {fileID: 0}
+    nightLighting: {fileID: 0}
   mainCameraTransform: {fileID: 0}
   terrainChunkPool: {fileID: 146523635}
   assetPool: {fileID: 362503763}
   fogMat: {fileID: 2100000, guid: b78a36d964d317b498aa1107a6978473, type: 2}
+  starMaterial: {fileID: 2100000, guid: e06cfccc2b20eff42ac2f0cc29d91708, type: 2}
   fogDensity: 0.08
   fogOffset: 150
-  upperFogColor: {r: 0.015686275, g: 0.05882353, b: 0.14117648, a: 0}
-  lowerFogColor: {r: 0.101960786, g: 0.14901961, b: 0.20784314, a: 0}
   darkFogColor: {r: 0.09429512, g: 0.10846831, b: 0.122641504, a: 1}
   globalVolume: {fileID: 832575518}
   depthOfField: {fileID: 0}
