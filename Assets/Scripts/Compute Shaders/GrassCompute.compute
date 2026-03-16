@@ -32,8 +32,8 @@ AppendStructuredBuffer<GrassBlade> GrassPositionsBuffer5;
 int TriangleCount;
 int GrassDensity;
 
-int MinHeight;
-int MaxHeight;
+float MinHeight;
+float MaxHeight;
 float MaxSlope;
 int MaxBladesPerTriangle;
 StructuredBuffer<float2> GrassHeightRangeBuffer;

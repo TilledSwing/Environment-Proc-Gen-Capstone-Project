@@ -10,7 +10,10 @@ public class GrassProfile : ScriptableObject
     public int grassDensity;
     public int maxBladesPerTriangle;
     public float maxGrassSlope;
-
+    public bool useMinHeight;
+    public float minHeight;
+    public bool useMaxHeight;
+    public float maxHeight;
     [Serializable]
     public struct FoliageType
     {

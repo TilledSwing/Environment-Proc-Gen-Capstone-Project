@@ -111,8 +111,7 @@ public class ChunkGenNetwork : MonoBehaviour
     public Vector2 globalWindDirection;
     public ComputeShader grassPositionComputeShader;
     public ComputeShader grassUpdateComputeShader;
-    public GrassProfile landGrass;
-    public GrassProfile seaGrass;
+    public List<GrassProfile> grassProfiles;
     public Material bushMaterial;
     public Material treeTopMaterial;
     public ParticleSystem leafParticleSystem;
@@ -347,10 +346,10 @@ public class ChunkGenNetwork : MonoBehaviour
         viewerPos = viewer.position;
         lastUpdateViewerPos = viewerPos;
 
-        foreach (GrassProfile.FoliageType foliageType in landGrass.foliageList)
-        {
-            foliageType.grassMaterial.SetVector("_WindDir", globalWindDirection);
-        }
+        // foreach (GrassProfile.FoliageType foliageType in landGrass.foliageList)
+        // {
+        //     foliageType.grassMaterial.SetVector("_WindDir", globalWindDirection);
+        // }
         bushMaterial.SetVector("_WindDir", globalWindDirection);
         treeTopMaterial.SetVector("_WindDir", globalWindDirection);
 
@@ -406,6 +405,7 @@ public class ChunkGenNetwork : MonoBehaviour
         terrainDensityData = terrainConfig.terrainDensityData;
         terrainTextureData = terrainConfig.terrainTextureData;
         assetSpawnData = terrainConfig.assetSpawnData;
+        grassProfiles = terrainConfig.terrainDensityData.grassProfiles;
 
         mainLight.intensity = terrainConfig.lightingSettings.NightLighting.lightIntensity;
         mainLight.color = terrainConfig.lightingSettings.NightLighting.lightColor;

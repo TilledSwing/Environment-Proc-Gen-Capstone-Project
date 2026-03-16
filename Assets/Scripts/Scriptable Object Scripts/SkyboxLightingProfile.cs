@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 
@@ -7,7 +8,7 @@ public class SkyboxLightingProfile : ScriptableObject
     public LightingData DayLighting;
     public LightingData DuskAndDawnLighting;
     public LightingData NightLighting;
-    [System.Serializable]
+    [Serializable]
     public struct LightingData
     {
         public float lightIntensity;

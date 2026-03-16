@@ -177,7 +177,8 @@ public class ComputeMarchingCubes : MonoBehaviour
             VertexSortJob vertexSortJob = new VertexSortJob { vertexArray = assetSpawner.chunkVertices };
             JobHandle vertexSortJobHandler = vertexSortJob.Schedule();
             ChunkGenNetwork.Instance.vertexSortJobQueue.Enqueue(new ChunkGenNetwork.VertexSortJob(vertexSortJobHandler, assetSpawner, owner.chunkID));
-            ChunkGenNetwork.Instance.grassProcessQueue.Enqueue(new ChunkGenNetwork.GrassObject(owner, triangleCount, owner.chunkID));
+            if (terrainDensityData.hasFoliage)
+                ChunkGenNetwork.Instance.grassProcessQueue.Enqueue(new ChunkGenNetwork.GrassObject(owner, triangleCount, owner.chunkID));
         }
         else
         {
@@ -186,47 +187,55 @@ public class ComputeMarchingCubes : MonoBehaviour
     }
     public void ProcessGrass(int triangleCount)
     {
-        if(chunkPos.y >= terrainDensityData.waterLevel && triangleCount > ChunkGenNetwork.Instance.landGrass.maxBladesPerTriangle)
+        bool grassWasSet = false;
+        foreach (GrassProfile grassProfile in ChunkGenNetwork.Instance.grassProfiles)
         {
-            if (grass == null)
-                grass = gameObject.AddComponent<GrassRender>();
-            grass.enabled = true;
-            grass.InitializeGrassRenderer(
-                chunkPos, 
-                ChunkGenNetwork.Instance.landGrass,
-                terrainDensityData.waterLevel,
-                52,
-                ChunkGenNetwork.Instance.grassPositionComputeShader,
-                ChunkGenNetwork.Instance.grassUpdateComputeShader,
-                triangleCount,
-                triangleArray.AsArray(),
-                mesh.bounds,
-                false
-            );
-            grass.SetupGrass();
-            grass.renderGrass = true;
+            bool chunkMinHeight = grassProfile.useMinHeight ? chunkPos.y >= grassProfile.minHeight : true;
+            bool chunkMaxHeight = grassProfile.useMaxHeight ?  chunkPos.y <= grassProfile.maxHeight : true;
+            if(chunkMinHeight && chunkMaxHeight && triangleCount > grassProfile.maxBladesPerTriangle)
+            {
+                if (grass == null)
+                    grass = gameObject.AddComponent<GrassRender>();
+                grass.enabled = true;
+                grass.InitializeGrassRenderer(
+                    chunkPos, 
+                    grassProfile,
+                    grassProfile.minHeight,
+                    grassProfile.maxHeight,
+                    ChunkGenNetwork.Instance.grassPositionComputeShader,
+                    ChunkGenNetwork.Instance.grassUpdateComputeShader,
+                    triangleCount,
+                    triangleArray.AsArray(),
+                    mesh.bounds,
+                    false
+                );
+                grass.SetupGrass();
+                grass.renderGrass = true;
+                grassWasSet = true;
+            }
+            else if(chunkMinHeight && chunkMaxHeight && triangleCount > grassProfile.maxBladesPerTriangle)
+            {
+                if (grass == null)
+                    grass = gameObject.AddComponent<GrassRender>();
+                grass.enabled = true;
+                grass.InitializeGrassRenderer(
+                    chunkPos, 
+                    grassProfile,
+                    grassProfile.minHeight,
+                    grassProfile.maxHeight,
+                    ChunkGenNetwork.Instance.grassPositionComputeShader,
+                    ChunkGenNetwork.Instance.grassUpdateComputeShader,
+                    triangleCount,
+                    triangleArray.AsArray(),
+                    mesh.bounds,
+                    true
+                );
+                grass.SetupGrass();
+                grass.renderGrass = true;
+                grassWasSet = true;
+            }
         }
-        else if(chunkPos.y <= terrainDensityData.waterLevel - terrainDensityData.chunkSize && triangleCount > ChunkGenNetwork.Instance.seaGrass.maxBladesPerTriangle && terrainDensityData.water)
-        {
-            if (grass == null)
-                grass = gameObject.AddComponent<GrassRender>();
-            grass.enabled = true;
-            grass.InitializeGrassRenderer(
-                chunkPos, 
-                ChunkGenNetwork.Instance.seaGrass,
-                -500,
-                terrainDensityData.waterLevel - terrainDensityData.chunkSize,
-                ChunkGenNetwork.Instance.grassPositionComputeShader,
-                ChunkGenNetwork.Instance.grassUpdateComputeShader,
-                triangleCount,
-                triangleArray.AsArray(),
-                mesh.bounds,
-                true
-            );
-            grass.SetupGrass();
-            grass.renderGrass = true;
-        }
-        else if (grass != null)
+        if (grass != null && !grassWasSet)
         {
             grass.enabled = false;
         }

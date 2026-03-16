@@ -18,3 +18,7 @@ MonoBehaviour:
   waterLevel: 0
   water: 1
   lerp: 1
+  hasFoliage: 1
+  grassProfiles:
+  - {fileID: 11400000, guid: b5321fb8eb3e63c43a1ea7873ecc4305, type: 2}
+  - {fileID: 11400000, guid: 724eaf9f27efdf04ea6a9b881f61336c, type: 2}
