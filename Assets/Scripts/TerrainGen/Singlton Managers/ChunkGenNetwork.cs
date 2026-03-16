@@ -407,14 +407,14 @@ public class ChunkGenNetwork : MonoBehaviour
         terrainTextureData = terrainConfig.terrainTextureData;
         assetSpawnData = terrainConfig.assetSpawnData;
 
-        mainLight.intensity = terrainConfig.nightLighting.lightIntensity;
-        mainLight.color = terrainConfig.nightLighting.lightColor;
-        fogMat.SetColor("_upperFogColor", terrainConfig.nightLighting.upperSkyColor);
-        fogMat.SetColor("_lowerFogColor", terrainConfig.nightLighting.lowerSkyColor);
-        fogMat.SetColor("_sunColor", terrainConfig.nightLighting.sunOrMoonColor);
-        fogMat.SetFloat("_sunSize", terrainConfig.nightLighting.sunOrMoonSize);
-        starMaterial.SetColor("_StarColor", terrainConfig.nightLighting.hasStars ? terrainConfig.nightLighting.starColor : Color.black);
-        waterMaterial.SetColor("_fogColor", terrainConfig.nightLighting.lowerSkyColor);
+        mainLight.intensity = terrainConfig.lightingSettings.NightLighting.lightIntensity;
+        mainLight.color = terrainConfig.lightingSettings.NightLighting.lightColor;
+        fogMat.SetColor("_upperFogColor", terrainConfig.lightingSettings.NightLighting.upperSkyColor);
+        fogMat.SetColor("_lowerFogColor", terrainConfig.lightingSettings.NightLighting.lowerSkyColor);
+        fogMat.SetColor("_sunColor", terrainConfig.lightingSettings.NightLighting.sunOrMoonColor);
+        fogMat.SetFloat("_sunSize", terrainConfig.lightingSettings.NightLighting.sunOrMoonSize);
+        starMaterial.SetColor("_StarColor", terrainConfig.lightingSettings.NightLighting.hasStars ? terrainConfig.lightingSettings.NightLighting.starColor : Color.black);
+        waterMaterial.SetColor("_fogColor", terrainConfig.lightingSettings.NightLighting.lowerSkyColor);
 
         chunkSize = terrainDensityData.chunkSize;
         chunksVisible = Mathf.RoundToInt(maxViewDst / chunkSize);
@@ -742,7 +742,7 @@ public class ChunkGenNetwork : MonoBehaviour
         lightingBlocker.transform.position = new Vector3(viewerPos.x, viewerPos.y + 100f, viewerPos.z);
         // Darker fog at lower world heights
         float depthFactor = Mathf.Clamp01(-viewerPos.y * 0.01f);
-        Color currentFog = Color.Lerp(terrainConfig.nightLighting.lowerSkyColor, darkFogColor, depthFactor);
+        Color currentFog = Color.Lerp(terrainConfig.lightingSettings.NightLighting.lowerSkyColor, darkFogColor, depthFactor);
         fogMat.SetColor("_lowerFogColor", currentFog);
         waterMaterial.SetColor("_fogColor", currentFog);
 

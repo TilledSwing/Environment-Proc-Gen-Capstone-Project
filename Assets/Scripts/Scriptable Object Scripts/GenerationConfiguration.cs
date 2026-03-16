@@ -14,6 +14,5 @@ public class TerrainConfig
     public TerrainDensityData terrainDensityData;
     public TerrainTextureData terrainTextureData;
     public AssetSpawnData assetSpawnData;
-    public SkyboxLightingProfile dayLighting;
-    public SkyboxLightingProfile nightLighting;
+    public SkyboxLightingProfile lightingSettings;
 }

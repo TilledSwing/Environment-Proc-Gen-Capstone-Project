@@ -17,11 +17,9 @@ MonoBehaviour:
     terrainDensityData: {fileID: 11400000, guid: 4bc939f839855ea45ade17dce060eea5, type: 2}
     terrainTextureData: {fileID: 11400000, guid: 1fa52b57a0c85a34eb28c4f99612d21f, type: 2}
     assetSpawnData: {fileID: 11400000, guid: ac92efdaf283ed346bf2f132639a35ad, type: 2}
-    dayLighting: {fileID: 11400000, guid: d241b3b704b588a46ac92258ce1a4c80, type: 2}
-    nightLighting: {fileID: 11400000, guid: 81c3d34c4bdb9f148ad48fb14271a52f, type: 2}
+    lightingSettings: {fileID: 11400000, guid: 81c3d34c4bdb9f148ad48fb14271a52f, type: 2}
   - name: Alien Planet
     terrainDensityData: {fileID: 11400000, guid: 15bbff1c68d6f4349b3807d03cde17ea, type: 2}
     terrainTextureData: {fileID: 11400000, guid: e48097e2206f03541aae962be6b2ffc7, type: 2}
     assetSpawnData: {fileID: 11400000, guid: 2dc139ac326102649846abe98bbf5505, type: 2}
-    dayLighting: {fileID: 11400000, guid: 12895caebf4d34c4e9d9eaae662a34ce, type: 2}
-    nightLighting: {fileID: 11400000, guid: 52704762a94e311449095df9ce6a217d, type: 2}
+    lightingSettings: {fileID: 11400000, guid: 8937644b412a31543818e8c5c6b85b33, type: 2}
