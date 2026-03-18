@@ -407,14 +407,16 @@ public class ChunkGenNetwork : MonoBehaviour
         assetSpawnData = terrainConfig.assetSpawnData;
         grassProfiles = terrainConfig.terrainDensityData.grassProfiles;
 
-        mainLight.intensity = terrainConfig.lightingSettings.NightLighting.lightIntensity;
-        mainLight.color = terrainConfig.lightingSettings.NightLighting.lightColor;
-        fogMat.SetColor("_upperFogColor", terrainConfig.lightingSettings.NightLighting.upperSkyColor);
-        fogMat.SetColor("_lowerFogColor", terrainConfig.lightingSettings.NightLighting.lowerSkyColor);
-        fogMat.SetColor("_sunColor", terrainConfig.lightingSettings.NightLighting.sunOrMoonColor);
-        fogMat.SetFloat("_sunSize", terrainConfig.lightingSettings.NightLighting.sunOrMoonSize);
-        starMaterial.SetColor("_StarColor", terrainConfig.lightingSettings.NightLighting.hasStars ? terrainConfig.lightingSettings.NightLighting.starColor : Color.black);
-        waterMaterial.SetColor("_fogColor", terrainConfig.lightingSettings.NightLighting.lowerSkyColor);
+        mainLight.intensity = terrainConfig.lightingSettings.DayLighting.lightIntensity;
+        mainLight.color = terrainConfig.lightingSettings.DayLighting.lightColor;
+        fogMat.SetColor("_upperFogColor", terrainConfig.lightingSettings.DayLighting.upperSkyColor);
+        fogMat.SetColor("_lowerFogColor", terrainConfig.lightingSettings.DayLighting.lowerSkyColor);
+        fogMat.SetColor("_sunColor", terrainConfig.lightingSettings.sunColor);
+        fogMat.SetFloat("_sunSize", terrainConfig.lightingSettings.sunSize);
+        fogMat.SetColor("_moonColor", terrainConfig.lightingSettings.moonColor);
+        fogMat.SetFloat("_moonSize", terrainConfig.lightingSettings.moonSize);
+        starMaterial.SetColor("_StarColor", terrainConfig.lightingSettings.starColor);
+        waterMaterial.SetColor("_fogColor", terrainConfig.lightingSettings.DayLighting.lowerSkyColor);
 
         chunkSize = terrainDensityData.chunkSize;
         chunksVisible = Mathf.RoundToInt(maxViewDst / chunkSize);
@@ -740,11 +742,6 @@ public class ChunkGenNetwork : MonoBehaviour
         // Position updates
         viewerPos = viewer.position;
         lightingBlocker.transform.position = new Vector3(viewerPos.x, viewerPos.y + 100f, viewerPos.z);
-        // Darker fog at lower world heights
-        float depthFactor = Mathf.Clamp01(-viewerPos.y * 0.01f);
-        Color currentFog = Color.Lerp(terrainConfig.lightingSettings.NightLighting.lowerSkyColor, darkFogColor, depthFactor);
-        fogMat.SetColor("_lowerFogColor", currentFog);
-        waterMaterial.SetColor("_fogColor", currentFog);
 
         // Update chunks
         if ((viewerPos - lastUpdateViewerPos).sqrMagnitude > updateDistanceThresholdSqr && initialLoadComplete)

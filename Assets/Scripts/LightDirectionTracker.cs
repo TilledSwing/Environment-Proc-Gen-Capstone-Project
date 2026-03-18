@@ -3,7 +3,12 @@ using UnityEngine;
 public class LightDirectionTracker : MonoBehaviour
 {    
     LightDirectionTracker Instance;
-    public Vector3 mainLightDirection;
+    public Transform sun;
+    [HideInInspector]
+    public Vector3 sunLightDirection;
+    public Transform moon;
+    [HideInInspector]
+    public Vector3 moonLightDirection;
     void Awake()
     {
         // Make a singleton
@@ -14,7 +19,9 @@ public class LightDirectionTracker : MonoBehaviour
     }
     void Update()
     {
-        mainLightDirection = transform.forward;
-        Shader.SetGlobalVector("_sunDirection", mainLightDirection);
+        sunLightDirection = sun.forward;
+        Shader.SetGlobalVector("_sunDirection", sunLightDirection);
+        moonLightDirection = moon.forward;
+        Shader.SetGlobalVector("_moonDirection", moonLightDirection);
     }
 }

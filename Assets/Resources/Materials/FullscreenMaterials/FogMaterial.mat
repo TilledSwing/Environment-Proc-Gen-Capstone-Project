@@ -144,12 +144,15 @@ Material:
     - _Surface: 0
     - _WorkflowMode: 1
     - _ZWrite: 1
+    - _bottomValue: 0.2
     - _fadeEnd: 0
     - _fadeHeight: 0.1
     - _fadeStart: -30
     - _fogDensity: 1
     - _fogOffset: 1000
+    - _moonSize: 0.1
     - _sunSize: 0.1
+    - _topValue: 0.1
     - _verticalFadeStrength: 1.2
     - fogDensity: 0.4
     - fogOffset: 110
@@ -160,10 +163,11 @@ Material:
     - _FogColor: {r: 0.19999999, g: 0.83137256, b: 0.79431653, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
     - _fogColor: {r: 0.102794595, g: 0.15040942, b: 0.20754719, a: 1}
-    - _lowerFogColor: {r: 0.101960786, g: 0.14901961, b: 0.20784314, a: 0}
+    - _lowerFogColor: {r: 0.16360432, g: 0.18328786, b: 0.22907487, a: 0}
+    - _moonColor: {r: 1, g: 1, b: 1, a: 0}
     - _starColor: {r: 1, g: 1, b: 1, a: 1}
-    - _sunColor: {r: 1, g: 1, b: 1, a: 0}
+    - _sunColor: {r: 1, g: 0.972549, b: 0.6745098, a: 0}
     - _sunDirection: {r: -0.7046075, g: -0.70957065, b: 0.0061489046, a: 0}
-    - _upperFogColor: {r: 0.015686275, g: 0.05882353, b: 0.14117648, a: 0}
+    - _upperFogColor: {r: 0.06811965, g: 0.12851341, b: 0.23006475, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
