@@ -212,7 +212,7 @@ Shader "Custom/BushShader"
                 inputData.viewDirectionWS = viewDirectionWS;
                 inputData.shadowCoord = TransformWorldToShadowCoord(IN.worldPos);
                 inputData.fogCoord = 0;
-                inputData.bakedGI = SampleSH(inputData.normalWS)/* + float3(0.2, 0.2, 0.2)*/;
+                inputData.bakedGI = SampleSH(inputData.normalWS);
                 inputData.vertexLighting = 0;
                 inputData.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(IN.positionHCS);
                 inputData.shadowMask = SAMPLE_SHADOWMASK(IN.positionHCS);
@@ -236,5 +236,6 @@ Shader "Custom/BushShader"
             }
             ENDHLSL
         }
+        UsePass "Universal Render Pipeline/Lit/ShadowCaster"
     }
 }
