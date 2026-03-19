@@ -51,7 +51,7 @@ float Hash(uint seed)
     seed *= 2654435769u;
     return (seed & 0x00FFFFFF) / 16777216.0;
 }
-[numthreads(256,1,1)]
+[numthreads(128,1,1)]
 void GrassCompute (uint3 id : SV_DispatchThreadID)
 {
     if (id.x >= TriangleCount) 
@@ -106,8 +106,10 @@ void GrassCompute (uint3 id : SV_DispatchThreadID)
         {
             if ( roll <= GrassProbabilityBuffer[j]) 
             {
-                grassBlade.height = lerp(GrassHeightRangeBuffer[j].x, GrassHeightRangeBuffer[j].y, Hash(hashSeed + i + 4));
-                grassBlade.curve = lerp(GrassCurveRangeBuffer[j].x, GrassCurveRangeBuffer[j].y, Hash(hashSeed + i + 5));
+                float2 grassHeightRange = GrassHeightRangeBuffer[j];
+                float2 grassCurveRange = GrassCurveRangeBuffer[j];
+                grassBlade.height = lerp(grassHeightRange.x, grassHeightRange.y, Hash(hashSeed + i + 4));
+                grassBlade.curve = lerp(grassCurveRange.x, grassCurveRange.y, Hash(hashSeed + i + 5));
 
                 switch(j)
                 {

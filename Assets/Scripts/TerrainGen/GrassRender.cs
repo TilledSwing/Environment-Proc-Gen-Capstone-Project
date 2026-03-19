@@ -144,7 +144,7 @@ public class GrassRender : MonoBehaviour
         spawnProbabilityUpperThresholdBuffer.SetData(spawnProbabilityUpperThresholdList);
         grassPositionComputeShader.SetBuffer(grassPositionKernel, "GrassProbabilityBuffer", spawnProbabilityUpperThresholdBuffer);
 
-        grassPositionComputeShader.Dispatch(grassPositionKernel, Mathf.CeilToInt(triangleCount / 256f), 1, 1);
+        grassPositionComputeShader.Dispatch(grassPositionKernel, Mathf.CeilToInt(triangleCount / 128f), 1, 1);
 
         grassTriangleBuffer.Release();
 

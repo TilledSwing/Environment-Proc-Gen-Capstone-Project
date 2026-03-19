@@ -65,6 +65,7 @@ public class ChunkGenNetwork : MonoBehaviour
     [HideInInspector]
     public Vector3 viewerPos;
     public float maxViewDst;
+    public float maxGrassViewDst;
     public int maxWorldYChunks;
     public float updateDistanceThreshold;
     float updateDistanceThresholdSqr;
@@ -74,6 +75,7 @@ public class ChunkGenNetwork : MonoBehaviour
     public int chunkSize;
     [HideInInspector]
     public int chunksVisible;
+    public int grassChunksVisible;
 
     [Space(10)]
     [Header("========== Map Settings ==========")]
@@ -354,6 +356,7 @@ public class ChunkGenNetwork : MonoBehaviour
         treeTopMaterial.SetVector("_WindDir", globalWindDirection);
 
         // noiseGenerator = FastNoise.FromEncodedNodeTree("HQkQ@BFkQY@BPwkWAgQICtcjPAQKJAjD9Sg/CS4AAQ@BkNAAc@BI@AgQAkH@BFkQQPQpXvxhmZmY/BAOamRk/CwAAgD8cAwAAcEIEAhYCHAkuAAE@BJJQkL@BJUQQzczMPRgAACDAIAM@B4Ag@BokCM3MzD4JCQ@AD5CEB+F6z4YzcxMPwwSJAjNzMw+CQk@BwQggB@BEM3MzL4Y@BPyQC/wsAC+xROD4EChcJDQkI@CEEEA7geBT8LexQuPwQDj8J1PBQ=");
+        // noiseGenerator = FastNoise.FromEncodedNodeTree("HQkQ@BFkQY@BPwkWAgQICtejPAQKJAjD9Sg/CS4AAQ@BkNAAc@BI@AgQAkH@BFkQQzczMvxhxPYo/BAOamRk/CwAAgD8cAwAAcEIEAhwJFgIcCS4AAQ@BklCQs@AC0QxDNzMw9G@AIMAgAw@ADgC@BCiQIzczMPgkJ@B3EEQH4XrPhjNzEw/DBIkCM3MzD4JCQ@AMBBCAE@BQzczMvhg@B/JAL/CwAL7FE4PgQKFwkNCQg@ACAQAQDuB4FPwt7FC4/BAOPwnU8DAIECArXozsLAADAQxQ=");
         noiseGenerator = FastNoise.FromEncodedNodeTree
         (
             generationConfiguration.terrainConfigs[presetDropdown.value].terrainDensityData.encodedNodeTreeString
@@ -420,6 +423,7 @@ public class ChunkGenNetwork : MonoBehaviour
 
         chunkSize = terrainDensityData.chunkSize;
         chunksVisible = Mathf.RoundToInt(maxViewDst / chunkSize);
+        grassChunksVisible = Mathf.RoundToInt(maxGrassViewDst / chunkSize);
 
         // Chunk Variables
         chunkDictionary = new();
@@ -783,6 +787,13 @@ public class ChunkGenNetwork : MonoBehaviour
         int minZ = currentChunkCoordZ - chunksVisible;
         int maxZ = currentChunkCoordZ + chunksVisible;
 
+        // int grassMinX = currentChunkCoordX - grassChunksVisible;
+        // int grassMaxX = currentChunkCoordX + grassChunksVisible;
+        // int grassMinY = currentChunkCoordY - grassChunksVisible;
+        // int grassMaxY = currentChunkCoordY + grassChunksVisible;
+        // int grassMinZ = currentChunkCoordZ - grassChunksVisible;
+        // int grassMaxZ = currentChunkCoordZ + grassChunksVisible;
+
         for (int xOffset = -chunksVisible; xOffset <= chunksVisible; xOffset++)
         {
             int currentX = currentChunkCoordX + xOffset;
@@ -800,6 +811,10 @@ public class ChunkGenNetwork : MonoBehaviour
 
                     if (useFixedMapSize && (math.abs(currentX) > maxChunkDst || math.abs(currentZ) > maxChunkDst))
                         continue;
+
+                    // bool isGrassEdge = currentX == grassMinX || currentX == grassMaxX ||
+                    //                    currentY == grassMinY || currentY == grassMaxY ||
+                    //                    currentZ == grassMinZ || currentZ == grassMaxZ;
 
                     bool isEdge = currentX == minX || currentX == maxX ||
                                   currentY == minY || currentY == maxY ||
@@ -841,6 +856,13 @@ public class ChunkGenNetwork : MonoBehaviour
         int minZ = currentChunkCoordZ - chunksVisible;
         int maxZ = currentChunkCoordZ + chunksVisible;
 
+        // int grassMinX = currentChunkCoordX - grassChunksVisible;
+        // int grassMaxX = currentChunkCoordX + grassChunksVisible;
+        // int grassMinY = currentChunkCoordY - grassChunksVisible;
+        // int grassMaxY = currentChunkCoordY + grassChunksVisible;
+        // int grassMinZ = currentChunkCoordZ - grassChunksVisible;
+        // int grassMaxZ = currentChunkCoordZ + grassChunksVisible;
+
         foreach (TerrainChunk terrainChunk in chunksVisibleLastUpdate)
         {
             if (terrainChunk.chunkCoord.x < minX || terrainChunk.chunkCoord.x > maxX ||
@@ -872,6 +894,10 @@ public class ChunkGenNetwork : MonoBehaviour
 
                     if (useFixedMapSize && (math.abs(currentX) > maxChunkDst || math.abs(currentZ) > maxChunkDst))
                         continue;
+
+                    // bool isGrassEdge = currentX == grassMinX || currentX == grassMaxX ||
+                    //                    currentY == grassMinY || currentY == grassMaxY ||
+                    //                    currentZ == grassMinZ || currentZ == grassMaxZ;
 
                     bool isEdge = currentX == minX || currentX == maxX ||
                                   currentY == minY || currentY == maxY ||

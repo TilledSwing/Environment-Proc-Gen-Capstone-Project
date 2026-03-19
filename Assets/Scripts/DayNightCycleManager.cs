@@ -27,6 +27,7 @@ public class DayNightCycleManager : MonoBehaviour
         moon.color = lightingSettings.NightLighting.lightColor;
         sunTransform = sun.transform;
         moonTransform = moon.transform;
+        RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Trilight;
     }
     void Update()
     {
@@ -64,6 +65,7 @@ public class DayNightCycleManager : MonoBehaviour
         moon.intensity = Mathf.Lerp(lightingSettings.NightLighting.lightIntensity, 0f, interpolator);
 
         sun.color = Color.Lerp(lightingSettings.DuskAndDawnLighting.lightColor, lightingSettings.DayLighting.lightColor, interpolator);
+        sun.color = Color.Lerp(sun.color, lightingSettings.NightLighting.lightColor, depthFactor);
         ChunkGenNetwork.Instance.starMaterial.SetColor("_StarColor", Color.Lerp(lightingSettings.starColor, Color.black, interpolator));
         
         Color upperColor = Color.Lerp(
@@ -79,10 +81,9 @@ public class DayNightCycleManager : MonoBehaviour
         ChunkGenNetwork.Instance.waterMaterial.SetColor("_fogColor", lowerColor);
 
         ambientIntensity = Mathf.Lerp(ambientIntensity, 0.1f, depthFactor);
-        RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Trilight;
-        RenderSettings.ambientSkyColor = upperColor * ambientIntensity;
-        RenderSettings.ambientEquatorColor = Color.Lerp(upperColor, lowerColor, 0.5f) * ambientIntensity;
-        RenderSettings.ambientGroundColor = lowerColor * ambientIntensity;
+        RenderSettings.ambientSkyColor = Color.Lerp(upperColor * ambientIntensity, ChunkGenNetwork.Instance.darkFogColor, depthFactor);
+        RenderSettings.ambientEquatorColor = Color.Lerp(Color.Lerp(upperColor, lowerColor, 0.5f) * ambientIntensity, ChunkGenNetwork.Instance.darkFogColor, depthFactor);
+        RenderSettings.ambientGroundColor = Color.Lerp(lowerColor * ambientIntensity, ChunkGenNetwork.Instance.darkFogColor, depthFactor);
 
         Color currentFog = Color.Lerp(lowerColor, ChunkGenNetwork.Instance.darkFogColor, depthFactor);
         ChunkGenNetwork.Instance.fogMat.SetColor("_lowerFogColor", currentFog);

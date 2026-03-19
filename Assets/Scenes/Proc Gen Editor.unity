@@ -1785,7 +1785,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 70
+  field of view: 80
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -1846,7 +1846,7 @@ MonoBehaviour:
   m_Antialiasing: 0
   m_AntialiasingQuality: 2
   m_StopNaN: 0
-  m_Dithering: 0
+  m_Dithering: 1
   m_ClearDepth: 1
   m_AllowXRRendering: 1
   m_AllowHDROutput: 1
@@ -12176,11 +12176,13 @@ MonoBehaviour:
   viewer: {fileID: 1588582780}
   viewerPos: {x: 0, y: 0, z: 0}
   maxViewDst: 192
+  maxGrassViewDst: 128
   maxWorldYChunks: 12
   updateDistanceThreshold: 32
   chunkParent: {fileID: 1368767289}
   chunkSize: 0
   chunksVisible: 0
+  grassChunksVisible: 0
   useFixedMapSize: 0
   mapSize: 11
   resolution: 1

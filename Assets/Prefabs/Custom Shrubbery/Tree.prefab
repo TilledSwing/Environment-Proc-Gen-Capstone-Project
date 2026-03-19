@@ -9,7 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2198178944184270225}
-  m_Layer: 0
+  - component: {fileID: 7010221549865448903}
+  m_Layer: 6
   m_Name: Tree
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -53,6 +54,27 @@ Transform:
   - {fileID: 508793953923452448}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &7010221549865448903
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6886524096454028204}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 3.77, z: 1}
+  m_Center: {x: 0, y: 1.82, z: 0}
 --- !u!1001 &118439829249284512
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -116,6 +138,10 @@ PrefabInstance:
     - target: {fileID: 3127531798616043212, guid: e3216a39a74f0df4291ec581a70a66e6, type: 3}
       propertyPath: m_Name
       value: TreeLeafClumpPrefab (13)
+      objectReference: {fileID: 0}
+    - target: {fileID: 3127531798616043212, guid: e3216a39a74f0df4291ec581a70a66e6, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -191,6 +217,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: TreeLeafClumpPrefab (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 3127531798616043212, guid: e3216a39a74f0df4291ec581a70a66e6, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -264,6 +294,10 @@ PrefabInstance:
     - target: {fileID: 3127531798616043212, guid: e3216a39a74f0df4291ec581a70a66e6, type: 3}
       propertyPath: m_Name
       value: TreeLeafClumpPrefab (19)
+      objectReference: {fileID: 0}
+    - target: {fileID: 3127531798616043212, guid: e3216a39a74f0df4291ec581a70a66e6, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -339,6 +373,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: TreeLeafClumpPrefab (9)
       objectReference: {fileID: 0}
+    - target: {fileID: 3127531798616043212, guid: e3216a39a74f0df4291ec581a70a66e6, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -412,6 +450,10 @@ PrefabInstance:
     - target: {fileID: 3127531798616043212, guid: e3216a39a74f0df4291ec581a70a66e6, type: 3}
       propertyPath: m_Name
       value: TreeLeafClumpPrefab (11)
+      objectReference: {fileID: 0}
+    - target: {fileID: 3127531798616043212, guid: e3216a39a74f0df4291ec581a70a66e6, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -487,6 +529,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: TreeLeafClumpPrefab (7)
       objectReference: {fileID: 0}
+    - target: {fileID: 3127531798616043212, guid: e3216a39a74f0df4291ec581a70a66e6, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -560,6 +606,10 @@ PrefabInstance:
     - target: {fileID: 3127531798616043212, guid: e3216a39a74f0df4291ec581a70a66e6, type: 3}
       propertyPath: m_Name
       value: TreeLeafClumpPrefab (6)
+      objectReference: {fileID: 0}
+    - target: {fileID: 3127531798616043212, guid: e3216a39a74f0df4291ec581a70a66e6, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -635,6 +685,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: TreeLeafClumpPrefab
       objectReference: {fileID: 0}
+    - target: {fileID: 3127531798616043212, guid: e3216a39a74f0df4291ec581a70a66e6, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -708,6 +762,10 @@ PrefabInstance:
     - target: {fileID: 3127531798616043212, guid: e3216a39a74f0df4291ec581a70a66e6, type: 3}
       propertyPath: m_Name
       value: TreeLeafClumpPrefab (16)
+      objectReference: {fileID: 0}
+    - target: {fileID: 3127531798616043212, guid: e3216a39a74f0df4291ec581a70a66e6, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -783,6 +841,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: TreeLeafClumpPrefab (3)
       objectReference: {fileID: 0}
+    - target: {fileID: 3127531798616043212, guid: e3216a39a74f0df4291ec581a70a66e6, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -856,6 +918,10 @@ PrefabInstance:
     - target: {fileID: 3127531798616043212, guid: e3216a39a74f0df4291ec581a70a66e6, type: 3}
       propertyPath: m_Name
       value: TreeLeafClumpPrefab (18)
+      objectReference: {fileID: 0}
+    - target: {fileID: 3127531798616043212, guid: e3216a39a74f0df4291ec581a70a66e6, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -931,6 +997,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: TreeLeafClumpPrefab (10)
       objectReference: {fileID: 0}
+    - target: {fileID: 3127531798616043212, guid: e3216a39a74f0df4291ec581a70a66e6, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1004,6 +1074,10 @@ PrefabInstance:
     - target: {fileID: 3127531798616043212, guid: e3216a39a74f0df4291ec581a70a66e6, type: 3}
       propertyPath: m_Name
       value: TreeLeafClumpPrefab (5)
+      objectReference: {fileID: 0}
+    - target: {fileID: 3127531798616043212, guid: e3216a39a74f0df4291ec581a70a66e6, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1079,6 +1153,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: TreeLeafClumpPrefab (8)
       objectReference: {fileID: 0}
+    - target: {fileID: 3127531798616043212, guid: e3216a39a74f0df4291ec581a70a66e6, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1152,6 +1230,10 @@ PrefabInstance:
     - target: {fileID: 3127531798616043212, guid: e3216a39a74f0df4291ec581a70a66e6, type: 3}
       propertyPath: m_Name
       value: TreeLeafClumpPrefab (4)
+      objectReference: {fileID: 0}
+    - target: {fileID: 3127531798616043212, guid: e3216a39a74f0df4291ec581a70a66e6, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1227,6 +1309,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: TreeLeafClumpPrefab (17)
       objectReference: {fileID: 0}
+    - target: {fileID: 3127531798616043212, guid: e3216a39a74f0df4291ec581a70a66e6, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1292,6 +1378,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: a091035360e07574fb4bed3ebd2418a2, type: 3}
       propertyPath: m_Name
       value: TreeTrunkPrefab
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: a091035360e07574fb4bed3ebd2418a2, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1397,6 +1487,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: TreeLeafClumpPrefab (15)
       objectReference: {fileID: 0}
+    - target: {fileID: 3127531798616043212, guid: e3216a39a74f0df4291ec581a70a66e6, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1418,6 +1512,10 @@ PrefabInstance:
     - target: {fileID: 2303804818922195499, guid: 4c1788d7929c4824d92b4727979ae073, type: 3}
       propertyPath: m_Name
       value: FallingLeavesParticleSystem
+      objectReference: {fileID: 0}
+    - target: {fileID: 2303804818922195499, guid: 4c1788d7929c4824d92b4727979ae073, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 9088544798849069233, guid: 4c1788d7929c4824d92b4727979ae073, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1533,6 +1631,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: TreeLeafClumpPrefab (2)
       objectReference: {fileID: 0}
+    - target: {fileID: 3127531798616043212, guid: e3216a39a74f0df4291ec581a70a66e6, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1607,6 +1709,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: TreeLeafClumpPrefab (14)
       objectReference: {fileID: 0}
+    - target: {fileID: 3127531798616043212, guid: e3216a39a74f0df4291ec581a70a66e6, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1680,6 +1786,10 @@ PrefabInstance:
     - target: {fileID: 3127531798616043212, guid: e3216a39a74f0df4291ec581a70a66e6, type: 3}
       propertyPath: m_Name
       value: TreeLeafClumpPrefab (12)
+      objectReference: {fileID: 0}
+    - target: {fileID: 3127531798616043212, guid: e3216a39a74f0df4291ec581a70a66e6, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

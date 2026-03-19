@@ -9,6 +9,8 @@ Shader "Custom/GrassShader"
         _WindStrength ("WindStrength", Float) = 0.5
         _WindOscillation ("WindOscillation", Float) = 0.8
         _AOStrength ("AOStrength", Float) = 0.5
+        _FadeStart ("FadeStart", Float) = 0.0
+        _FadeEnd ("FadeEnd", Float) = 0.0
     }
     SubShader
     {
@@ -48,6 +50,7 @@ Shader "Custom/GrassShader"
                 float3 worldPos : TEXCOORD0;
                 float3 worldNormal : TEXCOORD1;
                 float2 uv : TEXCOORD2;
+                float fade : TEXCOORD3;
             };
 
             struct GrassBlade
@@ -65,6 +68,8 @@ Shader "Custom/GrassShader"
             float2 _WindDir;
             float _WindStrength;
             float _WindOscillation;
+            float _FadeStart;
+            float _FadeEnd;
 
             Varyings vert(Attributes IN)
             {
@@ -79,7 +84,11 @@ Shader "Custom/GrassShader"
                 float3 up = normalize(grassBlade.terrainNormal);
                 float3 ref = abs(up.y) < 0.999 ? float3(0,1,0) : float3(1,0,0);
                 float3 tangent = normalize(cross(ref, up));
-                float3 bitangent = cross(up, tangent); 
+                float3 bitangent = cross(up, tangent);
+
+                float dist = distance(_WorldSpaceCameraPos, instanceOffset);
+                float blend = saturate((dist - _FadeStart) / (_FadeEnd - _FadeStart));
+                OUT.fade = blend;
 
                 // Y-axis rotation
                 float3 local = IN.positionOS.xyz;
@@ -89,9 +98,9 @@ Shader "Custom/GrassShader"
                 rotatedLocal.z = local.x * sinRot + local.z * cosRot;
                 rotatedLocal.y = local.y;
                 #ifdef _UNIFORM_SCALE
-                    rotatedLocal.xyz *= grassBlade.height;
+                    rotatedLocal.xyz *= grassBlade.height * (1 - blend);
                 #else
-                    rotatedLocal.y *= grassBlade.height;
+                    rotatedLocal.y *= grassBlade.height * (1 - blend);
                 #endif
 
                 // float3 rotated = rotatedLocal.x * tangent + rotatedLocal.y * up + rotatedLocal.z * bitangent;
@@ -104,8 +113,6 @@ Shader "Custom/GrassShader"
                 float windStr = ((GradientNoiseDeterministicfloat(worldPos.xz * 0.5 + phase, 1) * 2 - 1) + wave) * _WindStrength;
 
                 float3 bend = float3(windDir.x, 0, windDir.y) * windStr * rotated.y;
-                float dist = distance(_WorldSpaceCameraPos, worldPos);
-                float blend = saturate((dist - 80) / (120 - 80));
                 worldPos += bend * (1 - blend);
 
                 OUT.positionHCS = TransformWorldToHClip(worldPos);
@@ -130,6 +137,9 @@ Shader "Custom/GrassShader"
 
             float4 frag(Varyings IN, bool isFrontFace : SV_IsFrontFace) : SV_Target
             {
+                float noise = GradientNoiseDeterministicfloat(IN.worldPos.xz * 4, 1);
+                clip(noise - IN.fade);
+
                 float4 tex = SAMPLE_TEXTURE2D(_InstanceTexture, sampler_InstanceTexture, IN.uv);
                 clip(tex.a - 0.5);
                 float3 normalWS = normalize(IN.worldNormal);
@@ -196,6 +206,7 @@ Shader "Custom/GrassShader"
                 float4 shadowCoord : TEXCOORD3;
                 float grassHeight : TEXCOORD4;
                 float2 uv : TEXCOORD5;
+                float fade : TEXCOORD6;
             };
 
             struct GrassBlade
@@ -216,6 +227,8 @@ Shader "Custom/GrassShader"
             float _WindStrength;
             float _WindOscillation;
             float _AOStrength;
+            float _FadeStart;
+            float _FadeEnd;
 
             Varyings vert(Attributes IN)
             {
@@ -231,6 +244,10 @@ Shader "Custom/GrassShader"
                 float3 ref = abs(up.y) < 0.999 ? float3(0,1,0) : float3(1,0,0);
                 float3 tangent = normalize(cross(ref, up));
                 float3 bitangent = cross(up, tangent);
+
+                float dist = distance(_WorldSpaceCameraPos, instanceOffset);
+                float blend = saturate((dist - _FadeStart) / (_FadeEnd - _FadeStart));
+                OUT.fade = blend;
 
                 // Y-axis rotation
                 float3 local = IN.positionOS.xyz;
@@ -255,8 +272,6 @@ Shader "Custom/GrassShader"
                 float windStr = ((GradientNoiseDeterministicfloat(worldPos.xz * 0.5 + phase, 1) * 2 - 1) + wave) * _WindStrength;
 
                 float3 bend = float3(windDir.x, 0, windDir.y) * windStr * rotated.y;
-                float dist = distance(_WorldSpaceCameraPos, worldPos);
-                float blend = saturate((dist - 80) / (120 - 80));
                 worldPos += bend * (1 - blend);
 
                 OUT.positionHCS = TransformWorldToHClip(worldPos);
@@ -283,6 +298,9 @@ Shader "Custom/GrassShader"
 
             float4 frag(Varyings IN, bool isFrontFace : SV_IsFrontFace) : SV_Target
             {
+                float noise = GradientNoiseDeterministicfloat(IN.worldPos.xz * 4, 1);
+                clip(noise - IN.fade);
+
                 float4 tex = SAMPLE_TEXTURE2D(_InstanceTexture, sampler_InstanceTexture, IN.uv);
                 clip(tex.a - 0.5);
                 float height01 = saturate(IN.grassHeight);
