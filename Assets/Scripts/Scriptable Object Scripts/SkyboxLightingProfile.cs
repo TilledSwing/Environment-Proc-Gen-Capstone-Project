@@ -17,6 +17,7 @@ public class SkyboxLightingProfile : ScriptableObject
     public struct LightingData
     {
         public float lightIntensity;
+        public float ambientIntensity;
         public Color lightColor;
         public Color upperSkyColor;
         public Color lowerSkyColor;

@@ -518,23 +518,24 @@ public class ChunkGenNetwork : MonoBehaviour
         while (chunkLoadQueue.Count > 0 && Time.realtimeSinceStartup - startTime < timeBudget)
         {
             Vector3Int coord = chunkLoadQueue.Dequeue();
-            int currentChunkCoordX = Mathf.FloorToInt(viewerPos.x / chunkSize);
-            int currentChunkCoordY = Mathf.FloorToInt(viewerPos.y / chunkSize);
-            int currentChunkCoordZ = Mathf.FloorToInt(viewerPos.z / chunkSize);
+            // int currentChunkCoordX = Mathf.FloorToInt(viewerPos.x / chunkSize);
+            // int currentChunkCoordY = Mathf.FloorToInt(viewerPos.y / chunkSize);
+            // int currentChunkCoordZ = Mathf.FloorToInt(viewerPos.z / chunkSize);
 
             long packedCoord = PackChunkCoord(coord.x, coord.y, coord.z);
 
-            bool isInView = Mathf.Abs(currentChunkCoordX - coord.x) <= chunksVisible &&
-                            Mathf.Abs(currentChunkCoordY - coord.y) <= chunksVisible &&
-                            Mathf.Abs(currentChunkCoordZ - coord.z) <= chunksVisible;
+            // bool isInView = Mathf.Abs(currentChunkCoordX - coord.x) <= chunksVisible &&
+            //                 Mathf.Abs(currentChunkCoordY - coord.y) <= chunksVisible &&
+            //                 Mathf.Abs(currentChunkCoordZ - coord.z) <= chunksVisible;
 
-            if (!chunkDictionary.TryGetValue(packedCoord, out TerrainChunk dictChunk) && isInView)
+            if (!chunkDictionary.TryGetValue(packedCoord, out TerrainChunk dictChunk))
             {
                 Vector3Int chunkPos = coord * chunkSize;
                 bool waterChunk = terrainDensityData.waterLevel >= chunkPos.y && terrainDensityData.waterLevel < chunkPos.y + terrainDensityData.chunkSize && Instance.terrainDensityData.water;
                 TerrainChunk chunk = terrainChunkPool.GetChunk(packedCoord, coord, chunkPos, waterChunk);
                 chunkDictionary.Add(packedCoord, chunk);
                 chunksVisibleLastUpdate.Add(chunk);
+                // chunkLoadSet.Remove(packedCoord);
             }
             chunkLoadSet.Remove(packedCoord);
 

@@ -17,28 +17,18 @@ MonoBehaviour:
     lightColor: {r: 1, g: 0.9764706, b: 0.8627451, a: 0}
     upperSkyColor: {r: 0.29411766, g: 0.42745098, b: 0.85882354, a: 0}
     lowerSkyColor: {r: 0.2509804, g: 0.62352943, b: 0.9607843, a: 0}
-    hasSunOrMoon: 1
-    sunOrMoonColor: {r: 1, g: 0.972549, b: 0.6745098, a: 0}
-    sunOrMoonSize: 0.1
-    hasStars: 0
-    starColor: {r: 1, g: 1, b: 1, a: 0}
+  sunColor: {r: 1, g: 1, b: 1, a: 0}
+  sunSize: 0
   DuskAndDawnLighting:
     lightIntensity: 3
     lightColor: {r: 1, g: 0.8161019, b: 0.5518868, a: 0}
     upperSkyColor: {r: 0.19379672, g: 0.5119843, b: 0.6320754, a: 0}
     lowerSkyColor: {r: 0.7735849, g: 0.43087006, b: 0.22258809, a: 0}
-    hasSunOrMoon: 1
-    sunOrMoonColor: {r: 1, g: 1, b: 1, a: 0}
-    sunOrMoonSize: 0.1
-    hasStars: 0
-    starColor: {r: 0, g: 0, b: 0, a: 0}
   NightLighting:
     lightIntensity: 12
     lightColor: {r: 0.2, g: 0.3137255, b: 0.4627451, a: 0}
     upperSkyColor: {r: 0.015686275, g: 0.05882353, b: 0.14117648, a: 0}
     lowerSkyColor: {r: 0.101960786, g: 0.14901961, b: 0.20784314, a: 0}
-    hasSunOrMoon: 1
-    sunOrMoonColor: {r: 1, g: 1, b: 1, a: 0}
-    sunOrMoonSize: 0.1
-    hasStars: 1
-    starColor: {r: 1, g: 1, b: 1, a: 0}
+  moonColor: {r: 1, g: 1, b: 1, a: 0}
+  moonSize: 0
+  starColor: {r: 1, g: 1, b: 1, a: 0}

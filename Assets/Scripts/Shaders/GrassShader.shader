@@ -304,7 +304,7 @@ Shader "Custom/GrassShader"
                 inputData.viewDirectionWS = normalize(_WorldSpaceCameraPos - IN.worldPos);
                 inputData.shadowCoord = TransformWorldToShadowCoord(IN.worldPos);
                 inputData.fogCoord = 0;
-                inputData.bakedGI = saturate(SampleSH(inputData.normalWS) + float3(0.02, 0.02, 0.02));
+                inputData.bakedGI = SampleSH(inputData.normalWS)/* + float3(0.02, 0.02, 0.02)*/;
                 inputData.vertexLighting = 0;
                 inputData.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(IN.positionHCS);
                 inputData.shadowMask = SAMPLE_SHADOWMASK(IN.positionHCS);
@@ -313,7 +313,7 @@ Shader "Custom/GrassShader"
                 surfaceData.albedo = albedo;
                 surfaceData.alpha = 1;
                 surfaceData.metallic = 0.0;
-                surfaceData.specular = 0.5;
+                surfaceData.specular = 0.3;
                 surfaceData.smoothness = 0.5;
                 surfaceData.normalTS = float3(0,0,1);
                 surfaceData.emission = 0.0;

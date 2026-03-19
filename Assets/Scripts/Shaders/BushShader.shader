@@ -212,10 +212,10 @@ Shader "Custom/BushShader"
                 inputData.viewDirectionWS = viewDirectionWS;
                 inputData.shadowCoord = TransformWorldToShadowCoord(IN.worldPos);
                 inputData.fogCoord = 0;
-                inputData.bakedGI = saturate(SampleSH(inputData.normalWS) + float3(0.2, 0.2, 0.2));
+                inputData.bakedGI = SampleSH(inputData.normalWS)/* + float3(0.2, 0.2, 0.2)*/;
                 inputData.vertexLighting = 0;
                 inputData.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(IN.positionHCS);
-                inputData.shadowMask = 1;
+                inputData.shadowMask = SAMPLE_SHADOWMASK(IN.positionHCS);
 
                 SurfaceData surfaceData;
                 surfaceData.albedo = tex;

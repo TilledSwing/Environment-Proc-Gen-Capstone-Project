@@ -262,10 +262,10 @@ Shader "Custom/WaterShader"
                 inputData.viewDirectionWS = normalize(_WorldSpaceCameraPos - IN.worldPos);
                 inputData.shadowCoord = TransformWorldToShadowCoord(IN.worldPos);
                 inputData.fogCoord = 0;
-                inputData.bakedGI = saturate(SampleSH(inputData.normalWS) + float3(0.8, 0.8, 0.8));
+                inputData.bakedGI = SampleSH(inputData.normalWS)/* + float3(0.8, 0.8, 0.8)*/;
                 inputData.vertexLighting = 0;
                 inputData.normalizedScreenSpaceUV = screenUV;
-                inputData.shadowMask = 1;
+                inputData.shadowMask = SAMPLE_SHADOWMASK(IN.positionHCS);
 
                 SurfaceData surfaceData;
                 surfaceData.albedo = color.rgb;

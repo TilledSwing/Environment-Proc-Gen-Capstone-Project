@@ -55,6 +55,11 @@ public class DayNightCycleManager : MonoBehaviour
 
         float interpolator = Mathf.InverseLerp(-0.2f, 0.2f, sunHeight);
         float duskDawnFactor = 1f - Mathf.Abs(interpolator * 2f - 1f);
+
+        float ambientIntensity = Mathf.Lerp(Mathf.Lerp(lightingSettings.NightLighting.ambientIntensity, lightingSettings.DayLighting.ambientIntensity, interpolator), 
+                                                     lightingSettings.DuskAndDawnLighting.ambientIntensity, 
+                                                     duskDawnFactor);
+        
         sun.intensity = Mathf.Lerp(0f, lightingSettings.DayLighting.lightIntensity, interpolator);
         moon.intensity = Mathf.Lerp(lightingSettings.NightLighting.lightIntensity, 0f, interpolator);
 
@@ -72,6 +77,12 @@ public class DayNightCycleManager : MonoBehaviour
         ChunkGenNetwork.Instance.fogMat.SetColor("_upperFogColor", upperColor);
         ChunkGenNetwork.Instance.fogMat.SetColor("_lowerFogColor", lowerColor);
         ChunkGenNetwork.Instance.waterMaterial.SetColor("_fogColor", lowerColor);
+
+        ambientIntensity = Mathf.Lerp(ambientIntensity, 0.1f, depthFactor);
+        RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Trilight;
+        RenderSettings.ambientSkyColor = upperColor * ambientIntensity;
+        RenderSettings.ambientEquatorColor = Color.Lerp(upperColor, lowerColor, 0.5f) * ambientIntensity;
+        RenderSettings.ambientGroundColor = lowerColor * ambientIntensity;
 
         Color currentFog = Color.Lerp(lowerColor, ChunkGenNetwork.Instance.darkFogColor, depthFactor);
         ChunkGenNetwork.Instance.fogMat.SetColor("_lowerFogColor", currentFog);

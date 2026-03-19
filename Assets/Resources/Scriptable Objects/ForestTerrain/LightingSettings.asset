@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   DayLighting:
     lightIntensity: 3
+    ambientIntensity: 1.4
     lightColor: {r: 1, g: 0.9764706, b: 0.8627451, a: 0}
     upperSkyColor: {r: 0.29411766, g: 0.42745098, b: 0.85882354, a: 0}
     lowerSkyColor: {r: 0.2509804, g: 0.62352943, b: 0.9607843, a: 0}
@@ -21,11 +22,13 @@ MonoBehaviour:
   sunSize: 0.1
   DuskAndDawnLighting:
     lightIntensity: 2
+    ambientIntensity: 1
     lightColor: {r: 1, g: 0.8161019, b: 0.5518868, a: 0}
     upperSkyColor: {r: 0.53333336, g: 0.7474963, b: 0.90588236, a: 0}
     lowerSkyColor: {r: 0.7924528, g: 0.35294282, b: 0.12335351, a: 0}
   NightLighting:
-    lightIntensity: 10
+    lightIntensity: 6
+    ambientIntensity: 3
     lightColor: {r: 0.2, g: 0.3137255, b: 0.4627451, a: 0}
     upperSkyColor: {r: 0.015686275, g: 0.05882353, b: 0.14117648, a: 0}
     lowerSkyColor: {r: 0.101960786, g: 0.14901961, b: 0.20784314, a: 0}
