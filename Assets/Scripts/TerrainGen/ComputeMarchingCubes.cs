@@ -27,6 +27,7 @@ public class ComputeMarchingCubes : MonoBehaviour
     public NativeReference<FastNoise.OutputMinMax> densityMinMax;
     public Mesh mesh;
     int marchingCubesIterations;
+    public int triangleCount;
     /// <summary>
     /// Struct for vertex data
     /// </summary>
@@ -139,7 +140,7 @@ public class ComputeMarchingCubes : MonoBehaviour
     {
         if (!heightsArray.IsCreated)
             return;
-        int triangleCount = triangleArray.Length;
+        triangleCount = triangleArray.Length;
         Mesh.MeshDataArray meshDataArray = Mesh.AllocateWritableMeshData(1);
         Mesh.MeshData meshData = meshDataArray[0];
 

@@ -65,6 +65,7 @@ Shader "Custom/GrassShader"
             TEXTURE2D(_InstanceTexture);
             SAMPLER(sampler_InstanceTexture);
             StructuredBuffer<GrassBlade> _Positions;
+            uint _Offset;
             float2 _WindDir;
             float _WindStrength;
             float _WindOscillation;
@@ -76,7 +77,7 @@ Shader "Custom/GrassShader"
                 Varyings OUT;
                 InitIndirectDrawArgs(0);
                 uint instanceID = IN.instanceID;
-                GrassBlade grassBlade = _Positions[instanceID];
+                GrassBlade grassBlade = _Positions[instanceID + _Offset];
                 float3 instanceOffset = grassBlade.position;
                 float sinRot = sin(grassBlade.rotation);
                 float cosRot = cos(grassBlade.rotation);
@@ -221,6 +222,7 @@ Shader "Custom/GrassShader"
             TEXTURE2D(_InstanceTexture);
             SAMPLER(sampler_InstanceTexture);
             StructuredBuffer<GrassBlade> _Positions;
+            uint _Offset;
             float4 _BaseColor;
             float4 _TipColor;
             float2 _WindDir;
@@ -235,7 +237,7 @@ Shader "Custom/GrassShader"
                 Varyings OUT;
                 InitIndirectDrawArgs(0);
                 uint instanceID = IN.instanceID;
-                GrassBlade grassBlade = _Positions[instanceID];
+                GrassBlade grassBlade = _Positions[instanceID + _Offset];
                 float3 instanceOffset = grassBlade.position;
                 float sinRot = sin(grassBlade.rotation);
                 float cosRot = cos(grassBlade.rotation);

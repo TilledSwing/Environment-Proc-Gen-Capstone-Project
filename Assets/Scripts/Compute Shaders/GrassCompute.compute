@@ -1,4 +1,6 @@
 #pragma kernel GrassCompute
+#define MAX_FOLIAGE 5
+#define MAX_BLADES_PER_TRI 50
 
 struct Vertex
 {
@@ -22,15 +24,23 @@ struct GrassBlade
     float3 terrainNormal;
 };
 
+struct IndirectDrawIndexedArgs
+{
+    uint indexCountPerInstance;
+    uint instanceCount;
+    uint startIndex;
+    uint baseVertexIndex;
+    uint startInstance;
+};
+
 StructuredBuffer<Triangle> GrassTriangleBuffer;
-AppendStructuredBuffer<GrassBlade> GrassPositionsBuffer1;
-AppendStructuredBuffer<GrassBlade> GrassPositionsBuffer2;
-AppendStructuredBuffer<GrassBlade> GrassPositionsBuffer3;
-AppendStructuredBuffer<GrassBlade> GrassPositionsBuffer4;
-AppendStructuredBuffer<GrassBlade> GrassPositionsBuffer5;
+RWStructuredBuffer<GrassBlade> GrassPositionsBuffer;
+RWStructuredBuffer<IndirectDrawIndexedArgs> ArgsBuffers;
+StructuredBuffer<uint> OffsetsBuffer;
 
 int TriangleCount;
 int GrassDensity;
+int FoliageCount;
 
 float MinHeight;
 float MaxHeight;
@@ -83,6 +93,42 @@ void GrassCompute (uint3 id : SV_DispatchThreadID)
     uint hashSeed = id.x * 73856093u;
     float twoPie = 2 * 6.2831853;
 
+    float rolls[MAX_BLADES_PER_TRI];
+    uint counts[MAX_FOLIAGE];
+    uint baseOffsets[MAX_FOLIAGE];
+    uint localOffsets[MAX_FOLIAGE];
+
+    [unroll]
+    for (int j = 0; j < FoliageCount; j++)
+    {
+        counts[j] = 0;
+        baseOffsets[j] = 0;
+        localOffsets[j] = 0;
+    }
+
+    for (int i = 0; i < bladeCount; i++)
+    {
+        float roll = Hash(hashSeed + i + 3);
+        rolls[i] = roll;
+
+        for (int j = 0; j < FoliageCount; j++)
+        {
+            if (roll <= GrassProbabilityBuffer[j])
+            {
+                counts[j]++;
+                break;
+            }
+        }
+    }
+
+    for (int j = 0; j < FoliageCount; j++)
+    {
+        if (counts[j] > 0)
+        {
+            InterlockedAdd(ArgsBuffers[j].instanceCount, counts[j], baseOffsets[j]);
+        }
+    }
+
     for (int i = 0; i < bladeCount; i++)
     {
         float r1 = Hash(hashSeed + i);
@@ -101,8 +147,9 @@ void GrassCompute (uint3 id : SV_DispatchThreadID)
         grassBlade.terrainNormal = normal;
         grassBlade.rotation = Hash(hashSeed + i + 2) * twoPie;
 
-        float roll = Hash(hashSeed + i + 3);
-        for (int j = 0; j < 5; j++)
+        float roll = rolls[i];
+        
+        for (int j = 0; j < FoliageCount; j++)
         {
             if ( roll <= GrassProbabilityBuffer[j]) 
             {
@@ -111,24 +158,9 @@ void GrassCompute (uint3 id : SV_DispatchThreadID)
                 grassBlade.height = lerp(grassHeightRange.x, grassHeightRange.y, Hash(hashSeed + i + 4));
                 grassBlade.curve = lerp(grassCurveRange.x, grassCurveRange.y, Hash(hashSeed + i + 5));
 
-                switch(j)
-                {
-                    case 0:
-                        GrassPositionsBuffer1.Append(grassBlade);
-                        break;
-                    case 1:
-                        GrassPositionsBuffer2.Append(grassBlade);
-                        break;
-                    case 2:
-                        GrassPositionsBuffer3.Append(grassBlade);
-                        break;
-                    case 3:
-                        GrassPositionsBuffer4.Append(grassBlade);
-                        break;
-                    case 4:
-                        GrassPositionsBuffer5.Append(grassBlade);
-                        break;
-                }
+                uint globalIndex = OffsetsBuffer[j] + baseOffsets[j] + localOffsets[j]++;
+
+                GrassPositionsBuffer[globalIndex] = grassBlade;
                 break;
             }
         }

@@ -37,6 +37,11 @@ public class DayNightCycleManager : MonoBehaviour
         updateTimer += Time.deltaTime;
         time += Time.deltaTime;
 
+        if (updateTimer < updateInterval) 
+            return ;
+
+        updateTimer -= updateInterval;
+
         // Rotation
         float currentCyle = time / dayNightCycleLength % 1f;
         float normalizedOffset = startOffset / 360f;
@@ -45,11 +50,6 @@ public class DayNightCycleManager : MonoBehaviour
         sunTransform.rotation = Quaternion.Euler(angle, sunTransform.rotation.y, sunTransform.rotation.z);
         moonTransform.rotation = Quaternion.Euler(angle + 180f, moonTransform.rotation.y, moonTransform.rotation.z);
 
-        if (updateTimer < updateInterval) 
-            return ;
-
-        updateTimer -= updateInterval;
-        
         // Colors and Lighting
         depthFactor = Mathf.Clamp01(-ChunkGenNetwork.Instance.viewerPos.y * 0.01f);
         sunHeight = Vector3.Dot(sunTransform.forward, Vector3.down);
