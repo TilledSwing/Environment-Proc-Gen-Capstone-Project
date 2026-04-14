@@ -89,6 +89,10 @@ public class ComputeMarchingCubes : MonoBehaviour
         {
             densityMinMax.Dispose();
         }
+        if (triangleArray.IsCreated)
+        {
+            triangleArray.Dispose();
+        }
     }
     /// <summary>
     /// Release associated buffers
@@ -180,6 +184,7 @@ public class ComputeMarchingCubes : MonoBehaviour
             ChunkGenNetwork.Instance.vertexSortJobQueue.Enqueue(new ChunkGenNetwork.VertexSortJob(vertexSortJobHandler, assetSpawner, owner.chunkID));
             if (terrainDensityData.hasFoliage)
                 ChunkGenNetwork.Instance.grassProcessQueue.Enqueue(new ChunkGenNetwork.GrassObject(owner, triangleCount, owner.chunkID));
+            // triangleArray.Dispose();
         }
         else
         {
@@ -193,11 +198,13 @@ public class ComputeMarchingCubes : MonoBehaviour
         {
             bool chunkMinHeight = grassProfile.useMinHeight ? chunkPos.y >= grassProfile.minHeight : true;
             bool chunkMaxHeight = grassProfile.useMaxHeight ?  chunkPos.y <= grassProfile.maxHeight : true;
+            bool underwater = grassProfile.maxHeight <= terrainDensityData.waterLevel ? true : false;
             if(chunkMinHeight && chunkMaxHeight && triangleCount > grassProfile.maxBladesPerTriangle)
             {
                 if (grass == null)
                     grass = gameObject.AddComponent<GrassRender>();
-                grass.enabled = true;
+                if (!grass.enabled)
+                    grass.enabled = true;
                 grass.InitializeGrassRenderer(
                     chunkPos, 
                     grassProfile,
@@ -208,7 +215,7 @@ public class ComputeMarchingCubes : MonoBehaviour
                     triangleCount,
                     triangleArray.AsArray(),
                     mesh.bounds,
-                    false
+                    underwater
                 );
                 grass.SetupGrass();
                 grass.renderGrass = true;
@@ -218,7 +225,8 @@ public class ComputeMarchingCubes : MonoBehaviour
             {
                 if (grass == null)
                     grass = gameObject.AddComponent<GrassRender>();
-                grass.enabled = true;
+                if (!grass.enabled)
+                    grass.enabled = true;
                 grass.InitializeGrassRenderer(
                     chunkPos, 
                     grassProfile,
@@ -229,7 +237,7 @@ public class ComputeMarchingCubes : MonoBehaviour
                     triangleCount,
                     triangleArray.AsArray(),
                     mesh.bounds,
-                    true
+                    underwater
                 );
                 grass.SetupGrass();
                 grass.renderGrass = true;
@@ -238,7 +246,8 @@ public class ComputeMarchingCubes : MonoBehaviour
         }
         if (grass != null && !grassWasSet)
         {
-            grass.enabled = false;
+            if (grass.enabled)
+                grass.enabled = false;
         }
         triangleArray.Dispose();
     }

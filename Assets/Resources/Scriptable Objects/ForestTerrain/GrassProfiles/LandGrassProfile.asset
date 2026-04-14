@@ -18,7 +18,7 @@ MonoBehaviour:
     grassMaterial: {fileID: 2100000, guid: bdfda37c10344e84ebfde33ef935cf28, type: 2}
     grassHeightRange: {x: 0.7, y: 1.1}
     grassCurveRange: {x: 0, y: 1}
-    spawnProbabilityUpperThreshold: 0.995
+    spawnProbabilityUpperThreshold: 0.999
   - useUniformScale: 1
     grassMesh: {fileID: 4781277628412113339, guid: 39fbcfb3440d46148bab38e13a0a4e4f, type: 3}
     grassMaterial: {fileID: 2100000, guid: c48ee81920a7c0348aab46d0a9d6417c, type: 2}

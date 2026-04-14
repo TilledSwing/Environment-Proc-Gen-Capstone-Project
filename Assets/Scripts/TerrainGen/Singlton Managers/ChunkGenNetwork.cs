@@ -75,7 +75,9 @@ public class ChunkGenNetwork : MonoBehaviour
     public int chunkSize;
     [HideInInspector]
     public int chunksVisible;
+    [HideInInspector]
     public int grassChunksVisible;
+    public float chunkProcessingTotalFrameBudget;
 
     [Space(10)]
     [Header("========== Map Settings ==========")]
@@ -311,8 +313,8 @@ public class ChunkGenNetwork : MonoBehaviour
             Destroy(gameObject);
 
         // VSYNC ON
-        QualitySettings.vSyncCount = 1;   // wait for monitor refresh
-        Application.targetFrameRate = -1; // let vsync control it
+        // QualitySettings.vSyncCount = 1;   // wait for monitor refresh
+        // Application.targetFrameRate = -1; // let vsync control it
 
         // DATA LEAK STACK TRACES ENABLED
         NativeLeakDetection.Mode = NativeLeakDetectionMode.EnabledWithStackTrace;
@@ -512,14 +514,19 @@ public class ChunkGenNetwork : MonoBehaviour
         if (filmGrain != null)
             filmGrain.active = enable;
     }
+
     /// <summary>
     /// Process chunk load queue
     /// </summary>
+    /// <param name="processingStart">Start of chunk processing this frame</param>
     /// <param name="startTime">Start of allocated time frame</param>
-    public void ProcessChunkLoads(float startTime, float timeBudget)
+    /// <param name="timeBudget">This process's max time budget</param>
+    public void ProcessChunkLoads(float processingStart, float startTime, float timeBudget)
     {
         int counter = 0;
-        while (chunkLoadQueue.Count > 0 && Time.realtimeSinceStartup - startTime < timeBudget)
+        while (chunkLoadQueue.Count > 0 && 
+               Time.realtimeSinceStartup - startTime < timeBudget && 
+               Time.realtimeSinceStartup - processingStart < chunkProcessingTotalFrameBudget)
         {
             Vector3Int coord = chunkLoadQueue.Dequeue();
             // int currentChunkCoordX = Mathf.FloorToInt(viewerPos.x / chunkSize);
@@ -543,17 +550,21 @@ public class ChunkGenNetwork : MonoBehaviour
             }
             chunkLoadSet.Remove(packedCoord);
 
-            if (++counter >= 12) break;
+            if (++counter >= 10) break;
         }
     }
     /// <summary>
     /// Process chunk return queue
     /// </summary>
+    /// <param name="processingStart">Start of chunk processing this frame</param>
     /// <param name="startTime">Start of allocated time frame</param>
-    public void ProcessChunkReturns(float startTime, float timeBudget)
+    /// <param name="timeBudget">This process's max time budget</param>
+    public void ProcessChunkReturns(float processingStart, float startTime, float timeBudget)
     {
         int counter = 0;
-        while (chunkReturnQueue.Count > 0 && Time.realtimeSinceStartup - startTime < timeBudget)
+        while (chunkReturnQueue.Count > 0 && 
+               Time.realtimeSinceStartup - startTime < timeBudget && 
+               Time.realtimeSinceStartup - processingStart < chunkProcessingTotalFrameBudget)
         {
             int currentChunkCoordX = Mathf.FloorToInt(viewerPos.x / chunkSize);
             int currentChunkCoordY = Mathf.FloorToInt(viewerPos.y / chunkSize);
@@ -573,16 +584,20 @@ public class ChunkGenNetwork : MonoBehaviour
             {
                 chunksVisibleLastUpdate.Add(chunk);
             }
-            if (++counter >= 12) break;
+            if (++counter >= 10) break;
         }
     }
     /// <summary>
     /// Process chunk visibility queue
     /// </summary>
+    /// <param name="processingStart">Start of chunk processing this frame</param>
     /// <param name="startTime">Start of allocated time frame</param>
-    public void ProcessChunkVisibilty(float startTime, float timeBudget)
+    /// <param name="timeBudget">This process's max time budget</param>
+    public void ProcessChunkVisibilty(float processingStart, float startTime, float timeBudget)
     {
-        while (chunkVisibilityQueue.Count > 0 && Time.realtimeSinceStartup - startTime < timeBudget)
+        while (chunkVisibilityQueue.Count > 0 &&
+               Time.realtimeSinceStartup - startTime < timeBudget &&
+               Time.realtimeSinceStartup - processingStart < chunkProcessingTotalFrameBudget)
         {
             ChunkVisibility chunk = chunkVisibilityQueue.Dequeue();
             if (chunk.expectedID != chunk.chunk.chunkID)
@@ -593,9 +608,13 @@ public class ChunkGenNetwork : MonoBehaviour
     /// <summary>
     /// Process active chunk density jobs
     /// </summary>
+    /// <param name="processingStart">Start of chunk processing this frame</param>
     /// <param name="startTime">Start of allocated time frame</param>
-    public void ProcessDensityJobs(float startTime, float timeBudget) {
-        while (terrainDensityJobQueue.Count > 0 && Time.realtimeSinceStartup - startTime < timeBudget)
+    /// <param name="timeBudget">This process's max time budget</param>
+    public void ProcessDensityJobs(float processingStart, float startTime, float timeBudget) {
+        while (terrainDensityJobQueue.Count > 0 && 
+               Time.realtimeSinceStartup - startTime < timeBudget && 
+               Time.realtimeSinceStartup - processingStart < chunkProcessingTotalFrameBudget)
         {
             TerrainJobObject job = terrainDensityJobQueue.Peek();
             if(job.expectedID != job.owner.chunkID)
@@ -624,9 +643,13 @@ public class ChunkGenNetwork : MonoBehaviour
     /// <summary>
     /// Process active chunk polygonization jobs
     /// </summary>
+    /// <param name="processingStart">Start of chunk processing this frame</param>
     /// <param name="startTime">Start of allocated time frame</param>
-    public void ProcessPolygonizationJobs(float startTime, float timeBudget) {
-        while (terrainPolygonizationJobQueue.Count > 0 && Time.realtimeSinceStartup - startTime < timeBudget)
+    /// <param name="timeBudget">This process's max time budget</param>
+    public void ProcessPolygonizationJobs(float processingStart, float startTime, float timeBudget) {
+        while (terrainPolygonizationJobQueue.Count > 0 && 
+               Time.realtimeSinceStartup - startTime < timeBudget &&
+               Time.realtimeSinceStartup - processingStart < chunkProcessingTotalFrameBudget)
         {
             TerrainJobObject job = terrainPolygonizationJobQueue.Peek();
             if(job.expectedID != job.owner.chunkID)
@@ -646,10 +669,14 @@ public class ChunkGenNetwork : MonoBehaviour
     /// <summary>
     /// Process mesh creation queue
     /// </summary>
+    /// <param name="processingStart">Start of chunk processing this frame</param>
     /// <param name="startTime">Start of allocated time frame</param>
-    public void ProcessMeshGenQueue(float startTime, float timeBudget)
+    /// <param name="timeBudget">This process's max time budget</param>
+    public void ProcessMeshGenQueue(float processingStart, float startTime, float timeBudget)
     {
-        while (meshGenQueue.Count > 0 && Time.realtimeSinceStartup - startTime < timeBudget)
+        while (meshGenQueue.Count > 0 && 
+               Time.realtimeSinceStartup - startTime < timeBudget && 
+               Time.realtimeSinceStartup - processingStart < chunkProcessingTotalFrameBudget)
         {
             TerrainJobObject meshGen = meshGenQueue.Dequeue();
             if (meshGen.expectedID != meshGen.owner.chunkID)
@@ -661,10 +688,14 @@ public class ChunkGenNetwork : MonoBehaviour
     /// <summary>
     /// Process chunk collision mesh bakes
     /// </summary>
+    /// <param name="processingStart">Start of chunk processing this frame</param>
     /// <param name="startTime">Start of allocated time frame</param>
-    public void ProcessCollisionMeshBakes(float startTime, float timeBudget)
+    /// <param name="timeBudget">This process's max time budget</param>
+    public void ProcessCollisionMeshBakes(float processingStart, float startTime, float timeBudget)
     {
-        while (collisionMeshBakeQueue.Count > 0 && Time.realtimeSinceStartup - startTime < timeBudget)
+        while (collisionMeshBakeQueue.Count > 0 && 
+               Time.realtimeSinceStartup - startTime < timeBudget &&
+               Time.realtimeSinceStartup - processingStart < chunkProcessingTotalFrameBudget)
         {
             MeshBake meshBake = collisionMeshBakeQueue.Dequeue();
             if (meshBake.meshCollider == null || meshBake.mesh == null || meshBake.mesh.vertexCount == 0)
@@ -677,11 +708,15 @@ public class ChunkGenNetwork : MonoBehaviour
     /// <summary>
     /// Process mesh creation queue
     /// </summary>
+    /// <param name="processingStart">Start of chunk processing this frame</param>
     /// <param name="startTime">Start of allocated time frame</param>
-    public void ProcessGrassQueue(float startTime, float timeBudget)
+    /// <param name="timeBudget">This process's max time budget</param>
+    public void ProcessGrassQueue(float processingStart, float startTime, float timeBudget)
     {
         int counter = 0;
-        while (grassProcessQueue.Count > 0 && Time.realtimeSinceStartup - startTime < timeBudget)
+        while (grassProcessQueue.Count > 0 && 
+               Time.realtimeSinceStartup - startTime < timeBudget &&
+               Time.realtimeSinceStartup - processingStart < chunkProcessingTotalFrameBudget)
         {
             GrassObject grass = grassProcessQueue.Dequeue();
             if (grass.expectedID != grass.owner.chunkID)
@@ -694,9 +729,13 @@ public class ChunkGenNetwork : MonoBehaviour
     /// <summary>
     /// Process vertex sort jobs
     /// </summary>
+    /// <param name="processingStart">Start of chunk processing this frame</param>
     /// <param name="startTime">Start of allocated time frame</param>
-    public void ProcessVertexSortJobs(float startTime, float timeBudget) {
-        while (vertexSortJobQueue.Count > 0 && Time.realtimeSinceStartup - startTime < timeBudget)
+    /// <param name="timeBudget">This process's max time budget</param>
+    public void ProcessVertexSortJobs(float processingStart, float startTime, float timeBudget) {
+        while (vertexSortJobQueue.Count > 0 && 
+               Time.realtimeSinceStartup - startTime < timeBudget &&
+               Time.realtimeSinceStartup - processingStart < chunkProcessingTotalFrameBudget)
         {
             VertexSortJob job = vertexSortJobQueue.Peek();
             if (job.expectedID != job.assetSpawner.owner.chunkID)
@@ -716,10 +755,14 @@ public class ChunkGenNetwork : MonoBehaviour
     /// <summary>
     /// Process spawn point creation queue
     /// </summary>
+    /// <param name="processingStart">Start of chunk processing this frame</param>
     /// <param name="startTime">Start of allocated time frame</param>
-    public void ProcessSpawnPointCreation(float startTime, float timeBudget)
+    /// <param name="timeBudget">This process's max time budget</param>
+    public void ProcessSpawnPointCreation(float processingStart, float startTime, float timeBudget)
     {
-        while (spawningPointCreationQueue.Count > 0 && Time.realtimeSinceStartup - startTime < timeBudget)
+        while (spawningPointCreationQueue.Count > 0 && 
+               Time.realtimeSinceStartup - startTime < timeBudget &&
+               Time.realtimeSinceStartup - processingStart < chunkProcessingTotalFrameBudget)
         {
             AssetSpawnPointCreation assetSpawner = spawningPointCreationQueue.Dequeue();
             if (assetSpawner.expectedID != assetSpawner.owner.chunkID)
@@ -731,10 +774,14 @@ public class ChunkGenNetwork : MonoBehaviour
     /// <summary>
     /// Process asset instantiation queue
     /// </summary>
+    /// <param name="processingStart">Start of chunk processing this frame</param>
     /// <param name="startTime">Start of allocated time frame</param>
-    public void ProcessAssetInstantiation(float startTime, float timeBudget)
+    /// <param name="timeBudget">This process's max time budget</param>
+    public void ProcessAssetInstantiation(float processingStart, float startTime, float timeBudget)
     {
-        while (pendingAssetInstantiations.Count > 0 && Time.realtimeSinceStartup - startTime < timeBudget)
+        while (pendingAssetInstantiations.Count > 0 && 
+               Time.realtimeSinceStartup - startTime < timeBudget &&
+               Time.realtimeSinceStartup - processingStart < chunkProcessingTotalFrameBudget)
         {
             AssetInstantiation assetInstantiation = pendingAssetInstantiations.Dequeue();
             if (assetInstantiation.expectedID != assetInstantiation.owner.chunkID)
@@ -754,22 +801,22 @@ public class ChunkGenNetwork : MonoBehaviour
             UpdateVisibleChunks();
             lastUpdateViewerPos = viewerPos;
         }
-        // Current Max: 9.9ms
-        ProcessChunkReturns(Time.realtimeSinceStartup, 0.0002f); //0.2ms
-        ProcessChunkLoads(Time.realtimeSinceStartup, 0.0002f); //0.2ms
-        ProcessChunkVisibilty(Time.realtimeSinceStartup, 0.0005f); //0.5ms
+        float processingStart = Time.realtimeSinceStartup;
+        ProcessChunkReturns(processingStart, Time.realtimeSinceStartup, 0.00025f); //0.25ms
+        ProcessChunkLoads(processingStart, Time.realtimeSinceStartup, 0.00025f); //0.25ms
+        ProcessChunkVisibilty(processingStart, Time.realtimeSinceStartup, 0.0005f); //0.5ms
 
-        ProcessDensityJobs(Time.realtimeSinceStartup, 0.001f); //1ms
-        ProcessPolygonizationJobs(Time.realtimeSinceStartup, 0.001f); //1ms
+        ProcessDensityJobs(processingStart, Time.realtimeSinceStartup, 0.001f); //1ms
+        ProcessPolygonizationJobs(processingStart, Time.realtimeSinceStartup, 0.001f); //1ms
 
-        ProcessMeshGenQueue(Time.realtimeSinceStartup, 0.001f); //1ms
-        ProcessCollisionMeshBakes(Time.realtimeSinceStartup, 0.0005f); //0.5ms
+        ProcessMeshGenQueue(processingStart, Time.realtimeSinceStartup, 0.001f); //1ms
+        ProcessCollisionMeshBakes(processingStart, Time.realtimeSinceStartup, 0.0005f); //0.5ms
 
-        ProcessGrassQueue(Time.realtimeSinceStartup, 0.0005f); //0.5ms
+        ProcessGrassQueue(processingStart, Time.realtimeSinceStartup, 0.0005f); //0.5ms
 
-        ProcessVertexSortJobs(Time.realtimeSinceStartup, 0.001f); //1ms
-        ProcessSpawnPointCreation(Time.realtimeSinceStartup, 0.002f); //2ms
-        ProcessAssetInstantiation(Time.realtimeSinceStartup, 0.002f); //2ms
+        ProcessVertexSortJobs(processingStart, Time.realtimeSinceStartup, 0.001f); //1ms
+        ProcessSpawnPointCreation(processingStart, Time.realtimeSinceStartup, 0.002f); //1ms
+        ProcessAssetInstantiation(processingStart, Time.realtimeSinceStartup, 0.002f); //1ms
     }
     /// <summary>
     /// Initial chunk load
